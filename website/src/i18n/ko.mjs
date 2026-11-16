@@ -4,7 +4,7 @@ export default {
     description: '스퀴시를 분류하고 병을 채우며 스트레스를 꾹꾹 풀어 보세요. 말랑하고 기분 좋은 60개 레벨, 12월의 산타의 집, 모을 수 있는 오리지널 스퀴시 64종. iPhone에서 무료.',
   },
   skip: '본문으로 건너뛰기',
-  nav: { demo: '체험하기', squishies: '스퀴시', parents: '보호자 안내', support: '고객지원', language: '언어' },
+  nav: { demo: '체험하기', squishies: '스퀴시', parents: '보호자 안내', support: '고객지원', language: '언어', findLanguage: '언어 검색' },
   cta: {
     soon: '곧 출시', soonSmall: 'iPhone App Store에서',
     badgeAlt: 'App Store에서 다운로드',

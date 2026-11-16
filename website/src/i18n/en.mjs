@@ -4,7 +4,7 @@ export default {
     description: 'Sort the squishies, fill the jars and squeeze the stress away. 60 soft, satisfying levels, Santa’s Grotto in December and 64 original squishies to collect. Free on iPhone.',
   },
   skip: 'Skip to content',
-  nav: { demo: 'Play demo', squishies: 'Squishies', parents: 'Parents', support: 'Support', language: 'Language' },
+  nav: { demo: 'Play demo', squishies: 'Squishies', parents: 'Parents', support: 'Support', language: 'Language', findLanguage: 'Find a language' },
   cta: {
     soon: 'Coming soon', soonSmall: 'to the App Store on iPhone',
     badgeAlt: 'Download on the App Store',
@@ -82,7 +82,7 @@ export default {
     accessibility: ['Accessibility', 'How we make the game and site usable'],
     imprint: ['Legal notice', 'Who runs Squish Sort, and EU trader details'],
   },
-  doc: { updated: 'Last updated', onRequest: 'available on request by email', contents: 'Contents', translationNote: '' },
+  doc: { updated: 'Last updated', onRequest: 'available on request by email', contents: 'Contents', translationNote: '', englishOnly: 'This page is only available in English. The English version is the official one.' },
   support: {
     title: 'Support', lede: 'Stuck on a level, lost a purchase or have an idea? Write to us. A real person reads every message, usually within two working days.',
     faqTitle: 'Quick answers',

@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SITE } from './src/site.mjs';
+import { esc, inline, md } from './lib/md.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const SRC = path.join(ROOT, 'src'), OUT = path.join(ROOT, 'dist');
@@ -13,76 +14,21 @@ const roster = JSON.parse(fs.readFileSync(path.join(SRC, 'roster.json'), 'utf8')
 // cache-buster: assets are cached for a day, so their URLs change whenever any of them does
 const V = (() => { const h = crypto.createHash('sha1'); for (const f of fs.readdirSync(path.join(SRC, 'assets'), { recursive: true }).sort()) { const fp = path.join(SRC, 'assets', f); if (/\.(js|css)$/.test(f)) h.update(fs.readFileSync(fp)); } return h.digest('hex').slice(0, 8); })();
 const T = {};
-for (const l of SITE.langs) T[l.code] = (await import(`./src/i18n/${l.code}.mjs`)).default;
+// every language falls back to English for any string it does not have yet
+const merge = (base, over) => { if (over == null) return base; if (typeof base !== 'object' || base === null) return over; const o = Array.isArray(base) ? base.slice() : { ...base }; for (const k of Object.keys(over)) o[k] = merge(base[k], over[k]); return o; };
+for (const l of SITE.langs) { const own = (await import(`./src/i18n/${l.code}.mjs`)).default; T[l.code] = l.code === 'en' ? own : merge(T.en, own); }
+const enName = new Intl.DisplayNames(['en'], { type: 'language' });
 
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(OUT, { recursive: true });
 fs.cpSync(path.join(SRC, 'assets'), path.join(OUT, 'assets'), { recursive: true });
 fs.cpSync(path.join(SRC, 'static'), OUT, { recursive: true });
 
-const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const L = code => SITE.langs.find(l => l.code === code);
 const href = (code, slug = '') => '/' + [L(code).path, slug].filter(Boolean).join('/') + (slug || L(code).path ? '' : '');
 const write = (rel, html) => { const f = path.join(OUT, rel); fs.mkdirSync(path.dirname(f), { recursive: true }); fs.writeFileSync(f, html); };
 const pageFile = (code, slug) => path.join(L(code).path, slug, 'index.html');
 
-// ---------- tiny markdown ----------
-function inline(s) {
-  return esc(s)
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (m, t, u) => `<a href="${u}"${/^https?:/.test(u) ? ' rel="noopener"' : ''}>${t}</a>`)
-    .replace(/(^|[\s(])((?:support|privacy)@squishsort\.app)/g, '$1<a href="mailto:$2">$2</a>');
-}
-function md(src, vars) {
-  src = src.replace(/\{\{(\w+)\}\}/g, (m, k) => (k in vars ? vars[k] : m));
-  const lines = src.split('\n');
-  let html = '', i = 0, toc = [];
-  const slugify = s => s.toLowerCase().replace(/<[^>]+>/g, '').replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '').slice(0, 60);
-  while (i < lines.length) {
-    const line = lines[i];
-    if (!line.trim()) { i++; continue; }
-    let m;
-    if ((m = line.match(/^:::(\w+)/))) {
-      const cls = m[1], body = [];
-      i++;
-      while (i < lines.length && !lines[i].startsWith(':::')) body.push(lines[i++]);
-      i++;
-      html += `<div class="${cls}">${md(body.join('\n'), vars).html}</div>`;
-      continue;
-    }
-    if ((m = line.match(/^(#{2,3}) (.+?)(?: \{#([\w-]+)\})?$/))) {
-      const id = m[3] || slugify(m[2]);
-      if (m[1] === '##') toc.push([id, m[2]]);
-      html += `<h${m[1].length} id="${id}">${inline(m[2])}</h${m[1].length}>`; i++; continue;
-    }
-    if (line.startsWith('<')) { html += line; i++; continue; }
-    if (/^\|/.test(line)) {
-      const rows = [];
-      while (i < lines.length && /^\|/.test(lines[i])) rows.push(lines[i++]);
-      const cells = r => r.replace(/^\||\|$/g, '').split('|').map(c => c.trim());
-      const head = cells(rows[0]);
-      html += '<table><thead><tr>' + head.map(c => `<th scope="col">${inline(c)}</th>`).join('') + '</tr></thead><tbody>';
-      for (const r of rows.slice(2)) html += '<tr>' + cells(r).map(c => `<td>${inline(c)}</td>`).join('') + '</tr>';
-      html += '</tbody></table>';
-      continue;
-    }
-    if (/^(- |\d+\. )/.test(line)) {
-      const ordered = /^\d+\. /.test(line), items = [];
-      while (i < lines.length && /^(- |\d+\. |  )/.test(lines[i])) {
-        if (/^  /.test(lines[i]) && items.length) items[items.length - 1] += ' ' + lines[i].trim();
-        else items.push(lines[i].replace(/^(- |\d+\. )/, ''));
-        i++;
-      }
-      const tag = ordered ? 'ol' : 'ul';
-      html += `<${tag}>` + items.map(it => `<li>${inline(it)}</li>`).join('') + `</${tag}>`;
-      continue;
-    }
-    const para = [];
-    while (i < lines.length && lines[i].trim() && !/^(#|- |\d+\. |\||:::|<)/.test(lines[i])) para.push(lines[i++]);
-    html += `<p>${inline(para.join(' '))}</p>`;
-  }
-  return { html, toc };
-}
 function readDoc(code, slug) {
   const f = path.join(SRC, 'legal', code, slug + '.md');
   const raw = fs.readFileSync(f, 'utf8');
@@ -98,13 +44,13 @@ function storeCta(code, from, big = false) {
   if (!SITE.APP_LIVE) return `<span class="soon" role="note">${esc(t.cta.soon)}<small>${esc(t.cta.soonSmall)}</small></span>`;
   return `<a class="store${big ? ' big' : ''}" href="/go/app-store?from=${from}-${code}"><img src="https://tools.applemarketingtools.com/api/badges/download-on-the-app-store/black/${L(code).badge}?size=250x83" alt="${esc(t.cta.badgeAlt)}" width="191" height="64"></a>`;
 }
-function head(code, { title, description, slug = '', noindex = false }) {
+function head(code, { title, description, slug = '', noindex = false, canon = null }) {
   const alts = SITE.langs.map(l => `<link rel="alternate" hreflang="${l.html}" href="${SITE.origin}${href(l.code, slug)}">`).join('')
     + `<link rel="alternate" hreflang="x-default" href="${SITE.origin}${href('en', slug)}">`;
-  return `<!doctype html><html lang="${L(code).html}"><head><meta charset="utf-8">
+  return `<!doctype html><html lang="${L(code).html}"${L(code).dir === 'rtl' ? ' dir="rtl"' : ''}><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>${esc(title)}</title><meta name="description" content="${esc(description)}">
-<link rel="canonical" href="${SITE.origin}${href(code, slug)}">${alts}
+<link rel="canonical" href="${SITE.origin}${canon || href(code, slug)}">${canon ? '' : alts}
 <meta name="theme-color" content="#FFF4E8">
 <meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(description)}">
 <meta property="og:type" content="website"><meta property="og:url" content="${SITE.origin}${href(code, slug)}">
@@ -119,11 +65,12 @@ ${noindex ? '<meta name="robots" content="noindex">' : ''}
 }
 function bar(code, slug = '') {
   const t = T[code];
-  const langs = SITE.langs.map(l => `<li><a href="${href(l.code, slug)}" hreflang="${l.html}" lang="${l.html}"${l.code === code ? ' aria-current="true"' : ''}>${l.label}</a></li>`).join('');
+  const sorted = [...SITE.langs].sort((a, b) => enName.of(a.html).localeCompare(enName.of(b.html), 'en'));
+  const langs = sorted.map(l => { const n = enName.of(l.html); return `<li data-s="${esc((l.label + ' ' + n + ' ' + l.html).toLowerCase())}"><a href="${href(l.code, slug)}" hreflang="${l.html}" lang="${l.html}"${l.code === code ? ' aria-current="true"' : ''}>${l.label}${n !== l.label ? ` <small lang="en">${esc(n)}</small>` : ''}</a></li>`; }).join('');
   return `<a class="skip" href="#main">${esc(t.skip)}</a>
 <header class="bar"><a class="brand" href="${href(code)}"><img src="/assets/img/icon-180.png" alt="" width="36" height="36">Squish Sort</a>
 <nav aria-label="Main"><a class="hide-s" href="${href(code)}#play">${esc(t.nav.demo)}</a><a class="hide-s" href="${href(code, 'parents')}">${esc(t.nav.parents)}</a><a href="${href(code, 'support')}">${esc(t.nav.support)}</a>
-<details class="lang"><summary aria-label="${esc(t.nav.language)}">🌐 ${L(code).label}</summary><ul>${langs}</ul></details></nav></header>`;
+<details class="lang"><summary aria-label="${esc(t.nav.language)}">🌐 ${L(code).label}</summary><div class="lang-pop"><input type="search" class="lang-q" placeholder="${esc(t.nav.findLanguage)}" aria-label="${esc(t.nav.findLanguage)}" autocomplete="off" hidden><ul>${langs}</ul></div></details></nav></header>`;
 }
 function footer(code) {
   const t = T[code];
@@ -133,7 +80,7 @@ function footer(code) {
 <div><h4>${esc(t.footer.legal)}</h4><ul>${legal}<li><a href="${href(code, 'legal')}">${esc(t.footer.links.legalHub)}</a></li></ul></div>
 </div><p class="fine">${esc(t.footer.fine)}</p></footer>`;
 }
-const end = scripts => `${scripts || ''}</body></html>`;
+const end = scripts => `<script src="/assets/lang.js?v=${V}" defer></script>${scripts || ''}</body></html>`;
 
 // ---------- landing ----------
 const PALETTE = { common: '#7FE0C4', rare: '#7CC8FF', ultra: '#C9B6FF', secret: '#FFD86B' };
@@ -237,13 +184,14 @@ function vars(code) {
 }
 function docPage(code, slug) {
   const t = T[code];
-  const { meta, body } = readDoc(code, slug);
-  const { html, toc } = md(body, vars(code));
+  const own = L(code).legal, { meta, body } = readDoc(own ? code : 'en', slug);
+  const { html, toc } = md(body, own ? vars(code) : { ...vars('en'), h: href(code).replace(/\/$/, '') });
   const tocHtml = toc.length > 4 ? `<nav aria-label="${esc(t.doc.contents)}"><h2 style="font-size:18px;margin:0 0 8px">${esc(t.doc.contents)}</h2><ol class="toc">${toc.map(([id, h]) => `<li><a href="#${id}">${inline(h)}</a></li>`).join('')}</ol></nav>` : '';
   const peek = { privacy: 'snooze', terms: 'butter-bar', ads: 'golden-mic', purchases: 'golden-gummy', parents: 'peach-bun', delete: 'gloop', cookies: 'cream-puff', accessibility: 'capy', imprint: 'golden-shop-cat' }[slug] || 'pip';
-  return head(code, { title: `${meta.title} | Squish Sort`, description: meta.description, slug }) + bar(code, slug) + `
-<main id="main" class="doc"><img class="peek" src="/assets/sq/${peek}.webp" alt="" width="120" height="120">
-<h1>${esc(meta.title)}</h1><p class="meta">${esc(t.doc.updated)}: ${SITE.updated}</p>
+  const note = own ? '' : `<p class="note" lang="${L(code).html}">${esc(t.doc.englishOnly)}</p>`;
+  return head(code, { title: `${meta.title} | Squish Sort`, description: meta.description, slug, canon: own ? null : href('en', slug) }) + bar(code, slug) + `
+<main id="main" class="doc"${own ? '' : ' lang="en"'}><img class="peek" src="/assets/sq/${peek}.webp" alt="" width="120" height="120">
+${note}<h1>${esc(meta.title)}</h1><p class="meta">${esc(t.doc.updated)}: ${SITE.updated}</p>
 ${tocHtml}${html}</main>` + footer(code) + end();
 }
 function legalHub(code) {
@@ -303,7 +251,7 @@ for (const l of SITE.langs) {
   write(pageFile(c, 'legal'), legalHub(c)); urls.push(href(c, 'legal'));
   write(pageFile(c, 'support'), support(c)); urls.push(href(c, 'support'));
   write(pageFile(c, 'shop'), shop(c)); urls.push(href(c, 'shop'));
-  for (const s of SITE.legalPages) { write(pageFile(c, s), docPage(c, s)); urls.push(href(c, s)); }
+  for (const s of SITE.legalPages) { write(pageFile(c, s), docPage(c, s)); if (l.legal) urls.push(href(c, s)); }
 }
 write('404.html', notFound());
 write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map(u => `<url><loc>${SITE.origin}${u}</loc><lastmod>${SITE.updated}</lastmod></url>`).join('')}</urlset>\n`);

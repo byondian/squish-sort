@@ -4,7 +4,7 @@ export default {
     description: 'スクイーズを仕分けてビンをいっぱいにして、ストレスをむぎゅっと解消。ぷにぷに気持ちいい60レベル、12月のサンタのおうち、集められるオリジナルのスクイーズ64種。iPhoneで無料。',
   },
   skip: '本文へスキップ',
-  nav: { demo: 'デモで遊ぶ', squishies: 'スクイーズ', parents: '保護者の方へ', support: 'サポート', language: '言語' },
+  nav: { demo: 'デモで遊ぶ', squishies: 'スクイーズ', parents: '保護者の方へ', support: 'サポート', language: '言語', findLanguage: '言語を検索' },
   cta: {
     soon: 'まもなく配信', soonSmall: 'iPhone版をApp Storeで',
     badgeAlt: 'App Storeからダウンロード',

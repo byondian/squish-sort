@@ -4,7 +4,7 @@ export default {
     description: '分類軟軟、裝滿罐子，把壓力捏走。60 個軟綿療癒的關卡、12 月的聖誕老人小屋，還有 64 款原創軟軟等你收集。iPhone 免費下載。',
   },
   skip: '跳至主要內容',
-  nav: { demo: '試玩', squishies: '軟軟', parents: '家長專區', support: '客服', language: '語言' },
+  nav: { demo: '試玩', squishies: '軟軟', parents: '家長專區', support: '客服', language: '語言', findLanguage: '搜尋語言' },
   cta: {
     soon: '即將推出', soonSmall: 'iPhone 版將於 App Store 上架',
     badgeAlt: '在 App Store 下載',

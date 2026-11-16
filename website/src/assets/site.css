@@ -38,7 +38,12 @@ h1,h2,h3{font-family:var(--title);line-height:1.1;margin:0 0 .4em;letter-spacing
 .lang{position:relative}
 .lang summary{list-style:none;cursor:pointer;font:600 15px var(--title);padding:8px 12px;border-radius:99px;background:#fff;border:2px solid var(--line)}
 .lang summary::-webkit-details-marker{display:none}
-.lang ul{position:absolute;right:0;top:calc(100% + 6px);list-style:none;margin:0;padding:6px;background:#fff;border-radius:18px;box-shadow:0 12px 30px rgba(59,42,74,.15);min-width:150px}
+.lang-pop{position:absolute;right:0;top:calc(100% + 6px);background:#fff;border-radius:18px;box-shadow:0 12px 30px rgba(59,42,74,.15);width:min(280px,calc(100vw - 32px));padding:8px;z-index:20}
+.lang-q{width:100%;box-sizing:border-box;font:600 15px var(--body,inherit);padding:9px 12px;border:2px solid var(--line);border-radius:12px;margin-bottom:6px;color:var(--plum)}
+.lang-q:focus{outline:3px solid #7FE0C4;outline-offset:1px}
+.lang ul{list-style:none;margin:0;padding:0;max-height:min(60vh,420px);overflow:auto}
+.lang li a small{color:var(--plum-2);font-size:12px;margin-left:6px}
+.lang li[hidden]{display:none}
 .lang li a{display:block;padding:8px 12px;border-radius:12px;color:var(--plum);text-decoration:none}
 .lang li a:hover,.lang li a[aria-current]{background:var(--mallow)}
 @media (max-width:640px){.bar nav .hide-s{display:none}}
