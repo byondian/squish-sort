@@ -22,7 +22,9 @@ final class GoldenPathTests: XCTestCase {
 
     private func tapJar(_ j: Int) {
         let button = app.buttons["jar-\(j)"]
-        XCTAssertTrue(button.waitForExistence(timeout: 5), "jar-\(j) missing")
+        if !button.waitForExistence(timeout: 5) {
+            XCTFail("jar-\(j) missing. Screen:\n\(app.debugDescription)")
+        }
         button.tap()
         Thread.sleep(forTimeInterval: 0.2)
     }

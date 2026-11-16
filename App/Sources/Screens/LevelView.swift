@@ -214,8 +214,8 @@ struct LevelView: View {
             ForEach(0..<controller.scene.board.jarCount, id: \.self) { j in
                 Button("jar-\(j)") { controller.scene.tapJar(j) }
                     .font(.system(size: 6))
-                    .frame(width: 24, height: 12)
-                    .opacity(0.05)
+                    .frame(width: 28, height: 14)
+                    .background(Color.white)
                     .accessibilityIdentifier("jar-\(j)")
             }
         }
