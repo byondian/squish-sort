@@ -382,6 +382,17 @@ struct BuddyHomeView: View {
     @State private var sway: CGFloat = 0
     @State private var trickTurn = 0
     @State private var giftWobble = false
+    @State private var talking = false
+
+    /// Three little squashes, like a mouth moving.
+    private func talk() {
+        for i in 0..<3 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.22 * Double(i)) {
+                withAnimation(.easeOut(duration: 0.09)) { talking = true }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { withAnimation(.spring(response: 0.2, dampingFraction: 0.5)) { talking = false } }
+            }
+        }
+    }
 
     private let moods: [(id: String, face: String, label: LocalizedStringKey)] = [
         ("happy", "😊", "Happy"), ("okay", "🙂", "Okay"), ("sleepy", "😴", "Sleepy"), ("grumpy", "😠", "Grumpy"),
@@ -391,18 +402,36 @@ struct BuddyHomeView: View {
         VStack(spacing: 10) {
             if let ref = model.progress.buddy.squishy {
                 if let says = model.buddySays {
-                    SpeechBubble(text: says).transition(.scale(scale: 0.6).combined(with: .opacity))
-                }
-                if model.buddyAsksMood {
-                    HStack(spacing: 12) {
-                        ForEach(moods, id: \.id) { mood in
-                            Button { withAnimation { model.answerMood(mood.id) } } label: {
-                                Text(verbatim: mood.face).font(.system(size: 30))
-                                    .frame(width: 52, height: 52)
-                                    .background(Circle().fill(.white))
+                    // A comic bubble; the mood question and its faces sit in the same bubble.
+                    BuddyBubble(text: says, kind: model.buddySaysKind,
+                                asker: model.buddyAsksMood ? model.progress.buddy.name : nil, sounds: model.sounds) {
+                        if model.buddyAsksMood {
+                            HStack(spacing: 10) {
+                                ForEach(Array(moods.enumerated()), id: \.element.id) { i, mood in
+                                    Button { withAnimation { model.answerMood(mood.id) } } label: {
+                                        Text(verbatim: mood.face).font(.system(size: 26))
+                                            .frame(width: 46, height: 42)
+                                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                                .fill([Theme.butter, Theme.mint, Theme.sky, Theme.bubblegum][i % 4].opacity(0.7)))
+                                            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                                .stroke(Theme.plum.opacity(0.5), lineWidth: 2))
+                                    }
+                                    .buttonStyle(PressSquish())
+                                    .accessibilityLabel(Text(mood.label))
+                                }
                             }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel(Text(mood.label))
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                    .onTapGesture { withAnimation { model.buddySays = nil } }
+                    .transition(.scale(scale: 0.6, anchor: .bottom).combined(with: .opacity))
+                    // It fades by itself after about four seconds, unless it is waiting for an answer.
+                    .task(id: says) {
+                        talk()
+                        guard !model.buddyAsksMood, !AppModel.isUITesting else { return }
+                        try? await Task.sleep(nanoseconds: UInt64((2.5 + Double(says.count) * 0.06) * 1_000_000_000))
+                        if !Task.isCancelled, model.buddySays == says, !model.buddyAsksMood {
+                            withAnimation { model.buddySays = nil }
                         }
                     }
                 }
@@ -416,6 +445,8 @@ struct BuddyHomeView: View {
                 .rotationEffect(.degrees(spin))
                 .rotation3DEffect(.degrees(flip), axis: (x: 1, y: 0, z: 0))
                 .offset(x: sway)
+                // It squashes a little as it talks.
+                .scaleEffect(x: talking ? 1.04 : 1, y: talking ? 0.94 : 1, anchor: .bottom)
                 .scaleEffect(1 + buddySize, anchor: .bottom)
                 .padding(.top, 60 * buddySize)
                 .animation(.spring(response: 0.5, dampingFraction: 0.5), value: model.progress.buddy.lastTreatAt)

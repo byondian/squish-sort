@@ -67,6 +67,8 @@ final class AppModel: ObservableObject {
     @Published var storefront = ""
     /// The Buddy's speech bubble on the home screen. Never shown during a level.
     @Published var buddySays: String?
+    /// The trigger of the line being said ("joke", "fact", "poke", ...).
+    private(set) var buddySaysKind = ""
     /// Goes up each time the daily gift is opened, so the home screen can throw the coins.
     @Published var giftsOpened = 0
     /// A treat or gift bought in the shop, on its way to the Buddy.
@@ -452,6 +454,12 @@ final class AppModel: ObservableObject {
         return ["ja", "ko", "zh-Hant"].contains(code) ? code : "en"
     }
 
+    /// The Buddy says a line on Home. The trigger also picks the bubble's tint.
+    func say(_ trigger: String) {
+        buddySaysKind = trigger
+        buddySays = buddyLine(trigger)
+    }
+
     func buddyLine(_ trigger: String) -> String? {
         guard buddyActive else { return nil }
         return buddyScript.line(trigger, language: language, using: &rng)
@@ -483,7 +491,7 @@ final class AppModel: ObservableObject {
     func setBuddy(ref: String, name: String) -> Bool {
         guard isExtraUnlocked(.buddy), squeezables.contains(ref), let clean = NameFilter.clean(name) else { return false }
         update { $0.buddy.squishy = ref; $0.buddy.name = clean; $0.seenExtras.insert(Extra.buddy.rawValue) }
-        buddySays = buddyLine("greet_back")
+        say("greet_back")
         return true
     }
 
@@ -505,10 +513,10 @@ final class AppModel: ObservableObject {
                                         hoursSinceLastOpen: away, moodAskedToday: progress.buddy.moodAskedDay == today,
                                         roll: Double.random(in: 0..<1, using: &rng))
         switch line {
-        case .say(let trigger): buddySays = buddyLine(trigger)
+        case .say(let trigger): say(trigger)
         case .askMood:
             update { $0.buddy.moodAskedDay = today }
-            buddySays = buddyLine("ask_mood")
+            say("ask_mood")
             buddyAsksMood = buddySays != nil
         case .quiet: buddySays = nil
         }
@@ -517,14 +525,14 @@ final class AppModel: ObservableObject {
     /// The answer picks a reply and is then forgotten: never stored, never sent.
     func answerMood(_ mood: String) {
         buddyAsksMood = false
-        buddySays = buddyLine("reply_\(mood)")
+        say("reply_\(mood)")
     }
 
     func pokeBuddy() {
         haptics.land()
         sounds.play("buddy_giggle")
         buddyAsksMood = false
-        buddySays = buddyLine("poke")
+        say("poke")
     }
 
     func feedBuddy() {
@@ -620,7 +628,7 @@ final class AppModel: ObservableObject {
             }
             self.sounds.play("gift_open", or: "coin_shower")
             self.haptics.win()
-            self.buddySays = self.buddyLine("treat")
+            self.say("treat")
         }
         if isGentleMode { grant() } else { optIn(.dailyGift, granted: grant) }
     }
