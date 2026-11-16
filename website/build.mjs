@@ -139,6 +139,7 @@ const waveTo = (fill, flip = false) => `<svg class="wave" viewBox="0 0 1440 80" 
 function landing(code) {
   const t = T[code];
   const nm = c => (c.names && c.names[L(code).html]) || c.name;
+  const heroTiers = ['common', 'rare', 'ultra'].reduce((o, r) => (o[r] = roster.collectibles.filter(c => c.rarity === r && c.world !== 'christmas').map(c => c.id), o), {});
   const names = Object.fromEntries([...roster.collectibles, ...roster.squishRoomToys].map(c => [c.id, nm(c)]));
   const all = roster.collectibles.filter(c => c.rarity !== 'secret');
   const half = Math.ceil(all.length / 2);
@@ -160,7 +161,7 @@ function landing(code) {
     <div class="cta-row">${storeCta(code, 'hero')}<a class="btn soft" href="#play">▶ ${esc(t.cta.demo)}</a></div>
     <p class="sub">${esc(t.hero.sub)}</p>
   </div>
-  <div class="stage" id="morph" tabindex="0" role="button" aria-label="${esc(t.hero.stageLabel)}" data-names='${esc(JSON.stringify(names))}' data-rarity='${esc(JSON.stringify(t.collect.rarity))}'>
+  <div class="stage" id="morph" tabindex="0" role="button" aria-label="${esc(t.hero.stageLabel)}" data-names='${esc(JSON.stringify(names))}' data-rarity='${esc(JSON.stringify(t.collect.rarity))}' data-tiers='${esc(JSON.stringify(heroTiers))}'>
     <span class="who" aria-live="polite"></span>
     <button class="snd" id="snd" type="button" aria-label="${esc(t.hero.sound)}" aria-pressed="true">🔊</button>
     <span class="hint">👆 ${esc(t.hero.hint)}</span>

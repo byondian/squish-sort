@@ -1,112 +1,57 @@
-// The giant shape-shifting squishy in the hero. Poke it, squeeze it, stretch it.
-// Every release turns it into another squishy, like the Morph Squad in the game.
+// The giant squishy in the hero, drawn from the game's real art.
+// Squeeze it, stretch it, let go: it pops into another squishy. Every few pops
+// you uncover a rare one, then an ultra rare, each with its own fanfare.
 // Plain SVG + springs, no libraries. Pauses when off screen.
 (() => {
   const stage = document.getElementById('morph');
   if (!stage) return;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const NS = 'http://www.w3.org/2000/svg';
-  const N = 72, CX = 200, CY = 214, R = 128, BASE = CY + R * 0.86;
-  const TAU = Math.PI * 2;
+  const W = 400, H = 420, CX = 200, BASE = 372, SIZE = 330; // art box, anchored at bottom centre
+  const TAU = Math.PI * 2, pow = Math.pow;
   const el = (t, a = {}, p) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
-  const sgn = Math.sign, abs = Math.abs, pow = Math.pow;
-  const gauss = (x, w) => Math.exp(-(x * x) / (2 * w * w));
-  const wrap = a => { while (a > Math.PI) a -= TAU; while (a < -Math.PI) a += TAU; return a; };
-  const flatBottom = (p, at = 0.74, k = 0.35) => (p[1] > at ? [p[0] * (1 + (p[1] - at) * 0.25), at + (p[1] - at) * k] : p);
-  const polar = (t, r) => [Math.sin(t) * r, -Math.cos(t) * r];
+  const ease = x => (x < .5 ? 4 * x * x * x : 1 - pow(-2 * x + 2, 3) / 2);
 
-  // Unit-space outlines (radius ~1, y down). t = angle from the top, clockwise.
-  const SHAPES = [
-    { id: 'morphy', fill: '#C9B6FF', sheen: 1, face: { y: .12 }, pt: t => flatBottom(polar(t, .9 + .12 * abs(Math.cos(3.5 * t)))) },
-    { id: 'strawbie', fill: '#FF6B7A', face: { y: .05 }, decor: 'leaf', pt: t => { let [x, y] = polar(t, 1); x *= 1.06; y *= .86; if (y > 0) { x *= 1 - .5 * y; y *= 1.08; } return [x * .96, y * .96 + .04]; } },
-    { id: 'tango', fill: '#FF9A3C', face: { y: .16, muzzle: '#FFE7CF' }, pt: t => flatBottom(polar(t, 1 + .46 * gauss(wrap(t - .66), .17) + .46 * gauss(wrap(t + .66), .17))) },
-    { id: 'grapey', fill: '#A98BF0', face: { y: -.02 }, pt: t => { const s = Math.sin(t), c = Math.cos(t); if (c > 0) return [s, -c * 1.05]; const n = 2 / 5; let x = sgn(s) * pow(abs(s), n) * .98, y = pow(abs(c), n) * .92; y += .08 * Math.sin(t * 7) * pow(abs(c), 2); return [x, y]; } },
-    { id: 'lumi', fill: '#FF8FC0', face: { y: .2 }, pt: t => flatBottom(polar(t, .95 + .8 * gauss(wrap(t - .3), .085) + .8 * gauss(wrap(t + .3), .085))) },
-    { id: 'centre-star', fill: '#A6E07A', sheen: 1, face: { y: .06 }, pt: t => polar(t, .78 + .34 * pow((Math.cos(5 * t) + 1) / 2, 1.6)) },
-    { id: 'peach-bun', fill: '#FFAE8A', face: { y: .14 }, decor: 'peach', pt: t => flatBottom(polar(t, 1 + .24 * pow(Math.max(0, Math.cos(t)), 14))) },
-    { id: 'dino-rex', fill: '#6FD6B0', face: { y: .16 }, pt: t => flatBottom(polar(t, 1 + (abs(t) < 1.15 ? .17 * pow(Math.max(0, Math.cos(8 * t)), 3) : 0))) },
-    { id: 'jelly', fill: '#FF5E7A', face: { y: .1 }, pt: t => { const s = Math.sin(t), c = Math.cos(t), n = 2 / 4.5; let x = sgn(s) * pow(abs(s), n) * .9, y = -sgn(c) * pow(abs(c), n) * .9; x *= 1 - .08 * Math.min(0, y); return [x, y + .02]; } },
-    { id: 'gloop', fill: '#FF9EC9', face: { y: .1 }, pt: t => flatBottom(polar(t, 1)) },
-  ];
   const names = JSON.parse(stage.dataset.names || '{}');
   const rarityWords = JSON.parse(stage.dataset.rarity || '[]');
+  const tiers = JSON.parse(stage.dataset.tiers || '{}');
+  const ART = id => `/assets/art/${id}.svg`;
+  const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
   // The reveal ladder: a few commons, then a rare, a few more, then an ultra rare.
-  const byId = id => SHAPES.findIndex(s => s.id === id);
-  const TIER = { common: ['strawbie', 'tango', 'grapey', 'lumi', 'jelly', 'gloop'].map(byId), rare: ['peach-bun', 'dino-rex'].map(byId), ultra: ['morphy', 'centre-star'].map(byId) };
   const LADDER = ['common', 'common', 'common', 'common', 'rare', 'common', 'common', 'common', 'ultra'];
-  const seen = { common: 0, rare: 0, ultra: 0 };
-  let step = 0;
-  const ANG = Array.from({ length: N }, (_, i) => (i / N) * TAU);
-  for (const s of SHAPES) s.pts = ANG.map(t => s.pt(t));
+  const bags = {}, pick = tier => { const all = tiers[tier] || []; if (!all.length) return 'strawbie'; if (!bags[tier] || !bags[tier].length) bags[tier] = shuffle(all); return bags[tier].pop(); };
+  if (tiers.common) tiers.common = tiers.common.filter(id => id !== 'strawbie');
+  let step = 0, current = 'strawbie', upcoming = null;
+  const plan = () => { const tier = LADDER[step % LADDER.length]; const id = pick(tier); upcoming = { tier, id }; const im = new Image(); im.src = ART(id); };
 
   // DOM
-  const svg = el('svg', { viewBox: '0 0 400 420', 'aria-hidden': 'true' }, stage);
+  const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, 'aria-hidden': 'true' }, stage);
   const defs = el('defs', {}, svg);
-  const shine = el('radialGradient', { id: 'mshine', cx: '.34', cy: '.26', r: '.75' }, defs);
-  el('stop', { offset: '0', 'stop-color': '#fff', 'stop-opacity': '.8' }, shine);
-  el('stop', { offset: '.42', 'stop-color': '#fff', 'stop-opacity': '0' }, shine);
   const rb = el('linearGradient', { id: 'mrainbow', x1: '0', y1: '0', x2: '1', y2: '1' }, defs);
-  ['#FF9CC8', '#FFD86B', '#7FE0C4', '#7CC8FF', '#B48CFF'].forEach((c, i) => el('stop', { offset: i / 4, 'stop-color': c }, rb));
-  const halo = el('circle', { cx: CX, cy: CY, r: R, fill: 'none', stroke: 'url(#mrainbow)', 'stroke-width': 14, opacity: 0 }, svg);
+  const RAINBOW = ['#FF9CC8', '#FFD86B', '#7FE0C4', '#7CC8FF', '#B48CFF'];
+  RAINBOW.forEach((c, i) => el('stop', { offset: i / 4, 'stop-color': c }, rb));
+  // jelly wobble: a gentle displacement that swells when it's poked
+  const filt = el('filter', { id: 'mjelly', x: '-15%', y: '-15%', width: '130%', height: '130%' }, defs);
+  const turb = el('feTurbulence', { type: 'fractalNoise', baseFrequency: '0.012', numOctaves: '1', seed: '3', result: 'n' }, filt);
+  const disp = el('feDisplacementMap', { in: 'SourceGraphic', in2: 'n', scale: '0', xChannelSelector: 'R', yChannelSelector: 'G' }, filt);
+
   const rays = el('g', { opacity: 0 }, svg);
-  for (let i = 0; i < 12; i++) el('path', { d: `M-9 ${-R - 30} L0 ${-R - 92} L9 ${-R - 30}Z`, fill: i % 2 ? '#FFD86B' : '#FFF1B8', transform: `rotate(${i * 30})` }, rays);
-  const shadow = el('ellipse', { cx: CX, cy: BASE + 12, rx: R * .9, ry: 14, fill: '#3B2A4A', opacity: '.1' }, svg);
-  const body = el('path', { stroke: '#3B2A4A', 'stroke-width': 9, 'stroke-linejoin': 'round' }, svg);
-  const sheen = el('path', { fill: 'url(#mrainbow)', opacity: 0 }, svg);
-  const gloss = el('path', { fill: 'url(#mshine)' }, svg);
-  const decor = el('g', {}, svg);
-  const face = el('g', {}, svg);
-  const blushL = el('ellipse', { rx: 17, ry: 10, fill: '#FF7EB6', opacity: '.5' }, face);
-  const blushR = el('ellipse', { rx: 17, ry: 10, fill: '#FF7EB6', opacity: '.5' }, face);
-  const muzzle = el('ellipse', { rx: 40, ry: 26, fill: '#FFE7CF', opacity: 0 }, face);
-  const eyeL = el('g', {}, face), eyeR = el('g', {}, face);
-  const mkEye = g => ({ ball: el('ellipse', { rx: 13, ry: 14, fill: '#3B2A4A' }, g), hi: el('circle', { r: 5, fill: '#fff' }, g), hi2: el('circle', { r: 2.2, fill: '#fff' }, g), x: el('path', { d: 'M-12 -10 L8 0 L-12 10', fill: 'none', stroke: '#3B2A4A', 'stroke-width': 7, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: 0 }, g) });
-  const EL = mkEye(eyeL), ER = mkEye(eyeR);
-  ER.x.setAttribute('d', 'M12 -10 L-8 0 L12 10');
-  const mouth = el('path', { fill: '#FF6B7A', stroke: '#3B2A4A', 'stroke-width': 6, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, face);
+  for (let i = 0; i < 12; i++) el('path', { d: `M-9 -150 L0 -214 L9 -150Z`, transform: `rotate(${i * 30})` }, rays);
+  const halo = el('circle', { cx: CX, cy: BASE - SIZE * .42, r: 150, fill: 'none', stroke: 'url(#mrainbow)', 'stroke-width': 14, opacity: 0 }, svg);
+  const shadow = el('ellipse', { cx: CX, cy: BASE + 6, rx: SIZE * .36, ry: 13, fill: '#3B2A4A', opacity: '.1' }, svg);
+  const body = el('g', reduce ? {} : { filter: 'url(#mjelly)' }, svg);
+  const mkImg = () => el('image', { x: -SIZE / 2, y: -SIZE * .93, width: SIZE, height: SIZE, preserveAspectRatio: 'xMidYMax meet' }, body);
+  let imgA = mkImg(), imgB = mkImg();
+  imgA.setAttribute('href', ART(current)); imgB.setAttribute('opacity', 0);
   const fx = el('g', {}, svg);
 
-  const DECOR = {
-    leaf: '<path d="M-38 -8 q16 -34 38 -14 q22 -20 38 14 q-19 14 -38 2 q-19 12 -38 -2Z" fill="#6FCF8E" stroke="#3B2A4A" stroke-width="8" stroke-linejoin="round"/><path d="M0 -20 v-26" stroke="#3B2A4A" stroke-width="8" stroke-linecap="round"/>',
-    peach: '<path d="M6 -6 q24 -30 52 -12 q-22 22 -52 12Z" fill="#7FD48E" stroke="#3B2A4A" stroke-width="7" stroke-linejoin="round"/>',
-  };
-
-  // state
-  const START = SHAPES.findIndex(s => s.id === 'gloop');
-  let from = START, to = START, mt = 1, glow = 0, glowKind = '';
-  const disp = new Float32Array(N), vel = new Float32Array(N), pull = new Float32Array(N);
+  // state: squash springs (sx, sy), a stretch toward the pointer, a lean, and the wobble
   let sx = 1, sy = 1, vsx = 0, vsy = 0, tsx = 1, tsy = 1;
-  let held = false, heldAt = 0, ptr = null, look = [0, 0], blinkAt = performance.now() + 2500, blink = 0, squeezeFace = 0;
-  let visible = true, last = performance.now(), touched = false, idleKick = performance.now() + 4000;
-
-  const ease = x => (x < .5 ? 4 * x * x * x : 1 - pow(-2 * x + 2, 3) / 2);
-  const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
-  const mix = (a, b, k) => { const A = hex(a), B = hex(b); return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * k).toString(16).padStart(2, '0')).join(''); };
-
-  function outline() {
-    const A = SHAPES[from].pts, B = SHAPES[to].pts, k = ease(mt);
-    const out = new Array(N);
-    for (let i = 0; i < N; i++) {
-      let x = A[i][0] + (B[i][0] - A[i][0]) * k, y = A[i][1] + (B[i][1] - A[i][1]) * k;
-      const len = Math.hypot(x, y) || 1, d = (disp[i] + pull[i]) / R;
-      x += (x / len) * d; y += (y / len) * d;
-      let px = CX + x * R, py = CY + y * R;
-      px = CX + (px - CX) * sx; py = BASE - (BASE - py) * sy;
-      out[i] = [px, py];
-    }
-    return out;
-  }
-  function pathOf(p, s = 1, ox = 0, oy = 0) {
-    const n = p.length, q = i => p[(i + n) % n];
-    let d = `M${(q(0)[0] - CX) * s + CX + ox} ${(q(0)[1] - CY) * s + CY + oy}`;
-    for (let i = 0; i < n; i++) {
-      const p0 = q(i - 1), p1 = q(i), p2 = q(i + 1), p3 = q(i + 2);
-      const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6], c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
-      const T = v => [((v[0] - CX) * s + CX + ox).toFixed(1), ((v[1] - CY) * s + CY + oy).toFixed(1)];
-      d += `C${T(c1)} ${T(c2)} ${T(p2)}`;
-    }
-    return d + 'Z';
-  }
+  let st = 0, vst = 0, sdx = 0, sdy = -1; // stretch amount along a direction
+  let lean = 0, vlean = 0, wob = 0, glow = 0, glowKind = '', fade = 1;
+  let held = false, ptr = null, start = null, touched = false, idleKick = performance.now() + 3500;
+  let visible = true, last = performance.now(), swapAt = 0;
 
   // sound (WebAudio, made on the fly, starts only after a tap)
   let ac = null, muted = false;
@@ -119,8 +64,9 @@
     if (muted) return;
     try {
       ac = ac || new (window.AudioContext || window.webkitAudioContext)();
-      const t = ac.currentTime, o = ac.createOscillator(), g = ac.createGain();
+      const t = ac.currentTime;
       if (kind === 'rare' || kind === 'ultra') return fanfare(kind, t);
+      const o = ac.createOscillator(), g = ac.createGain();
       const f = { squish: [520, 160, .22], pop: [380, 900, .16], pour: [300, 520, .12], lid: [700, 1100, .1], win: [520, 1040, .35] }[kind] || [400, 200, .2];
       o.type = 'sine'; o.frequency.setValueAtTime(f[0], t); o.frequency.exponentialRampToValueAtTime(f[1], t + f[2]);
       g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.25, t + .015); g.gain.exponentialRampToValueAtTime(.0001, t + f[2]);
@@ -134,7 +80,6 @@
       }
     } catch (e) {}
   };
-
   // the "you found a rare one" sounds: a sparkly chime for rare, a bigger fanfare for ultra
   function fanfare(kind, t) {
     const tone = (freq, at, dur, type, vol) => {
@@ -147,7 +92,6 @@
     const gapT = kind === 'rare' ? .07 : .075;
     notes.forEach((f, i) => { tone(f, i * gapT, kind === 'rare' ? .35 : .5, 'triangle', .16); if (kind === 'ultra') tone(f / 2, i * gapT, .5, 'sine', .08); });
     if (kind === 'ultra') { const end = notes.length * gapT; [1047, 1319, 1568].forEach(f => tone(f, end, 1.1, 'sine', .09)); }
-    // shimmer: bright filtered noise that fades out
     const dur = kind === 'rare' ? .6 : 1.4, len = ac.sampleRate * dur, buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
     for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * pow(1 - i / len, 3) * (Math.random() < .08 ? 1 : .15);
     const src = ac.createBufferSource(), hp = ac.createBiquadFilter(), g2 = ac.createGain();
@@ -169,138 +113,109 @@
 
   // particles
   const parts = [];
-  const RAINBOW = ['#FF9CC8', '#FFD86B', '#7FE0C4', '#7CC8FF', '#B48CFF'];
-  function burst(color, tier = 'common') {
+  const STAR = 'M0 -9 L2.6 -2.6 9 0 2.6 2.6 0 9 -2.6 2.6 -9 0 -2.6 -2.6Z', HEART = 'M0 4 C-8 -4 -6 -10 0 -6 C6 -10 8 -4 0 4Z';
+  function burst(tier) {
     if (reduce) return;
-    const n = tier === 'ultra' ? 36 : tier === 'rare' ? 24 : 14;
+    const n = tier === 'ultra' ? 36 : tier === 'rare' ? 24 : 12, cy = BASE - SIZE * .45;
     for (let i = 0; i < n; i++) {
       const a = Math.random() * TAU, sp = (3 + Math.random() * 5) * (tier === 'common' ? 1 : 1.4);
-      if (tier === 'ultra') color = RAINBOW[i % 5];
-      const kind = tier === 'rare' ? (i % 3 ? 0 : 1) : i % 3;
-      const node = kind === 0
-        ? el('path', { d: 'M0 -9 L2.6 -2.6 9 0 2.6 2.6 0 9 -2.6 2.6 -9 0 -2.6 -2.6Z', fill: '#FFD86B', stroke: '#3B2A4A', 'stroke-width': 2 }, fx)
-        : kind === 1 ? el('circle', { r: 6 + Math.random() * 6, fill: color, stroke: '#3B2A4A', 'stroke-width': 2.5 }, fx)
-          : el('path', { d: 'M0 4 C-8 -4 -6 -10 0 -6 C6 -10 8 -4 0 4Z', fill: '#FF7EB6', stroke: '#3B2A4A', 'stroke-width': 2 }, fx);
-      parts.push({ node, x: CX + Math.cos(a) * 80, y: CY + Math.sin(a) * 80, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 3, life: 1, rot: Math.random() * 360 });
+      const col = tier === 'ultra' ? RAINBOW[i % 5] : tier === 'rare' ? '#FFD86B' : ['#FFD86B', '#FF7EB6', '#7FE0C4'][i % 3];
+      const node = i % 3 === 2 && tier === 'common'
+        ? el('path', { d: HEART, fill: '#FF7EB6', stroke: '#3B2A4A', 'stroke-width': 2 }, fx)
+        : i % 3 === 1 ? el('circle', { r: 5 + Math.random() * 6, fill: col, stroke: '#3B2A4A', 'stroke-width': 2.5 }, fx)
+          : el('path', { d: STAR, fill: col, stroke: '#3B2A4A', 'stroke-width': 2 }, fx);
+      parts.push({ node, x: CX + Math.cos(a) * 90, y: cy + Math.sin(a) * 90, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 3, life: 1, rot: Math.random() * 360 });
     }
   }
 
-  function morphNext() {
-    const tier = LADDER[step % LADDER.length]; step++;
-    const pool = TIER[tier];
-    let next = pool[seen[tier]++ % pool.length];
-    if (next === to) next = pool[seen[tier]++ % pool.length];
-    from = to; to = next; mt = 0;
-    const s = SHAPES[to];
-    burst(s.fill, tier);
-    if (tier !== 'common') { [...rays.children].forEach((r, i) => r.setAttribute('fill', tier === 'ultra' ? RAINBOW[i % 5] : i % 2 ? '#FFD86B' : '#FFF1B8')); glow = 1; glowKind = tier; announce(tier); vsx += .08; vsy -= .14; }
-    vsx += .05; vsy -= .09; // boing
-    for (let i = 0; i < N; i++) vel[i] += (Math.random() - .5) * 60;
-    const who = stage.querySelector('.who');
-    if (who) who.textContent = names[s.id] || '';
+  // the swap: squash down, change squishy at the bottom of the squash, boing back up
+  function popNext() {
+    if (!upcoming) plan();
+    const { tier, id } = upcoming; step++;
+    current = id;
+    [imgA, imgB] = [imgB, imgA];
+    imgA.setAttribute('href', ART(id)); fade = 0;
+    vsx -= .1; vsy += .22; vlean += (Math.random() - .5) * .25; wob = Math.max(wob, tier === 'common' ? .6 : 1);
+    burst(tier);
+    if (tier !== 'common') {
+      [...rays.children].forEach((r, i) => r.setAttribute('fill', tier === 'ultra' ? RAINBOW[i % 5] : i % 2 ? '#FFD86B' : '#FFF1B8'));
+      glow = 1; glowKind = tier; announce(tier); vsy += .1;
+    }
+    const who = stage.querySelector('.who'); if (who) who.textContent = names[id] || '';
     window.ssSound(tier === 'common' ? 'pop' : tier);
+    plan();
   }
+  function letGo() { tsx = 1.3; tsy = .66; swapAt = performance.now() + (reduce ? 0 : 70); }
 
   // input
-  const toLocal = e => { const r = svg.getBoundingClientRect(); return [(e.clientX - r.left) * (400 / r.width), (e.clientY - r.top) * (420 / r.height)]; };
-  function poke(p, strength) {
-    const a = Math.atan2(p[0] - CX, -(p[1] - CY));
-    for (let i = 0; i < N; i++) { const da = wrap(ANG[i] - a); vel[i] -= strength * gauss(da, .45); }
-  }
+  const toLocal = e => { const r = svg.getBoundingClientRect(); return [(e.clientX - r.left) * (W / r.width), (e.clientY - r.top) * (H / r.height)]; };
   stage.addEventListener('pointerdown', e => {
     if (e.target.closest('.snd')) return;
-    held = true; heldAt = performance.now(); ptr = toLocal(e); touched = true;
+    held = true; ptr = start = toLocal(e); touched = true;
     stage.setPointerCapture(e.pointerId);
-    poke(ptr, 260); tsx = 1.14; tsy = .84; squeezeFace = 1;
+    tsx = 1.16; tsy = .8; wob = Math.max(wob, .5);
+    vlean += (start[0] - CX) / 2400;
     window.ssSound('squish');
+    if (!upcoming) plan();
     const h = stage.querySelector('.hint'); if (h) h.style.opacity = 0;
   });
-  stage.addEventListener('pointermove', e => { const p = toLocal(e); look = [(p[0] - CX) / 200, (p[1] - CY) / 200]; if (held) ptr = p; });
+  stage.addEventListener('pointermove', e => { if (held) ptr = toLocal(e); });
   const release = () => {
-    if (!held) return; held = false; ptr = null; tsx = 1; tsy = 1; squeezeFace = 0;
-    pull.fill(0); vsx -= .08; vsy += .14;
-    morphNext();
+    if (!held) return; held = false; ptr = start = null;
+    letGo();
   };
   stage.addEventListener('pointerup', release);
   stage.addEventListener('pointercancel', release);
   stage.addEventListener('keydown', e => {
     if (e.key !== 'Enter' && e.key !== ' ') return;
-    e.preventDefault(); poke([CX, CY - R], 260); vsx += .1; vsy -= .16; touched = true; morphNext();
+    e.preventDefault(); touched = true; if (!upcoming) plan(); window.ssSound('squish'); letGo();
   });
 
   // loop
   function frame(now) {
     const dt = Math.min(33, now - last) / 16.67; last = now;
     if (!visible) return requestAnimationFrame(frame);
-    if (mt < 1) mt = Math.min(1, mt + .045 * dt);
 
-    // drag stretch: points facing the pointer reach for it
-    if (held && ptr) {
-      const a = Math.atan2(ptr[0] - CX, -(ptr[1] - CY));
-      const dist = Math.hypot(ptr[0] - CX, ptr[1] - CY);
-      const over = Math.max(0, Math.min(90, dist - R * .9));
-      for (let i = 0; i < N; i++) pull[i] += ((over * .8 * gauss(wrap(ANG[i] - a), .38)) - pull[i]) * .2 * dt;
+    if (swapAt && now >= swapAt) { swapAt = 0; tsx = 1; tsy = 1; popNext(); }
+
+    // drag: stretch toward the pointer, squash across it
+    let tst = 0;
+    if (held && ptr && start) {
+      const dx = ptr[0] - start[0], dy = ptr[1] - start[1], d = Math.hypot(dx, dy);
+      if (d > 4) { sdx = dx / d; sdy = dy / d; tst = Math.min(.45, d / 360); }
     }
+    vst += (tst - st) * .18 * dt; vst *= pow(.78, dt); st += vst * dt;
+
     // idle wobble invites a poke
-    if (!touched && !reduce && now > idleKick) { idleKick = now + 3500; poke([CX + 60, CY - R], 120); vsy -= .05; }
+    if (!touched && !reduce && now > idleKick) { idleKick = now + 3500; vsy -= .06; vsx += .03; wob = Math.max(wob, .35); }
 
-    // jelly springs: each point springs home and to its neighbours
-    const k = .09, damp = .86, nb = .22;
-    for (let i = 0; i < N; i++) {
-      const l = disp[(i - 1 + N) % N], r = disp[(i + 1) % N];
-      vel[i] += (-k * disp[i] + nb * (l + r - 2 * disp[i])) * dt;
-    }
-    for (let i = 0; i < N; i++) { vel[i] *= pow(damp, dt); disp[i] += vel[i] * .06 * dt; }
-    const breathe = reduce ? 0 : Math.sin(now / 700) * .012;
+    const breathe = reduce ? 0 : Math.sin(now / 700) * .014;
     vsx += ((tsx - breathe) - sx) * .16 * dt; vsy += ((tsy + breathe) - sy) * .16 * dt;
     vsx *= pow(.8, dt); vsy *= pow(.8, dt); sx += vsx * dt; sy += vsy * dt;
+    vlean += -lean * .12 * dt; vlean *= pow(.85, dt); lean += vlean * dt;
+    wob = Math.max(0, wob - .02 * dt);
+    if (fade < 1) fade = Math.min(1, fade + .12 * dt);
 
-    const p = outline();
-    const d = pathOf(p);
-    const sA = SHAPES[from], sB = SHAPES[to], k2 = ease(mt);
-    body.setAttribute('d', d); body.setAttribute('fill', mix(sA.fill, sB.fill, k2));
-    sheen.setAttribute('d', d); sheen.setAttribute('opacity', ((sA.sheen || 0) * (1 - k2) + (sB.sheen || 0) * k2) * .45);
-    gloss.setAttribute('d', d);
-    shadow.setAttribute('rx', R * .95 * sx);
+    // matrix: stretch along (sdx, sdy) by st, then squash, lean, anchored at the bottom centre
+    const k = st, a11 = 1 + k * sdx * sdx, a12 = k * sdx * sdy, a22 = 1 + k * sdy * sdy;
+    const c = Math.cos(lean), s = Math.sin(lean);
+    const m11 = sx * a11, m12 = sy * a12, m21 = sx * a12, m22 = sy * a22; // stretch ∘ squash
+    const A = c * m11 - s * m21, B = s * m11 + c * m21, C = c * m12 - s * m22, D = s * m12 + c * m22; // then lean
+    body.setAttribute('transform', `matrix(${A} ${B} ${C} ${D} ${CX} ${BASE})`);
+    imgA.setAttribute('opacity', fade); imgB.setAttribute('opacity', 1 - fade);
+    const pop = 1 - fade; imgA.setAttribute('transform', pop ? `scale(${.86 + .14 * fade})` : '');
+    if (!reduce) { disp.setAttribute('scale', (wob * 22).toFixed(1)); turb.setAttribute('baseFrequency', (0.010 + 0.004 * Math.sin(now / 300)).toFixed(4)); }
+    shadow.setAttribute('rx', SIZE * .36 * sx * (1 + st * .3)); shadow.setAttribute('opacity', .1 * Math.min(1.3, sx));
 
     // rare: golden rays spin behind; ultra: a rainbow ring pulses out too
     if (glow > 0) {
       glow = Math.max(0, glow - .006 * dt);
-      const g = ease(glow);
+      const g = ease(glow), cy = BASE - SIZE * .42;
       rays.setAttribute('opacity', g);
-      rays.setAttribute('transform', `translate(${CX} ${CY}) rotate(${reduce ? 0 : now / 30 % 360}) scale(${.9 + .15 * Math.sin(now / 200)})`);
-      if (glowKind === 'ultra') {
-        const ph = (now / 900) % 1;
-        halo.setAttribute('r', R * (1.05 + ph * .6)); halo.setAttribute('opacity', g * (1 - ph));
-      } else halo.setAttribute('opacity', 0);
+      rays.setAttribute('transform', `translate(${CX} ${cy}) rotate(${reduce ? 0 : now / 30 % 360}) scale(${.9 + .15 * Math.sin(now / 200)})`);
+      if (glowKind === 'ultra') { const ph = (now / 900) % 1; halo.setAttribute('r', 150 * (1 + ph * .6)); halo.setAttribute('opacity', g * (1 - ph)); }
+      else halo.setAttribute('opacity', 0);
     } else { rays.setAttribute('opacity', 0); halo.setAttribute('opacity', 0); }
-
-    // face rides on the squash
-    const fy = (sA.face.y + (sB.face.y - sA.face.y) * k2);
-    const fcx = CX + look[0] * 10, fcy = BASE - (BASE - (CY + fy * R)) * sy + look[1] * 6;
-    const gap = 42 * sx;
-    if (now > blinkAt) { blink = 1; if (now > blinkAt + 120) { blink = 0; blinkAt = now + 2200 + Math.random() * 3000; } }
-    for (const [g, E, side] of [[eyeL, EL, -1], [eyeR, ER, 1]]) {
-      g.setAttribute('transform', `translate(${fcx + side * gap} ${fcy - 6}) scale(1 ${blink ? .12 : 1})`);
-      E.ball.setAttribute('opacity', squeezeFace ? 0 : 1); E.hi.setAttribute('opacity', squeezeFace ? 0 : 1); E.hi2.setAttribute('opacity', squeezeFace ? 0 : 1);
-      E.x.setAttribute('opacity', squeezeFace ? 1 : 0);
-      E.hi.setAttribute('cx', -4 + look[0] * 3); E.hi.setAttribute('cy', -5 + look[1] * 3); E.hi2.setAttribute('cx', 5); E.hi2.setAttribute('cy', 4);
-    }
-    blushL.setAttribute('cx', fcx - gap - 22); blushL.setAttribute('cy', fcy + 18);
-    blushR.setAttribute('cx', fcx + gap + 22); blushR.setAttribute('cy', fcy + 18);
-    const mz = (sA.face.muzzle ? 1 - k2 : 0) + (sB.face.muzzle ? k2 : 0);
-    muzzle.setAttribute('cx', fcx); muzzle.setAttribute('cy', fcy + 24); muzzle.setAttribute('opacity', mz);
-    mouth.setAttribute('d', squeezeFace
-      ? `M${fcx - 14} ${fcy + 16} q14 26 28 0 Z`
-      : `M${fcx - 12} ${fcy + 18} q12 14 24 0`);
-    mouth.setAttribute('fill', squeezeFace ? '#FF6B7A' : 'none');
-
-    // decor fades with the morph
-    const topY = Math.min(...p.map(v => v[1]));
-    let html = '';
-    if (sA.decor && k2 < 1) html += `<g opacity="${1 - k2}" transform="translate(${CX} ${topY + 16})">${DECOR[sA.decor]}</g>`;
-    if (sB.decor) html += `<g opacity="${k2}" transform="translate(${CX} ${topY + 16})">${DECOR[sB.decor]}</g>`;
-    decor.innerHTML = html;
 
     for (let i = parts.length - 1; i >= 0; i--) {
       const q = parts[i]; q.vy += .25 * dt; q.x += q.vx * dt; q.y += q.vy * dt; q.life -= .018 * dt; q.rot += 6 * dt;
@@ -310,6 +225,6 @@
     requestAnimationFrame(frame);
   }
   new IntersectionObserver(es => { visible = es[0].isIntersecting; }).observe(stage);
-  const who = stage.querySelector('.who'); if (who) who.textContent = names[SHAPES[START].id] || '';
+  const who = stage.querySelector('.who'); if (who) who.textContent = names[current] || '';
   requestAnimationFrame(frame);
 })();
