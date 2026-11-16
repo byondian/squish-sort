@@ -5,6 +5,8 @@ import SquishPolicy
 /// the next level, then the Collection and the Mystery Bag. Nothing here pops up by itself.
 struct HomeView: View {
     @EnvironmentObject var model: AppModel
+    @State private var coinGate = false
+    @State private var coinGatePassed = false
     @State private var wobble = false
     @State private var showStamps = false
     @State private var coinsFlying = false
@@ -16,18 +18,27 @@ struct HomeView: View {
             let compact = screen.size.height < 720
             VStack(spacing: compact ? 6 : 10) {
                 HStack {
-                    // The coins pill opens the shop (under-13s reach it only from Settings).
-                    Button { if !model.isGentleMode { model.screen = .shop } } label: {
-                        Label { Text("\(model.progress.wallet.balance)") } icon: { CoinIcon() }
-                            .font(Theme.body(17)).foregroundStyle(Theme.plum)
-                            .monospacedDigit()
-                            .contentTransition(.numericText(value: Double(model.progress.wallet.balance)))
-                            .animation(.easeOut(duration: 0.9), value: model.progress.wallet.balance)
-                            .scaleEffect(coinsLanded && coinsFlying ? 1.12 : 1)
-                            .padding(.horizontal, 14).frame(height: 44)
-                            .background(Capsule().fill(.white))
+                    // The coins pill opens the coin shop. Under-13s (and players who gave no age) meet
+                    // the grown-up check first, the same one Settings uses.
+                    Button { if model.isGentleMode { coinGate = true } else { model.screen = .shop } } label: {
+                        HStack(spacing: 6) {
+                            Label { Text("\(model.progress.wallet.balance)") } icon: { CoinIcon() }
+                                .font(Theme.body(17)).foregroundStyle(Theme.plum)
+                                .monospacedDigit()
+                                .contentTransition(.numericText(value: Double(model.progress.wallet.balance)))
+                                .animation(.easeOut(duration: 0.9), value: model.progress.wallet.balance)
+                            Image(systemName: "plus").font(.system(size: 12, weight: .heavy)).foregroundStyle(.white)
+                                .frame(width: 22, height: 22).background(Circle().fill(Theme.mint))
+                        }
+                        .scaleEffect(coinsLanded && coinsFlying ? 1.12 : 1)
+                        .padding(.leading, 14).padding(.trailing, 8).frame(height: 44)
+                        .background(Capsule().fill(.white))
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PressSquish())
+                    .accessibilityLabel(Text("Get coins"))
+                    .sheet(isPresented: $coinGate, onDismiss: { if coinGatePassed { coinGatePassed = false; model.screen = .shop } }) {
+                        ParentalGate(onPass: { coinGatePassed = true; coinGate = false }, onCancel: { coinGate = false })
+                    }
                     .accessibilityIdentifier("home-coins")
                     Spacer()
                     IconButton(system: "gearshape.fill") { model.screen = .settings }
