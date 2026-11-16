@@ -2,7 +2,7 @@
 export default {
   meta: {
     title: 'Squish Sort: il gioco per smistare gli squishy su iPhone',
-    description: 'Smista gli squishy, riempi i barattoli e manda via lo stress. 60 livelli morbidi e soddisfacenti, Santa’s Grotto a dicembre e 64 squishy originali da collezionare. Gratis su iPhone.',
+    description: 'Smista gli squishy, riempi i barattoli e manda via lo stress. Oltre 100 livelli morbidi e soddisfacenti, poi rompicapi infiniti, Santa’s Grotto a dicembre e 64 squishy originali da collezionare. Gratis su iPhone.',
   },
   skip: 'Vai al contenuto',
   nav: { demo: 'Gioca la demo', squishies: 'Squishy', parents: 'Genitori', support: 'Assistenza', language: 'Lingua', findLanguage: 'Cerca una lingua' },
@@ -24,6 +24,7 @@ export default {
     next: 'Livello successivo', stars: '{n} stelle su 3',
     allDone: 'Hai talento!', allDoneMsg: 'Hai provato tre mondi! Il gioco completo ha 64 squishy da collezionare, Santa’s Grotto a dicembre, una Squish Room e una Mystery Bag ogni giorno.',
     again: 'Gioca ancora',
+    wrapTip: 'I dolcetti incartati mostrano cosa c’è dentro quando arrivano in cima al barattolo.',
   },
   collect: {
     kicker: 'Collezionali tutti', title: '64 squishy da trovare',
@@ -32,7 +33,7 @@ export default {
     oddsLink: 'Vedi le probabilità',
   },
   worlds: {
-    kicker: 'Tre mondi e uno di festa', title: '60 livelli di smistamento morbido e soddisfacente',
+    kicker: 'Tre mondi e uno di festa', title: 'Oltre 100 livelli, poi rompicapi infiniti e un nuovo Daily Jar ogni giorno',
     list: [
       ['Toy Shop', 'Dove tutto ha inizio: fragole, cuccioli, rane e un dinosauro molto orgoglioso.'],
       ['Sweet Factory', 'Ciambelle, macaron e mochi appena usciti dal nastro trasportatore.'],
@@ -48,6 +49,8 @@ export default {
       ['🎁', 'Mystery Bag', 'Un gioco di indovinelli quotidiano. Tre risposte giuste valgono una capsula gratis.'],
       ['🎨', 'Squishy Maker', 'Crea il tuo squishy con forme, colori, orecchie e cappelli.'],
       ['💗', 'Squishy Buddy', 'Un piccolo amico che fa il tifo per te. Non si rattrista mai se sei via.'],
+      ['🎀', 'Extras', 'Vesti i tuoi squishy con fiocchi, occhiali, cappelli e ali, con set stagionali per Natale e Halloween. Prova tutto prima.'],
+      ['🫙', 'Daily Jar', 'Un nuovo rompicapo ogni giorno e livelli Keep Squishing infiniti quando finisci i mondi.'],
     ],
   },
   promise: {

@@ -127,6 +127,7 @@ ${waveTo('#FFE3EF')}
       <div class="board-top"><span class="lvl"></span><span class="moves">${esc(t.demo.moves)}: <b>0</b></span>
         <button class="iconbtn undo" type="button" aria-label="${esc(t.demo.undo)}" title="${esc(t.demo.undo)}">↶</button>
         <button class="iconbtn reset" type="button" aria-label="${esc(t.demo.reset)}" title="${esc(t.demo.reset)}">↻</button></div>
+      <p class="wrap-tip" hidden>🍬 ${esc(t.demo.wrapTip)}</p>
       <div class="jars"></div>
       <p class="live sr" aria-live="polite"></p>
       <div class="win" role="dialog" aria-modal="false" aria-labelledby="win-h">

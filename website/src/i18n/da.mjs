@@ -2,7 +2,7 @@
 export default {
   meta: {
     title: 'Squish Sort: squishy-sorteringsspillet til iPhone',
-    description: 'Sortér squishies, fyld glassene og klem stressen væk. 60 søde, tilfredsstillende baner, Santa’s Grotto i december og 64 originale squishies at samle. Gratis på iPhone.',
+    description: 'Sortér squishies, fyld glassene og klem stressen væk. Over 100 søde, tilfredsstillende baner og uendelige puslespil bagefter, Santa’s Grotto i december og 64 originale squishies at samle. Gratis på iPhone.',
   },
   skip: 'Spring til indholdet',
   nav: { demo: 'Spil demoen', squishies: 'Squishies', parents: 'Forældre', support: 'Hjælp', language: 'Sprog', findLanguage: 'Find et sprog' },
@@ -24,6 +24,7 @@ export default {
     next: 'Næste bane', stars: '{n} af 3 stjerner',
     allDone: 'Du har styr på det!', allDoneMsg: 'Du har prøvet tre verdener! Hele spillet har 64 squishies at samle, Santa’s Grotto i december, et Squish Room og en daglig Mystery Bag.',
     again: 'Spil igen',
+    wrapTip: 'Indpakkede slik viser, hvad de er, når de kommer øverst i glasset.',
   },
   collect: {
     kicker: 'Saml dem alle', title: '64 squishies at finde',
@@ -32,7 +33,7 @@ export default {
     oddsLink: 'Se chancerne',
   },
   worlds: {
-    kicker: 'Tre verdener og en festlig', title: '60 baner med sød, tilfredsstillende sortering',
+    kicker: 'Tre verdener og en festlig', title: 'Over 100 baner, derefter uendelige puslespil og en ny Daily Jar hver dag',
     list: [
       ['Toy Shop', 'Her starter det hele: jordbær, hvalpe, frøer og en meget stolt dino.'],
       ['Sweet Factory', 'Donuts, macarons og mochi direkte fra samlebåndet.'],
@@ -48,6 +49,8 @@ export default {
       ['🎁', 'Mystery Bag', 'Et dagligt gættespil. Tre rigtige giver en gratis kapsel.'],
       ['🎨', 'Squishy Maker', 'Lav din egen squishy med former, farver, ører og hatte.'],
       ['💗', 'Squishy Buddy', 'En lille ven, der hepper på dig. Den bliver aldrig ked af det, hvis du er væk et stykke tid.'],
+      ['🎀', 'Extras', 'Klæd dine squishies på med sløjfer, briller, hatte og vinger, med sæsonsæt til jul og Halloween. Prøv det hele først.'],
+      ['🫙', 'Daily Jar', 'Et nyt puslespil hver dag og uendeligt mange Keep Squishing-baner, når du har klaret verdenerne.'],
     ],
   },
   promise: {

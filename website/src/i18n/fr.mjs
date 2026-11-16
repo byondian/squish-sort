@@ -2,7 +2,7 @@
 export default {
   meta: {
     title: 'Squish Sort : le jeu de tri de squishies pour iPhone',
-    description: 'Triez les squishies, remplissez les bocaux et faites fondre le stress. 60 niveaux doux et satisfaisants, Santa’s Grotto en décembre et 64 squishies originaux à collectionner. Gratuit sur iPhone.',
+    description: 'Triez les squishies, remplissez les bocaux et faites fondre le stress. Plus de 100 niveaux doux et satisfaisants, puis des puzzles à l’infini, Santa’s Grotto en décembre et 64 squishies originaux à collectionner. Gratuit sur iPhone.',
   },
   skip: 'Aller au contenu',
   nav: { demo: 'Jouer à la démo', squishies: 'Squishies', parents: 'Parents', support: 'Aide', language: 'Langue', findLanguage: 'Chercher une langue' },
@@ -24,6 +24,7 @@ export default {
     next: 'Niveau suivant', stars: '{n} étoiles sur 3',
     allDone: 'Vous êtes doué !', allDoneMsg: 'Tu as essayé trois mondes ! Le jeu complet compte 64 squishies à collectionner, Santa’s Grotto en décembre, une Squish Room et une Mystery Bag chaque jour.',
     again: 'Rejouer',
+    wrapTip: 'Les bonbons emballés révèlent leur contenu quand ils arrivent en haut du bocal.',
   },
   collect: {
     kicker: 'Collectionnez-les tous', title: '64 squishies à trouver',
@@ -32,7 +33,7 @@ export default {
     oddsLink: 'Voir les taux d’obtention',
   },
   worlds: {
-    kicker: 'Trois mondes et un monde de fête', title: '60 niveaux de tri doux et satisfaisant',
+    kicker: 'Trois mondes et un monde de fête', title: 'Plus de 100 niveaux, puis des puzzles à l’infini et un nouveau Daily Jar chaque jour',
     list: [
       ['Toy Shop', 'Là où tout commence : fraises, chiots, grenouilles et un dinosaure très fier.'],
       ['Sweet Factory', 'Donuts, macarons et mochis tout juste sortis du tapis roulant.'],
@@ -48,6 +49,8 @@ export default {
       ['🎁', 'Mystery Bag', 'Un jeu de devinettes quotidien. Trois bonnes réponses rapportent une capsule gratuite.'],
       ['🎨', 'Squishy Maker', 'Créez votre propre squishy avec des formes, des couleurs, des oreilles et des chapeaux.'],
       ['💗', 'Squishy Buddy', 'Un petit ami qui vous encourage. Il n’est jamais triste quand vous êtes absent.'],
+      ['🎀', 'Extras', 'Habille tes squishies de nœuds, lunettes, chapeaux et ailes, avec des collections de saison pour Noël et Halloween. Essaie tout avant.'],
+      ['🫙', 'Daily Jar', 'Un nouveau puzzle chaque jour, et des niveaux Keep Squishing à l’infini une fois les mondes terminés.'],
     ],
   },
   promise: {

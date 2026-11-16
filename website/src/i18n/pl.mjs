@@ -2,7 +2,7 @@
 export default {
   meta: {
     title: 'Squish Sort: gra w sortowanie squishy na iPhone’a',
-    description: 'Sortuj squishy, napełniaj słoiki i wyciskaj stres. 60 uroczych, satysfakcjonujących poziomów, Santa’s Grotto w grudniu i 64 oryginalne squishy do zebrania. Za darmo na iPhone’a.',
+    description: 'Sortuj squishy, napełniaj słoiki i wyciskaj stres. Ponad 100 uroczych, satysfakcjonujących poziomów, a potem niekończące się łamigłówki, Santa’s Grotto w grudniu i 64 oryginalne squishy do zebrania. Za darmo na iPhone’a.',
   },
   skip: 'Przejdź do treści',
   nav: { demo: 'Zagraj w demo', squishies: 'Squishy', parents: 'Rodzice', support: 'Pomoc', language: 'Język', findLanguage: 'Znajdź język' },
@@ -24,6 +24,7 @@ export default {
     next: 'Następny poziom', stars: '{n} z 3 gwiazdek',
     allDone: 'Masz do tego dryg!', allDoneMsg: 'Wypróbowałeś trzy światy! Pełna gra ma 64 squishy do zebrania, Santa’s Grotto w grudniu, Squish Room i codzienną Mystery Bag.',
     again: 'Zagraj jeszcze raz',
+    wrapTip: 'Zapakowane słodycze pokazują, co jest w środku, gdy znajdą się na górze słoika.',
   },
   collect: {
     kicker: 'Zbierz je wszystkie', title: '64 squishy do odkrycia',
@@ -32,7 +33,7 @@ export default {
     oddsLink: 'Zobacz szanse',
   },
   worlds: {
-    kicker: 'Trzy światy i jeden świąteczny', title: '60 poziomów uroczego, satysfakcjonującego sortowania',
+    kicker: 'Trzy światy i jeden świąteczny', title: 'Ponad 100 poziomów, potem niekończące się łamigłówki i codziennie nowy Daily Jar',
     list: [
       ['Toy Shop', 'Tu wszystko się zaczyna: truskawki, szczeniaczki, żabki i bardzo dumny dinozaur.'],
       ['Sweet Factory', 'Pączki, makaroniki i mochi prosto z taśmy.'],
@@ -48,6 +49,8 @@ export default {
       ['🎁', 'Mystery Bag', 'Codzienna zgadywanka. Trzy trafienia dają darmową kapsułkę.'],
       ['🎨', 'Squishy Maker', 'Zrób własnego squishy z kształtów, kolorów, uszu i czapek.'],
       ['💗', 'Squishy Buddy', 'Mały kumpel, który ci kibicuje. Nigdy się nie smuci, gdy cię nie ma.'],
+      ['🎀', 'Extras', 'Ubierz swoje squishy w kokardki, okulary, czapki i skrzydła, z sezonowymi zestawami na święta i Halloween. Najpierw wszystko przymierz.'],
+      ['🫙', 'Daily Jar', 'Codziennie nowa łamigłówka i niekończące się poziomy Keep Squishing po ukończeniu światów.'],
     ],
   },
   promise: {

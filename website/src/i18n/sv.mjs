@@ -2,7 +2,7 @@
 export default {
   meta: {
     title: 'Squish Sort: squishy-sorteringsspelet för iPhone',
-    description: 'Sortera squishies, fyll burkarna och kläm bort stressen. 60 gulliga, tillfredsställande nivåer, Santa’s Grotto i december och 64 egna squishies att samla. Gratis på iPhone.',
+    description: 'Sortera squishies, fyll burkarna och kläm bort stressen. Över 100 gulliga, tillfredsställande nivåer och sedan oändligt med pussel, Santa’s Grotto i december och 64 egna squishies att samla. Gratis på iPhone.',
   },
   skip: 'Hoppa till innehållet',
   nav: { demo: 'Spela demon', squishies: 'Squishies', parents: 'Föräldrar', support: 'Hjälp', language: 'Språk', findLanguage: 'Sök efter språk' },
@@ -24,6 +24,7 @@ export default {
     next: 'Nästa nivå', stars: '{n} av 3 stjärnor',
     allDone: 'Du har kläm på det!', allDoneMsg: 'Du har testat tre världar! Hela spelet har 64 squishies att samla, Santa’s Grotto i december, ett Squish Room och en daglig Mystery Bag.',
     again: 'Spela igen',
+    wrapTip: 'Inslagna godisar visar vad de är när de hamnar överst i burken.',
   },
   collect: {
     kicker: 'Samla alla', title: '64 squishies att hitta',
@@ -32,7 +33,7 @@ export default {
     oddsLink: 'Se chanserna',
   },
   worlds: {
-    kicker: 'Tre världar och en festlig', title: '60 nivåer med gullig, skön sortering',
+    kicker: 'Tre världar och en festlig', title: 'Över 100 nivåer, sedan oändligt med pussel och en ny Daily Jar varje dag',
     list: [
       ['Toy Shop', 'Här börjar allt: jordgubbar, valpar, grodor och en väldigt stolt dinosaurie.'],
       ['Sweet Factory', 'Munkar, macarons och mochi direkt från bandet.'],
@@ -48,6 +49,8 @@ export default {
       ['🎁', 'Mystery Bag', 'Ett dagligt gissningsspel. Tre rätt ger en gratis kapsel.'],
       ['🎨', 'Squishy Maker', 'Gör din egen squishy med former, färger, öron och hattar.'],
       ['💗', 'Squishy Buddy', 'En liten kompis som hejar på dig. Den blir aldrig ledsen om du är borta ett tag.'],
+      ['🎀', 'Extras', 'Klä dina squishies i rosetter, glasögon, hattar och vingar, med säsongsset för jul och Halloween. Prova allt först.'],
+      ['🫙', 'Daily Jar', 'Ett nytt pussel varje dag, och oändligt med Keep Squishing-nivåer när du klarat världarna.'],
     ],
   },
   promise: {

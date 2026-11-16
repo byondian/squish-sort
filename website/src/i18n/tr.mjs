@@ -2,7 +2,7 @@
 export default {
   meta: {
     title: 'Squish Sort: iPhone için squishy sıralama oyunu',
-    description: 'Squishy’leri sırala, kavanozları doldur ve stresi sıkıp at. 60 sevimli ve tatmin edici bölüm, aralıkta Santa’s Grotto ve toplanacak 64 orijinal squishy. iPhone’da ücretsiz.',
+    description: 'Squishy’leri sırala, kavanozları doldur ve stresi sıkıp at. 100’den fazla sevimli ve tatmin edici bölüm, ardından sonsuz bulmacalar, aralıkta Santa’s Grotto ve toplanacak 64 orijinal squishy. iPhone’da ücretsiz.',
   },
   skip: 'İçeriğe geç',
   nav: { demo: 'Demoyu oyna', squishies: 'Squishy’ler', parents: 'Ebeveynler', support: 'Yardım', language: 'Dil', findLanguage: 'Dil ara' },
@@ -24,6 +24,7 @@ export default {
     next: 'Sonraki bölüm', stars: '3 yıldızdan {n}',
     allDone: 'Bu işte iyisin!', allDoneMsg: 'Üç dünyayı denedin! Oyunun tamamında toplanacak 64 squishy, aralıkta Santa’s Grotto, bir Squish Room ve günlük bir Mystery Bag var.',
     again: 'Tekrar oyna',
+    wrapTip: 'Paketli şekerler kavanozun en üstüne gelince içlerinde ne olduğunu gösterir.',
   },
   collect: {
     kicker: 'Hepsini topla', title: 'Bulunacak 64 squishy',
@@ -32,7 +33,7 @@ export default {
     oddsLink: 'Olasılıkları gör',
   },
   worlds: {
-    kicker: 'Üç dünya ve bir bayram dünyası', title: 'Sevimli ve tatmin edici sıralamayla dolu 60 bölüm',
+    kicker: 'Üç dünya ve bir bayram dünyası', title: '100’den fazla bölüm, ardından sonsuz bulmacalar ve her gün yeni bir Daily Jar',
     list: [
       ['Toy Shop', 'Her şeyin başladığı yer: çilekler, yavru köpekler, kurbağalar ve çok gururlu bir dinozor.'],
       ['Sweet Factory', 'Banttan taze çıkan donutlar, makaronlar ve mochiler.'],
@@ -48,6 +49,8 @@ export default {
       ['🎁', 'Mystery Bag', 'Günlük bir tahmin oyunu. Üç doğru tahmin ücretsiz bir kapsül kazandırır.'],
       ['🎨', 'Squishy Maker', 'Şekiller, renkler, kulaklar ve şapkalarla kendi squishy’ni yap.'],
       ['💗', 'Squishy Buddy', 'Seni neşelendiren küçük bir dost. Bir süre gelmesen de asla üzülmez.'],
+      ['🎀', 'Extras', 'Squishy’lerini fiyonklar, gözlükler, şapkalar ve kanatlarla süsle; Noel ve Cadılar Bayramı için sezon setleri de var. Önce hepsini dene.'],
+      ['🫙', 'Daily Jar', 'Her gün yeni bir bulmaca ve dünyaları bitirince sonsuz Keep Squishing bölümleri.'],
     ],
   },
   promise: {

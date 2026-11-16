@@ -9,8 +9,9 @@
   const LEVELS = [
     { w: 0, jars: [['strawbie', 'strawbie', 'strawbie'], ['tango', 'tango', 'tango', 'strawbie'], ['tango']], par: 2 },
     { w: 0, jars: [['strawbie', 'sunny', 'sunny', 'blu'], ['sunny', 'blu', 'blu', 'strawbie'], ['blu', 'strawbie', 'strawbie', 'sunny'], [], []], par: 7 },
-    { w: 1, jars: [['macaron', 'macaron', 'gummy-bear', 'gummy-bear'], ['gummy-bear', 'macaron', 'donut', 'donut'], ['donut', 'cupcake', 'gummy-bear', 'cupcake'], ['donut', 'cupcake', 'cupcake', 'macaron'], [], []], par: 10 },
-    { w: 1, jars: [['macaron', 'lolly', 'jelly', 'macaron'], ['jelly', 'donut', 'lolly', 'donut'], ['lolly', 'jelly', 'lolly', 'donut'], ['jelly', 'macaron', 'macaron', 'donut'], [], []], par: 12 },
+    // Sweet Factory levels 3 and 6 from the game, with wrapped sweets ([jar, position from the bottom]).
+    { w: 1, jars: [['macaron', 'macaron', 'macaron', 'jelly'], ['jelly', 'macaron', 'donut', 'jelly'], ['donut', 'donut', 'jelly', 'donut'], [], []], hidden: [[0, 1], [2, 0]], par: 7 },
+    { w: 1, jars: [['cupcake', 'donut', 'donut', 'jelly'], ['jelly', 'jelly', 'jelly', 'macaron'], ['macaron', 'cupcake', 'cupcake', 'donut'], ['donut', 'cupcake', 'macaron', 'macaron'], [], []], hidden: [[0, 2], [1, 0], [1, 1], [1, 2], [2, 2]], par: 8 },
     { w: 2, jars: [['riff', 'zuzu', 'zuzu', 'nova'], ['nova', 'lumi', 'riff', 'lumi'], ['lumi', 'nova', 'nova', 'riff'], ['lumi', 'zuzu', 'zuzu', 'riff'], [], []], par: 11 },
     { w: 2, jars: [['nova', 'nova', 'coco', 'riff'], ['pip', 'nova', 'nova', 'coco'], ['pip', 'coco', 'pip', 'lumi'], ['riff', 'lumi', 'lumi', 'riff'], ['riff', 'lumi', 'coco', 'pip'], [], []], par: 14 },
   ];
@@ -24,7 +25,9 @@
 
   function load(n) {
     level = n; sel = -1; moves = 0; history = [];
-    jars = LEVELS[n].jars.map(j => j.map(kind => ({ id: ++ids, kind })));
+    const hid = new Set((LEVELS[n].hidden || []).map(([a, b]) => a + ':' + b));
+    jars = LEVELS[n].jars.map((j, a) => j.map((kind, b) => ({ id: ++ids, kind, hidden: hid.has(a + ':' + b) })));
+    const tip = $('.wrap-tip'); if (tip) tip.hidden = !LEVELS[n].hidden;
     win.classList.remove('show');
     const w = LEVELS[n].w, first = LEVELS.findIndex(l => l.w === w);
     lvlEl.textContent = T.worlds[w] + ' · ' + T.level.replace('{n}', n - first + 1);
@@ -46,7 +49,8 @@
   }
   const jarEls = () => [...jarsEl.children];
   const done = j => j.length === CAP && j.every(p => p.kind === j[0].kind);
-  const runLen = j => { if (!j.length) return 0; const k = j[j.length - 1].kind; let n = 0; for (let i = j.length - 1; i >= 0 && j[i].kind === k; i--) n++; return n; };
+  const runLen = j => { if (!j.length || j[j.length - 1].hidden) return 0; const k = j[j.length - 1].kind; let n = 0; for (let i = j.length - 1; i >= 0 && j[i].kind === k && !j[i].hidden; i--) n++; return n; };
+  const copy = () => jars.map(x => x.map(p => ({ ...p })));
 
   function render(squished = []) {
     const els = jarEls();
@@ -55,7 +59,7 @@
       const jarEl = els[ji];
       jarEl.classList.toggle('done', done(j));
       jarEl.classList.toggle('sel', ji === sel);
-      const label = j.length ? j.map(p => T.names[p.kind] || p.kind).join(', ') : T.empty;
+      const label = j.length ? j.map(p => p.hidden ? '?' : (T.names[p.kind] || p.kind)).join(', ') : T.empty;
       jarEl.setAttribute('aria-label', T.jar.replace('{n}', ji + 1) + ': ' + label + (done(j) ? ' (' + T.full + ')' : ''));
       const h = jarEl.clientHeight || 300, size = jarEl.clientWidth * .92;
       const run = ji === sel ? runLen(j) : 0;
@@ -64,13 +68,15 @@
         let pe = pieceEls.get(p.id);
         if (!pe) {
           pe = document.createElement('span'); pe.className = 'piece';
-          pe.innerHTML = `<img src="/assets/sq/${p.kind}.webp" alt="" width="96" height="96">`;
+          pe.innerHTML = `<img src="/assets/sq/${p.kind}.webp" alt="" width="96" height="96"><span class="wrapper" aria-hidden="true">?</span>`;
           pieceEls.set(p.id, pe);
         }
         if (pe.parentNode !== jarEl) jarEl.appendChild(pe);
         pe.style.bottom = (8 + pi * (h - 24) / CAP * .985) + 'px';
         pe.style.zIndex = pi + 1;
         pe.classList.toggle('lift', pi >= j.length - run);
+        if (pe.classList.contains('wrapped') && !p.hidden) { pe.classList.remove('unwrap'); void pe.offsetWidth; pe.classList.add('unwrap'); }
+        pe.classList.toggle('wrapped', !!p.hidden);
         if (squished.includes(p.id)) { pe.classList.remove('squish'); void pe.offsetWidth; pe.classList.add('squish'); }
       });
     });
@@ -83,7 +89,7 @@
     if (win.classList.contains('show')) return;
     const j = jars[i];
     if (sel < 0) {
-      if (!j.length || done(j)) { bump(i); return; }
+      if (!j.length || done(j) || !runLen(j)) { bump(i); return; }
       sel = i; window.ssSound && window.ssSound('squish'); render(); return;
     }
     if (sel === i) { sel = -1; render(); return; }
@@ -92,11 +98,14 @@
     const dstTop = j[j.length - 1];
     if (j.length >= CAP || (dstTop && dstTop.kind !== top.kind)) { bump(i); sel = -1; render(); return; }
     const n = Math.min(runLen(src), CAP - j.length);
-    history.push(jars.map(x => x.slice()));
+    history.push(copy());
     const moved = src.splice(src.length - n, n);
     j.push(...moved);
     moves++; sel = -1;
+    const top2 = src[src.length - 1];
+    if (top2 && top2.hidden) top2.hidden = false;
     const nowDone = done(j);
+    if (nowDone) j.forEach(p => (p.hidden = false));
     window.ssSound && window.ssSound(nowDone ? 'lid' : 'pour');
     render(moved.map(p => p.id));
     if (nowDone) { say(T.closed); sparkle(jarEls()[i]); }

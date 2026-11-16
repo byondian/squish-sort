@@ -2,7 +2,7 @@
 export default {
   meta: {
     title: 'Squish Sort: o jogo de organizar squishies para iPhone',
-    description: 'Organize os squishies, encha os potes e esprema o estresse para longe. 60 fases fofas e satisfatórias, Santa’s Grotto em dezembro e 64 squishies originais para colecionar. Grátis no iPhone.',
+    description: 'Organize os squishies, encha os potes e esprema o estresse para longe. Mais de 100 fases fofas e satisfatórias e, depois, quebra-cabeças sem fim, Santa’s Grotto em dezembro e 64 squishies originais para colecionar. Grátis no iPhone.',
   },
   skip: 'Pular para o conteúdo',
   nav: { demo: 'Jogar a demo', squishies: 'Squishies', parents: 'Pais', support: 'Ajuda', language: 'Idioma', findLanguage: 'Buscar um idioma' },
@@ -24,6 +24,7 @@ export default {
     next: 'Próxima fase', stars: '{n} de 3 estrelas',
     allDone: 'Você leva jeito!', allDoneMsg: 'Você experimentou três mundos! O jogo completo tem 64 squishies para colecionar, Santa’s Grotto em dezembro, um Squish Room e uma Mystery Bag diária.',
     again: 'Jogar de novo',
+    wrapTip: 'Os doces embrulhados mostram o que têm dentro quando chegam ao topo do pote.',
   },
   collect: {
     kicker: 'Colecione todos', title: '64 squishies para encontrar',
@@ -32,7 +33,7 @@ export default {
     oddsLink: 'Ver as chances',
   },
   worlds: {
-    kicker: 'Três mundos e um festivo', title: '60 fases de organização fofa e satisfatória',
+    kicker: 'Três mundos e um festivo', title: 'Mais de 100 fases, depois quebra-cabeças sem fim e um Daily Jar novo todo dia',
     list: [
       ['Toy Shop', 'Onde tudo começa: morangos, cachorrinhos, sapos e um dinossauro muito orgulhoso.'],
       ['Sweet Factory', 'Donuts, macarons e mochis fresquinhos saindo da esteira.'],
@@ -48,6 +49,8 @@ export default {
       ['🎁', 'Mystery Bag', 'Um jogo de adivinhação diário. Três palpites certos dão uma cápsula grátis.'],
       ['🎨', 'Squishy Maker', 'Monte seu próprio squishy com formas, cores, orelhas e chapéus.'],
       ['💗', 'Squishy Buddy', 'Um amiguinho que torce por você. Ele nunca fica triste se você sumir.'],
+      ['🎀', 'Extras', 'Vista seus squishies com laços, óculos, chapéus e asas, com coleções de época para o Natal e o Halloween. Experimente tudo antes.'],
+      ['🫙', 'Daily Jar', 'Um quebra-cabeça novo todo dia e fases Keep Squishing sem fim depois que você terminar os mundos.'],
     ],
   },
   promise: {

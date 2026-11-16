@@ -3,7 +3,7 @@
 export default {
   meta: {
     title: 'Squish Sort: el juego de ordenar squishies para iPhone',
-    description: 'Ordena los squishies, llena los tarros y olvídate del estrés. 60 niveles suaves y satisfactorios, Santa’s Grotto en diciembre y 64 squishies originales para coleccionar. Gratis en iPhone.',
+    description: 'Ordena los squishies, llena los tarros y olvídate del estrés. Más de 100 niveles suaves y satisfactorios, y después puzles infinitos, Santa’s Grotto en diciembre y 64 squishies originales para coleccionar. Gratis en iPhone.',
   },
   skip: 'Ir al contenido',
   nav: { demo: 'Jugar la demo', squishies: 'Squishies', parents: 'Familias', support: 'Ayuda', language: 'Idioma', findLanguage: 'Buscar un idioma' },
@@ -25,6 +25,7 @@ export default {
     next: 'Siguiente nivel', stars: '{n} de 3 estrellas',
     allDone: '¡Se te da genial!', allDoneMsg: '¡Has probado tres mundos! El juego completo tiene 64 squishies para coleccionar, Santa’s Grotto en diciembre, un Squish Room y una Mystery Bag diaria.',
     again: 'Jugar otra vez',
+    wrapTip: 'Los dulces envueltos muestran lo que hay dentro cuando llegan arriba del tarro.',
   },
   collect: {
     kicker: 'Colecciónalos todos', title: '64 squishies por descubrir',
@@ -33,7 +34,7 @@ export default {
     oddsLink: 'Ver las probabilidades',
   },
   worlds: {
-    kicker: 'Tres mundos y uno navideño', title: '60 niveles de orden suave y satisfactorio',
+    kicker: 'Tres mundos y uno navideño', title: 'Más de 100 niveles, después puzles infinitos y un Daily Jar nuevo cada día',
     list: [
       ['Toy Shop', 'Donde empieza todo: fresas, cachorros, ranas y un dinosaurio muy orgulloso.'],
       ['Sweet Factory', 'Dónuts, macarons y mochis recién salidos de la cinta.'],
@@ -49,6 +50,8 @@ export default {
       ['🎁', 'Mystery Bag', 'Un juego de adivinar cada día. Tres aciertos te dan una cápsula gratis.'],
       ['🎨', 'Squishy Maker', 'Crea tu propio squishy con formas, colores, orejas y sombreros.'],
       ['💗', 'Squishy Buddy', 'Un amiguito que te anima. Nunca se pone triste si no estás.'],
+      ['🎀', 'Extras', 'Viste a tus squishies con lazos, gafas, sombreros y alas, con colecciones de temporada para Navidad y Halloween. Pruébatelo todo antes.'],
+      ['🫙', 'Daily Jar', 'Un puzle nuevo cada día y niveles infinitos de Keep Squishing cuando termines los mundos.'],
     ],
   },
   promise: {

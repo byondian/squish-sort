@@ -2,7 +2,7 @@
 export default {
   meta: {
     title: 'Squish Sort: het squishy-sorteerspel voor iPhone',
-    description: 'Sorteer de squishies, vul de potten en knijp de stress weg. 60 schattige, voldoening gevende levels, Santa’s Grotto in december en 64 originele squishies om te verzamelen. Gratis op iPhone.',
+    description: 'Sorteer de squishies, vul de potten en knijp de stress weg. Meer dan 100 schattige, voldoening gevende levels en daarna eindeloos puzzels, Santa’s Grotto in december en 64 originele squishies om te verzamelen. Gratis op iPhone.',
   },
   skip: 'Naar de inhoud',
   nav: { demo: 'Speel de demo', squishies: 'Squishies', parents: 'Ouders', support: 'Hulp', language: 'Taal', findLanguage: 'Zoek een taal' },
@@ -24,6 +24,7 @@ export default {
     next: 'Volgend level', stars: '{n} van 3 sterren',
     allDone: 'Je hebt er gevoel voor!', allDoneMsg: 'Je hebt drie werelden geprobeerd! Het volledige spel heeft 64 squishies om te verzamelen, Santa’s Grotto in december, een Squish Room en elke dag een Mystery Bag.',
     again: 'Nog een keer',
+    wrapTip: 'Ingepakte snoepjes laten zien wat erin zit zodra ze bovenaan de pot liggen.',
   },
   collect: {
     kicker: 'Verzamel ze allemaal', title: '64 squishies om te vinden',
@@ -32,7 +33,7 @@ export default {
     oddsLink: 'Bekijk de kansen',
   },
   worlds: {
-    kicker: 'Drie werelden en een feestelijke', title: '60 levels vol schattig, fijn sorteerplezier',
+    kicker: 'Drie werelden en een feestelijke', title: 'Meer dan 100 levels, daarna eindeloos puzzels en elke dag een nieuwe Daily Jar',
     list: [
       ['Toy Shop', 'Hier begint het: aardbeien, puppy’s, kikkers en een heel trotse dino.'],
       ['Sweet Factory', 'Donuts, macarons en mochi, vers van de lopende band.'],
@@ -48,6 +49,8 @@ export default {
       ['🎁', 'Mystery Bag', 'Een dagelijks raadspel. Drie keer goed geraden geeft een gratis capsule.'],
       ['🎨', 'Squishy Maker', 'Maak je eigen squishy met vormen, kleuren, oren en hoedjes.'],
       ['💗', 'Squishy Buddy', 'Een maatje dat je aanmoedigt. Het wordt nooit verdrietig als je even wegblijft.'],
+      ['🎀', 'Extras', 'Kleed je squishies aan met strikjes, brillen, hoedjes en vleugels, met seizoenssets voor Kerstmis en Halloween. Pas alles eerst.'],
+      ['🫙', 'Daily Jar', 'Elke dag een nieuwe puzzel, en eindeloos Keep Squishing-levels als je de werelden uit hebt.'],
     ],
   },
   promise: {

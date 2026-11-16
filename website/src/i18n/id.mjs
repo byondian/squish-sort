@@ -2,7 +2,7 @@
 export default {
   meta: {
     title: 'Squish Sort: game menyortir squishy untuk iPhone',
-    description: 'Sortir squishy, isi toplesnya, dan remas stres sampai hilang. 60 level yang imut dan memuaskan, Santa’s Grotto di bulan Desember, dan 64 squishy orisinal untuk dikoleksi. Gratis di iPhone.',
+    description: 'Sortir squishy, isi toplesnya, dan remas stres sampai hilang. Lebih dari 100 level yang imut dan memuaskan, lalu teka-teki tanpa batas, Santa’s Grotto di bulan Desember, dan 64 squishy orisinal untuk dikoleksi. Gratis di iPhone.',
   },
   skip: 'Langsung ke konten',
   nav: { demo: 'Main demo', squishies: 'Squishy', parents: 'Orang tua', support: 'Bantuan', language: 'Bahasa', findLanguage: 'Cari bahasa' },
@@ -24,6 +24,7 @@ export default {
     next: 'Level berikutnya', stars: '{n} dari 3 bintang',
     allDone: 'Kamu jago!', allDoneMsg: 'Kamu sudah mencoba tiga dunia! Game lengkapnya punya 64 squishy untuk dikoleksi, Santa’s Grotto di bulan Desember, Squish Room, dan Mystery Bag harian.',
     again: 'Main lagi',
+    wrapTip: 'Permen terbungkus menunjukkan isinya saat sampai di bagian atas toples.',
   },
   collect: {
     kicker: 'Koleksi semuanya', title: '64 squishy untuk ditemukan',
@@ -32,7 +33,7 @@ export default {
     oddsLink: 'Lihat peluangnya',
   },
   worlds: {
-    kicker: 'Tiga dunia dan satu dunia liburan', title: '60 level menyortir yang imut dan memuaskan',
+    kicker: 'Tiga dunia dan satu dunia liburan', title: 'Lebih dari 100 level, lalu teka-teki tanpa batas dan Daily Jar baru setiap hari',
     list: [
       ['Toy Shop', 'Tempat semuanya dimulai: stroberi, anak anjing, katak, dan dinosaurus yang sangat bangga.'],
       ['Sweet Factory', 'Donat, macaron, dan mochi yang baru keluar dari ban berjalan.'],
@@ -48,6 +49,8 @@ export default {
       ['🎁', 'Mystery Bag', 'Permainan tebak-tebakan harian. Tiga tebakan benar memberi satu kapsul gratis.'],
       ['🎨', 'Squishy Maker', 'Buat squishy-mu sendiri dengan bentuk, warna, telinga, dan topi.'],
       ['💗', 'Squishy Buddy', 'Teman kecil yang menyemangatimu. Ia tidak pernah sedih kalau kamu lama tidak datang.'],
+      ['🎀', 'Extras', 'Dandani squishy-mu dengan pita, kacamata, topi, dan sayap, plus set musiman untuk Natal dan Halloween. Coba dulu semuanya.'],
+      ['🫙', 'Daily Jar', 'Teka-teki baru setiap hari, dan level Keep Squishing tanpa batas setelah kamu menamatkan semua dunia.'],
     ],
   },
   promise: {

@@ -1,7 +1,7 @@
 export default {
   meta: {
     title: 'Squish Sort: the squishy sorting game for iPhone',
-    description: 'Sort the squishies, fill the jars and squeeze the stress away. 60 soft, satisfying levels, Santa’s Grotto in December and 64 original squishies to collect. Free on iPhone.',
+    description: 'Sort the squishies, fill the jars and squeeze the stress away. Over 100 soft, satisfying levels, endless puzzles after that, Santa’s Grotto in December and 64 original squishies to collect. Free on iPhone.',
   },
   skip: 'Skip to content',
   nav: { demo: 'Play demo', squishies: 'Squishies', parents: 'Parents', support: 'Support', language: 'Language', findLanguage: 'Find a language' },
@@ -28,6 +28,7 @@ export default {
     next: 'Next level', stars: '{n} of 3 stars',
     allDone: 'You are a natural!', allDoneMsg: 'You’ve tried three worlds! The full game has 64 squishies to collect, Santa’s Grotto in December, a Squish Room and a daily Mystery Bag.',
     again: 'Play again',
+    wrapTip: 'Wrapped sweets show what’s inside when they reach the top of a jar.',
   },
   collect: {
     kicker: 'Collect them all', title: '64 squishies to find',
@@ -36,7 +37,7 @@ export default {
     oddsLink: 'See the drop rates',
   },
   worlds: {
-    kicker: 'Three worlds and a festive one', title: '60 levels of soft, satisfying sorting',
+    kicker: 'Three worlds and a festive one', title: 'Over 100 levels, then endless puzzles and a new Daily Jar every day',
     list: [
       ['Toy Shop', 'Where it all begins: strawberries, puppies, frogs and a very proud dinosaur.'],
       ['Sweet Factory', 'Donuts, macarons and mochi, fresh off the conveyor belt.'],
@@ -52,6 +53,8 @@ export default {
       ['🎁', 'Mystery Bag', 'A daily guessing game. Three right guesses earn a free capsule.'],
       ['🎨', 'Squishy Maker', 'Build your own squishy from shapes, colours, ears and hats.'],
       ['💗', 'Squishy Buddy', 'A little friend who cheers you on. It never gets sad if you are away.'],
+      ['🎀', 'Extras', 'Dress your squishies in bows, glasses, hats and wings, with seasonal sets for Christmas and Halloween. Try everything on first.'],
+      ['🫙', 'Daily Jar', 'A fresh puzzle every day, and endless Keep Squishing levels once you finish the worlds.'],
     ],
   },
   promise: {

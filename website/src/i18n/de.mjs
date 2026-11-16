@@ -2,7 +2,7 @@
 export default {
   meta: {
     title: 'Squish Sort: das Squishy-Sortierspiel für iPhone',
-    description: 'Sortiere die Squishies, fülle die Gläser und knautsch den Stress weg. 60 weiche, befriedigende Level, Santa’s Grotto im Dezember und 64 originelle Squishies zum Sammeln. Kostenlos für iPhone.',
+    description: 'Sortiere die Squishies, fülle die Gläser und knautsch den Stress weg. Über 100 weiche, befriedigende Level und danach endlos weitere Rätsel, Santa’s Grotto im Dezember und 64 originelle Squishies zum Sammeln. Kostenlos für iPhone.',
   },
   skip: 'Zum Inhalt springen',
   nav: { demo: 'Demo spielen', squishies: 'Squishies', parents: 'Eltern', support: 'Hilfe', language: 'Sprache', findLanguage: 'Sprache suchen' },
@@ -24,6 +24,7 @@ export default {
     next: 'Nächstes Level', stars: '{n} von 3 Sternen',
     allDone: 'Du bist ein Naturtalent!', allDoneMsg: 'Du hast drei Welten ausprobiert! Im ganzen Spiel gibt es 64 Squishies zu sammeln, Santa’s Grotto im Dezember, einen Squish Room und täglich eine Mystery Bag.',
     again: 'Nochmal spielen',
+    wrapTip: 'Eingepackte Süßigkeiten zeigen, was drin ist, sobald sie oben im Glas liegen.',
   },
   collect: {
     kicker: 'Sammle sie alle', title: '64 Squishies zu entdecken',
@@ -32,7 +33,7 @@ export default {
     oddsLink: 'Die Wahrscheinlichkeiten ansehen',
   },
   worlds: {
-    kicker: 'Drei Welten und eine festliche', title: '60 Level weiches, befriedigendes Sortieren',
+    kicker: 'Drei Welten und eine festliche', title: 'Über 100 Level, danach endlos Rätsel und jeden Tag ein neues Daily Jar',
     list: [
       ['Toy Shop', 'Hier fängt alles an: Erdbeeren, Welpen, Frösche und ein sehr stolzer Dinosaurier.'],
       ['Sweet Factory', 'Donuts, Macarons und Mochi, frisch vom Fließband.'],
@@ -48,6 +49,8 @@ export default {
       ['🎁', 'Mystery Bag', 'Ein tägliches Ratespiel. Drei richtige Tipps bringen eine kostenlose Kapsel.'],
       ['🎨', 'Squishy Maker', 'Bau dein eigenes Squishy aus Formen, Farben, Ohren und Hüten.'],
       ['💗', 'Squishy Buddy', 'Ein kleiner Freund, der dich anfeuert. Er wird nie traurig, wenn du mal weg bist.'],
+      ['🎀', 'Extras', 'Zieh deinen Squishies Schleifen, Brillen, Hüte und Flügel an, mit Saison-Sets für Weihnachten und Halloween. Alles vorher anprobieren.'],
+      ['🫙', 'Daily Jar', 'Jeden Tag ein neues Rätsel und endlos viele Keep-Squishing-Level, wenn du die Welten geschafft hast.'],
     ],
   },
   promise: {
