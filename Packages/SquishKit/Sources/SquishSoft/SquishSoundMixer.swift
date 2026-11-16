@@ -98,7 +98,7 @@ public struct SquishSoundMixer {
 
     /// Continuous haptic strength while a finger is on the toy.
     public func hapticIntensity(metric: SquishBody.Metric) -> Double {
-        metric.held > 0 ? min(1, tuning.hapticGain * metric.D) : 0
+        metric.held > 0 ? min(1, tuning.hapticGain * metric.D + tuning.hapticDentGain * metric.Z) : 0
     }
 }
 

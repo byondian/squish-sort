@@ -39,6 +39,19 @@ public final class SquishBody {
         public var air = false
         public var cx = 0.0
         public var cy = 0.0
+        /// The deepest point of the dent (positive is pushed in).
+        public var Z = 0.0
+        /// How fast the dent as a whole is changing.
+        public var zrate = 0.0
+        var Zr = 0.0
+    }
+
+    /// The painted face slides a little over the body: towards a finger, and lagging behind when the toy moves.
+    public struct Tilt: Sendable {
+        public var x = 0.0
+        public var y = 0.0
+        var vx = 0.0
+        var vy = 0.0
     }
 
     public struct Pointer {
@@ -56,6 +69,11 @@ public final class SquishBody {
         var py: Double
         var t = 0.0
         var drag = 0.0
+        /// Where the finger is on the toy's own picture (0...1), for the dent.
+        var fu = 0.0
+        var fv = 0.0
+        /// 1 = a normal press, up to about 1.6 = pressing hard.
+        var force = 1.0
     }
 
     public struct Bounds: Sendable {
@@ -96,15 +114,51 @@ public final class SquishBody {
     public private(set) var halfW = 0.0
     public private(set) var c0 = (x: 0.5, y: 0.5)
 
+    // Depth: a finer grid over the same square. z > 0 is pushed in, z < 0 bulges towards the viewer.
+    /// Cells per side of the dent grid.
+    public let nz: Int
+    /// The dent grid, `(nz + 1) * (nz + 1)` values, row by row from the top left.
+    public private(set) var z: [Float]
+    private var zv: [Float]
+    private var zl: [Float]
+    private var zmask: [Bool]
+    private var zshape: [Float]
+    private var zedge: [Float]
+    private var zcount = 0
+    private var zmean = 0.0
+    private var puffed = 0.0
+    private var thick: [Float]
+    /// Side of the packed surface that `surface()` returns.
+    public let zres: Int
+    private var bytes: [UInt8]
+    private var surfaceSum: [Float]
+    private var surfaceWeight: [Float]
+    private var surfaceRows: [Float]
+    public private(set) var tilt = Tilt()
+
     /// - Parameters:
     ///   - inside: whether the art covers the point (u, v), both 0...1 with v downwards.
     ///   - footV: where the art's true lowest pixel sits (0...1), if below the lowest lattice point.
     ///   - x, y: the centre of the sprite's square.
     public init(size: Double, n: Int = 12, material: SquishMaterial, x: Double = 0, y: Double = 0,
-                footV: Double? = nil, breath: Double = Double.random(in: 0..<6),
+                footV: Double? = nil, breath: Double = Double.random(in: 0..<6), nz: Int = 32,
                 inside: (Double, Double) -> Bool = { _, _ in true }) {
         self.n = n
+        self.nz = nz
+        let zc = (nz + 1) * (nz + 1)
+        z = [Float](repeating: 0, count: zc)
+        zv = [Float](repeating: 0, count: zc)
+        zl = [Float](repeating: 0, count: zc)
+        zmask = [Bool](repeating: false, count: zc)
+        zshape = [Float](repeating: 0, count: zc)
+        zedge = [Float](repeating: 0, count: zc)
+        zres = 3 * nz + 1
+        bytes = [UInt8](repeating: 0, count: (3 * nz + 1) * (3 * nz + 1) * 4)
+        surfaceRows = [Float](repeating: 0, count: (nz + 1) * (3 * nz + 1))
         let cnt = (n + 1) * (n + 1)
+        thick = [Float](repeating: 0, count: cnt)
+        surfaceSum = [Float](repeating: 0, count: cnt)
+        surfaceWeight = [Float](repeating: 0, count: cnt)
         count = cnt
         self.size = size
         self.material = material
@@ -198,6 +252,30 @@ public final class SquishBody {
             }
         }
         minv = SquishBody.inv5(aqq)
+        let dz = Double(nz)
+        for j in 1..<nz {
+            for i in 1..<nz where inside(Double(i) / dz, Double(j) / dz) {
+                let k = j * (nz + 1) + i
+                zmask[k] = true
+                zcount += 1
+                let dx = Double(i) / dz - cx, dy = Double(j) / dz - cy
+                zshape[k] = Float(exp(-(dx * dx + dy * dy) / 0.06))
+            }
+        }
+        // Dents fade out towards the outline, so the edge of the toy never shows a cliff.
+        let z1 = nz + 1
+        var dd = [Float](repeating: 0, count: zc)
+        for k in 0..<zc { dd[k] = zmask[k] ? 99 : 0 }
+        for pass in 0..<2 {
+            for a in 0..<zc {
+                let k = pass == 1 ? zc - 1 - a : a
+                if dd[k] == 0 { continue }
+                let i = k % z1, j = k / z1, s = pass == 1 ? 1 : -1
+                if i + s >= 0, i + s <= nz { dd[k] = min(dd[k], dd[k + s] + 1) }
+                if j + s >= 0, j + s <= nz { dd[k] = min(dd[k], dd[k + s * z1] + 1) }
+            }
+        }
+        for k in 0..<zc { zedge[k] = Float(SquishBody.smooth(0.5, 4, Double(dd[k]))) }
         place(x: x, y: y)
     }
 
@@ -211,6 +289,16 @@ public final class SquishBody {
         }
         g = p
         theta = 0
+        clearDent()
+        zmean = 0
+        tilt = Tilt()
+    }
+
+    private func clearDent() {
+        for k in z.indices {
+            z[k] = 0
+            zv[k] = 0
+        }
     }
 
     /// Stops all movement where it is (Reduce Motion: let go without a throw).
@@ -276,13 +364,25 @@ public final class SquishBody {
             let share = ((Double(p[k * 2]) - tx) * ax + (Double(p[k * 2 + 1]) - ty) * ay) / al
             sc[k] = Float(SquishBody.clamp(share, 0, 1.15))
         }
+        // Where the finger is on the toy's own picture (0...1), for the dent.
+        var fu = 0.0, fv = 0.0, fw = 0.0
+        let r2 = (S * 0.09) * (S * 0.09)
+        for k in 0..<count {
+            let dx = Double(p[k * 2]) - x, dy = Double(p[k * 2 + 1]) - y
+            let ww = exp(-(dx * dx + dy * dy) / r2) + 1e-9
+            fu += ww * Double(uv[k * 2])
+            fv += ww * Double(uv[k * 2 + 1])
+            fw += ww
+        }
         pointers[id] = Pointer(x: x, y: y, sx: x, sy: y, w: w, off: off, sc: sc,
-                               px: (tx - x) * material.press, py: (ty - y) * material.press)
+                               px: (tx - x) * material.press, py: (ty - y) * material.press, fu: fu / fw, fv: fv / fw)
         return true
     }
 
-    public func move(_ id: Int, x: Double, y: Double, dt: Double) {
+    /// `force`: 1 = a normal press, up to about 1.6 = pressing hard (from the touch's contact size).
+    public func move(_ id: Int, x: Double, y: Double, dt: Double, force: Double? = nil) {
         guard var q = pointers[id] else { return }
+        if let force, force.isFinite { q.force += 0.3 * (SquishBody.clamp(force, 0.7, 1.6) - q.force) }
         let h = max(dt > 0 ? dt : 1.0 / 60, 1.0 / 240), a = 0.5
         q.vx += a * ((x - q.x) / h - q.vx)
         q.vy += a * ((y - q.y) / h - q.vy)
@@ -361,10 +461,13 @@ public final class SquishBody {
         // Goal = mostly the rest shape, partly the fitted stretch; a slow breath keeps it alive.
         breath += h
         let br = 0.012 * sin(breath * 1.9) * (isHeld ? 0 : 1) * breathScale
+        // A dent pushes the rest of the toy outwards.
+        puffed += (SquishBody.clamp(M.puff * zmean, 0, 0.08) - puffed) * (1 - exp(-h / 0.09))
+        let pf = puffed
         let be = M.beta, e1 = be * l1 + (1 - be), e2 = be * l2 + (1 - be)
-        let gxx = cp * cp * e1 + sp * sp * e2 - br * 0.5
+        let gxx = cp * cp * e1 + sp * sp * e2 - br * 0.5 + pf
         let gxy = cp * sp * (e1 - e2)
-        let gyy = sp * sp * e1 + cp * cp * e2 + br
+        let gyy = sp * sp * e1 + cp * cp * e2 + br + pf
         let tg = SquishBody.clamp(th * 0.6, -0.35, 0.35), cg = cos(tg), sg = sin(tg)
         let g00 = (cg * gxx - sg * gxy) * S, g01 = (cg * gxy - sg * gyy) * S
         let g10 = (sg * gxx + cg * gxy) * S, g11 = (sg * gxy + cg * gyy) * S
@@ -544,6 +647,89 @@ public final class SquishBody {
             p[k * 2] = g[k * 2]
             p[k * 2 + 1] = g[k * 2 + 1]
         }
+        // Depth. The surface is a damped membrane: it springs back (zk, zd) and passes ripples along (zc).
+        do {
+            let N1 = nz + 1, dz = Double(nz)
+            let c2 = M.zc * M.zc * dz * dz, zk = M.zk, zdamp = 1 / (1 + M.zd * h)
+            if impact > S * 0.6 && M.zland != 0 {
+                // A landing makes the belly bulge, then ripple.
+                let kick = -min(impact / S, 6) * M.zland * 0.9
+                for k in z.indices where zmask[k] { zv[k] = Float(Double(zv[k]) + kick * Double(zshape[k])) }
+            }
+            for j in 1..<nz {
+                for i in 1..<nz {
+                    let k = j * N1 + i
+                    if zmask[k] {
+                        zl[k] = Float(Double(z[k - 1]) + Double(z[k + 1]) + Double(z[k - N1]) + Double(z[k + N1]) - 4 * Double(z[k]))
+                    }
+                }
+            }
+            for k in z.indices where zmask[k] {
+                zv[k] = Float((Double(zv[k]) + h * (c2 * Double(zl[k]) - zk * Double(z[k]))) * zdamp)
+                z[k] = Float(Double(z[k]) + h * Double(zv[k]))
+            }
+            var fuS = 0.0, fvS = 0.0
+            for id in pointers.keys.sorted() {
+                guard let q = pointers[id] else { continue }
+                let R = M.pokeR
+                let depth = M.poke * q.press * q.force * (1 - 0.3 * SquishBody.smooth(S * 0.07, S * 0.45, q.drag))
+                let i0 = max(1, Int(((q.fu - 2.6 * R) * dz).rounded(.down))), i1 = min(nz - 1, Int(((q.fu + 2.6 * R) * dz).rounded(.up)))
+                let j0 = max(1, Int(((q.fv - 2.6 * R) * dz).rounded(.down))), j1 = min(nz - 1, Int(((q.fv + 2.6 * R) * dz).rounded(.up)))
+                if i0 <= i1 && j0 <= j1 {
+                    for j in j0...j1 {
+                        for i in i0...i1 {
+                            let k = j * N1 + i
+                            if !zmask[k] { continue }
+                            let du = Double(i) / dz - q.fu, dv = Double(j) / dz - q.fv, rr = (du * du + dv * dv) / (R * R)
+                            // A bowl: flat floor, a clear wall.
+                            let prof = depth * Double(zedge[k]) * exp(-rr * (0.45 + 0.55 * rr))
+                            // The finger holds the dent open.
+                            if Double(z[k]) < prof {
+                                z[k] = Float(prof)
+                                if zv[k] < 0 { zv[k] = 0 }
+                            }
+                        }
+                    }
+                }
+                fuS += q.fu - c0.x
+                fvS += q.fv - c0.y
+            }
+            var zs = 0.0, zmax = 0.0, zq = 0.0
+            for k in z.indices where zmask[k] {
+                var zz = Double(z[k])
+                if !(zz > -2 && zz < 2) {
+                    zz = SquishBody.clamp(zz.isNaN ? 0 : zz, -2, 2)
+                    z[k] = Float(zz)
+                    zv[k] = 0
+                }
+                if zz > 0 { zs += zz }
+                if zz > zmax { zmax = zz }
+                zq += zz * zz
+            }
+            zmean = zcount > 0 ? zs / Double(zcount) : 0
+            let zr = zcount > 0 ? (zq / Double(zcount)).squareRoot() : 0
+            metric.zrate += 0.25 * (((zr - metric.Zr) / h) - metric.zrate)
+            metric.Zr = zr
+            metric.Z = zmax
+            // The painted face slides a little over the body.
+            let lk = M.look
+            var tx = 0.0, ty = 0.0
+            if held > 0 {
+                tx = SquishBody.clamp(fuS / Double(held) * 2, -1, 1) * lk
+                ty = SquishBody.clamp(fvS / Double(held) * 2, -1, 1) * lk
+            } else {
+                tx = 0.012 * sin(breath * 0.63) * breathScale
+                ty = 0.006 * sin(breath * 0.41 + 1) * breathScale
+            }
+            let lvx = SquishBody.clamp(vx / S * 0.007, -0.035, 0.035), lvy = SquishBody.clamp(vy / S * 0.007, -0.035, 0.035)
+            let cT = cos(th), sT = sin(th)
+            tx -= cT * lvx + sT * lvy
+            ty -= -sT * lvx + cT * lvy
+            tilt.vx = (tilt.vx + h * M.tk * (tx - tilt.x)) / (1 + M.td * h)
+            tilt.x += h * tilt.vx
+            tilt.vy = (tilt.vy + h * M.tk * (ty - tilt.y)) / (1 + M.td * h)
+            tilt.y += h * tilt.vy
+        }
         var Dn = (D / m).squareRoot() / S
         if !(Dn < 2.5) {
             // Never let it explode.
@@ -554,6 +740,7 @@ public final class SquishBody {
                 v[k * 2 + 1] = 0
             }
             Dn = 0
+            clearDent()
         }
         metric.rate += 0.25 * (((Dn - metric.D) / h) - metric.rate)
         metric.D = Dn
@@ -566,6 +753,147 @@ public final class SquishBody {
         metric.cx = cx
         metric.cy = cy
         theta = th
+    }
+
+    // MARK: - Surface
+
+    /// Packs the surface for the shader, once per drawn frame: `zres` by `zres` RGBA, top row first.
+    /// R and G = the dent as 16 bits (-2...2), smoothed up three times with a cubic B-spline so its
+    /// light is smooth. B = local thickness (0...2; over 1 where the toy is squeezed together in the
+    /// plane, so it bulges towards the viewer there). A = 255.
+    public func surface() -> [UInt8] {
+        let N1 = n + 1
+        let cell = (size / Double(n)) * (size / Double(n))
+        for k in 0..<count {
+            surfaceSum[k] = 0
+            surfaceWeight[k] = 0
+        }
+        for j in 0..<n {
+            for i in 0..<n {
+                let a = j * N1 + i, b = a + 1, c = a + N1, d = c + 1
+                let ax = Double(p[d * 2]) - Double(p[a * 2]), ay = Double(p[c * 2 + 1]) - Double(p[b * 2 + 1])
+                let bx = Double(p[c * 2]) - Double(p[b * 2]), by = Double(p[d * 2 + 1]) - Double(p[a * 2 + 1])
+                let J = 0.5 * abs(ax * ay - bx * by) / cell
+                for k in [a, b, c, d] {
+                    surfaceSum[k] = Float(Double(surfaceSum[k]) + J)
+                    surfaceWeight[k] += 1
+                }
+            }
+        }
+        for k in 0..<count {
+            let share = Double(surfaceSum[k]) / Double(surfaceWeight[k])
+            thick[k] = Float(SquishBody.clamp(pow(max(0.2, share), -0.8), 0.55, 1.9))
+        }
+        let Z1 = nz + 1, F = 3, R = zres
+        let W = SquishBody.splineWeights
+        for j in 0...nz {
+            let r = j * Z1
+            for x in 0..<R {
+                let i = x / F, w = W[x % F]
+                let a = Double(z[r + (i > 0 ? i - 1 : 0)]), b = Double(z[r + min(i, nz)])
+                let c = Double(z[r + (i < nz ? i + 1 : nz)]), d = Double(z[r + (i + 2 < nz ? i + 2 : nz)])
+                surfaceRows[j * R + x] = Float(w[0] * a + w[1] * b + w[2] * c + w[3] * d)
+            }
+        }
+        let dn = Double(n)
+        for y in 0..<R {
+            let j = y / F, w = W[y % F]
+            let r0 = (j > 0 ? j - 1 : 0) * R, r1 = min(j, nz) * R, r2 = (j < nz ? j + 1 : nz) * R, r3 = (j + 2 < nz ? j + 2 : nz) * R
+            let fy = Double(y) / Double(R - 1) * dn, iy = min(n - 1, Int(fy)), ay = fy - Double(iy)
+            for x in 0..<R {
+                let zf = w[0] * Double(surfaceRows[r0 + x]) + w[1] * Double(surfaceRows[r1 + x])
+                    + w[2] * Double(surfaceRows[r2 + x]) + w[3] * Double(surfaceRows[r3 + x])
+                let fx = Double(x) / Double(R - 1) * dn, ix = min(n - 1, Int(fx)), ax = fx - Double(ix), a = iy * N1 + ix
+                let top = Double(thick[a]) * (1 - ax) + Double(thick[a + 1]) * ax
+                let bottom = Double(thick[a + N1]) * (1 - ax) + Double(thick[a + N1 + 1]) * ax
+                let th = top * (1 - ay) + bottom * ay
+                let zz = Int((SquishBody.clamp((zf + 2) / 4, 0, 1) * 65535).rounded())
+                let k = (y * R + x) * 4
+                bytes[k] = UInt8(zz >> 8)
+                bytes[k + 1] = UInt8(zz & 255)
+                bytes[k + 2] = UInt8((SquishBody.clamp(th / 2, 0, 1) * 255).rounded())
+                bytes[k + 3] = 255
+            }
+        }
+        return bytes
+    }
+
+    private static let splineWeights: [[Double]] = [0.0, 1.0 / 3, 2.0 / 3].map { t in
+        [(1 - t) * (1 - t) * (1 - t) / 6, (3 * t * t * t - 6 * t * t + 4) / 6, (-3 * t * t * t + 3 * t * t + 3 * t + 1) / 6, t * t * t / 6]
+    }
+
+    /// The toy's puffy rest shape, made once per toy from its alpha (`size` by `size` bytes, top row first).
+    /// Returns `size` by `size` RGBA: R and G = height as 16 bits (0...1), B = how much the painted
+    /// face may slide there (0 at the outline, 1 in the middle), A = 255.
+    public static func heightField(alpha: [UInt8], size N: Int, threshold: UInt8 = 60) -> [UInt8] {
+        guard N > 0, alpha.count >= N * N else { return [] }
+        var d = [Float](repeating: 0, count: N * N)
+        for k in 0..<(N * N) { d[k] = alpha[k] > threshold ? 1e6 : 0 }
+        func at(_ x: Int, _ y: Int) -> Double { (x < 0 || y < 0 || x >= N || y >= N) ? 0 : Double(d[y * N + x]) }
+        for y in 0..<N {
+            for x in 0..<N {
+                let k = y * N + x
+                if d[k] == 0 { continue }
+                let best = min(Double(d[k]), at(x - 1, y) + 1, at(x, y - 1) + 1, at(x - 1, y - 1) + 1.414, at(x + 1, y - 1) + 1.414)
+                d[k] = Float(best)
+            }
+        }
+        for y in stride(from: N - 1, through: 0, by: -1) {
+            for x in stride(from: N - 1, through: 0, by: -1) {
+                let k = y * N + x
+                if d[k] == 0 { continue }
+                let best = min(Double(d[k]), at(x + 1, y) + 1, at(x, y + 1) + 1, at(x + 1, y + 1) + 1.414, at(x - 1, y + 1) + 1.414)
+                d[k] = Float(best)
+            }
+        }
+        var dmax = 1e-6
+        for k in 0..<(N * N) {
+            d[k] = Float(Double(d[k]) / Double(N))
+            if Double(d[k]) > dmax { dmax = Double(d[k]) }
+        }
+        var h = [Float](repeating: 0, count: N * N), s = [Float](repeating: 0, count: N * N)
+        let R0 = min(0.2, dmax * 0.9)
+        for k in 0..<(N * N) {
+            let dk = Double(d[k])
+            let t = min(1, dk / R0), e = (1 - (1 - t) * (1 - t)).squareRoot()
+            h[k] = Float(0.72 * e + 0.28 * min(1, dk / dmax))
+            s[k] = Float(smooth(0.03, 0.2, dk))
+        }
+        func blur(_ a: inout [Float], _ r: Int, _ passes: Int) {
+            var t = [Float](repeating: 0, count: N * N)
+            let span = Double(2 * r + 1)
+            func cl(_ v: Int) -> Int { v < 0 ? 0 : (v > N - 1 ? N - 1 : v) }
+            for _ in 0..<passes {
+                for y in 0..<N {
+                    var acc = 0.0
+                    for x in -r...r { acc += Double(a[y * N + cl(x)]) }
+                    for x in 0..<N {
+                        t[y * N + x] = Float(acc / span)
+                        acc += Double(a[y * N + cl(x + r + 1)]) - Double(a[y * N + cl(x - r)])
+                    }
+                }
+                for x in 0..<N {
+                    var acc = 0.0
+                    for y in -r...r { acc += Double(t[cl(y) * N + x]) }
+                    for y in 0..<N {
+                        a[y * N + x] = Float(acc / span)
+                        acc += Double(t[cl(y + r + 1) * N + x]) - Double(t[cl(y - r) * N + x])
+                    }
+                }
+            }
+        }
+        let r = max(1, Int((Double(N) / 64).rounded()))
+        blur(&h, r, 3)
+        blur(&s, r, 2)
+        var out = [UInt8](repeating: 0, count: N * N * 4)
+        for k in 0..<(N * N) {
+            let v = Int((clamp(Double(h[k]), 0, 1) * 65535).rounded())
+            out[k * 4] = UInt8(v >> 8)
+            out[k * 4 + 1] = UInt8(v & 255)
+            out[k * 4 + 2] = UInt8((clamp(Double(s[k]), 0, 1) * 255).rounded())
+            out[k * 4 + 3] = 255
+        }
+        return out
     }
 
     // MARK: - Helpers

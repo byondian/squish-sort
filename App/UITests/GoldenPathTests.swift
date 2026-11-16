@@ -73,6 +73,25 @@ final class GoldenPathTests: XCTestCase {
         print("GOLDEN-PATH screen:\n\(app.debugDescription)")
     }
 
+    /// Pictures of the soft squishy at rest and just after a squeeze, kept with the test results so the
+    /// light and the dent can be looked at without a phone. Nothing here can fail the test.
+    private func squeezeForThePicture() {
+        let squishy = app.otherElements["capsule-squishy"]
+        guard squishy.waitForExistence(timeout: 3) else { return }
+        Thread.sleep(forTimeInterval: 0.8)
+        keep(app.screenshot(), as: "squishy-at-rest")
+        squishy.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.55)).press(forDuration: 0.9)
+        keep(app.screenshot(), as: "squishy-just-squeezed")
+        Thread.sleep(forTimeInterval: 2.5)
+    }
+
+    private func keep(_ shot: XCUIScreenshot, as name: String) {
+        let attachment = XCTAttachment(screenshot: shot)
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+
     private func playFirstThreeAndOpenCapsule() {
         XCTAssertTrue(app.staticTexts["Level 1"].waitForExistence(timeout: 10), "Level 1 is the first screen")
         // Level 1 opens with the first squishy already lifted: one tap finishes a jar.
@@ -89,6 +108,7 @@ final class GoldenPathTests: XCTestCase {
         XCTAssertTrue(open.waitForExistence(timeout: 8), "capsule after level 3")
         open.tap()
         XCTAssertTrue(app.staticTexts["Peach Bun"].waitForExistence(timeout: 5))
+        squeezeForThePicture()
         next("capsule-next")
     }
 

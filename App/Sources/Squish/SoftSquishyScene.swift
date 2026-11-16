@@ -1,3 +1,4 @@
+import CoreMotion
 import SpriteKit
 import UIKit
 import SquishSoft
@@ -8,21 +9,31 @@ struct SquishMask {
     private let alpha: [UInt8]
     /// Where the art's lowest pixel sits, 0 (top) to 1 (bottom).
     let footV: Double
+    /// The toy's puffy rest shape for the light (`SquishBody.heightField`), `restSize` a side, top row first.
+    let rest: [UInt8]
+    static let restSize = 128
 
-    init?(image: UIImage) {
-        let n = SquishMask.n
-        guard let cg = image.cgImage,
-              let ctx = CGContext(data: nil, width: n, height: n, bitsPerComponent: 8, bytesPerRow: n * 4,
+    /// The picture's transparency at `n` by `n`, top row first.
+    private static func alpha(of image: CGImage, side n: Int) -> [UInt8]? {
+        guard let ctx = CGContext(data: nil, width: n, height: n, bitsPerComponent: 8, bytesPerRow: n * 4,
                                   space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
         else { return nil }
         ctx.interpolationQuality = .medium
-        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: n, height: n))
+        ctx.draw(image, in: CGRect(x: 0, y: 0, width: n, height: n))
         guard let raw = ctx.data else { return nil }
         let pixels = raw.bindMemory(to: UInt8.self, capacity: n * n * 4)
         var alpha = [UInt8](repeating: 0, count: n * n)
         // The first row in memory is the top of the picture.
         for i in 0..<(n * n) { alpha[i] = pixels[i * 4 + 3] }
+        return alpha
+    }
+
+    init?(image: UIImage) {
+        let n = SquishMask.n
+        guard let cg = image.cgImage, let alpha = SquishMask.alpha(of: cg, side: n),
+              let fine = SquishMask.alpha(of: cg, side: SquishMask.restSize) else { return nil }
         self.alpha = alpha
+        rest = SquishBody.heightField(alpha: fine, size: SquishMask.restSize)
         var foot = 1.0
         search: for y in stride(from: n - 1, through: 0, by: -1) {
             for x in 0..<n where alpha[y * n + x] > 60 {
@@ -39,6 +50,55 @@ struct SquishMask {
         let y = min(n - 1, max(0, Int((v * Double(n - 1)).rounded())))
         return alpha[y * n + x] > 60
     }
+}
+
+/// The light on a soft squishy: a port of the fragment shader in the page's `SquishGL`.
+/// The toy is shaded as a puffy object from its rest shape, minus the dent, times
+/// how thick it is where the lattice is squeezed together; the painted face slides a
+/// little; jelly and gel get a wet highlight.
+enum SquishLight {
+    /// `u_hm` rest shape, `u_zm` surface (`SquishBody.surface`). `u_L` light in the toy's own frame.
+    /// `u_m` = (kd, gloss, shin, relief), `u_m2` = (pinch, ao, dent relief, unused),
+    /// `u_e` = (1 / rest size, zres - 1, 1 / zres). Everything is written out in `main`
+    /// with no helper functions, which is the form SpriteKit's shader translator is surest of.
+    /// `q` counts downwards like the page; the data textures have their first row at 0.
+    static let source = """
+    void main() {
+        vec2 q = vec2(v_tex_coord.x, 1.0 - v_tex_coord.y);
+        float d1 = u_e.x * 1.5;
+        float d2 = 1.0 / u_e.y;
+        vec4 h0 = texture2D(u_hm, q + vec2(d1, 0.0));
+        vec4 h1 = texture2D(u_hm, q - vec2(d1, 0.0));
+        vec4 h2 = texture2D(u_hm, q + vec2(0.0, d1));
+        vec4 h3 = texture2D(u_hm, q - vec2(0.0, d1));
+        vec2 gh = vec2((h0.r - h1.r) * 65280.0 + (h0.g - h1.g) * 255.0, (h2.r - h3.r) * 65280.0 + (h2.g - h3.g) * 255.0) / 65535.0 / (2.0 * d1);
+        vec4 z0 = texture2D(u_zm, ((q + vec2(d2, 0.0)) * u_e.y + 0.5) * u_e.z);
+        vec4 z1 = texture2D(u_zm, ((q - vec2(d2, 0.0)) * u_e.y + 0.5) * u_e.z);
+        vec4 z2 = texture2D(u_zm, ((q + vec2(0.0, d2)) * u_e.y + 0.5) * u_e.z);
+        vec4 z3 = texture2D(u_zm, ((q - vec2(0.0, d2)) * u_e.y + 0.5) * u_e.z);
+        vec2 gz = vec2((z0.r - z1.r) * 65280.0 + (z0.g - z1.g) * 255.0, (z2.r - z3.r) * 65280.0 + (z2.g - z3.g) * 255.0) / 65535.0 * 4.0 / (2.0 * d2);
+        vec4 zc = texture2D(u_zm, (q * u_e.y + 0.5) * u_e.z);
+        float z = (zc.r * 65280.0 + zc.g * 255.0) / 65535.0 * 4.0 - 2.0;
+        float th = zc.b * 2.0;
+        vec4 hh = texture2D(u_hm, q);
+        vec2 p = q - u_tilt * hh.b - u_m2.x * gz * hh.b;
+        vec4 a = texture2D(u_texture, vec2(p.x, 1.0 - p.y));
+        vec2 g = gh * th * u_m.w - gz * u_m2.z;
+        vec3 N = normalize(vec3(-g, 1.0));
+        float nl = dot(N, u_L) - u_L.z;
+        float al = max(a.a, 0.0001);
+        vec3 c = a.rgb / al;
+        float ink = smoothstep(0.1, 0.38, dot(c, vec3(0.3, 0.59, 0.11)));
+        float zin = clamp(z, 0.0, 1.2);
+        float sh = clamp(-nl * u_m.x, 0.0, 0.7) + zin * u_m2.y;
+        c = mix(c, c * c * vec3(0.8, 0.62, 0.7), clamp(sh, 0.0, 0.85));
+        c += ink * clamp(nl * u_m.x, 0.0, 0.6) * (1.0 - 0.5 * min(zin, 1.0)) * (vec3(1.0, 0.98, 0.94) - c) * 0.75;
+        vec3 Hv = normalize(u_L + vec3(0.0, 0.0, 1.0));
+        float sp = pow(max(dot(N, Hv), 0.0), u_m.z);
+        c += ink * u_m.y * smoothstep(0.25, 0.95, sp) * (vec3(1.0) - c) * 0.85;
+        gl_FragColor = vec4(clamp(c, 0.0, 1.0) * a.a, a.a) * v_color_mix.a;
+    }
+    """
 }
 
 /// One soft squishy. The body is `SquishBody` (the page's engine, ported); this
@@ -81,6 +141,19 @@ final class SoftSquishyScene: SKScene {
     private var touchTimes: [Int: TimeInterval] = [:]
     private var pokeEnds: TimeInterval?
     private static let pokeID = -1
+    /// Where each finger went down, and how big its contact patch was then.
+    private var touchStarts: [Int: (x: Double, y: Double, radius: Double)] = [:]
+    /// A let-go dent that has not popped out past flat yet (jelly's light tap).
+    private var waitsForPop = false
+    private var shader: SKShader?
+    private let lightUniform = SKUniform(name: "u_L", vectorFloat3: SIMD3<Float>(-0.46, -0.62, 0.64))
+    private let tiltUniform = SKUniform(name: "u_tilt", vectorFloat2: SIMD2<Float>(0, 0))
+    private let lookUniform = SKUniform(name: "u_m", vectorFloat4: SIMD4<Float>(0.5, 0, 30, 0.2))
+    private let dentUniform = SKUniform(name: "u_m2", vectorFloat4: SIMD4<Float>(0.004, 0.15, 0.3, 1))
+    private let sizeUniform = SKUniform(name: "u_e", vectorFloat3: SIMD3<Float>(1.0 / 128, 96, 1.0 / 97))
+    private let restUniform = SKUniform(name: "u_hm", texture: nil)
+    private let surfaceUniform = SKUniform(name: "u_zm", texture: nil)
+    private let motion = SquishMotion.shared
 
     override init() {
         super.init(size: CGSize(width: 300, height: 300))
@@ -113,6 +186,8 @@ final class SoftSquishyScene: SKScene {
     func goQuiet() {
         body?.releaseAll()
         touchTimes = [:]
+        touchStarts = [:]
+        motion.stop(self)
         pokeEnds = nil
         sounds?.rest()
         haptics?.letGo()
@@ -166,14 +241,45 @@ final class SoftSquishyScene: SKScene {
             for i in 0...n { source.append(SIMD2(Float(i) / Float(n), Float(r) / Float(n))) }
         }
         touchTimes = [:]
+        touchStarts = [:]
         pokeEnds = nil
+        waitsForPop = false
         carried = 0
         mixer.reset()
         shadow.isHidden = mode != .room
+        light(made)
+        if reduceMotion { motion.stop(self) } else { motion.start(self) }
         draw()
     }
 
+    /// Sets up the light for this toy: its rest shape once, then the surface every frame.
+    private func light(_ body: SquishBody) {
+        guard let rest = mask?.rest, !rest.isEmpty else {
+            sprite.shader = nil
+            return
+        }
+        let look = body.material
+        let side = SquishMask.restSize
+        restUniform.textureValue = SKTexture(data: Data(rest), size: CGSize(width: side, height: side))
+        lookUniform.vectorFloat4Value = SIMD4(Float(look.kd), Float(look.gloss), Float(look.shin), Float(tuning.restRelief))
+        dentUniform.vectorFloat4Value = SIMD4(Float(tuning.dentPinch), Float(look.ao), Float(tuning.dentRelief), 1)
+        sizeUniform.vectorFloat3Value = SIMD3(1 / Float(side), Float(body.zres - 1), 1 / Float(body.zres))
+        if shader == nil {
+            let made = SKShader(source: SquishLight.source)
+            made.uniforms = [lightUniform, tiltUniform, lookUniform, dentUniform, sizeUniform, restUniform, surfaceUniform]
+            shader = made
+        }
+        sprite.shader = shader
+    }
+
     // MARK: - Fingers
+
+    /// Pressing harder flattens more of the fingertip onto the glass: growth since touch down adds to the dent.
+    private func force(_ touch: UITouch, since start: Double) -> Double {
+        let now = Double(touch.majorRadius)
+        guard start > 4, now > 4 else { return 1 }
+        return 1 + max(0, min(1.2, (now - start) / max(start, 20))) * tuning.hardPressExtra
+    }
 
     private func point(_ touch: UITouch) -> (x: Double, y: Double) {
         let at = touch.location(in: self)
@@ -192,18 +298,21 @@ final class SoftSquishyScene: SKScene {
             let at = point(touch), id = ObjectIdentifier(touch).hashValue
             guard body.grab(id, x: at.x, y: at.y) else { continue }
             touchTimes[id] = touch.timestamp
+            touchStarts[id] = (at.x, at.y, Double(touch.majorRadius))
+            waitsForPop = false
             onTouch?()
             if touch.tapCount == 2 { onDoubleTap?() }
         }
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let body, mode == .room else { return }
+        guard let body else { return }
         for touch in touches {
             let id = ObjectIdentifier(touch).hashValue
-            guard let last = touchTimes[id] else { continue }
-            let at = point(touch)
-            body.move(id, x: at.x, y: at.y, dt: touch.timestamp - last)
+            guard let last = touchTimes[id], let start = touchStarts[id] else { continue }
+            // Outside the Squish Room the finger only presses: it stays where it went down.
+            let at = mode == .room ? point(touch) : (x: start.x, y: start.y)
+            body.move(id, x: at.x, y: at.y, dt: touch.timestamp - last, force: force(touch, since: start.radius))
             touchTimes[id] = touch.timestamp
         }
     }
@@ -216,11 +325,14 @@ final class SoftSquishyScene: SKScene {
         for touch in touches {
             let id = ObjectIdentifier(touch).hashValue
             guard touchTimes.removeValue(forKey: id) != nil else { continue }
+            touchStarts[id] = nil
             let depth = body.metric.D
+            let dent = body.metric.Z
             body.release(id)
             guard !body.isHeld else { continue }
             // Reduce Motion: let go without a throw.
             if reduceMotion { body.stop() }
+            waitsForPop = tuning.feel(feel).hapticDentPop && dent > 0.2
             if let volume = mixer.pop(depth: depth, feel: feel) {
                 sounds?.pop(volume: volume, pan: pan, enabled: soundOn())
             }
@@ -289,6 +401,11 @@ final class SoftSquishyScene: SKScene {
         if frame.thud != nil {
             haptics.tap(intensity: min(1, tuning.hapticLandingGain * metric.impact), sharpness: 0.3)
         }
+        // Jelly: one light tap as the let-go dent pops out past flat.
+        if waitsForPop, metric.Z < 0.02 {
+            waitsForPop = false
+            haptics.tap(intensity: 0.35, sharpness: 0.5)
+        }
     }
 
     private func draw() {
@@ -308,6 +425,18 @@ final class SoftSquishyScene: SKScene {
             }
         }
         sprite.warpGeometry = SKWarpGeometryGrid(columns: n, rows: n, sourcePositions: source, destinationPositions: to)
+        if sprite.shader != nil {
+            let res = body.zres
+            surfaceUniform.textureValue = SKTexture(data: Data(body.surface()), size: CGSize(width: res, height: res))
+            // The light stays put in the room when the toy turns. A tilt of the phone moves it, and the face, a little.
+            let lean = reduceMotion ? (x: 0.0, y: 0.0) : motion.lean(limit: tuning.phoneTilt)
+            let th = body.theta, c = cos(th), s = sin(th)
+            let lx = tuning.light[0] + lean.x, ly = tuning.light[1] + lean.y
+            lightUniform.vectorFloat3Value = SIMD3(Float(c * lx + s * ly), Float(-s * lx + c * ly), Float(tuning.light[2]))
+            tiltUniform.vectorFloat2Value = reduceMotion
+                ? SIMD2(0, 0)
+                : SIMD2(Float(body.tilt.x + lean.x), Float(body.tilt.y + lean.y))
+        }
         guard !shadow.isHidden else { return }
         let b = body.bounds()
         let lift = max(0, world.floor - b.y1)
@@ -316,5 +445,32 @@ final class SoftSquishyScene: SKScene {
         shadow.xScale = CGFloat(width / 100)
         shadow.yScale = CGFloat(width / 100)
         shadow.alpha = CGFloat(max(0.25, 1 - lift / (side * 1.2)) * 0.16)
+    }
+}
+
+/// A little of the phone's tilt, shared by every soft squishy on screen. No permission is needed for this.
+final class SquishMotion {
+    static let shared = SquishMotion()
+    private let manager = CMMotionManager()
+    private var users = Set<ObjectIdentifier>()
+
+    func start(_ user: AnyObject) {
+        users.insert(ObjectIdentifier(user))
+        guard manager.isDeviceMotionAvailable, !manager.isDeviceMotionActive else { return }
+        manager.deviceMotionUpdateInterval = 1.0 / 30
+        manager.startDeviceMotionUpdates()
+    }
+
+    func stop(_ user: AnyObject) {
+        users.remove(ObjectIdentifier(user))
+        if users.isEmpty, manager.isDeviceMotionActive { manager.stopDeviceMotionUpdates() }
+    }
+
+    /// How far the phone leans from an easy holding angle, as a small offset: x to the right, y downwards.
+    func lean(limit: Double) -> (x: Double, y: Double) {
+        guard let gravity = manager.deviceMotion?.gravity else { return (0, 0) }
+        func cap(_ v: Double) -> Double { max(-limit, min(limit, v)) }
+        // Held upright the pull is along -y; a relaxed hold is about halfway to flat.
+        return (cap(gravity.x * limit * 2), cap(-(gravity.y + 0.7) * limit * 2))
     }
 }
