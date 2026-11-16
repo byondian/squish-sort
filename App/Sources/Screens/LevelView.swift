@@ -436,7 +436,7 @@ struct LevelView: View {
                 }
                 // The stars still to be won, and the moves left before the next one goes.
                 StarMeter(moves: controller.session.moveCount, par: controller.level.par,
-                          haptics: model.haptics, sounds: model.sounds)
+                          gentle: model.isGentleMode, haptics: model.haptics, sounds: model.sounds)
                 // The level pot: coins thrown by finished jars, banked on the win.
                 if controller.pot.paysCoins {
                     // Says what it is until the first jar pays, then just the number.
@@ -600,6 +600,8 @@ struct JoinedBookSticker: View {
 struct StarMeter: View {
     let moves: Int
     let par: Int
+    /// Gentle mode: stars and a plain move count only. No limit, no warning colour, no falling star.
+    var gentle = false
     var haptics: Haptics?
     var sounds: SoundService?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -608,8 +610,8 @@ struct StarMeter: View {
 
     var body: some View {
         let lit = Stars.rating(moves: moves, par: par)
-        let limit = Stars.moveLimit(forStars: lit, par: par)
-        let near = moves > 0 && (limit.map { $0 - moves <= 2 } ?? false)
+        let limit = gentle ? nil : Stars.moveLimit(forStars: lit, par: par)
+        let near = !gentle && moves > 0 && (limit.map { $0 - moves <= 2 } ?? false)
         HStack(spacing: 6) {
             HStack(spacing: 4) {
                 Text("Moves").font(Theme.body(13)).opacity(0.7)
@@ -646,7 +648,7 @@ struct StarMeter: View {
         }
         .animation(.spring(response: 0.3, dampingFraction: 0.5), value: moves)
         .onChange(of: lit) { old, new in
-            guard new < old, moves > 0 else { return }
+            guard new < old, moves > 0, !gentle else { return }
             sounds?.play("star_lost", or: "lift")
             haptics?.star()
             guard !reduceMotion else { return }
