@@ -23,6 +23,11 @@ final class LevelController: ObservableObject {
     /// Coins the jars have thrown on this attempt. Banked on the win; a retry empties it.
     @Published private(set) var pot: LevelPot
     private var jarsDone = 0
+    /// Squishy streak: moves that land on a match, one soon after another.
+    private var chain = SortChain()
+    private var landsOnMatch = false
+    /// Bonus levels are Coin Rush: every finished jar throws double on a first clear.
+    private var jarMultiplier: Int { level.file.beat == .bonus ? 2 : 1 }
     /// The hint search is running.
     @Published private(set) var thinking = false
     /// The hint search found no way to win from here. Nothing is charged for that.
@@ -43,7 +48,7 @@ final class LevelController: ObservableObject {
         scene = BoardScene(board: level.board, kinds: level.kinds)
         let lucky = model.luckyKind(index: index)
         pot = LevelPot(firstClear: model.progress.stars[level.id] == nil, jars: level.kinds.count,
-                       luckyKind: lucky, rules: model.config.coins)
+                       luckyKind: lucky, jarMultiplier: level.file.beat == .bonus ? 2 : 1, rules: model.config.coins)
         scene.luckyKind = lucky.map { UInt8($0) }
         scene.onPlay = { [weak self] move in self?.play(move) }
         scene.onLift = { [weak model] in
@@ -56,6 +61,7 @@ final class LevelController: ObservableObject {
         }
         scene.onLand = { [weak self, weak model] result in
             model?.sounds.move(run: result.count)
+            self?.landed()
             if !result.thawedJars.isEmpty { model?.sounds.play("thaw") }
             if let jar = result.completedJar {
                 model?.haptics.complete()
@@ -73,9 +79,37 @@ final class LevelController: ObservableObject {
     }
 
     private func play(_ move: Move) -> (MoveResult, Board)? {
+        let ontoMatch = session.board.jars.indices.contains(move.to) && !session.board.jars[move.to].isEmpty
         guard let result = session.play(move) else { return nil }
+        landsOnMatch = ontoMatch
         noWayThrough = false; hintGaveUp = false
         return (result, session.board)
+    }
+
+    /// A move has landed: it may earn a squishy streak word. Nothing shows when a streak ends.
+    private func landed() {
+        guard let model, let word = chain.move(ontoMatch: landsOnMatch, at: Date().timeIntervalSince(started)) else { return }
+        let text: String
+        switch word {
+        case .nice: text = String(localized: "Nice!")
+        case .streak: text = String(localized: "Squishy streak!")
+        case .onARoll: text = String(localized: "On a roll!")
+        case .unstoppable: text = String(localized: "Unstoppable!")
+        }
+        scene.popWord(text, size: 0.7 + 0.1 * CGFloat(word.rawValue))
+        model.sounds.play("combo_\(word.rawValue)", or: "run_x3")
+        // A stronger tap each step.
+        switch word {
+        case .nice: model.haptics.land()
+        case .streak: model.haptics.complete()
+        case .onARoll, .unstoppable: model.haptics.win()
+        }
+        // On a first clear the word adds to the level pot.
+        let coins = pot.streakWord(word)
+        if coins > 0 {
+            scene.throwCoins(fromJar: 0, count: 2 + word.rawValue)
+            model.sounds.coin()
+        }
     }
 
     /// Commons join the book the first time a jar of them is completed.
@@ -104,8 +138,9 @@ final class LevelController: ObservableObject {
     private func newPot() {
         guard let model else { return }
         pot = LevelPot(firstClear: model.progress.stars[level.id] == nil, jars: level.kinds.count,
-                       luckyKind: model.luckyKind(index: index), rules: model.config.coins)
+                       luckyKind: model.luckyKind(index: index), jarMultiplier: jarMultiplier, rules: model.config.coins)
         jarsDone = 0
+        chain = SortChain()
     }
 
     private func checkOutcome() {
@@ -130,6 +165,7 @@ final class LevelController: ObservableObject {
 
     func undo() {
         guard session.undo() else { return }
+        chain.end()
         noWayThrough = false; hintGaveUp = false
         outcome = nil
         scene.reload(session.board)
@@ -177,6 +213,7 @@ final class LevelController: ObservableObject {
     /// (free hint, coins or an ad) when there is a move to show.
     func hint() {
         guard !thinking, outcome == nil else { return }
+        chain.end()
         thinking = true
         let board = session.board
         Task {
@@ -365,12 +402,20 @@ struct LevelView: View {
         HStack {
             if model.showsCornerButtons {
                 IconButton(system: "house.fill") { model.screen = .home }
+                // Straight to the level map, without going by home.
+                IconButton(system: "circle.grid.3x3.fill") { model.screen = .map }
+                    .accessibilityLabel(Text("Levels"))
             }
             Spacer()
             VStack(spacing: 2) {
                 Text("Level \(number)").font(Theme.title(22))
                 if controller.level.file.beat == .boss {
                     Text("BOSS 👑").font(Theme.body(13))
+                } else if controller.level.file.beat == .bonus {
+                    // Coin Rush: every finished jar throws double coins the first time through.
+                    Text("BONUS x2").font(Theme.body(13)).foregroundStyle(Theme.plum)
+                        .padding(.horizontal, 8).padding(.vertical, 1)
+                        .background(Capsule().fill(Theme.butter))
                 } else if controller.level.file.beat == .showpiece {
                     // Looks big, solves fast: not "hard".
                     Text("BIG ONE").font(Theme.body(13)).foregroundStyle(Theme.bubblegum)

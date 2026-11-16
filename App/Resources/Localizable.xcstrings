@@ -365,6 +365,28 @@
         }
       }
     },
+    "BONUS x2": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ボーナス x2"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "보너스 x2"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "獎勵 x2"
+          }
+        }
+      }
+    },
     "BOSS 👑": {
       "localizations": {
         "ja": {
@@ -1993,6 +2015,28 @@
         }
       }
     },
+    "Nice!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ナイス！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "좋아!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不錯！"
+          }
+        }
+      }
+    },
     "Night": {
       "localizations": {
         "ja": {
@@ -2187,6 +2231,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "還好"
+          }
+        }
+      }
+    },
+    "On a roll!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ノリノリ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "신났다!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "勢如破竹！"
           }
         }
       }
@@ -2917,6 +2983,28 @@
         }
       }
     },
+    "Squishy streak!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ぷにぷに連続！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "말랑 연속!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "捏捏連擊！"
+          }
+        }
+      }
+    },
     "Stamp %lld of 7!": {
       "localizations": {
         "ja": {
@@ -3463,6 +3551,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "復原 %lld"
+          }
+        }
+      }
+    },
+    "Unstoppable!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "とまらない！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "멈출 수 없어!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停不下來！"
           }
         }
       }
