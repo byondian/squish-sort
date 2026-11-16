@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import SquishPolicy
 
 /// A squishy drawn in SwiftUI (book, capsule, Squish Room), matching the board look.
@@ -9,6 +10,28 @@ struct SquishyView: View {
     var squash: CGFloat = 0 // 0 = resting, 1 = fully pressed
 
     var body: some View {
+        if UIImage(named: "squishy-\(id)") != nil {
+            art
+        } else {
+            drawn
+        }
+    }
+
+    /// Launch art, squashed in code and anchored at the bottom centre.
+    private var art: some View {
+        Group {
+            if silhouette {
+                Image("squishy-\(id)").renderingMode(.template).resizable().scaledToFit()
+                    .foregroundStyle(Theme.plum.opacity(0.18))
+            } else {
+                Image("squishy-\(id)").resizable().scaledToFit()
+            }
+        }
+        .scaleEffect(x: 1 + squash * 0.25, y: 1 - squash * 0.35, anchor: .bottom)
+        .accessibilityLabel(Text(id))
+    }
+
+    private var drawn: some View {
         Canvas { ctx, size in
             let d = min(size.width, size.height) * 0.78
             let style = SquishyStyle.forID(id)

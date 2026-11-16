@@ -86,12 +86,13 @@ final class BoardScene: SKScene {
 
     private func slot(_ jar: Int, _ index: Int) -> CGPoint {
         let c = geometry.centers[jar]
-        return CGPoint(x: c.x, y: c.y - geometry.jarSize.height / 2 + geometry.piece * (0.2 + CGFloat(index) + 0.5))
+        // Piece nodes have their origin at the bottom centre (squash anchors there).
+        return CGPoint(x: c.x, y: c.y - geometry.jarSize.height / 2 + geometry.piece * (0.2 + CGFloat(index) + 0.07))
     }
 
     private func liftPoint(_ jar: Int, _ k: Int) -> CGPoint {
         let c = geometry.centers[jar]
-        return CGPoint(x: c.x, y: c.y + geometry.jarSize.height / 2 + geometry.piece * (0.65 + CGFloat(k) * 0.9))
+        return CGPoint(x: c.x, y: c.y + geometry.jarSize.height / 2 + geometry.piece * (0.22 + CGFloat(k) * 0.9))
     }
 
     private func rebuild() {

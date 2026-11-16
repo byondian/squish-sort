@@ -11,6 +11,10 @@ final class PieceNode: SKNode {
     private let question: SKLabelNode
     private let ice: SKShapeNode
     private let duetMark: SKLabelNode
+    /// Everything is drawn centred in here; the node's own origin is the
+    /// bottom centre, so squash and stretch are anchored at the bottom.
+    private let content = SKNode()
+    private var art: SKSpriteNode?
 
     init(kindID: String, diameter d: CGFloat) {
         self.kindID = kindID
@@ -21,19 +25,32 @@ final class PieceNode: SKNode {
         ice = SKShapeNode(path: style.bodyPath(diameter: d * 1.06))
         duetMark = SKLabelNode(text: "♥")
         super.init()
+        content.position = CGPoint(x: 0, y: d / 2)
+        addChild(content)
 
-        for path in style.featurePaths(diameter: d) {
+        if UIImage(named: "squishy-\(kindID)") != nil {
+            // Launch art from the design thread.
+            let sprite = SKSpriteNode(texture: SKTexture(imageNamed: "squishy-\(kindID)"))
+            sprite.size = CGSize(width: d * 1.12, height: d * 1.12)
+            sprite.zPosition = 1
+            content.addChild(sprite)
+            art = sprite
+        }
+
+        for path in style.featurePaths(diameter: d) where art == nil {
             let f = SKShapeNode(path: path)
             f.fillColor = style.featureColor
             f.strokeColor = .plum
             f.lineWidth = max(1.5, d * 0.035)
             f.zPosition = -1
-            addChild(f)
+            content.addChild(f)
         }
         body.fillColor = style.color
+        body.isHidden = art != nil
+        body.zPosition = 2
         body.strokeColor = .plum
         body.lineWidth = max(1.5, d * 0.04)
-        addChild(body)
+        content.addChild(body)
 
         // Gloss highlight, top left.
         let gloss = SKShapeNode(ellipseOf: CGSize(width: d * 0.22, height: d * 0.13))
@@ -51,7 +68,7 @@ final class PieceNode: SKNode {
         question.fontColor = .plum
         question.verticalAlignmentMode = .center
         question.isHidden = true
-        addChild(question)
+        content.addChild(question)
 
         ice.fillColor = UIColor.ice.withAlphaComponent(0.55)
         ice.strokeColor = UIColor.white
@@ -63,7 +80,7 @@ final class PieceNode: SKNode {
         flake.verticalAlignmentMode = .center
         flake.position = CGPoint(x: d * 0.28, y: d * 0.28)
         ice.addChild(flake)
-        addChild(ice)
+        content.addChild(ice)
 
         duetMark.fontSize = d * 0.3
         duetMark.fontColor = UIColor(hex: 0xFF7EB6)
@@ -71,7 +88,7 @@ final class PieceNode: SKNode {
         duetMark.position = CGPoint(x: 0, y: d * 0.5)
         duetMark.zPosition = 2
         duetMark.isHidden = true
-        addChild(duetMark)
+        content.addChild(duetMark)
 
         startBreathing()
     }
@@ -113,6 +130,10 @@ final class PieceNode: SKNode {
         question.isHidden = !piece.hidden
         face.isHidden = piece.hidden
         body.fillColor = piece.hidden ? .wrapper : style.color
+        if let art {
+            art.isHidden = piece.hidden
+            body.isHidden = !piece.hidden
+        }
         ice.isHidden = !piece.isFrozen
         ice.alpha = piece.frozen >= 2 ? 1 : 0.6
         duetMark.isHidden = !piece.bondedAbove
@@ -127,7 +148,7 @@ final class PieceNode: SKNode {
             .scaleX(to: 1.0, y: 1.02, duration: 1.1),
             .scaleX(to: 1.0, y: 1.0, duration: 1.1),
         ])
-        body.run(.repeatForever(breathe), withKey: "breathe")
+        (art ?? body).run(.repeatForever(breathe), withKey: "breathe")
     }
 
     private func blinkForever() {
