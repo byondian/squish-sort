@@ -16,7 +16,7 @@ struct HomeView: View {
             HStack {
                 // The coins pill opens the shop (under-13s reach it only from Settings).
                 Button { if !model.isGentleMode { model.screen = .shop } } label: {
-                    Label("\(model.progress.wallet.balance)", systemImage: "circle.hexagongrid.fill")
+                    Label { Text("\(model.progress.wallet.balance)") } icon: { CoinIcon() }
                         .font(Theme.body(17)).foregroundStyle(Theme.plum)
                         .monospacedDigit()
                         .contentTransition(.numericText(value: Double(model.progress.wallet.balance)))
@@ -62,7 +62,7 @@ struct HomeView: View {
             GeometryReader { geo in
                 if coinsFlying {
                     ForEach(0..<10, id: \.self) { i in
-                        Image(systemName: "circle.hexagongrid.fill")
+                        CoinIcon()
                             .font(.system(size: 22)).foregroundStyle(Theme.butter)
                             .shadow(color: Theme.plum.opacity(0.6), radius: 1)
                             .position(coinsLanded
@@ -184,7 +184,7 @@ struct HomeView: View {
                                 .foregroundStyle(done ? Theme.bubblegum : Theme.plum.opacity(0.3))
                             switch model.stampReward(n) {
                             case .coins(let amount):
-                                Label("\(amount)", systemImage: "circle.hexagongrid.fill").font(Theme.body(13))
+                                Label { Text("\(amount)") } icon: { CoinIcon() }.font(Theme.body(13))
                             case .capsuleStep:
                                 Image(systemName: "gift.fill").font(.system(size: 14, weight: .bold))
                             }
@@ -436,7 +436,7 @@ struct BuddyHomeView: View {
                             HStack(spacing: 6) {
                                 Image(systemName: "birthday.cake.fill")
                                 Text(confirmTreat ? LocalizedStringKey("Tap again") : LocalizedStringKey("Treat"))
-                                Label("\(Coins.Item.treat.price)", systemImage: "circle.hexagongrid.fill").font(Theme.body(14))
+                                Label { Text("\(Coins.Item.treat.price)") } icon: { CoinIcon() }.font(Theme.body(14))
                             }
                         }
                         .buttonStyle(SquishButtonStyle(fill: confirmTreat ? Theme.mint : Theme.butter, text: Theme.plum))

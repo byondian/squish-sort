@@ -1707,6 +1707,28 @@
         }
       }
     },
+    "Level coins": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "レベルのコイン"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "레벨 코인"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本關金幣"
+          }
+        }
+      }
+    },
     "Levels": {
       "localizations": {
         "ja": {

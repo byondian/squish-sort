@@ -142,7 +142,7 @@ struct MysteryBagView: View {
                 bagShape
             }
             Text(right ? LocalizedStringKey("Yes! You got it!") : LocalizedStringKey("So close!")).font(Theme.title(28)).foregroundStyle(Theme.plum)
-            Label("+\(model.config.coins.mysteryGuess)", systemImage: "circle.hexagongrid.fill")
+            Label { Text("+\(model.config.coins.mysteryGuess)") } icon: { CoinIcon() }
                 .font(Theme.body(17)).foregroundStyle(Theme.plum)
             if !right && model.offersExtraMysteryGuess {
                 // The answer stays hidden while one more guess is on offer.

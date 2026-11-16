@@ -105,7 +105,7 @@ struct WorldCompleteView: View {
     private var celebration: some View {
         VStack(spacing: 16) {
             HStack {
-                Label("\(shownCoins)", systemImage: "circle.hexagongrid.fill")
+                Label { Text("\(shownCoins)") } icon: { CoinIcon() }
                     .font(Theme.body(17)).foregroundStyle(Theme.plum).monospacedDigit()
                     .contentTransition(.numericText(value: Double(shownCoins)))
                     .padding(.horizontal, 12).padding(.vertical, 8)
@@ -122,7 +122,7 @@ struct WorldCompleteView: View {
                 .font(Theme.body(18)).foregroundStyle(Theme.plum)
                 .padding(.horizontal, 14).padding(.vertical, 8)
                 .background(Capsule().fill(Theme.butter))
-            Label("+\(model.config.coins.worldComplete)", systemImage: "circle.hexagongrid.fill")
+            Label { Text("+\(model.config.coins.worldComplete)") } icon: { CoinIcon() }
                 .font(Theme.title(24)).foregroundStyle(Theme.plum)
                 .scaleEffect(coinsFly ? 1 : 0.3).opacity(coinsFly ? 1 : 0)
                 .animation(.spring(response: 0.4, dampingFraction: 0.5), value: coinsFly)
@@ -165,7 +165,7 @@ struct WorldCompleteView: View {
             GeometryReader { geo in
                 if coinsReady {
                 ForEach(0..<10, id: \.self) { i in
-                    Image(systemName: "circle.hexagongrid.fill")
+                    CoinIcon()
                         .font(.system(size: 22)).foregroundStyle(Theme.butter)
                         .shadow(color: Theme.plum.opacity(0.6), radius: 1)
                         .position(coinsFly
