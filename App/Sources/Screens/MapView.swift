@@ -28,7 +28,12 @@ struct MapView: View {
                     }
                     ForEach(worlds.filter { $0.id != "christmas" || model.progress.christmasEntered }, id: \.id) { world in
                         VStack(alignment: .leading, spacing: 10) {
-                            Text(world.name).font(Theme.title(22)).foregroundStyle(Theme.plum)
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(world.name).font(Theme.title(22)).foregroundStyle(Theme.plum)
+                                if model.starJarPrizes(world.id) >= 3 { Text(verbatim: "👑").font(.system(size: 20)) }
+                                Spacer()
+                                starJar(world.id)
+                            }
                             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 5), spacing: 10) {
                                 ForEach(model.levels.indices.filter { model.levels[$0].file.world == world.id }, id: \.self) { i in
                                     levelBubble(i)
@@ -48,6 +53,34 @@ struct MapView: View {
             }
         }
         .background(Theme.marshmallow.ignoresSafeArea())
+    }
+
+    /// The world's star jar: stars earned there, and how many more the next prize needs.
+    private func starJar(_ world: String) -> some View {
+        let stars = model.stars(inWorld: world)
+        let given = model.starJarPrizes(world)
+        let goals = model.starJarGoals(world)
+        let more = given < 3 ? max(0, goals[given] - stars.earned) : 0
+        return VStack(alignment: .trailing, spacing: 2) {
+            Label { Text(verbatim: "\(stars.earned)/\(stars.possible)").monospacedDigit() } icon: {
+                Image(systemName: "star.fill").foregroundStyle(Theme.butter).shadow(color: Theme.plum.opacity(0.5), radius: 0.5)
+            }
+            .font(Theme.body(15)).foregroundStyle(Theme.plum)
+            .padding(.horizontal, 10).padding(.vertical, 3)
+            .background(Capsule().fill(.white))
+            .overlay(Capsule().stroke(Theme.plum.opacity(0.15), lineWidth: 2))
+            if given < 3, more > 0 {
+                Group {
+                    switch given {
+                    case 0: Text("\(more) more for coins")
+                    case 1: Text("\(more) more for a capsule")
+                    default: Text("\(more) more for a golden capsule")
+                    }
+                }
+                .font(Theme.body(12)).foregroundStyle(Theme.plum.opacity(0.7))
+            }
+        }
+        .accessibilityElement(children: .combine)
     }
 
     /// The level the player is on: the next one to win on its path.

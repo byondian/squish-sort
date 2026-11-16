@@ -13,6 +13,8 @@ final class SquishSound {
     }
 
     private let engine = AVAudioEngine()
+    /// The Sounds slider, 0 to 1.
+    var level: Float = 1 { didSet { engine.mainMixerNode.outputVolume = level } }
     private var loops: [String: (player: AVAudioPlayerNode, buffer: AVAudioPCMBuffer, volume: Float)] = [:]
     private var grains: [String: [AVAudioPCMBuffer]] = [:]
     private var oneShots: [String: AVAudioPCMBuffer] = [:]

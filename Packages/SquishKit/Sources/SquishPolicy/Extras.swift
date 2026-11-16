@@ -349,16 +349,20 @@ public struct BuddyState: Codable, Equatable, Sendable {
     public var lastOpenedAt: Double?
     /// The day the Buddy last asked "How are you today?". The answer is never stored.
     public var moodAskedDay: String?
+    /// Seconds since 1970 of the last treat, for the puff that eases back.
+    public var lastTreatAt: Double?
 
     public static let maxStoredTreats = 3
     public static let heartsPerTreat = 1
-    public static let heartsPerGift = 5
+    /// A gift is better value than six treats, and nearly a whole trick.
+    public static let heartsPerGift = 8
 
     public init() {}
 
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         squishy = try c.decodeIfPresent(String.self, forKey: .squishy)
+        lastTreatAt = try? c.decodeIfPresent(Double.self, forKey: .lastTreatAt)
         name = try c.decodeIfPresent(String.self, forKey: .name) ?? ""
         treats = try c.decodeIfPresent(Int.self, forKey: .treats) ?? 0
         hearts = try c.decodeIfPresent(Int.self, forKey: .hearts) ?? 0
@@ -385,7 +389,7 @@ public struct BuddyState: Codable, Equatable, Sendable {
         switch item {
         case .treat: hearts += BuddyState.heartsPerTreat
         case .gift: hearts += BuddyState.heartsPerGift
-        case .hint, .extraJar, .theme: break
+        case .hint, .extraJar, .theme, .shuffle: break
         }
     }
 
@@ -409,6 +413,17 @@ public struct BuddyState: Codable, Equatable, Sendable {
     /// The Buddy grows a little at 10, 20, 30, 40 and 50 hearts: 5% a step, to 25%. It never shrinks.
     public static func growthSteps(hearts: Int) -> Int { min(5, max(0, hearts) / 10) }
     public var growth: Double { Double(BuddyState.growthSteps(hearts: hearts)) * 0.05 }
+
+    /// A treat puffs the Buddy up by a tenth, easing back over a day to the size it has
+    /// earned for good. Nothing earned is ever lost, and nothing is shown when the puff is gone.
+    public static let puffSize = 0.10
+    public static let puffSeconds = 86_400.0
+    /// Gentle mode: a short happy reaction, never something to come back in time for.
+    public static let puffSecondsGentle = 60.0
+    public func puff(at now: Double, lasting seconds: Double = BuddyState.puffSeconds) -> Double {
+        guard let fed = lastTreatAt, now >= fed, seconds > 0 else { return 0 }
+        return BuddyState.puffSize * max(0, 1 - (now - fed) / seconds)
+    }
 }
 
 public struct BuddyLine: Codable, Equatable, Sendable {

@@ -284,6 +284,51 @@ final class CapsuleTests: XCTestCase {
         roster = try Roster.decode(Data(contentsOf: url))
     }
 
+    func testTheSecretComesOnlyWhenEveryOtherSquishyOfItsWorldIsFound() {
+        var state = CollectionState()
+        let others = roster.collectibles.filter { $0.world == "toyshop" && $0.rarity != .secret }
+        for c in others.dropLast() { state.owned[c.id] = 1 }
+        XCTAssertNil(state.awardSecret(world: "toyshop", roster: roster))
+        XCTAssertFalse(SetGoal.world.isDone(world: "toyshop", roster: roster, state: state))
+        state.owned[others.last!.id] = 1
+        XCTAssertTrue(SetGoal.world.isDone(world: "toyshop", roster: roster, state: state))
+        let secret = state.awardSecret(world: "toyshop", roster: roster)
+        XCTAssertEqual(secret?.rarity, .secret)
+        XCTAssertEqual(state.source(of: secret?.id ?? ""), "set")
+        XCTAssertNil(state.awardSecret(world: "toyshop", roster: roster), "given once")
+        XCTAssertNil(state.awardSecret(world: "sweetfactory", roster: roster))
+    }
+
+    func testSetGoalsCountTheirOwnRarityAndPayCoinsOnly() {
+        var state = CollectionState()
+        for c in roster.world("toyshop", .common) { state.owned[c.id] = 1 }
+        XCTAssertTrue(SetGoal.commons.isDone(world: "toyshop", roster: roster, state: state))
+        XCTAssertFalse(SetGoal.rares.isDone(world: "toyshop", roster: roster, state: state))
+        XCTAssertEqual(SetGoal.rares.progress(world: "toyshop", roster: roster, state: state).found, 0)
+        XCTAssertEqual(SetGoal.allCases.map(\.coins), [500, 750, 0])
+        XCTAssertEqual(SetGoal.commons.key(world: "toyshop"), "toyshop.commons")
+    }
+
+    func testEverySquishyHasABioInEveryLanguage() throws {
+        let data = try Data(contentsOf: URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+            .deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("Content/squishy-bios.json"))
+        let file = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        let bios = file?["bios"] as? [String: [String: String]] ?? [:]
+        let riddles = file?["riddles"] as? [String: [String: String]] ?? [:]
+        let stats = file?["stats"] as? [String: [String: Int]] ?? [:]
+        for c in roster.collectibles {
+            for stat in ["squish", "bounce", "stretch", "charm"] {
+                XCTAssertTrue((1...99).contains(stats[c.id]?[stat] ?? 0), "\(c.id) \(stat)")
+            }
+            for lang in ["en", "ja", "ko", "zh-Hant"] {
+                XCTAssertFalse((bios[c.id]?[lang] ?? "").isEmpty, "\(c.id) bio \(lang)")
+                if c.rarity == .secret { XCTAssertFalse((riddles[c.id]?[lang] ?? "").isEmpty, "\(c.id) riddle \(lang)") }
+            }
+        }
+    }
+
     func testRosterShape() {
         XCTAssertEqual(roster.collectibles.count, 64)
         XCTAssertEqual(Set(roster.collectibles.map(\.id)).count, 64, "ids are unique")
@@ -501,7 +546,7 @@ final class CoinTests: XCTestCase {
     }
 
     func testNothingInTheShopIsASquishy() {
-        XCTAssertEqual(Set(Coins.Item.allCases), [.hint, .extraJar, .theme, .treat, .gift])
+        XCTAssertEqual(Set(Coins.Item.allCases), [.hint, .extraJar, .theme, .treat, .gift, .shuffle])
     }
 
     func testALevelPaysOnceSoReplaysCannotBeFarmed() {
@@ -517,7 +562,7 @@ final class CoinTests: XCTestCase {
     }
 
     func testPricesAreTenTimesTheOldOnes() {
-        XCTAssertEqual(Coins.Item.allCases.map(\.price), [250, 400, 3000, 100, 600])
+        XCTAssertEqual(Coins.Item.allCases.map(\.price), [250, 400, 1500, 100, 600, 150])
         XCTAssertEqual(CoinRules().dailyGift, 200)
     }
 
@@ -793,9 +838,9 @@ final class ExtrasTests: XCTestCase {
         XCTAssertEqual(b.treats, 2)
         XCTAssertEqual(b.hearts, 1)
         b.give(.gift)
-        XCTAssertEqual(b.hearts, 6)
+        XCTAssertEqual(b.hearts, 9)
         b.give(.hint)
-        XCTAssertEqual(b.hearts, 6)
+        XCTAssertEqual(b.hearts, 9)
         b.hearts = 1000
         XCTAssertEqual(b.tricksUnlocked, BuddyState.tricks)
         XCTAssertEqual(Coins.Item.treat.price, 100)
@@ -925,5 +970,16 @@ final class ExtrasTests: XCTestCase {
         XCTAssertEqual(b.trickProgress, 1)
         b.hearts = 500
         XCTAssertEqual(b.growth, 0.25, accuracy: 1e-9, "growth stops at a quarter bigger")
+        // A treat's puff eases back over a day, and the earned growth stays.
+        XCTAssertEqual(b.puff(at: 1000), 0)
+        b.lastTreatAt = 1000
+        XCTAssertEqual(b.puff(at: 1000), 0.10, accuracy: 1e-9)
+        XCTAssertEqual(b.puff(at: 1000 + 43_200), 0.05, accuracy: 1e-9)
+        XCTAssertEqual(b.puff(at: 1000 + 200_000), 0)
+        XCTAssertEqual(b.puff(at: 500), 0, "a clock set back gives no puff")
+        // Gentle mode: gone within a minute, so there is nothing to come back for.
+        XCTAssertEqual(b.puff(at: 1030, lasting: BuddyState.puffSecondsGentle), 0.05, accuracy: 1e-9)
+        XCTAssertEqual(b.puff(at: 1061, lasting: BuddyState.puffSecondsGentle), 0)
+        XCTAssertEqual(b.growth, 0.25, accuracy: 1e-9)
     }
 }

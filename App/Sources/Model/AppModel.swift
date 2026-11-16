@@ -23,6 +23,13 @@ final class AppModel: ObservableObject {
         case shop
     }
 
+    /// One-line bios and the secrets' riddles, by squishy id then language.
+    private let bios: [String: [String: String]]
+    private let riddles: [String: [String: String]]
+    /// Display-only stats, 1 to 99: squish, bounce, stretch, charm. Nothing in the game reads them yet.
+    private let stats: [String: [String: Int]]
+    /// A duplicate just came out of a capsule or a swap: the spares it made, for "+1 spare".
+    @Published private(set) var capsuleSpares: Int?
     @Published var screen: Screen = .level(0)
     @Published private(set) var progress: PlayerProgress
     @Published var capsule: Collectible?
@@ -46,12 +53,15 @@ final class AppModel: ObservableObject {
         case worldComplete(world: String, next: String?)
         /// The Buddy learned its first, second or third trick.
         case trick(Int)
+        /// A world's star jar reached its first, second or third prize.
+        case starJar(world: String, prize: Int)
 
         var id: String {
             switch self {
             case .unlocked(let extra): return "extra-\(extra.rawValue)"
             case .worldComplete(let world, _): return "world-\(world)"
             case .trick(let number): return "trick-\(number)"
+            case .starJar(let world, let prize): return "starjar-\(world)-\(prize)"
             }
         }
     }
@@ -67,8 +77,15 @@ final class AppModel: ObservableObject {
     @Published var storefront = ""
     /// The Buddy's speech bubble on the home screen. Never shown during a level.
     @Published var buddySays: String?
+    /// A trick the Buddy should do now on Home (1 spin, 2 flip, 3 dance). Home clears it.
+    @Published var trickToShow: Int?
+    /// The trigger of the line being said ("joke", "fact", "poke", ...).
+    private(set) var buddySaysKind = ""
     /// Goes up each time the daily gift is opened, so the home screen can throw the coins.
     @Published var giftsOpened = 0
+    /// A treat or gift bought in the shop, on its way to the Buddy.
+    @Published var buddyDelivery: Coins.Item?
+    private var heartsBeforeDelivery = 0
     private var ultraJustOpened = false
     private var squeezeAfterCapsule: String?
     @Published var buddyAsksMood = false
@@ -98,15 +115,26 @@ final class AppModel: ObservableObject {
     static let isUITesting = ProcessInfo.processInfo.arguments.contains("-uiTesting")
 
     init() {
-        let loaded = AppModel.isUITesting ? PlayerProgress() : store.load()
-        progress = loaded
+        var loaded = AppModel.isUITesting ? PlayerProgress() : store.load()
         levels = AppModel.loadLevels()
+        if loaded.version < 2 {
+            loaded.migrate(path: levels.filter { LevelCatalog.worlds.contains($0.file.world) }.map(\.id))
+            store.save(loaded)
+        }
+        progress = loaded
         roster = AppModel.loadRoster()
+        let words = AppModel.loadBios()
+        bios = words.bios
+        riddles = words.riddles
+        stats = words.stats
         config = RemoteConfig.cached()
         buddyScript = AppModel.loadBuddyScript()
         purchases = PurchaseService(cachedOwnership: loaded.ownsRemoveAds)
         haptics.enabled = loaded.hapticsOn
         sounds.enabled = loaded.soundOn
+        sounds.level = Float(loaded.soundLevel)
+        sounds.squishOn = loaded.squishSoundsOn
+        sounds.buddyVoice = loaded.buddyVoiceOn
         // New players land straight on Level 1; the home screen arrives with the first capsule.
         screen = loaded.highestUnlocked >= 3 ? .home : .level(min(loaded.highestUnlocked, max(0, levels.count - 1)))
         purchases.onChange = { [weak self] owns in self?.update { $0.ownsRemoveAds = owns } }
@@ -134,6 +162,45 @@ final class AppModel: ObservableObject {
         guard let root = Bundle.main.url(forResource: "Levels", withExtension: nil),
               let levels = try? LevelCatalog.load(root: root) else { return [] }
         return levels
+    }
+
+    private static func loadBios() -> (bios: [String: [String: String]], riddles: [String: [String: String]],
+                                       stats: [String: [String: Int]]) {
+        guard let url = Bundle.main.url(forResource: "squishy-bios", withExtension: "json", subdirectory: "Content"),
+              let data = try? Data(contentsOf: url),
+              let file = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return ([:], [:], [:]) }
+        return (file["bios"] as? [String: [String: String]] ?? [:], file["riddles"] as? [String: [String: String]] ?? [:],
+                file["stats"] as? [String: [String: Int]] ?? [:])
+    }
+
+    /// The four stats of a squishy in card order, or nil when it has none yet.
+    func stats(for id: String) -> [Int]? {
+        guard let s = stats[id] else { return nil }
+        return ["squish", "bounce", "stretch", "charm"].map { min(99, max(1, s[$0] ?? 1)) }
+    }
+
+    /// A world's name as plain text, for tags and counts.
+    func worldTitle(_ world: String) -> String {
+        switch world {
+        case "toyshop": return String(localized: "Toy Shop")
+        case "sweetfactory": return String(localized: "Sweet Factory")
+        case "starlight": return String(localized: "Starlight Stage")
+        default:
+            return ["US", "CA"].contains(Locale.current.region?.identifier ?? "")
+                ? String(localized: "Santa's Workshop") : String(localized: "Santa's Grotto")
+        }
+    }
+
+    /// The squishy's one-line bio in the player's language, or nil when it has none yet.
+    func bio(for id: String) -> String? {
+        guard let lines = bios[id] else { return nil }
+        return lines[language] ?? lines["en"]
+    }
+
+    /// The riddle that says how a secret squishy is found.
+    func riddle(for id: String) -> String? {
+        guard let lines = riddles[id] else { return nil }
+        return lines[language] ?? lines["en"]
     }
 
     private static func loadRoster() -> Roster {
@@ -295,6 +362,80 @@ final class AppModel: ObservableObject {
         return (ids.reduce(0) { $0 + (progress.stars[$1] ?? 0) }, ids.count * 3)
     }
 
+    /// How many moves over the best answer still earn three stars. It starts roomy and tightens:
+    /// 2 for the first five levels, 1 for the rest of the first world, then none at all except on
+    /// a world's rests. A level with wrapped squishies always keeps one, because nobody can plan
+    /// round what they cannot see.
+    func starSlack(index: Int) -> Int {
+        guard levels.indices.contains(index) else { return 2 }
+        let level = levels[index]
+        let beat = level.file.beat
+        let wrapped = !(level.file.mechanics?.hidden ?? []).isEmpty
+        var slack: Int
+        if isSideLevel(index) {
+            slack = 1
+        } else {
+            let number = index + 1
+            let worldNumber = LevelCatalog.worlds.firstIndex(of: level.file.world) ?? 0
+            if number <= 5 {
+                slack = 2
+            } else if worldNumber == 0 {
+                slack = 1
+            } else {
+                slack = [Beat.intro, Beat.breather, Beat.calm].contains(beat) ? 1 : 0
+            }
+        }
+        return wrapped ? max(1, slack) : slack
+    }
+
+    /// Shake-up: on a boss level from the second world on, the pieces are shuffled once, after
+    /// this many moves. Nil where the level has none.
+    func shakeUpMove(index: Int) -> Int? {
+        guard levels.indices.contains(index), !isSideLevel(index), !AppModel.isUITesting else { return nil }
+        let level = levels[index]
+        guard level.file.beat == .boss, (LevelCatalog.worlds.firstIndex(of: level.file.world) ?? 0) >= 1 else { return nil }
+        return max(4, level.par / 2)
+    }
+
+    // MARK: - Star jar
+
+    static let starJarCoins = 300
+    /// Marks a waiting capsule as golden (always an ultra).
+    private static let goldenMark = "#gold"
+
+    /// The stars a world's jar needs for its three prizes: a third, two thirds and all of them.
+    func starJarGoals(_ world: String) -> [Int] {
+        let possible = stars(inWorld: world).possible
+        return [possible / 3, possible * 2 / 3, possible]
+    }
+
+    /// Prizes given so far in a world, 0 to 3.
+    func starJarPrizes(_ world: String) -> Int { min(3, progress.starJarPrizes[world] ?? 0) }
+
+    /// Stars come only from playing, so these capsules keep the rule that no ad or purchase gives one.
+    /// Each prize is given once: coins, then a capsule from that world, then a golden capsule.
+    private func awardStarJars() {
+        for world in LevelCatalog.allWorlds {
+            let goals = starJarGoals(world)
+            let earned = stars(inWorld: world).earned
+            guard goals[2] > 0 else { continue }
+            var given = starJarPrizes(world)
+            while given < 3, earned >= goals[given] {
+                given += 1
+                let prize = given
+                update { p in
+                    p.starJarPrizes[world] = prize
+                    switch prize {
+                    case 1: p.wallet.earn(AppModel.starJarCoins)
+                    case 2: p.pendingCapsules.append(world)
+                    default: p.pendingCapsules.append(world + AppModel.goldenMark)
+                    }
+                }
+                news.append(.starJar(world: world, prize: prize))
+            }
+        }
+    }
+
     var worldsCompleted: Int { LevelCatalog.allWorlds.filter { isWorldComplete($0) }.count }
 
     func isExtraUnlocked(_ extra: Extra) -> Bool {
@@ -446,6 +587,12 @@ final class AppModel: ObservableObject {
         return ["ja", "ko", "zh-Hant"].contains(code) ? code : "en"
     }
 
+    /// The Buddy says a line on Home. The trigger also picks the bubble's tint.
+    func say(_ trigger: String) {
+        buddySaysKind = trigger
+        buddySays = buddyLine(trigger)
+    }
+
     func buddyLine(_ trigger: String) -> String? {
         guard buddyActive else { return nil }
         return buddyScript.line(trigger, language: language, using: &rng)
@@ -477,7 +624,7 @@ final class AppModel: ObservableObject {
     func setBuddy(ref: String, name: String) -> Bool {
         guard isExtraUnlocked(.buddy), squeezables.contains(ref), let clean = NameFilter.clean(name) else { return false }
         update { $0.buddy.squishy = ref; $0.buddy.name = clean; $0.seenExtras.insert(Extra.buddy.rawValue) }
-        buddySays = buddyLine("greet_back")
+        say("greet_back")
         return true
     }
 
@@ -499,10 +646,10 @@ final class AppModel: ObservableObject {
                                         hoursSinceLastOpen: away, moodAskedToday: progress.buddy.moodAskedDay == today,
                                         roll: Double.random(in: 0..<1, using: &rng))
         switch line {
-        case .say(let trigger): buddySays = buddyLine(trigger)
+        case .say(let trigger): say(trigger)
         case .askMood:
             update { $0.buddy.moodAskedDay = today }
-            buddySays = buddyLine("ask_mood")
+            say("ask_mood")
             buddyAsksMood = buddySays != nil
         case .quiet: buddySays = nil
         }
@@ -511,20 +658,20 @@ final class AppModel: ObservableObject {
     /// The answer picks a reply and is then forgotten: never stored, never sent.
     func answerMood(_ mood: String) {
         buddyAsksMood = false
-        buddySays = buddyLine("reply_\(mood)")
+        say("reply_\(mood)")
     }
 
     func pokeBuddy() {
         haptics.land()
         sounds.play("buddy_giggle")
         buddyAsksMood = false
-        buddySays = buddyLine("poke")
+        say("poke")
     }
 
     func feedBuddy() {
         guard buddyActive, progress.buddy.treats > 0 else { return }
         let before = progress.buddy.hearts
-        update { _ = $0.buddy.feedStoredTreat() }
+        update { _ = $0.buddy.feedStoredTreat(); $0.buddy.lastTreatAt = Date().timeIntervalSince1970 }
         haptics.complete()
         sounds.play("buddy_yum", or: "buddy_munch")
         heartsChanged(from: before)
@@ -548,12 +695,45 @@ final class AppModel: ObservableObject {
     /// Treats and gifts bought with coins are given straight away.
     func buyForBuddy(_ item: Coins.Item) {
         guard buddyActive, item == .treat || item == .gift, spend(item) else { return }
+        giveBuddy(item)
+    }
+
+    /// Bought in the shop: paid for and saved here in one go, so nothing can be lost. The home screen
+    /// then plays the arrival, where the Buddy can be seen enjoying it.
+    func buyForBuddyFromShop(_ item: Coins.Item) {
+        guard buddyActive, buddyDelivery == nil, item == .treat || item == .gift, spend(item) else { return }
+        heartsBeforeDelivery = progress.buddy.hearts
+        applyToBuddy(item)
+        buddyDelivery = item
+        screen = homeScreen
+    }
+
+    /// The home screen calls this when the bought treat or gift reaches the Buddy: only the celebration is left to do.
+    func deliverToBuddy() {
+        guard let item = buddyDelivery else { return }
+        buddyDelivery = nil
+        celebrate(item, heartsBefore: heartsBeforeDelivery)
+    }
+
+    private func giveBuddy(_ item: Coins.Item) {
         let before = progress.buddy.hearts
-        update { $0.buddy.give(item) }
+        applyToBuddy(item)
+        celebrate(item, heartsBefore: before)
+    }
+
+    private func applyToBuddy(_ item: Coins.Item) {
+        update { $0.buddy.give(item); if item == .treat { $0.buddy.lastTreatAt = Date().timeIntervalSince1970 } }
+    }
+
+    private func celebrate(_ item: Coins.Item, heartsBefore before: Int) {
         haptics.complete()
-        if item == .gift { sounds.play("heart") } else { sounds.play("buddy_yum", or: "buddy_munch") }
+        if item == .gift { sounds.play("gift_open", or: "heart") } else { sounds.play("buddy_yum", or: "buddy_munch") }
         heartsChanged(from: before)
     }
+
+    /// How long a treat's puff lasts: a day for players of 13 and over. In gentle mode it is a short
+    /// happy reaction, so nothing asks a child to come back in time.
+    var puffSeconds: Double { isGentleMode ? BuddyState.puffSecondsGentle : BuddyState.puffSeconds }
 
     // MARK: - The Buddy's daily gift
 
@@ -581,7 +761,7 @@ final class AppModel: ObservableObject {
             }
             self.sounds.play("gift_open", or: "coin_shower")
             self.haptics.win()
-            self.buddySays = self.buddyLine("treat")
+            self.say("treat")
         }
         if isGentleMode { grant() } else { optIn(.dailyGift, granted: grant) }
     }
@@ -671,7 +851,7 @@ final class AppModel: ObservableObject {
             p.buddy.earnTreatForWin()
             p.stars[level.id] = max(previousBest ?? 0, stars)
             if side {
-                p.christmasUnlocked = max(p.christmasUnlocked, min(level.file.index, LevelCatalog.levelsPerWorld - 1))
+                p.christmasUnlocked = max(p.christmasUnlocked, min(level.file.index, LevelCatalog.levelCount(in: level.file.world) - 1))
             } else {
                 p.highestUnlocked = max(p.highestUnlocked, min(index + 1, max(0, mainLevelCount - 1)))
             }
@@ -691,6 +871,7 @@ final class AppModel: ObservableObject {
             news.append(.worldComplete(world: level.file.world, next: next))
             update { $0.wallet.earn(config.coins.worldComplete) }
         }
+        awardStarJars()
         // The Buddy is met in the first capsule itself ("Is this your Buddy?"), so it has no card.
         for extra in [Extra.mysteryBag, .maker] where isExtraUnlocked(extra) && !extrasBefore.contains(extra) {
             news.append(.unlocked(extra))
@@ -743,7 +924,71 @@ final class AppModel: ObservableObject {
         guard let squishy = roster.collectible(kind) else { return }
         var added = false
         update { added = $0.collection.addSorted(squishy) }
-        if added { joinedBook = squishy }
+        if added {
+            joinedBook = squishy
+            queueSecretIfWon(world: squishy.world)
+        }
+    }
+
+    // MARK: - Collection
+
+    static let secretMark = "#secret"
+
+    /// Finding the last other squishy of a world brings its secret out: it is shown like a capsule
+    /// find, straight after whatever is on screen now.
+    private func queueSecretIfWon(world: String) {
+        var state = progress.collection
+        let mark = world + AppModel.secretMark
+        guard !progress.pendingCapsules.contains(mark), state.awardSecret(world: world, roster: roster) != nil else { return }
+        update { $0.pendingCapsules.insert(mark, at: 0) }
+    }
+
+    /// Owned squishies whose card has not been opened yet.
+    var newSquishies: Int {
+        roster.collectibles.filter { progress.collection.owns($0.id) && !progress.seenCards.contains($0.id) }.count
+    }
+
+    func cardSeen(_ id: String) {
+        guard !progress.seenCards.contains(id) else { return }
+        update { $0.seenCards.insert(id) }
+    }
+
+    func setGoalDone(_ goal: SetGoal, world: String) -> Bool {
+        goal.isDone(world: world, roster: roster, state: progress.collection)
+    }
+
+    func setGoalClaimed(_ goal: SetGoal, world: String) -> Bool {
+        progress.setGoalsClaimed.contains(goal.key(world: world))
+    }
+
+    /// Pays a finished set goal once. The whole-world goal pays nothing here: its prize is the secret squishy.
+    @discardableResult
+    func claimSetGoal(_ goal: SetGoal, world: String) -> Bool {
+        guard goal.coins > 0, setGoalDone(goal, world: world), !setGoalClaimed(goal, world: world) else { return false }
+        update {
+            $0.setGoalsClaimed.insert(goal.key(world: world))
+            $0.wallet.earn(goal.coins)
+        }
+        sounds.play("coin_shower")
+        haptics.win()
+        return true
+    }
+
+    /// Any set goal finished and not yet claimed, for the badge on the Collection button.
+    var setGoalWaiting: Bool {
+        for world in LevelCatalog.worlds + [ChristmasWorld.id] {
+            for goal in SetGoal.allCases where goal.coins > 0 {
+                if setGoalDone(goal, world: world) && !setGoalClaimed(goal, world: world) { return true }
+            }
+        }
+        return false
+    }
+
+    /// "4 of 6" for the squishy's own set: commons with commons, rares with rares, the rest with the world.
+    func setProgress(for squishy: Collectible) -> (goal: SetGoal, found: Int, of: Int) {
+        let goal: SetGoal = squishy.rarity == .common ? .commons : (squishy.rarity == .rare ? .rares : .world)
+        let p = goal.progress(world: squishy.world, roster: roster, state: progress.collection)
+        return (goal, p.found, p.of)
     }
 
     /// Levels still to win before the next capsule level, counting from the level after `index`.
@@ -778,13 +1023,30 @@ final class AppModel: ObservableObject {
 
     // MARK: - Capsules
 
-    private func openCapsule(world: String) {
+    private func openCapsule(world waiting: String) {
+        if waiting.hasSuffix(AppModel.secretMark) {
+            // A secret is not in a capsule: it comes out of hiding when the rest of its world is found.
+            let world = String(waiting.dropLast(AppModel.secretMark.count))
+            var state = progress.collection
+            if let secret = state.awardSecret(world: world, roster: roster) {
+                update { $0.collection = state }
+                capsuleIsNew = true
+                capsuleSpares = nil
+                capsule = secret
+            }
+            return
+        }
+        let golden = waiting.hasSuffix(AppModel.goldenMark)
+        let world = golden ? String(waiting.dropLast(AppModel.goldenMark.count)) : waiting
         var state = progress.collection
-        if let got = CapsuleDrops.open(world: world, roster: roster, state: &state, rng: &rng, odds: config.capsuleOdds) {
+        if let got = CapsuleDrops.open(world: world, roster: roster, state: &state, rng: &rng, odds: config.capsuleOdds,
+                                       force: golden ? .ultra : nil) {
             capsuleIsNew = !progress.collection.owns(got.id)
+            capsuleSpares = capsuleIsNew ? nil : state.spareCount
             let roomWasOpen = isExtraUnlocked(.squishRoom)
             update { $0.collection = state }
             capsule = got
+            queueSecretIfWon(world: world)
             // The first capsule opens the Squish Room: its card is told at the next "Next".
             if !roomWasOpen, isExtraUnlocked(.squishRoom), !news.contains(.unlocked(.squishRoom)) {
                 news.append(.unlocked(.squishRoom))
@@ -840,7 +1102,14 @@ final class AppModel: ObservableObject {
     func rerollSpares(world: String) -> Collectible? {
         var state = progress.collection
         let got = CapsuleDrops.rerollSpares(world: world, roster: roster, state: &state, rng: &rng, odds: config.capsuleOdds)
-        if got != nil { update { $0.collection = state } }
+        if let got {
+            update { $0.collection = state }
+            // The swap's squishy arrives in a capsule, like any other rare find.
+            capsuleIsNew = true
+            capsuleSpares = nil
+            capsule = got
+            queueSecretIfWon(world: world)
+        }
         return got
     }
 
@@ -953,6 +1222,8 @@ final class AppModel: ObservableObject {
     /// The player has read a news card. `open` goes straight to the new place.
     func newsRead(open: Bool = false) {
         let read = showingNews
+        // A trick just learned is done straight away, as soon as its card is closed.
+        if case .trick(let number) = read { trickToShow = number }
         if case .worldComplete = read { maybeAskForRating(at: .worldComplete) }
         if open, case .unlocked(let extra) = read {
             news = []
@@ -1065,6 +1336,30 @@ final class AppModel: ObservableObject {
         update { $0.soundOn = on }
         sounds.enabled = on
         ads.setMuted(!on)
+    }
+
+    /// The Sounds slider. All the way down is the same as off, so ads start muted too.
+    func setSoundLevel(_ level: Double) {
+        let level = min(1, max(0, level))
+        update { $0.soundLevel = level; $0.soundOn = level > 0 }
+        sounds.level = Float(level)
+        sounds.enabled = level > 0
+        ads.setMuted(level <= 0)
+    }
+
+    func setMusicLevel(_ level: Double) {
+        let level = min(1, max(0, level))
+        update { $0.musicLevel = level; $0.musicOn = level > 0 }
+    }
+
+    func setSquishSounds(_ on: Bool) {
+        update { $0.squishSoundsOn = on }
+        sounds.squishOn = on
+    }
+
+    func setBuddyVoice(_ on: Bool) {
+        update { $0.buddyVoiceOn = on }
+        sounds.buddyVoice = on
     }
 
     func setHaptics(_ on: Bool) {

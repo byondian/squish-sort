@@ -5,7 +5,8 @@ import SquishPolicy
 /// Everything the player has, in one Codable file with atomic writes.
 /// Collectible ids are stable so the January accounts update can migrate them.
 struct PlayerProgress: Codable, Equatable {
-    var version = 1
+    /// 2 since the worlds became 15, 20 and 25 levels long (build 3).
+    var version = 2
     /// Best stars per level id.
     var stars: [String: Int] = [:]
     /// Index into the play-order level list of the furthest unlocked level.
@@ -17,6 +18,12 @@ struct PlayerProgress: Codable, Equatable {
     var soundOn = true
     var musicOn = true
     var hapticsOn = true
+    /// Sliders in Settings, 0 to 1. Zero counts as off (ads start muted).
+    var soundLevel = 1.0
+    var musicLevel = 1.0
+    /// The close squish sounds of a soft squishy, and the Buddy's own noises.
+    var squishSoundsOn = true
+    var buddyVoiceOn = true
     /// Last verified Remove Ads state, for offline launches.
     var ownsRemoveAds = false
     /// yyyy-MM-dd of the last free daily extra jar.
@@ -58,15 +65,52 @@ struct PlayerProgress: Codable, Equatable {
     var seenExtras: Set<String> = []
     /// Apple's rating prompt has been requested (it's asked for once).
     var ratingAsked = false
+    /// Star jar prizes already given, by world: 0 to 3.
+    var starJarPrizes: [String: Int] = [:]
+    /// Squishies whose card has been opened: the others wear a NEW badge on the Collection page.
+    var seenCards: Set<String> = []
+    /// Set goals already paid, as "world.goal".
+    var setGoalsClaimed: Set<String> = []
 
     init() {}
+
+    /// Saves from before the worlds changed length (every world had 20 levels) point at the old
+    /// place on the path. Finds the same level by its id; a level that is gone moves on to the
+    /// start of the next world, and its stars are dropped.
+    /// - Parameter path: ids of the main path as it is now, in play order.
+    mutating func migrate(path: [String], oldWorlds: [String] = ["toyshop", "sweetfactory", "starlight"], oldLength: Int = 20) {
+        guard version < 2 else { return }
+        version = 2
+        guard !path.isEmpty else { return }
+        let world = oldWorlds[min(max(0, highestUnlocked / oldLength), oldWorlds.count - 1)]
+        let number = highestUnlocked % oldLength + 1
+        func levelID(_ world: String, _ number: Int) -> String {
+            let digits: String = number < 10 ? "0\(number)" : "\(number)"
+            return "\(world)-\(digits)"
+        }
+        let id: String = levelID(world, number)
+        if let same = path.firstIndex(of: id) {
+            highestUnlocked = same
+        } else if let w = oldWorlds.firstIndex(of: world), w + 1 < oldWorlds.count,
+                  let next = path.firstIndex(where: { $0.hasPrefix(oldWorlds[w + 1] + "-") }) {
+            highestUnlocked = next
+        } else {
+            highestUnlocked = path.count - 1
+        }
+        for old in oldWorlds {
+            for n in 1...oldLength {
+                let gone: String = levelID(old, n)
+                if !path.contains(gone) { stars[gone] = nil }
+            }
+        }
+    }
 
     /// Every field is optional on disk, so adding fields never loses a player's progress.
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         let d = PlayerProgress()
         func v<T: Decodable>(_ key: CodingKeys, _ fallback: T) -> T { ((try? c.decodeIfPresent(T.self, forKey: key)) ?? nil) ?? fallback }
-        version = v(.version, d.version)
+        version = v(.version, 1)
         stars = v(.stars, d.stars)
         highestUnlocked = v(.highestUnlocked, d.highestUnlocked)
         collection = v(.collection, d.collection)
@@ -75,6 +119,10 @@ struct PlayerProgress: Codable, Equatable {
         soundOn = v(.soundOn, d.soundOn)
         musicOn = v(.musicOn, d.musicOn)
         hapticsOn = v(.hapticsOn, d.hapticsOn)
+        soundLevel = min(1, max(0, v(.soundLevel, d.soundLevel)))
+        musicLevel = min(1, max(0, v(.musicLevel, d.musicLevel)))
+        squishSoundsOn = v(.squishSoundsOn, d.squishSoundsOn)
+        buddyVoiceOn = v(.buddyVoiceOn, d.buddyVoiceOn)
         ownsRemoveAds = v(.ownsRemoveAds, d.ownsRemoveAds)
         freeExtraJarDay = (try? c.decodeIfPresent(String.self, forKey: .freeExtraJarDay)) ?? nil
         hintDay = (try? c.decodeIfPresent(String.self, forKey: .hintDay)) ?? nil
@@ -101,6 +149,10 @@ struct PlayerProgress: Codable, Equatable {
         made = v(.made, d.made)
         seenExtras = v(.seenExtras, d.seenExtras)
         ratingAsked = v(.ratingAsked, d.ratingAsked)
+        starJarPrizes = v(.starJarPrizes, d.starJarPrizes)
+        // A save from before the Collection page: what is already owned is not suddenly new.
+        seenCards = v(.seenCards, Set(collection.owned.keys))
+        setGoalsClaimed = v(.setGoalsClaimed, d.setGoalsClaimed)
     }
 
     static func today(_ date: Date = Date()) -> String {

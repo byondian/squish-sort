@@ -32,6 +32,12 @@ final class BoardScene: SKScene {
     var tutorialMove: Move?
     /// The kind that glitters on this level (the lucky squishy), if any.
     var luckyKind: UInt8?
+    /// The level's world: it picks the lid and the word for a finished jar.
+    var world = ""
+    /// On a dark background the jars glow instead of having a plum outline.
+    var darkBackground = false { didSet { if oldValue != darkBackground, size.width > 0, view != nil { rebuild() } } }
+    /// The lid twists shut (a click and a tick).
+    var onLidTwist: (() -> Void)?
 
     init(board: Board, kinds: [String]) {
         self.board = board
@@ -53,13 +59,93 @@ final class BoardScene: SKScene {
         if oldSize != size && size.width > 0 { rebuild() }
     }
 
-    /// Replace the board without animation (undo, retry, extra jar).
-    func reload(_ board: Board) {
+    /// Replace the board without animation (undo, retry, extra jar). With `dropIn` the squishies
+    /// of unfinished jars fall into their new places (shake-up).
+    func reload(_ board: Board, dropIn: Bool = false) {
         removeAllActions()
         self.board = board
         lifted = nil
         busy = false
         rebuild()
+        guard dropIn else { return }
+        let calm = UIAccessibility.isReduceMotionEnabled
+        for j in pieces.indices where !board.isComplete(j) {
+            for (i, node) in pieces[j].enumerated() {
+                let home = slot(j, i)
+                node.alpha = 0
+                if calm {
+                    node.run(.fadeIn(withDuration: 0.3))
+                    continue
+                }
+                node.position = CGPoint(x: home.x, y: home.y + geometry.piece * 1.6)
+                let fall = SKAction.move(to: home, duration: 0.22)
+                fall.timingMode = .easeIn
+                node.run(.sequence([
+                    .wait(forDuration: 0.03 * Double(j) + 0.04 * Double(i)),
+                    .group([.fadeIn(withDuration: 0.1), fall]),
+                    .run { [weak node] in node?.land(speed: 6) },
+                ]), withKey: "travel")
+            }
+        }
+    }
+
+    /// Puts down anything held, without a move.
+    func clearSelection() {
+        if let l = lifted { putBack(l) }
+        clearHint()
+    }
+
+    /// Shake-up is coming: every jar trembles and the squishies shake their heads.
+    func tremble(seconds: Double) {
+        guard !UIAccessibility.isReduceMotionEnabled else { return }
+        busy = true
+        let steps = max(2, Int(seconds / 0.08))
+        for (j, jar) in jarNodes.enumerated() where j < geometry.centers.count {
+            let x = geometry.centers[j].x
+            var moves: [SKAction] = []
+            for s in 0..<steps {
+                let reach = 1.5 + 3.5 * CGFloat(s) / CGFloat(steps)
+                moves.append(.moveTo(x: x + (s % 2 == 0 ? reach : -reach), duration: 0.04))
+            }
+            moves.append(.moveTo(x: x, duration: 0.04))
+            jar.run(.sequence(moves))
+        }
+        for node in pieces.joined() { node.shakeHead() }
+        run(.sequence([.wait(forDuration: seconds), .run { [weak self] in self?.busy = false }]))
+    }
+
+    // MARK: - Squish Fever
+
+    private(set) var feverOn = false
+
+    /// A warm glow behind the jars that breathes slowly, with sparkles drifting up.
+    /// Glow and shimmer only: nothing flashes.
+    func setFever(_ on: Bool) {
+        feverOn = on
+        childNode(withName: "fever")?.removeFromParent()
+        guard on, size.width > 0 else { return }
+        let glow = SKSpriteNode(color: UIColor(hex: 0xFFD86B), size: size)
+        glow.name = "fever"
+        glow.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        glow.zPosition = -5
+        glow.alpha = 0.16
+        addChild(glow)
+        guard !UIAccessibility.isReduceMotionEnabled else { return }
+        glow.run(.repeatForever(.sequence([.fadeAlpha(to: 0.26, duration: 1.0), .fadeAlpha(to: 0.12, duration: 1.0)])))
+        let w = size.width, h = size.height
+        glow.run(.repeatForever(.sequence([.wait(forDuration: 0.22), .run { [weak glow] in
+            guard let glow else { return }
+            let spark = SKLabelNode(text: "✦")
+            spark.fontSize = CGFloat.random(in: 12...22)
+            spark.fontColor = .white
+            spark.position = CGPoint(x: CGFloat.random(in: -w / 2...w / 2), y: CGFloat.random(in: -h / 2...h / 4))
+            spark.alpha = 0
+            glow.addChild(spark)
+            spark.run(.sequence([
+                .group([.fadeAlpha(to: 0.9, duration: 0.3), .moveBy(x: 0, y: 40, duration: 0.9)]),
+                .fadeOut(withDuration: 0.3), .removeFromParent(),
+            ]))
+        }])))
     }
 
     // MARK: - Layout
@@ -109,7 +195,7 @@ final class BoardScene: SKScene {
         jarNodes = []
         pieces = []
         for j in 0..<board.jarCount {
-            let jar = JarNode(size: geometry.jarSize)
+            let jar = JarNode(size: geometry.jarSize, world: world, dark: darkBackground)
             jar.position = geometry.centers[j]
             addChild(jar)
             jarNodes.append(jar)
@@ -124,8 +210,9 @@ final class BoardScene: SKScene {
                 nodes.append(node)
             }
             pieces.append(nodes)
-            if board.isComplete(j) { jar.putLid(animated: false) }
+            if board.isComplete(j) { jar.putLid(animated: false, tint: nodes.first.map { SquishyStyle.forID($0.kindID).color }) }
         }
+        if feverOn { setFever(true) }
         showTutorialIfNeeded()
     }
 
@@ -316,8 +403,18 @@ final class BoardScene: SKScene {
     override func update(_ currentTime: TimeInterval) {
         let dt = lastUpdate == 0 ? 1.0 / 60 : min(0.05, max(0, currentTime - lastUpdate))
         lastUpdate = currentTime
-        for jar in pieces {
-            for node in jar { node.advance(dt) }
+        for (j, jar) in pieces.enumerated() {
+            for (i, node) in jar.enumerated() {
+                node.advance(dt)
+                // A squishy that is not travelling, held up or hopping sits exactly in its place.
+                // Whatever interrupted it, it can never be left part way.
+                if node.action(forKey: "travel") == nil, node.action(forKey: "wobble") == nil,
+                   node.action(forKey: "hop") == nil, j < geometry.centers.count {
+                    let home = slot(j, i)
+                    if node.position != home { node.position = home }
+                    if node.zRotation != 0 { node.zRotation = 0 }
+                }
+            }
         }
     }
 
@@ -341,6 +438,7 @@ final class BoardScene: SKScene {
         let n = board.runLength(at: j)
         for (k, node) in pieces[j].suffix(n).enumerated() {
             node.removeAction(forKey: "wobble")
+            node.removeAction(forKey: "travel")
             node.zPosition = 10
             let rise = SKAction.move(to: liftPoint(j, k), duration: 0.12)
             rise.timingMode = .easeOut
@@ -365,14 +463,15 @@ final class BoardScene: SKScene {
             let drop = Double(node.position.y - target.y) / Double(max(geometry.piece, 1))
             guard drop > 0.05 else {
                 // Already home, or as good as: make sure it sits exactly in its slot.
-                node.removeAction(forKey: "settle")
+                node.removeAction(forKey: "travel")
                 node.position = target
                 continue
             }
             node.run(.sequence([.move(to: target, duration: 0.12), .run { [weak self, weak node] in
                 guard let self, let node else { return }
+                node.position = target
                 self.land(node, jar: j, index: i, speed: drop / 0.12)
-            }]))
+            }]), withKey: "travel")
         }
     }
 
@@ -399,7 +498,7 @@ final class BoardScene: SKScene {
             node.removeAction(forKey: "wobble")
             node.zRotation = 0
             node.zPosition = 5
-            node.run(.move(to: slot(from, i), duration: 0.12))
+            node.run(.move(to: slot(from, i), duration: 0.12), withKey: "travel")
         }
         let hop = 0.18, stagger = 0.04
         let spread = stagger * Double(max(0, k - 1))
@@ -425,9 +524,10 @@ final class BoardScene: SKScene {
                 .run { [weak self, weak node] in
                     guard let self, let node else { return }
                     node.zPosition = 5
+                    node.position = target
                     self.land(node, jar: to, index: index, speed: fall / (hop / 2))
                 },
-            ]))
+            ]), withKey: "travel")
         }
         pieces[to].append(contentsOf: moving)
         run(.sequence([
@@ -450,10 +550,29 @@ final class BoardScene: SKScene {
         }
         if let done = result.completedJar {
             // All four squash down together, let go at once, and the lid drops as they spring past their shape.
+            // Then the lid moment: drop, squash, twist, rays, the squishies hop in turn and the world's word pops.
             let jar = jarNodes[done]
-            jar.run(.sequence([.wait(forDuration: PieceSpring.completeSqueezeSeconds), .run { jar.putLid(animated: true) }]))
+            let calm = UIAccessibility.isReduceMotionEnabled
+            let tint = pieces[done].first.map { SquishyStyle.forID($0.kindID).color }
+            jar.putLid(animated: true, tint: tint, reduceMotion: calm, onLand: { [weak self] in
+                guard let self, done < self.pieces.count else { return }
+                for node in self.pieces[done] { node.squeezeAndRelease() }
+            }, onTwist: { [weak self] in self?.onLidTwist?() })
             sparkle(at: geometry.centers[done])
-            for node in pieces[done] { node.squeezeAndRelease() }
+            let word = JarNode.word(for: world)
+            run(.sequence([.wait(forDuration: 0.6), .run { [weak self] in
+                guard let self, done < self.pieces.count, done < self.geometry.centers.count else { return }
+                self.popLabel(word, atJar: done)
+                guard !calm else { return }
+                let hop = self.geometry.piece * 0.14
+                for (i, node) in self.pieces[done].enumerated() where node.action(forKey: "hop") == nil {
+                    let up = SKAction.moveBy(x: 0, y: hop, duration: 0.09)
+                    up.timingMode = .easeOut
+                    let down = SKAction.moveBy(x: 0, y: -hop, duration: 0.09)
+                    down.timingMode = .easeIn
+                    node.run(.sequence([.wait(forDuration: 0.05 * Double(i)), up, down]), withKey: "hop")
+                }
+            }]))
         }
         busy = false
         onMoveFinished?(result)

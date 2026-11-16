@@ -101,14 +101,17 @@ public enum Coins {
         case hint, extraJar, theme
         /// Buddy items. Cosmetic fun only: hearts never affect squishies, capsules, odds or level help.
         case treat, gift
+        /// A second or later shuffle on a level. The first one each level is free.
+        case shuffle
 
         public var price: Int {
             switch self {
             case .hint: return 250
             case .extraJar: return 400
-            case .theme: return 3000
+            case .theme: return 1500
             case .treat: return 100
             case .gift: return 600
+            case .shuffle: return 150
             }
         }
     }
@@ -189,6 +192,14 @@ public struct LevelPot: Equatable, Sendable {
     }
 
     private var paidWords: Set<SortChain.Word> = []
+
+    /// Squish Fever: a jar finished during it pays its coins a second time (first clears only).
+    @discardableResult
+    public mutating func feverBonus(_ amount: Int) -> Int {
+        guard paysCoins, amount > 0 else { return 0 }
+        coins += amount
+        return amount
+    }
 }
 
 /// Squishy streak (fix list B3): a chain of moves that each land on a matching squishy

@@ -53,7 +53,7 @@ struct SoftSquishy<Art: View>: View {
         scene.sounds = model.sounds.squish
         scene.haptics = model.haptics.squish
         // UI tests run on machines with no speaker: leave the audio engine alone there.
-        scene.soundOn = { model.sounds.enabled && !AppModel.isUITesting }
+        scene.soundOn = { model.sounds.enabled && model.sounds.squishOn && !AppModel.isUITesting }
         scene.hapticsOn = { model.haptics.enabled }
         scene.onTouch = onTouch
         scene.onLetGo = onLetGo

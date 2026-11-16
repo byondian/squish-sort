@@ -26,6 +26,23 @@ final class LevelController: ObservableObject {
     /// Squishy streak: moves that land on a match, one soon after another.
     private var chain: SortChain
     private var landsOnMatch = false
+    /// Squish Fever: a streak of eight matching moves makes the next five moves free.
+    static let feverStreak = SortChain.Word.onARoll
+    static let feverMoves = 5
+    @Published private(set) var feverLeft = 0
+    private var feverCoins = 0
+    private var lastMoveWasFever = false
+    /// Free moves left before each move in the session's history, so undo gives them back.
+    private var feverBefore: [Int] = []
+    /// Shake-up: the move count at which the pieces are shuffled. Nil when there is none (left).
+    @Published private(set) var shakeAt: Int?
+    @Published private(set) var shaking = false
+    /// Shuffles used on this try: the first is free, the rest cost coins.
+    @Published private(set) var shufflesUsed = 0
+    /// A paid shuffle was tapped without enough coins.
+    @Published private(set) var shuffleShort = false
+    /// Moves left before the shake-up.
+    var shakeIn: Int? { shakeAt.map { max(0, $0 - session.history.count) } }
     /// Bonus levels are Coin Rush: every finished jar throws double on a first clear.
     private var jarMultiplier: Int { level.file.beat == .bonus ? 2 : 1 }
     /// The hint search is running.
@@ -39,13 +56,17 @@ final class LevelController: ObservableObject {
     private(set) var attempts = 1
     private var started = Date()
     private weak var model: AppModel?
+    /// Moves over the best answer that still earn three stars on this level.
+    let starSlack: Int
 
     init(index: Int, model: AppModel) {
         self.index = index
         self.model = model
         level = model.levels[index]
-        session = GameSession(board: level.board, par: level.par, undoLimit: model.undoLimit)
+        starSlack = model.starSlack(index: index)
+        session = GameSession(board: level.board, par: level.par, undoLimit: model.undoLimit, starSlack: starSlack)
         scene = BoardScene(board: level.board, kinds: level.kinds)
+        scene.world = level.file.world
         chain = SortChain(timed: !model.isGentleMode)
         let lucky = model.luckyKind(index: index)
         pot = LevelPot(firstClear: model.progress.stars[level.id] == nil, jars: level.kinds.count,
@@ -55,6 +76,10 @@ final class LevelController: ObservableObject {
         scene.onLift = { [weak model] in
             model?.haptics.lift()
             model?.sounds.play("lift")
+        }
+        scene.onLidTwist = { [weak model] in
+            model?.sounds.play("capsule_click")
+            model?.haptics.land()
         }
         scene.onReject = { [weak model] in
             model?.haptics.reject()
@@ -71,7 +96,11 @@ final class LevelController: ObservableObject {
                 model?.haptics.land()
             }
         }
-        scene.onMoveFinished = { [weak self] _ in self?.checkOutcome() }
+        scene.onMoveFinished = { [weak self] _ in
+            self?.checkOutcome()
+            self?.shakeUpIfDue()
+        }
+        shakeAt = model.shakeUpMove(index: index)
         // The very first board opens mid-move: one squishy already lifted and a
         // hand on the jar it belongs in, so the first tap finishes a jar.
         if index == 0, model.progress.stars.isEmpty, let first = level.solution.first {
@@ -81,7 +110,12 @@ final class LevelController: ObservableObject {
 
     private func play(_ move: Move) -> (MoveResult, Board)? {
         let ontoMatch = session.board.jars.indices.contains(move.to) && !session.board.jars[move.to].isEmpty
-        guard let result = session.play(move) else { return nil }
+        let free = feverLeft > 0
+        let before = feverLeft
+        guard !shaking, let result = session.play(move, free: free) else { return nil }
+        feverBefore.append(before)
+        lastMoveWasFever = free
+        if free { feverLeft -= 1 }
         landsOnMatch = ontoMatch
         noWayThrough = false; hintGaveUp = false
         return (result, session.board)
@@ -89,7 +123,19 @@ final class LevelController: ObservableObject {
 
     /// A move has landed: it may earn a squishy streak word. Nothing shows when a streak ends.
     private func landed() {
-        guard let model, let word = chain.move(ontoMatch: landsOnMatch, at: Date().timeIntervalSince(started)) else { return }
+        guard let model else { return }
+        let earned = chain.move(ontoMatch: landsOnMatch, at: Date().timeIntervalSince(started))
+        if lastMoveWasFever {
+            // Each free pour rings a note higher. The last one ends the fever, after its jar has paid.
+            model.sounds.star(LevelController.feverMoves - feverLeft)
+            if feverLeft == 0 { DispatchQueue.main.async { [weak self] in self?.endFever() } }
+        }
+        guard let word = earned else { return }
+        if word == LevelController.feverStreak, feverLeft == 0, !lastMoveWasFever {
+            _ = pot.streakWord(word)
+            startFever()
+            return
+        }
         let text: String
         switch word {
         case .nice: text = String(localized: "Nice!")
@@ -120,7 +166,13 @@ final class LevelController: ObservableObject {
         jarsDone += 1
         model.sounds.jarComplete(number: jarsDone)
         // First clear: the jar throws its share of coins into the level pot.
-        let payout = pot.jarCompleted(kind: Int(piece.kind), at: Date().timeIntervalSince(started))
+        var payout = pot.jarCompleted(kind: Int(piece.kind), at: Date().timeIntervalSince(started))
+        if lastMoveWasFever {
+            // A jar finished in a fever pays double.
+            let extra = pot.feverBonus(payout.coins)
+            payout.coins += extra
+            feverCoins += payout.coins
+        }
         guard payout.coins > 0 else { return }
         scene.throwCoins(fromJar: jar, count: min(10, max(3, payout.coins / 6)))
         for i in 0..<3 {
@@ -133,6 +185,98 @@ final class LevelController: ObservableObject {
         } else if payout.doublePop {
             model.sounds.play("double_pop")
             scene.popLabel(String(localized: "Double pop!"), atJar: jar)
+        }
+    }
+
+    // MARK: - Squish Fever
+
+    private func startFever() {
+        guard let model else { return }
+        feverLeft = LevelController.feverMoves
+        feverCoins = 0
+        scene.setFever(true)
+        scene.popWord(String(localized: "SQUISH FEVER!"), size: 1.05)
+        model.sounds.play("streak", or: "run_x3")
+        model.haptics.win()
+    }
+
+    private func endFever() {
+        guard feverLeft == 0, scene.feverOn else { return }
+        scene.setFever(false)
+        guard let model, feverCoins > 0, outcome == nil else { return }
+        scene.popWord("+\(feverCoins)", size: 0.9)
+        model.sounds.play("coin_shower")
+    }
+
+    // MARK: - Shake-up
+
+    /// The pieces in unfinished jars land in new spots. The new layout is always one that can be
+    /// solved, and the star limit starts again from it, so a shake-up never costs stars.
+    private func shakeUpIfDue() {
+        guard let at = shakeAt, session.history.count >= at, session.status == .playing, !shaking else { return }
+        shakeAt = nil
+        shake(word: String(localized: "Shake-up!"), keepsStarLimit: false) { _ in }
+    }
+
+    /// The Shuffle button: the first shuffle on a level is free, later ones cost coins. The moves so far
+    /// stay counted and the star limit does not move. Nothing is charged when no new layout is found.
+    func shuffle() {
+        guard let model, session.status == .playing, !shaking, outcome == nil else { return }
+        let paid = shufflesUsed > 0
+        if paid && !model.progress.wallet.canAfford(.shuffle) {
+            // No shop offer from the board: just say what is in the purse.
+            shuffleShort = true
+            model.haptics.reject()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) { [weak self] in self?.shuffleShort = false }
+            return
+        }
+        shake(word: String(localized: "Shuffle!"), keepsStarLimit: true) { [weak self] done in
+            guard let self, done else { return }
+            if paid { _ = model.spend(.shuffle) }
+            self.shufflesUsed += 1
+        }
+    }
+
+    /// Everything trembles, then the pieces in unfinished jars fly to new spots.
+    private func shake(word: String, keepsStarLimit: Bool, then: @escaping (Bool) -> Void) {
+        guard let model else { return }
+        shaking = true
+        chain.end()
+        feverLeft = 0
+        feverBefore = []
+        scene.setFever(false)
+        scene.clearSelection()
+        model.sounds.play("drumroll")
+        model.haptics.complete()
+        scene.tremble(seconds: 1.1)
+        let board = session.board
+        Task {
+            let found: (board: Board, best: Int)? = await Task.detached(priority: .userInitiated) { () -> (board: Board, best: Int)? in
+                var rng = SystemRandomNumberGenerator()
+                // Never hold the board for long: stop looking after about a second and a half.
+                let deadline = Date().addingTimeInterval(1.5)
+                for _ in 0..<14 {
+                    if Date() > deadline { break }
+                    let next = board.shakenUp(using: &rng)
+                    if next == board || next.isWon || next.isStuck { continue }
+                    if next.jars.indices.contains(where: { next.isComplete($0) && !board.isComplete($0) }) { continue }
+                    if let result = Solver.solve(next, maxStates: 60_000), result.moves.count >= 2 {
+                        return (next, result.moves.count)
+                    }
+                }
+                return nil
+            }.value
+            try? await Task.sleep(nanoseconds: 1_100_000_000)
+            shaking = false
+            guard let found, session.board == board, outcome == nil else { then(false); return }
+            if keepsStarLimit { session.shuffle(to: found.board) } else { session.shakeUp(to: found.board, bestFromHere: found.best) }
+            foundHint = nil
+            noWayThrough = false; hintGaveUp = false
+            scene.reload(session.board, dropIn: true)
+            scene.popWord(word, size: 0.95)
+            model.sounds.play("splat", or: "land_soft")
+            model.haptics.win()
+            then(true)
         }
     }
 
@@ -165,8 +309,13 @@ final class LevelController: ObservableObject {
     }
 
     func undo() {
-        guard session.undo() else { return }
+        guard !shaking, session.undo() else { return }
         chain.end()
+        // The free moves of a fever come back with the move.
+        if let before = feverBefore.popLast() {
+            feverLeft = before
+            scene.setFever(before > 0)
+        }
         noWayThrough = false; hintGaveUp = false
         outcome = nil
         scene.reload(session.board)
@@ -193,7 +342,7 @@ final class LevelController: ObservableObject {
             switch item {
             case .hint: self?.showHint()
             case .extraJar: self?.addJar()
-            case .theme, .treat, .gift: break
+            case .theme, .treat, .gift, .shuffle: break
             }
         }
         if withAd {
@@ -246,10 +395,16 @@ final class LevelController: ObservableObject {
         started = Date()
         // A retry empties the pot, so coins can't be farmed.
         newPot()
-        session = GameSession(board: level.board, par: level.par, undoLimit: model?.undoLimit ?? 5)
+        feverLeft = 0
+        feverBefore = []
+        lastMoveWasFever = false
+        scene.setFever(false)
+        shakeAt = model?.shakeUpMove(index: index)
+        session = GameSession(board: level.board, par: level.par, undoLimit: model?.undoLimit ?? 5, starSlack: starSlack)
         // Real walls soften: one extra jar after enough fails.
         if let soften = level.file.softenAfterFails, attempts > soften { session.addExtraJar() }
         extraJarUsed = false
+        shufflesUsed = 0
         noWayThrough = false; hintGaveUp = false
         outcome = nil
         scene.reload(session.board)
@@ -259,6 +414,7 @@ final class LevelController: ObservableObject {
 struct LevelView: View {
     @EnvironmentObject var model: AppModel
     @StateObject private var controller: LevelController
+    @State private var nudge = false
 
     init(index: Int, model: AppModel) {
         _controller = StateObject(wrappedValue: LevelController(index: index, model: model))
@@ -279,7 +435,7 @@ struct LevelView: View {
             }
             .padding(.horizontal, 12)
             if let joined = model.joinedBook {
-                JoinedBookSticker(squishy: joined, name: joined.name(in: model.language)) { model.joinedBook = nil }
+                NewFindSticker(squishy: joined) { model.joinedBook = nil }
                     .id(joined.id)
             }
             if model.trackingExplainer && controller.outcome == nil {
@@ -330,8 +486,9 @@ struct LevelView: View {
                     Confetti(count: stars >= 3 ? 80 : 45, seconds: 3).ignoresSafeArea()
                     WinCard(stars: stars, showpiece: controller.level.file.beat == .showpiece,
                             summary: model.lastWin,
-                            perfect: controller.session.moveCount <= controller.level.par,
-                            threeStarMoves: Stars.moveLimit(forStars: 3, par: controller.level.par),
+                            moves: controller.session.moveCount,
+                            perfect: controller.session.moveCount <= controller.session.par,
+                            threeStarMoves: Stars.moveLimit(forStars: 3, par: controller.session.par, slack: controller.starSlack),
                             // Not while good news is waiting behind the win card: that is told first.
                             retry: controller.index < 2 || !model.news.isEmpty ? nil : { controller.retry() },
                             toCapsule: model.levelsToNextCapsule(after: controller.index),
@@ -350,7 +507,15 @@ struct LevelView: View {
                 }
             }
         }
-        .background(LinearGradient(colors: model.boardTheme.colors, startPoint: .top, endPoint: .bottom).ignoresSafeArea())
+        .background {
+            // The plain theme shows the world's own room; a bought theme paints over it.
+            if model.boardTheme == .cream {
+                WorldBackdrop(world: controller.level.file.world)
+            } else {
+                LinearGradient(colors: model.boardTheme.colors, startPoint: .top, endPoint: .bottom).ignoresSafeArea()
+            }
+        }
+        .onAppear { controller.scene.darkBackground = darkRoom }
         .animation(.spring(response: 0.35, dampingFraction: 0.7), value: controller.outcome)
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: model.trackingExplainer)
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: controller.choosing)
@@ -418,7 +583,18 @@ struct LevelView: View {
                 }
             }
             VStack(spacing: 2) {
-                Text("Level \(number)").font(Theme.title(22))
+                // A pink jelly pill with the level, and the world's name under it.
+                Text("Level \(number)").font(Theme.title(20)).foregroundStyle(.white)
+                    .padding(.horizontal, 18).padding(.vertical, 5)
+                    .background {
+                        ZStack(alignment: .top) {
+                            Capsule().fill(Color(hex: 0xE5609B)).offset(y: 3)
+                            Capsule().fill(LinearGradient(colors: [Color(hex: 0xFFA3CB), Color(hex: 0xFF7EB6)], startPoint: .top, endPoint: .bottom))
+                            Capsule().fill(Color.white.opacity(0.35)).frame(height: 8).padding(.horizontal, 10).padding(.top, 3)
+                        }
+                    }
+                Text(controller.level.file.world == "christmas" ? AppModel.christmasWorldName : AppModel.worldName(controller.level.file.world))
+                    .font(Theme.body(13)).foregroundStyle(darkRoom ? Color.white.opacity(0.9) : Theme.plum.opacity(0.75))
                 if controller.level.file.beat == .boss {
                     Text("BOSS 👑").font(Theme.body(13))
                 } else if controller.level.file.beat == .bonus {
@@ -433,25 +609,20 @@ struct LevelView: View {
                     Text("HARD").font(Theme.body(13)).foregroundStyle(Theme.bubblegum)
                 }
                 // The stars still to be won, and the moves left before the next one goes.
-                // Empty outlines before the first move, so nothing looks won already.
-                HStack(spacing: 4) {
-                    let moves = controller.session.moveCount
-                    let lit = Stars.rating(moves: moves, par: controller.level.par)
-                    ForEach(0..<3, id: \.self) { i in
-                        Image(systemName: i < lit && moves > 0 ? "star.fill" : "star")
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundStyle(i < lit ? Theme.butter : Theme.plum.opacity(0.18))
-                            .scaleEffect(i < lit ? 1 : 0.8)
-                    }
-                    if let limit = Stars.moveLimit(forStars: lit, par: controller.level.par) {
-                        Text(verbatim: "\(moves)/\(limit)").font(Theme.body(14)).opacity(0.7)
-                            .accessibilityIdentifier("move-count")
-                    } else {
-                        Text(verbatim: "\(moves)").font(Theme.body(14)).opacity(0.7)
-                            .accessibilityIdentifier("move-count")
-                    }
+                StarMeter(moves: controller.session.moveCount, par: controller.session.par, slack: controller.starSlack,
+                          gentle: model.isGentleMode, haptics: model.haptics, sounds: model.sounds)
+                if controller.feverLeft > 0 {
+                    Label { Text("\(controller.feverLeft) free moves") } icon: { Image(systemName: "flame.fill") }
+                        .font(Theme.body(14)).foregroundStyle(.white)
+                        .padding(.horizontal, 10).padding(.vertical, 3)
+                        .background(Capsule().fill(LinearGradient(colors: [Color(hex: 0xFFB13D), Color(hex: 0xFF7EB6)], startPoint: .leading, endPoint: .trailing)))
+                        .transition(.scale.combined(with: .opacity))
+                } else if let left = controller.shakeIn {
+                    Label { Text("Shake-up in \(left)") } icon: { Image(systemName: "tornado") }
+                        .font(Theme.body(13)).foregroundStyle(Theme.plum)
+                        .padding(.horizontal, 10).padding(.vertical, 3)
+                        .background(Capsule().fill(left <= 3 ? Theme.butter : Color.white.opacity(0.7)))
                 }
-                .animation(.spring(response: 0.3, dampingFraction: 0.5), value: controller.session.moveCount)
                 // The level pot: coins thrown by finished jars, banked on the win.
                 if controller.pot.paysCoins {
                     // Says what it is until the first jar pays, then just the number.
@@ -471,40 +642,104 @@ struct LevelView: View {
         .padding(.top, 8)
     }
 
-    // Undo appears after level 2, Hint after 4, Extra jar after 7 (game design doc).
+    /// A night scene behind the jars: they glow, and loose words turn white.
+    private var darkRoom: Bool {
+        model.boardTheme == .night || (model.boardTheme == .cream && WorldBackdrop.isDark(controller.level.file.world))
+    }
+
+    /// Three stars are out of reach on this try. Players of 13 and over get a nudge to start again;
+    /// gentle mode is never pushed.
+    private var starsSlipped: Bool {
+        let moves = controller.session.moveCount
+        return moves > 0 && !model.isGentleMode && controller.index >= 2
+            && Stars.rating(moves: moves, par: controller.session.par, slack: controller.starSlack) < 3
+    }
+
+    // Undo appears after level 2, Hint after 4, Shuffle after 7. The extra jar is offered only when stuck.
     private var helpers: some View {
         HStack(spacing: 8) {
             if pathNumber >= 2 {
-                helper(undoLabel, "arrow.uturn.backward", .white, enabled: controller.session.canUndo) { controller.undo() }
+                helper(String(localized: "Undo"), "arrow.uturn.backward", .white, enabled: controller.session.canUndo,
+                       badge: controller.session.undosLeft) { controller.undo() }
             }
             if pathNumber >= 7 {
-                helper(String(localized: "Extra jar"), "plus", Theme.mint, enabled: controller.canExtraJar) { controller.extraJar() }
+                // One free shuffle a level, then coins. Too few coins: the price fades and a tap says what you have.
+                let paid = controller.shufflesUsed > 0
+                helper(String(localized: "Shuffle"), "shuffle", Theme.mint, enabled: !controller.shaking,
+                       tag: paid ? "\(Coins.Item.shuffle.price)" : String(localized: "Free"),
+                       tagFaded: paid && !model.progress.wallet.canAfford(.shuffle)) { controller.shuffle() }
+                    .accessibilityIdentifier("helper-shuffle")
             }
             if pathNumber >= 4 {
                 helper(String(localized: "Hint"), "lightbulb.fill", Theme.butter, enabled: controller.canHint) { controller.hint() }
             }
-            helper(String(localized: "Restart"), "arrow.clockwise", .white, enabled: true) { controller.retry() }
+            if starsSlipped {
+                // A nudge, never a loss: the level can still be finished as it is.
+                helper(String(localized: "Go for 3 stars"), "star.fill", Theme.butter, enabled: true) { controller.retry() }
+                    .scaleEffect(nudge ? 1.06 : 1)
+                    .animation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true), value: nudge)
+                    .onAppear { nudge = true }
+                    .onDisappear { nudge = false }
+            } else {
+                helper(String(localized: "Restart"), "arrow.clockwise", .white, enabled: true) { controller.retry() }
+            }
         }
         .padding(.bottom, 8)
+        .overlay(alignment: .top) {
+            if controller.shuffleShort {
+                Label { Text("You have \(model.progress.wallet.balance) coins") } icon: { CoinIcon() }
+                    .font(Theme.body(14)).foregroundStyle(Theme.plum)
+                    .padding(.horizontal, 12).padding(.vertical, 7)
+                    .background(Capsule().fill(.white))
+                    .offset(y: -40)
+                    .transition(.scale.combined(with: .opacity))
+            }
+        }
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: controller.shuffleShort)
     }
 
     /// Every helper is the same size, with its picture over its name, so the row lines up in any language.
-    private func helper(_ title: String, _ icon: String, _ fill: Color, enabled: Bool, action: @escaping () -> Void) -> some View {
+    private func helper(_ title: String, _ icon: String, _ fill: Color, enabled: Bool, badge: Int? = nil,
+                        tag: String? = nil, tagFaded: Bool = false, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(spacing: 3) {
                 Image(systemName: icon).font(.system(size: 18, weight: .bold))
                 Text(verbatim: title).font(Theme.body(13)).lineLimit(1).minimumScaleFactor(0.6)
             }
             .foregroundStyle(Theme.plum)
-            .frame(maxWidth: .infinity, minHeight: 54)
+            .frame(maxWidth: .infinity, minHeight: 62)
             .padding(.horizontal, 4)
-            .background(RoundedRectangle(cornerRadius: 18).fill(fill))
-            .overlay(RoundedRectangle(cornerRadius: 18).stroke(Theme.plum.opacity(0.15), lineWidth: 2))
             .opacity(enabled ? 1 : 0.45)
+            .overlay(alignment: .topTrailing) {
+                // How many are left, as a badge on the corner rather than in the name.
+                if let badge {
+                    Text(verbatim: "\(badge)").font(Theme.body(12)).monospacedDigit().foregroundStyle(.white)
+                        .frame(minWidth: 20, minHeight: 20)
+                        .background(Capsule().fill(badge > 0 ? Theme.grape : Theme.plum.opacity(0.4)))
+                        .overlay(Capsule().stroke(.white, lineWidth: 2))
+                        .offset(x: 4, y: -6)
+                } else if let tag {
+                    Text(verbatim: tag).font(Theme.body(11)).monospacedDigit().foregroundStyle(.white)
+                        .padding(.horizontal, 6).frame(minHeight: 20)
+                        .background(Capsule().fill(Theme.grape))
+                        .overlay(Capsule().stroke(.white, lineWidth: 2))
+                        .opacity(tagFaded ? 0.45 : 1)
+                        .offset(x: 4, y: -6)
+                }
+            }
         }
-        .buttonStyle(PressSquish())
+        .buttonStyle(JellyButtonStyle(colors: [fill, fill], rim: jellyRim(fill), radius: 22))
+        .opacity(enabled ? 1 : 0.6)
         .disabled(!enabled)
-        .accessibilityLabel(Text(verbatim: title))
+        .accessibilityLabel(Text(verbatim: badge.map { "\(title) \($0)" } ?? tag.map { "\(title) \($0)" } ?? title))
+    }
+
+    /// The darker lip under a jelly button of this colour.
+    private func jellyRim(_ fill: Color) -> Color {
+        if fill == Theme.mint { return Color(hex: 0x4FBF9F) }
+        if fill == Theme.butter { return Color(hex: 0xE0B13A) }
+        if fill == Theme.sky { return Color(hex: 0x6FA9D6) }
+        return Color(hex: 0xD9C9D6)
     }
 
     /// Invisible-ish jar buttons so UI tests can play without pixel maths.
@@ -527,11 +762,6 @@ struct LevelView: View {
             }
         }
     }
-
-    private var undoLabel: String {
-        if let left = controller.session.undosLeft { return String(localized: "Undo \(left)") }
-        return String(localized: "Undo")
-    }
 }
 
 struct IconButton: View {
@@ -551,37 +781,69 @@ struct IconButton: View {
     }
 }
 
-/// "<Name> joined your book!": the sticker pops up, then flies to the book corner.
-struct JoinedBookSticker: View {
-    let squishy: Collectible
-    let name: String
-    let done: () -> Void
-    @State private var phase = 0
+/// The move counter in the level header: the moves made, the most that still keep the stars shown,
+/// and the stars themselves. As the limit gets near the counter turns pink and throbs; when it is
+/// passed a star drops off, so the player can see a better run was possible.
+struct StarMeter: View {
+    let moves: Int
+    let par: Int
+    var slack: Int?
+    /// Gentle mode: stars and a plain move count only. No limit, no warning colour, no falling star.
+    var gentle = false
+    var haptics: Haptics?
+    var sounds: SoundService?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var falling: Int?
+    @State private var fell = false
 
     var body: some View {
-        VStack {
-            HStack(spacing: 8) {
-                SquishyView(id: squishy.id, rarity: squishy.rarity).frame(width: 44, height: 44)
-                Text("\(name) joined your book!").font(Theme.body(15)).foregroundStyle(Theme.plum)
+        let lit = Stars.rating(moves: moves, par: par, slack: slack)
+        let limit = gentle ? nil : Stars.moveLimit(forStars: lit, par: par, slack: slack)
+        let near = !gentle && moves > 0 && (limit.map { $0 - moves <= 2 } ?? false)
+        HStack(spacing: 6) {
+            HStack(spacing: 4) {
+                Text("Moves").font(Theme.body(13)).opacity(0.7)
+                Group {
+                    if let limit { Text(verbatim: "\(moves)/\(limit)") } else { Text(verbatim: "\(moves)") }
+                }
+                .font(Theme.title(15)).monospacedDigit()
+                .accessibilityIdentifier("move-count")
             }
-            .padding(.horizontal, 14).padding(.vertical, 8)
-            .background(Capsule().fill(.white))
-            .overlay(Capsule().stroke(Theme.butter, lineWidth: 3))
-            .scaleEffect(phase == 0 ? 0.3 : (phase == 1 ? 1 : 0.2), anchor: phase == 2 ? .topTrailing : .center)
-            .opacity(phase == 1 ? 1 : 0)
-            .frame(maxWidth: .infinity, alignment: phase == 2 ? .trailing : .center)
-            .padding(.top, phase == 2 ? 8 : 92)
-            .padding(.horizontal, 12)
-            Spacer()
+            .foregroundStyle(near ? Color.white : Theme.plum)
+            .padding(.horizontal, 9).padding(.vertical, 2)
+            .background(Capsule().fill(near ? Theme.bubblegum : Color.white.opacity(0.7)))
+            .scaleEffect(near && !reduceMotion ? 1.08 : 1)
+            HStack(spacing: 2) {
+                ForEach(0..<3, id: \.self) { i in
+                    Image(systemName: i < lit ? "star.fill" : "star")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(i < lit ? Theme.butter : Theme.plum.opacity(0.18))
+                        .shadow(color: Theme.plum.opacity(i < lit ? 0.35 : 0), radius: 0.5)
+                        .scaleEffect(i < lit ? 1 : 0.8)
+                        .overlay {
+                            if falling == i {
+                                Image(systemName: "star.fill")
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundStyle(Theme.butter)
+                                    .rotationEffect(.degrees(fell ? 140 : 0))
+                                    .offset(x: fell ? 10 : 0, y: fell ? 46 : 0)
+                                    .opacity(fell ? 0 : 1)
+                                    .allowsHitTesting(false)
+                            }
+                        }
+                }
+            }
         }
-        .allowsHitTesting(false)
-        .accessibilityElement(children: .combine)
-        .task {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { phase = 1 }
-            try? await Task.sleep(nanoseconds: 1_700_000_000)
-            withAnimation(.easeIn(duration: 0.35)) { phase = 2 }
-            try? await Task.sleep(nanoseconds: 400_000_000)
-            done()
+        .animation(.spring(response: 0.3, dampingFraction: 0.5), value: moves)
+        .onChange(of: lit) { old, new in
+            guard new < old, moves > 0, !gentle else { return }
+            sounds?.play("star_lost", or: "lift")
+            haptics?.star()
+            guard !reduceMotion else { return }
+            fell = false
+            falling = new
+            withAnimation(.easeIn(duration: 0.6)) { fell = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) { if falling == new { falling = nil } }
         }
     }
 }
@@ -591,6 +853,7 @@ struct WinCard: View {
     let showpiece: Bool
     let summary: AppModel.WinSummary
     /// Levels still to win before the next capsule (0 = the next level has one).
+    var moves: Int?
     /// Won in the fewest moves possible.
     var perfect = false
     /// The most moves that still earn three stars, for the line under a win with fewer.
@@ -632,7 +895,10 @@ struct WinCard: View {
                     .transition(.scale(scale: 2.2).combined(with: .opacity))
                     .accessibilityIdentifier("win-perfect")
             } else if stars < 3, let threeStarMoves {
-                Text("3 stars: \(threeStarMoves) moves or fewer").font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.7))
+                VStack(spacing: 2) {
+                    if let moves { Text("Your moves: \(moves)").font(Theme.body(15)).foregroundStyle(Theme.plum) }
+                    Text("3 stars: \(threeStarMoves) moves or fewer").font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.7))
+                }
             }
             if summary.total > 0 {
                 HStack(spacing: 10) {

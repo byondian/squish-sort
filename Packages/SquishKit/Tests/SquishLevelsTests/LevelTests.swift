@@ -13,15 +13,19 @@ let levelsRoot = repoRoot.appendingPathComponent("Levels", isDirectory: true)
 final class LevelTests: XCTestCase {
     func files() throws -> [LevelFile] { try LevelCatalog.loadFiles(root: levelsRoot) }
 
-    func testEightyLevelsTwentyPerWorld() throws {
+    func testWorldsGrowAndEveryLevelIsThere() throws {
         let all = try files()
-        XCTAssertEqual(all.count, 80)
+        XCTAssertEqual(LevelCatalog.worlds.map(LevelCatalog.levelCount(in:)), [15, 20, 25])
         XCTAssertEqual(LevelCatalog.mainLevelCount, 60)
-        XCTAssertEqual(Array(all.prefix(60)).map(\.world), LevelCatalog.worlds.flatMap { Array(repeating: $0, count: 20) },
+        XCTAssertEqual(all.count, 80)
+        XCTAssertEqual(Array(all.prefix(60)).map(\.world),
+                       LevelCatalog.worlds.flatMap { Array(repeating: $0, count: LevelCatalog.levelCount(in: $0)) },
                        "the main path comes first, in play order")
         for world in LevelCatalog.allWorlds {
             let inWorld = all.filter { $0.world == world }
-            XCTAssertEqual(inWorld.map(\.index), Array(1...20), world)
+            XCTAssertEqual(inWorld.map(\.index), Array(1...LevelCatalog.levelCount(in: world)), world)
+            XCTAssertEqual(inWorld.last?.beat, .boss, "\(world) ends on a boss")
+            XCTAssertEqual(inWorld.last?.capsule, true, "\(world) ends on a capsule")
         }
     }
 
@@ -72,8 +76,10 @@ final class LevelTests: XCTestCase {
     }
 
     func testCapsuleSchedule() {
-        let capsules = (1...20).filter(LevelCatalog.isCapsuleLevel(index:))
-        XCTAssertEqual(capsules, [3, 6, 9, 12, 15, 18, 20])
+        XCTAssertEqual((1...20).filter { LevelCatalog.isCapsuleLevel(index: $0, world: "sweetfactory") }, [3, 6, 9, 12, 15, 18, 20])
+        XCTAssertEqual((1...25).filter { LevelCatalog.isCapsuleLevel(index: $0, world: "starlight") }, [3, 6, 9, 12, 15, 18, 21, 24, 25])
+        XCTAssertEqual(Beat.expected(forIndex: 15, world: "toyshop"), .boss)
+        XCTAssertEqual(Beat.expected(forIndex: 15, world: "sweetfactory"), .showpiece)
     }
 }
 

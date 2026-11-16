@@ -3,23 +3,23 @@
   "id": "toyshop-15",
   "world": "toyshop",
   "index": 15,
-  "beat": "showpiece",
+  "beat": "boss",
   "capacity": 4,
   "jars": [
-    ["sunny", "tango", "tango", "tango"],
-    ["strawbie", "sunny", "sunny", "sunny"],
-    ["grapey", "strawbie", "strawbie", "strawbie"],
-    ["macaron", "minty", "minty", "minty"],
+    ["macaron", "grapey", "strawbie", "macaron"],
+    ["sunny", "donut", "minty", "strawbie"],
+    ["macaron", "minty", "strawbie", "sunny"],
+    ["blu", "tango", "tango", "minty"],
+    ["grapey", "tango", "blu", "grapey"],
+    ["strawbie", "sunny", "macaron", "grapey"],
+    ["donut", "blu", "minty", "tango"],
+    ["sunny", "blu", "donut", "donut"],
     [],
-    ["blu", "grapey", "grapey", "grapey"],
-    ["tango", "donut", "donut", "donut"],
-    ["blu", "blu", "blu"],
-    ["donut", "macaron", "macaron", "macaron"],
-    ["minty"]
+    []
   ],
   "mechanics": {"hidden": [], "sticky": [], "frozen": []},
-  "par": 8,
-  "solution": [[3, 9], [8, 3], [6, 8], [0, 6], [1, 0], [2, 1], [5, 2], [5, 7]],
+  "par": 25,
+  "solution": [[1, 8], [3, 1], [6, 3], [1, 9], [6, 9], [7, 1], [6, 7], [1, 6], [2, 1], [2, 8], [2, 9], [0, 2], [0, 8], [4, 0], [4, 7], [5, 0], [5, 2], [5, 1], [5, 8], [3, 5], [4, 5], [0, 4], [0, 2], [7, 3], [1, 7]],
   "capsule": true,
-  "softenAfterFails": null
+  "softenAfterFails": 3
 }

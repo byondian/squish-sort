@@ -145,3 +145,22 @@ public struct Board: Hashable, Sendable {
         }
     }
 }
+
+public extension Board {
+    /// Shake-up: every piece in an unfinished jar lands in a new spot. Finished jars stay as they
+    /// are, each jar keeps the number of pieces it had, and wrappers, ice and duets fall away.
+    /// The caller checks the result can still be solved.
+    func shakenUp<R: RandomNumberGenerator>(using rng: inout R) -> Board {
+        var next = jars
+        let open = next.indices.filter { !isComplete($0) }
+        var pool: [Piece] = []
+        for j in open { for piece in next[j] { pool.append(Piece(kind: piece.kind)) } }
+        pool.shuffle(using: &rng)
+        for j in open {
+            let n = next[j].count
+            next[j] = Array(pool.prefix(n))
+            pool.removeFirst(n)
+        }
+        return Board(capacity: capacity, jars: next)
+    }
+}

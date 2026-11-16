@@ -183,7 +183,10 @@ final class GoldenPathTests: XCTestCase {
         waitForAgeQuestionToClose()
         nextLevel("Level 4")
         app.buttons["gearshape.fill"].firstMatch.tap()
-        XCTAssertTrue(app.buttons["Set up for a child"].waitForExistence(timeout: 5))
+        // Settings is a long list now: rows below the fold only exist once scrolled to.
+        let child = app.buttons["Set up for a child"]
+        if !child.waitForExistence(timeout: 3) { app.swipeUp() }
+        XCTAssertTrue(child.waitForExistence(timeout: 5))
     }
 }
 

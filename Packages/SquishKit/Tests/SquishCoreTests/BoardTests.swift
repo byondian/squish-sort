@@ -137,6 +137,54 @@ final class BoardTests: XCTestCase {
 }
 
 final class SessionTests: XCTestCase {
+    func testFreeMovesAreNotCountedAndUndoGivesThemBack() {
+        let board = Board(capacity: 2, jars: [[Piece(kind: 0), Piece(kind: 1)], [Piece(kind: 1), Piece(kind: 0)], []])
+        var s = GameSession(board: board, par: 3)
+        XCTAssertNotNil(s.play(Move(from: 0, to: 2)))
+        XCTAssertNotNil(s.play(Move(from: 1, to: 0), free: true))
+        XCTAssertEqual(s.moveCount, 1, "a free move is not counted")
+        XCTAssertTrue(s.undo())
+        XCTAssertEqual(s.moveCount, 1)
+        XCTAssertTrue(s.undo())
+        XCTAssertEqual(s.moveCount, 0)
+    }
+
+    func testShakeUpKeepsMovesResetsParAndBlocksUndo() {
+        let board = Board(capacity: 2, jars: [[Piece(kind: 0), Piece(kind: 1)], [Piece(kind: 1), Piece(kind: 0)], []])
+        var s = GameSession(board: board, par: 3)
+        XCTAssertNotNil(s.play(Move(from: 0, to: 2)))
+        var rng = SystemRandomNumberGenerator()
+        let shaken = s.board.shakenUp(using: &rng)
+        XCTAssertEqual(shaken.jars.map(\.count), s.board.jars.map(\.count), "every jar keeps its number of pieces")
+        XCTAssertEqual(shaken.jars.joined().map(\.kind).sorted(), s.board.jars.joined().map(\.kind).sorted())
+        s.shakeUp(to: shaken, bestFromHere: 4)
+        XCTAssertEqual(s.moveCount, 1)
+        XCTAssertEqual(s.par, 5)
+        XCTAssertFalse(s.canUndo, "undo cannot go back past a shake-up")
+    }
+
+    func testAShuffleKeepsMovesAndTheStarLimitAndBlocksUndo() {
+        let board = Board(capacity: 2, jars: [[Piece(kind: 0), Piece(kind: 1)], [Piece(kind: 1), Piece(kind: 0)], []])
+        var s = GameSession(board: board, par: 3)
+        XCTAssertNotNil(s.play(Move(from: 0, to: 2)))
+        var rng = SystemRandomNumberGenerator()
+        s.shuffle(to: s.board.shakenUp(using: &rng))
+        XCTAssertEqual(s.moveCount, 1)
+        XCTAssertEqual(s.par, 3, "a shuffle is not a way to three stars")
+        XCTAssertFalse(s.canUndo, "undo cannot go back past a shuffle")
+    }
+
+    func testShakeUpLeavesFinishedJarsAlone() {
+        let done = [Piece(kind: 2), Piece(kind: 2)]
+        let board = Board(capacity: 2, jars: [done, [Piece(kind: 0), Piece(kind: 1)], [Piece(kind: 1), Piece(kind: 0)], []])
+        var rng = SystemRandomNumberGenerator()
+        for _ in 0..<10 {
+            let shaken = board.shakenUp(using: &rng)
+            XCTAssertEqual(shaken.jars[0].map(\.kind), [2, 2])
+            XCTAssertTrue(shaken.jars[3].isEmpty)
+        }
+    }
+
     func testUndoIsLimitedToFivePerAttempt() {
         var s = GameSession(board: board(["AB", "BA", "", ""]), par: 4)
         XCTAssertNotNil(s.play(Move(from: 0, to: 2)))
@@ -179,6 +227,15 @@ final class SessionTests: XCTestCase {
             XCTAssertEqual(Stars.rating(moves: two + 1, par: par), 1)
         }
         XCTAssertNil(Stars.moveLimit(forStars: 1, par: 10))
+        // Later levels set their own slack, down to none.
+        XCTAssertEqual(Stars.moveLimit(forStars: 3, par: 24, slack: 0), 24)
+        XCTAssertEqual(Stars.moveLimit(forStars: 2, par: 24, slack: 0), 30)
+        XCTAssertEqual(Stars.rating(moves: 24, par: 24, slack: 0), 3)
+        XCTAssertEqual(Stars.rating(moves: 25, par: 24, slack: 0), 2)
+        XCTAssertEqual(Stars.rating(moves: 31, par: 24, slack: 0), 1)
+        XCTAssertEqual(Stars.rating(moves: 9, par: 8, slack: 1), 3)
+        XCTAssertEqual(Stars.rating(moves: 12, par: 8, slack: 1), 2)
+        XCTAssertEqual(Stars.rating(moves: 13, par: 8, slack: 1), 1)
     }
 
     func testStarsAgainstPar() {

@@ -4,17 +4,19 @@
 /// Passing needs only 1 star.
 public enum Stars {
     /// The most moves that still earn this many stars (nil for 1 star: any solve).
-    public static func moveLimit(forStars stars: Int, par: Int) -> Int? {
+    /// `slack` is how many moves over the best answer still earn three stars. The game sets it
+    /// per level, from 2 at the start down to 0 on later hard levels. Nil is the roomy early rule.
+    public static func moveLimit(forStars stars: Int, par: Int, slack: Int? = nil) -> Int? {
         switch stars {
-        case 3...: return par + max(2, par / 5)
-        case 2: return par + max(4, par / 3)
+        case 3...: return par + (slack.map { max(0, $0) } ?? max(2, par / 5))
+        case 2: return par + (slack.map { max(0, $0) + max(3, par / 4) } ?? max(4, par / 3))
         default: return nil
         }
     }
 
-    public static func rating(moves: Int, par: Int) -> Int {
-        if moves <= par + max(2, par / 5) { return 3 }
-        if moves <= par + max(4, par / 3) { return 2 }
+    public static func rating(moves: Int, par: Int, slack: Int? = nil) -> Int {
+        if let three = moveLimit(forStars: 3, par: par, slack: slack), moves <= three { return 3 }
+        if let two = moveLimit(forStars: 2, par: par, slack: slack), moves <= two { return 2 }
         return 1
     }
 }
