@@ -123,3 +123,18 @@ targets:
         CODE_SIGN_STYLE: Automatic
     scheme:
       storeKitConfiguration: App/SquishSort.storekit
+      testTargets:
+        - SquishSortUITests
+  SquishSortUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: App/UITests
+    dependencies:
+      - target: SquishSort
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ianatkinson.squishsort.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic

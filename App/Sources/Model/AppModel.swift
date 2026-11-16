@@ -32,8 +32,11 @@ final class AppModel: ObservableObject {
     private var rng = SystemRandomNumberGenerator()
     private var sessionStart = Date()
 
+    /// UI tests start from a fresh install every time.
+    static let isUITesting = ProcessInfo.processInfo.arguments.contains("-uiTesting")
+
     init() {
-        let loaded = store.load()
+        let loaded = AppModel.isUITesting ? PlayerProgress() : store.load()
         progress = loaded
         levels = AppModel.loadLevels()
         roster = AppModel.loadRoster()

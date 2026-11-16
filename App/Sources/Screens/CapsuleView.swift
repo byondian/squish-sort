@@ -30,8 +30,12 @@ struct CapsuleView: View {
                     .gesture(DragGesture()
                         .onChanged { value in twist(value) }
                         .onEnded { _ in lastDrag = nil })
-                Label("Twist to open!", systemImage: "arrow.clockwise")
-                    .font(Theme.body(18)).foregroundStyle(Theme.plum)
+                // A tap works too, for VoiceOver and anyone who can't twist.
+                Button { open() } label: {
+                    Label("Twist to open!", systemImage: "arrow.clockwise")
+                }
+                .font(Theme.body(18)).foregroundStyle(Theme.plum)
+                .accessibilityIdentifier("open-capsule")
             }
             Spacer()
         }
@@ -60,9 +64,12 @@ struct CapsuleView: View {
         if delta > 180 { delta -= 360 }
         if delta < -180 { delta += 360 }
         angle += abs(delta)
-        if angle > 300 && !opened {
-            model.haptics.complete()
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.55).delay(0.35)) { opened = true }
-        }
+        if angle > 300 { open() }
+    }
+
+    private func open() {
+        guard !opened else { return }
+        model.haptics.complete()
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.55).delay(0.35)) { opened = true }
     }
 }

@@ -165,6 +165,13 @@ final class BoardScene: SKScene {
         }
     }
 
+    /// Same as a finger tap on jar `j` (used by UI tests and accessibility).
+    func tapJar(_ j: Int) {
+        guard j < board.jarCount else { return }
+        clearHint()
+        tap(j)
+    }
+
     // MARK: - Motion
 
     /// Stretch up to 115% tall and 90% wide, rise above the jar, hang with a wobble.

@@ -134,6 +134,7 @@ struct LevelView: View {
                 header
                 SpriteView(scene: controller.scene, options: [.allowsTransparency])
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .overlay(alignment: .top) { if AppModel.isUITesting { testTaps } }
                 helpers
             }
             .padding(.horizontal, 12)
@@ -205,6 +206,19 @@ struct LevelView: View {
         .labelStyle(.titleAndIcon)
         .font(Theme.body(15))
         .padding(.bottom, 8)
+    }
+
+    /// Invisible-ish jar buttons so UI tests can play without pixel maths.
+    private var testTaps: some View {
+        HStack(spacing: 2) {
+            ForEach(0..<controller.scene.board.jarCount, id: \.self) { j in
+                Button("jar-\(j)") { controller.scene.tapJar(j) }
+                    .font(.system(size: 6))
+                    .frame(width: 24, height: 12)
+                    .opacity(0.05)
+                    .accessibilityIdentifier("jar-\(j)")
+            }
+        }
     }
 
     private var undoLabel: String {
