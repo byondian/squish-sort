@@ -1,28 +1,60 @@
 import SwiftUI
 import SquishPolicy
 
-/// Home: one big Play button, the Buddy, and a quiet button for each extra
-/// once it unlocks. Nothing here pops up by itself.
+/// Home is one scene, not a grid: a shelf at the top, the Buddy on a rug in the
+/// middle, Play at the bottom. Objects are the buttons, and each appears when
+/// its extra unlocks. Nothing here pops up by itself.
 struct HomeView: View {
     @EnvironmentObject var model: AppModel
+    @State private var wobble = false
 
     var body: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 10) {
             HStack {
-                Label("\(model.progress.wallet.balance)", systemImage: "circle.hexagongrid.fill")
-                    .font(Theme.body(17)).foregroundStyle(Theme.plum)
-                    .padding(.horizontal, 12).padding(.vertical, 8)
-                    .background(Capsule().fill(.white))
+                // The coins pill opens the shop (under-13s reach it only from Settings).
+                Button { if !model.isGentleMode { model.screen = .shop } } label: {
+                    Label("\(model.progress.wallet.balance)", systemImage: "circle.hexagongrid.fill")
+                        .font(Theme.body(17)).foregroundStyle(Theme.plum)
+                        .padding(.horizontal, 12).padding(.vertical, 8)
+                        .background(Capsule().fill(.white))
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("home-coins")
                 Spacer()
                 IconButton(system: "gearshape.fill") { model.screen = .settings }
             }
+            Text(verbatim: "Squish Sort").font(Theme.title(30)).foregroundStyle(.white)
+                .padding(.horizontal, 22).padding(.vertical, 8)
+                .background(RoundedRectangle(cornerRadius: 18).fill(Theme.bubblegum))
+                .rotationEffect(.degrees(-2))
+            if model.adventDoors > 0 { AdventShelf() }
+            shelf
             Spacer(minLength: 0)
-            if model.isExtraUnlocked(.buddy) {
-                BuddyHomeView()
-            } else {
-                Text(verbatim: "Squish Sort").font(Theme.title(40)).foregroundStyle(Theme.plum)
-                SquishyView(id: model.progress.favouriteSquishy ?? "peach-bun", rarity: .rare)
-                    .frame(width: 170, height: 170)
+            HStack(alignment: .center, spacing: 4) {
+                VStack {
+                    if model.isExtraUnlocked(.squishRoom) {
+                        object("Squish Room", "hand.tap.fill", Theme.bubblegum.opacity(0.35), extra: .squishRoom) { model.open(.squishRoom) }
+                    }
+                }
+                .frame(width: 76)
+                if model.isExtraUnlocked(.buddy) {
+                    BuddyHomeView()
+                } else {
+                    SquishyView(id: model.progress.favouriteSquishy ?? "peach-bun", rarity: .rare)
+                        .frame(width: 170, height: 170)
+                }
+                VStack(spacing: 12) {
+                    if model.isExtraUnlocked(.maker) {
+                        object("Maker", "paintbrush.fill", Theme.mint, extra: .maker) { model.open(.maker) }
+                    }
+                    // The festive door: a side world. No countdown anywhere.
+                    if model.showsFestiveDoor {
+                        object(AppModel.christmasWorldName, "door.left.hand.closed", Color(red: 0.9, green: 0.25, blue: 0.3),
+                               tint: .white) { model.openFestiveDoor() }
+                            .accessibilityIdentifier("festive-door")
+                    }
+                }
+                .frame(width: 76)
             }
             Spacer(minLength: 0)
             Button { model.screen = .level(model.progress.highestUnlocked) } label: {
@@ -34,46 +66,81 @@ struct HomeView: View {
             }
             .buttonStyle(SquishButtonStyle())
             .accessibilityIdentifier("home-play")
-            if model.adventDoors > 0 { AdventShelf() }
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 3), spacing: 10) {
-                tile("Levels", "map.fill") { model.screen = .map }
-                // The festive door: Santa's Grotto, a side world. No countdown anywhere.
-                if model.showsFestiveDoor {
-                    tile(AppModel.christmasWorldName, "snowflake") { model.openFestiveDoor() }
-                }
-                tile("Book", "book.fill") { model.screen = .book }
-                if model.isExtraUnlocked(.squishRoom) {
-                    tile("Squish Room", "hand.tap.fill", extra: .squishRoom) { model.open(.squishRoom) }
-                }
-                if model.isExtraUnlocked(.mysteryBag) {
-                    tile("Mystery Bag", "bag.fill", extra: .mysteryBag) { model.open(.mysteryBag) }
-                }
-                if model.isExtraUnlocked(.maker) {
-                    tile("Maker", "paintbrush.fill", extra: .maker) { model.open(.maker) }
-                }
-                // Under-13s reach the shop only from Settings.
-                if !model.isGentleMode {
-                    tile("Shop", "cart.fill") { model.screen = .shop }
-                }
-            }
+            capsuleBar
         }
         .padding(16)
         .background(Theme.marshmallow.ignoresSafeArea())
-        .onAppear { model.homeAppeared() }
+        .onAppear {
+            model.homeAppeared()
+            withAnimation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true)) { wobble = true }
+        }
     }
 
-    private func tile(_ title: LocalizedStringKey, _ icon: String, extra: Extra? = nil, action: @escaping () -> Void) -> some View {
+    /// The shelf, left to right: the book, the capsule machine (the level map) and the Mystery Bag.
+    private var shelf: some View {
+        VStack(spacing: 2) {
+            HStack(alignment: .bottom) {
+                object("Book \(ownedCount)/\(model.roster.collectibles.count)", "book.closed.fill", Color(red: 0.49, green: 0.78, blue: 1)) {
+                    model.screen = .book
+                }
+                Spacer()
+                object("Levels", "circle.hexagongrid.circle.fill", Theme.bubblegum, tint: .white) { model.screen = .map }
+                Spacer()
+                if model.isExtraUnlocked(.mysteryBag) {
+                    object("Mystery Bag", "bag.fill", Theme.grape, tint: .white, extra: .mysteryBag) { model.open(.mysteryBag) }
+                        // The bag wiggles while today's bag is unopened.
+                        .rotationEffect(.degrees(model.progress.mystery.canPlay(today: model.today) && wobble ? 5 : 0))
+                } else {
+                    Color.clear.frame(width: 76, height: 1)
+                }
+            }
+            .padding(.horizontal, 8)
+        }
+        .background(alignment: .bottom) {
+            Capsule().fill(Color(red: 0.87, green: 0.72, blue: 0.53)).frame(height: 10).offset(y: -22)
+        }
+    }
+
+    private var ownedCount: Int {
+        model.roster.collectibles.filter { model.progress.collection.owns($0.id) }.count
+    }
+
+    /// How close the next capsule is, under Play.
+    @ViewBuilder private var capsuleBar: some View {
+        if let before = model.levelsToNextCapsule(after: model.progress.highestUnlocked - 1) {
+            let toGo = before + 1
+            HStack(spacing: 6) {
+                ForEach(0..<3, id: \.self) { i in
+                    Capsule().fill(i < 3 - toGo ? Theme.grape : Color.white)
+                        .frame(width: 26, height: 9)
+                        .overlay(Capsule().stroke(Theme.plum.opacity(0.25), lineWidth: 1.5))
+                }
+                if toGo == 1 {
+                    Text("1 more level to a capsule")
+                } else {
+                    Text("\(toGo) more levels to a capsule")
+                }
+            }
+            .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.75))
+        }
+    }
+
+    /// One object in the scene: a picture with its name under it, and a "new!" tag until first opened.
+    private func object(_ title: LocalizedStringKey, _ icon: String, _ fill: Color, tint: Color = Theme.plum,
+                        extra: Extra? = nil, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            VStack(spacing: 4) {
-                Image(systemName: icon).font(.system(size: 22, weight: .bold))
-                Text(title).font(Theme.body(13)).lineLimit(1).minimumScaleFactor(0.7)
+            VStack(spacing: 5) {
+                Image(systemName: icon).font(.system(size: 26, weight: .bold)).foregroundStyle(tint)
+                    .frame(width: 58, height: 58)
+                    .background(RoundedRectangle(cornerRadius: 18).fill(fill))
+                    .overlay(RoundedRectangle(cornerRadius: 18).stroke(Theme.plum, lineWidth: 3))
+                    .overlay(alignment: .topTrailing) {
+                        if let extra, model.isNew(extra) { NewBadge().offset(x: 12, y: -10) }
+                    }
+                Text(title).font(Theme.body(12)).foregroundStyle(Theme.plum)
+                    .lineLimit(2).multilineTextAlignment(.center).minimumScaleFactor(0.7)
             }
-            .foregroundStyle(Theme.plum)
-            .frame(maxWidth: .infinity, minHeight: 64)
-            .background(RoundedRectangle(cornerRadius: 18).fill(.white))
-            .overlay(alignment: .topTrailing) {
-                if let extra, model.isNew(extra) { NewBadge().offset(x: 6, y: -6) }
-            }
+            .frame(width: 76)
         }
         .buttonStyle(.plain)
     }

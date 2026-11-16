@@ -48,6 +48,28 @@
         }
       }
     },
+    "%lld more levels to a capsule": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あと%lldレベルでカプセル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "캡슐까지 %lld레벨"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再 %lld 關就有扭蛋"
+          }
+        }
+      }
+    },
     "%lld treats for your Buddy!": {
       "localizations": {
         "ja": {
@@ -94,6 +116,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "金幣 +%lld！"
+          }
+        }
+      }
+    },
+    "1 more level to a capsule": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あと1レベルでカプセル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "캡슐까지 1레벨"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再 1 關就有扭蛋"
           }
         }
       }
@@ -295,6 +339,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "圖鑑"
+          }
+        }
+      }
+    },
+    "Book %lld/%lld": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ずかん %1$lld/%2$lld"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "도감 %1$lld/%2$lld"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "圖鑑 %1$lld/%2$lld"
           }
         }
       }
