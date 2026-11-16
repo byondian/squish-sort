@@ -336,18 +336,18 @@ struct BuddyHomeView: View {
                         }
                     }
                 }
-                // Poke and squeeze only, no throwing.
-                SoftSquishy(toy: ref, look: ref, feel: model.feel(for: ref), pokes: pokes,
+                // The Buddy is as soft as in the Squish Room: knead, pull, pinch, pick up and throw.
+                SoftSquishy(toy: ref, look: ref, feel: model.feel(for: ref), mode: .room, pokes: pokes,
                             onTouch: { withAnimation { model.pokeBuddy() } }, onDoubleTap: { playTrick() }) {
                     SquishRefView(ref: ref)
                 }
-                .frame(width: 170, height: 170)
+                .frame(maxWidth: .infinity, minHeight: 200, maxHeight: 340)
                 // Tricks: spin, flip and dance. Then the little growth from hearts, which never goes back.
                 .rotationEffect(.degrees(spin))
                 .rotation3DEffect(.degrees(flip), axis: (x: 1, y: 0, z: 0))
                 .offset(x: sway)
                 .scaleEffect(1 + model.progress.buddy.growth, anchor: .bottom)
-                .padding(.top, 170 * model.progress.buddy.growth)
+                .padding(.top, 60 * model.progress.buddy.growth)
                 .overlay {
                     // A treat flies up to the Buddy, and a heart floats off it.
                     if feeding {
@@ -367,7 +367,7 @@ struct BuddyHomeView: View {
                         Text(verbatim: "🎁").font(.system(size: 46))
                             .rotationEffect(.degrees(giftWobble ? 9 : -9), anchor: .bottom)
                             .animation(.easeInOut(duration: 0.45).repeatForever(autoreverses: true), value: giftWobble)
-                            .offset(x: 34, y: 6)
+                            .offset(x: -18, y: -8)
                             .onAppear { giftWobble = true }
                             .onDisappear { giftWobble = false }
                             .onTapGesture { model.takeDailyGift() }
