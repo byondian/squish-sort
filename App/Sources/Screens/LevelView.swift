@@ -60,7 +60,6 @@ final class LevelController: ObservableObject {
         self.model = model
         level = model.levels[index]
         starSlack = model.starSlack(index: index)
-        shakeAt = model.shakeUpMove(index: index)
         session = GameSession(board: level.board, par: level.par, undoLimit: model.undoLimit, starSlack: starSlack)
         scene = BoardScene(board: level.board, kinds: level.kinds)
         scene.world = level.file.world
@@ -97,6 +96,7 @@ final class LevelController: ObservableObject {
             self?.checkOutcome()
             self?.shakeUpIfDue()
         }
+        shakeAt = model.shakeUpMove(index: index)
         // The very first board opens mid-move: one squishy already lifted and a
         // hand on the jar it belongs in, so the first tap finishes a jar.
         if index == 0, model.progress.stars.isEmpty, let first = level.solution.first {
@@ -222,7 +222,7 @@ final class LevelController: ObservableObject {
         scene.tremble(seconds: 1.1)
         let board = session.board
         Task {
-            let found: (board: Board, best: Int)? = await Task.detached(priority: .userInitiated) {
+            let found: (board: Board, best: Int)? = await Task.detached(priority: .userInitiated) { () -> (board: Board, best: Int)? in
                 var rng = SystemRandomNumberGenerator()
                 for _ in 0..<14 {
                     let next = board.shakenUp(using: &rng)
