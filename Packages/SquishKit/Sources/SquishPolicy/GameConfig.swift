@@ -10,6 +10,11 @@ public struct GameConfig: Codable, Equatable, Sendable {
     public var snowFrom = "2026-12-01"
     public var adsEnabled = true
     public var telemetryEnabled = true
+    /// Each extra can be switched off remotely without a new build.
+    public var squishRoomEnabled = true
+    public var mysteryBagEnabled = true
+    public var makerEnabled = true
+    public var buddyEnabled = true
 
     public init() {}
 
@@ -21,6 +26,10 @@ public struct GameConfig: Codable, Equatable, Sendable {
         snowFrom = try c.decodeIfPresent(String.self, forKey: .snowFrom) ?? d.snowFrom
         adsEnabled = try c.decodeIfPresent(Bool.self, forKey: .adsEnabled) ?? d.adsEnabled
         telemetryEnabled = try c.decodeIfPresent(Bool.self, forKey: .telemetryEnabled) ?? d.telemetryEnabled
+        squishRoomEnabled = try c.decodeIfPresent(Bool.self, forKey: .squishRoomEnabled) ?? d.squishRoomEnabled
+        mysteryBagEnabled = try c.decodeIfPresent(Bool.self, forKey: .mysteryBagEnabled) ?? d.mysteryBagEnabled
+        makerEnabled = try c.decodeIfPresent(Bool.self, forKey: .makerEnabled) ?? d.makerEnabled
+        buddyEnabled = try c.decodeIfPresent(Bool.self, forKey: .buddyEnabled) ?? d.buddyEnabled
     }
 
     /// Unknown or broken remote JSON falls back to the bundled defaults.

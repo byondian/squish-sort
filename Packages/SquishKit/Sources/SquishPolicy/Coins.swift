@@ -1,5 +1,5 @@
 /// Coins (Ian, 16 Nov 2026): earned by winning, also sold in packs. Spent on
-/// hints, extra jars and board themes only. Nothing paid leads to squishies or
+/// hints, extra jars, board themes and Buddy treats and gifts only. Nothing paid leads to squishies or
 /// capsules: capsules come only from finishing levels, and every level can be
 /// finished free (no move limit, unlimited retries, auto-softening).
 public enum Coins {
@@ -7,12 +7,16 @@ public enum Coins {
 
     public enum Item: String, Codable, CaseIterable, Sendable {
         case hint, extraJar, theme
+        /// Buddy items. Cosmetic fun only: hearts never affect squishies, capsules, odds or level help.
+        case treat, gift
 
         public var price: Int {
             switch self {
             case .hint: return 25
             case .extraJar: return 40
             case .theme: return 300
+            case .treat: return 10
+            case .gift: return 60
             }
         }
     }

@@ -321,3 +321,161 @@ final class CoinTests: XCTestCase {
         XCTAssertEqual(Set(Coins.Item.allCases), [.hint, .extraJar, .theme])
     }
 }
+
+final class ExtrasTests: XCTestCase {
+    private func content(_ name: String) throws -> Data {
+        let url = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+            .deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("Content/\(name)")
+        return try Data(contentsOf: url)
+    }
+
+    func testUnlockOrderKeepsTheFirstMinutesSimple() {
+        func open(_ e: Extra, capsules: Int = 0, won: Int = 0, world: Bool = false) -> Bool {
+            Extras.isUnlocked(e, capsulesOpened: capsules, levelsWon: won, firstWorldComplete: world)
+        }
+        for e in Extra.allCases { XCTAssertFalse(open(e), "\(e) is hidden on a fresh install") }
+        XCTAssertTrue(open(.squishRoom, capsules: 1, won: 3))
+        XCTAssertFalse(open(.mysteryBag, capsules: 3, won: 9))
+        XCTAssertTrue(open(.mysteryBag, capsules: 3, won: 10))
+        XCTAssertFalse(open(.maker, capsules: 6, won: 19))
+        XCTAssertTrue(open(.maker, capsules: 6, won: 20, world: true))
+        XCTAssertTrue(open(.buddy, capsules: 6, won: 20, world: true))
+    }
+
+    func testEachExtraHasARemoteOffSwitch() {
+        var config = GameConfig()
+        config.squishRoomEnabled = false
+        config.mysteryBagEnabled = false
+        config.makerEnabled = false
+        config.buddyEnabled = false
+        for e in Extra.allCases {
+            XCTAssertFalse(Extras.isUnlocked(e, capsulesOpened: 50, levelsWon: 80, firstWorldComplete: true, config: config))
+        }
+        let remote = GameConfig.decodeOrDefault(Data(#"{"makerEnabled": false}"#.utf8))
+        XCTAssertFalse(remote.makerEnabled)
+        XCTAssertTrue(remote.buddyEnabled)
+    }
+
+    func testMysteryBagIsTheSameAllDayAndNeverShowsSecretsOrLockedWorlds() throws {
+        let roster = try Roster.decode(content("roster.json"))
+        let worlds = ["toyshop", "sweetfactory", "starlight"]
+        for day in 1...28 {
+            let d = String(format: "2026-12-%02d", day)
+            let a = try XCTUnwrap(MysteryBag.daily(day: d, playerSeed: "p1", roster: roster, worlds: worlds))
+            let b = try XCTUnwrap(MysteryBag.daily(day: d, playerSeed: "p1", roster: roster, worlds: worlds))
+            XCTAssertEqual(a, b)
+            XCTAssertEqual(Set(a.choices.map(\.id)).count, 4)
+            XCTAssertTrue(a.choices.contains(a.answer))
+            for c in a.choices {
+                XCTAssertNotEqual(c.rarity, .secret)
+                XCTAssertNotEqual(c.world, "christmas")
+            }
+        }
+        let answers = Set((1...28).compactMap {
+            MysteryBag.daily(day: String(format: "2026-12-%02d", $0), playerSeed: "p1", roster: roster, worlds: worlds)?.answer.id
+        })
+        XCTAssertGreaterThan(answers.count, 10, "the bag changes from day to day")
+        XCTAssertNil(MysteryBag.daily(day: "2026-12-01", playerSeed: "p1", roster: Roster(collectibles: []), worlds: worlds))
+    }
+
+    func testMysteryBagIsOneGuessADayAndThreeRightGuessesEarnACapsule() {
+        var s = MysteryState()
+        XCTAssertFalse(s.recordGuess(correct: true, today: "2026-12-01"))
+        XCTAssertFalse(s.canPlay(today: "2026-12-01"))
+        XCTAssertFalse(s.recordGuess(correct: true, today: "2026-12-01"), "a second guess the same day does nothing")
+        XCTAssertEqual(s.steps, 1)
+        XCTAssertFalse(s.recordGuess(correct: false, today: "2026-12-02"))
+        XCTAssertEqual(s.steps, 1)
+        XCTAssertFalse(s.recordGuess(correct: true, today: "2026-12-03"))
+        XCTAssertTrue(s.recordGuess(correct: true, today: "2026-12-04"))
+        XCTAssertEqual(s.steps, 0)
+    }
+
+    func testMakerPartsOpenWithWorlds() {
+        XCTAssertEqual(MakerParts.shapes(worldsCompleted: 1), 3)
+        XCTAssertEqual(MakerParts.shapes(worldsCompleted: 10), MadeSquishy.Shape.allCases.count)
+        XCTAssertTrue(MakerParts.isAllowed(MadeSquishy(id: "a"), worldsCompleted: 1))
+        XCTAssertFalse(MakerParts.isAllowed(MadeSquishy(id: "a", shape: .cloud), worldsCompleted: 1))
+        XCTAssertTrue(MakerParts.isAllowed(MadeSquishy(id: "a", shape: .cloud, color: 11, eyes: .wink, mouth: .tongue,
+                                                       ears: .horns, accessory: .leaf), worldsCompleted: 4))
+        XCTAssertFalse(MakerParts.isAllowed(MadeSquishy(id: "a", color: 99), worldsCompleted: 4))
+        XCTAssertEqual(MadeSquishy(id: "x").ref, "made:x")
+    }
+
+    func testNamesAreTrimmedShortenedAndFiltered() {
+        XCTAssertEqual(NameFilter.clean("  Mochi  "), "Mochi")
+        XCTAssertEqual(NameFilter.clean("Supercalifragilistic"), "Supercalifra")
+        XCTAssertNil(NameFilter.clean("   "))
+        for rude in ["shit", "Sh1t", "s h i t", "FUCKface", "a$$hole", "ass", "씨발", "くそ"] {
+            XCTAssertNil(NameFilter.clean(rude), rude)
+        }
+        for fine in ["Grass", "Cocoa", "Bassy", "Peach Bun", "もち", "모찌", "麻糬", "Hello", "Shelly"] {
+            XCTAssertNotNil(NameFilter.clean(fine), fine)
+        }
+    }
+
+    func testBuddyTreatsAndHearts() {
+        var b = BuddyState()
+        XCTAssertFalse(b.feedStoredTreat())
+        for _ in 0..<5 { b.earnTreatForWin() }
+        XCTAssertEqual(b.treats, 3, "at most three free treats are stored")
+        XCTAssertTrue(b.feedStoredTreat())
+        XCTAssertEqual(b.treats, 2)
+        XCTAssertEqual(b.hearts, 1)
+        b.give(.gift)
+        XCTAssertEqual(b.hearts, 6)
+        b.give(.hint)
+        XCTAssertEqual(b.hearts, 6)
+        b.hearts = 1000
+        XCTAssertEqual(b.tricksUnlocked, BuddyState.tricks)
+        XCTAssertEqual(Coins.Item.treat.price, 10)
+        XCTAssertEqual(Coins.Item.gift.price, 60)
+    }
+
+    func testBuddyStateDecodesFromAnOlderSave() throws {
+        let b = try JSONDecoder().decode(BuddyState.self, from: Data("{}".utf8))
+        XCTAssertEqual(b, BuddyState())
+    }
+
+    func testLineBankCoversEveryTriggerInEveryLanguage() throws {
+        let script = try BuddyScript.decode(content("buddy-lines.json"))
+        XCTAssertGreaterThan(script.lines.count, 100)
+        XCTAssertEqual(Set(script.lines.map(\.id)).count, script.lines.count, "ids are unique")
+        let needed = ["greet_morning", "greet_afternoon", "greet_evening", "greet_night", "greet_back", "win", "win_3star",
+                      "fail", "poke", "treat", "joke", "fact", "ask_mood", "reply_happy", "reply_okay", "reply_sleepy", "reply_grumpy"]
+        var rng = SplitMix64(seed: 1)
+        for trigger in needed {
+            for language in ["en", "ja", "ko", "zh-Hant"] {
+                let line = script.line(trigger, language: language, using: &rng)
+                XCTAssertFalse((line ?? "").isEmpty, "\(trigger) in \(language)")
+            }
+        }
+        for line in script.lines {
+            for language in ["en", "ja", "ko", "zh-Hant"] {
+                XCTAssertFalse((line.text[language] ?? "").isEmpty, "\(line.id) in \(language)")
+            }
+        }
+        XCTAssertEqual(script.line("win", language: "fr", using: &rng) != nil, true, "unknown languages fall back to English")
+        XCTAssertNil(script.line("no_such_trigger", language: "en", using: &rng))
+    }
+
+    func testBuddySpeaksAtMostOncePerHomeVisit() {
+        let s = BuddyScript()
+        XCTAssertEqual(s.greetTrigger(hour: 8, hoursSinceLastOpen: 2), "greet_morning")
+        XCTAssertEqual(s.greetTrigger(hour: 14, hoursSinceLastOpen: nil), "greet_afternoon")
+        XCTAssertEqual(s.greetTrigger(hour: 19, hoursSinceLastOpen: 1), "greet_evening")
+        XCTAssertEqual(s.greetTrigger(hour: 2, hoursSinceLastOpen: 1), "greet_night")
+        XCTAssertEqual(s.greetTrigger(hour: 8, hoursSinceLastOpen: 30), "greet_back")
+        func visit(first: Bool = false, asked: Bool = false, roll: Double) -> BuddyScript.HomeLine {
+            s.homeLine(firstVisitThisSession: first, hour: 8, hoursSinceLastOpen: 1, moodAskedToday: asked, roll: roll)
+        }
+        XCTAssertEqual(visit(first: true, roll: 0.99), .say(trigger: "greet_morning"))
+        XCTAssertEqual(visit(roll: 0.05), .say(trigger: "joke"))
+        XCTAssertEqual(visit(roll: 0.2), .say(trigger: "fact"))
+        XCTAssertEqual(visit(roll: 0.3), .askMood)
+        XCTAssertEqual(visit(asked: true, roll: 0.3), .quiet, "the mood question comes at most once a day")
+        XCTAssertEqual(visit(roll: 0.9), .quiet)
+    }
+}
