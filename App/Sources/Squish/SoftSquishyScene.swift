@@ -148,6 +148,9 @@ final class SoftSquishyScene: SKScene {
     /// A let-go dent that has not popped out past flat yet (jelly's light tap).
     private var waitsForPop = false
     private var shader: SKShader?
+    /// Seconds the toy has sat untouched and settled, and a frame count for drawing less often then.
+    private var stillFor = 0.0
+    private var drawTick = 0
     private let lightUniform = SKUniform(name: "u_L", vectorFloat3: SIMD3<Float>(-0.46, -0.62, 0.64))
     private let tiltUniform = SKUniform(name: "u_tilt", vectorFloat2: SIMD2<Float>(0, 0))
     private let lookUniform = SKUniform(name: "u_m", vectorFloat4: SIMD4<Float>(0.5, 0, 30, 0.2))
@@ -380,7 +383,13 @@ final class SoftSquishyScene: SKScene {
         }
         if steps == 8 { carried = 0 }
         feedback(dt)
-        draw()
+        // Untouched and settled, only the slow breath and the phone's lean are left to show:
+        // a third of the frames is plenty for those, and easier on the battery.
+        let m = body.metric
+        let busy = !touchTimes.isEmpty || pokeEnds != nil || m.air || m.speed > 0.02 || m.Z > 0.01 || abs(m.rate) > 0.01
+        stillFor = busy ? 0 : stillFor + dt
+        drawTick &+= 1
+        if stillFor < 1 || drawTick % 3 == 0 { draw() }
     }
 
     private func feedback(_ dt: Double) {
@@ -464,7 +473,7 @@ final class SquishMotion {
     func start(_ user: AnyObject) {
         users.insert(ObjectIdentifier(user))
         guard manager.isDeviceMotionAvailable, !manager.isDeviceMotionActive else { return }
-        manager.deviceMotionUpdateInterval = 1.0 / 30
+        manager.deviceMotionUpdateInterval = 1.0 / 20
         manager.startDeviceMotionUpdates()
     }
 
