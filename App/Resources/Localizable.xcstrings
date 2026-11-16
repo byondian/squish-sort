@@ -120,6 +120,28 @@
         }
       }
     },
+    "+1 treat for %@": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@におやつ +1"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@에게 간식 +1"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 的點心 +1"
+          }
+        }
+      }
+    },
     "1 more level to a capsule": {
       "localizations": {
         "ja": {
@@ -138,6 +160,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "再 1 關就有扭蛋"
+          }
+        }
+      }
+    },
+    "3 stars: %lld moves or fewer": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "星3つ：%lld手以内"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "별 3개: %lld번 이하"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3 顆星：%lld 步以內"
           }
         }
       }
@@ -295,6 +339,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "請問問大人"
+          }
+        }
+      }
+    },
+    "BIG ONE": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "おおもの"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "큰 판"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大場面"
           }
         }
       }
@@ -1153,6 +1219,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "禮物"
+          }
+        }
+      }
+    },
+    "Go for 3 stars": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "星3つをめざす"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "별 3개 도전"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "挑戰 3 顆星"
           }
         }
       }
@@ -2191,6 +2279,28 @@
         }
       }
     },
+    "Perfect!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "パーフェクト！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "퍼펙트!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完美！"
+          }
+        }
+      }
+    },
     "Play": {
       "localizations": {
         "ja": {
@@ -3155,6 +3265,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "點心"
+          }
+        }
+      }
+    },
+    "Treat jar full": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "おやつビンはいっぱい"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "간식 병이 가득 찼어"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "點心罐滿了"
           }
         }
       }

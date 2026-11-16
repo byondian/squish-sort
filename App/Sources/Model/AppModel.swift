@@ -521,6 +521,9 @@ final class AppModel: ObservableObject {
         var doubled = false
         /// The one soft Remove Ads line (after the 3rd interstitial ever, 13 and over).
         var offersRemoveAds = false
+        /// The Buddy's free treat for this win: true = one more in the jar, false = the jar was full, nil = no Buddy yet.
+        var treat: Bool?
+        var buddyName = ""
         var total: Int { pot * (doubled ? 2 : 1) + starBonus + streakBonus + dailyBonus + stampCoins }
     }
 
@@ -558,6 +561,10 @@ final class AppModel: ObservableObject {
             case .coins(let amount): summary.stampCoins = amount
             case .capsuleStep: stampFillsBar = true
             }
+        }
+        if buddyActive {
+            summary.treat = progress.buddy.treats < BuddyState.maxStoredTreats
+            summary.buddyName = progress.buddy.name
         }
         let side = isSideLevel(index)
         var barFull = false

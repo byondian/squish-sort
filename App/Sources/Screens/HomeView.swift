@@ -329,7 +329,7 @@ struct BuddyHomeView: View {
                             Label("Treat ×\(model.progress.buddy.treats)", systemImage: "birthday.cake.fill")
                         }
                         .buttonStyle(SquishButtonStyle(fill: Theme.butter, text: Theme.plum))
-                    } else if model.progress.wallet.canAfford(.treat) {
+                    } else if !model.isGentleMode && model.progress.wallet.canAfford(.treat) {
                         // Out of free treats: one more for coins, given straight away.
                         // Two taps, so a poke meant for the Buddy never spends coins.
                         Button {

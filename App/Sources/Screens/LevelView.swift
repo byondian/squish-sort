@@ -291,6 +291,9 @@ struct LevelView: View {
                 case .won(let stars):
                     WinCard(stars: stars, showpiece: controller.level.file.beat == .showpiece,
                             summary: model.lastWin,
+                            perfect: controller.session.moveCount <= controller.level.par,
+                            threeStarMoves: Stars.moveLimit(forStars: 3, par: controller.level.par),
+                            retry: controller.index < 2 ? nil : { controller.retry() },
                             toCapsule: model.levelsToNextCapsule(after: controller.index),
                             // The first two levels roll straight on after the celebration.
                             autoAdvance: controller.index < 2,
@@ -369,6 +372,9 @@ struct LevelView: View {
                 if controller.level.file.beat == .boss {
                     Text("BOSS 👑").font(Theme.body(13))
                 } else if controller.level.file.beat == .showpiece {
+                    // Looks big, solves fast: not "hard".
+                    Text("BIG ONE").font(Theme.body(13)).foregroundStyle(Theme.bubblegum)
+                } else if controller.level.file.beat == .tension {
                     Text("HARD").font(Theme.body(13)).foregroundStyle(Theme.bubblegum)
                 }
                 // The stars still to be won, and the moves left before the next one goes.
@@ -532,6 +538,12 @@ struct WinCard: View {
     let showpiece: Bool
     let summary: AppModel.WinSummary
     /// Levels still to win before the next capsule (0 = the next level has one).
+    /// Won in the fewest moves possible.
+    var perfect = false
+    /// The most moves that still earn three stars, for the line under a win with fewer.
+    var threeStarMoves: Int?
+    /// "Go for 3 stars": play the level again. Nil where it isn't offered.
+    var retry: (() -> Void)?
     var toCapsule: Int?
     var autoAdvance = false
     var haptics: Haptics?
@@ -557,6 +569,16 @@ struct WinCard: View {
                         .scaleEffect(i < shown ? 1 : 0.7)
                         .rotationEffect(.degrees(i < shown ? 0 : -25))
                 }
+            }
+            if perfect && shown >= 3 {
+                Text("Perfect!").font(Theme.title(20)).foregroundStyle(.white)
+                    .padding(.horizontal, 14).padding(.vertical, 4)
+                    .background(Capsule().fill(Theme.bubblegum))
+                    .rotationEffect(.degrees(-6))
+                    .transition(.scale(scale: 2.2).combined(with: .opacity))
+                    .accessibilityIdentifier("win-perfect")
+            } else if stars < 3, let threeStarMoves {
+                Text("3 stars: \(threeStarMoves) moves or fewer").font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.7))
             }
             if summary.total > 0 {
                 HStack(spacing: 10) {
@@ -587,6 +609,15 @@ struct WinCard: View {
                 .font(Theme.body(12)).foregroundStyle(Theme.plum.opacity(0.7))
                 .accessibilityElement(children: .combine)
             }
+            if let treat = summary.treat {
+                // Where the Buddy's treats come from: one for every win, three to a jar.
+                Label {
+                    if treat { Text("+1 treat for \(summary.buddyName)") } else { Text("Treat jar full") }
+                } icon: {
+                    Image(systemName: "birthday.cake.fill")
+                }
+                .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.75))
+            }
             if let toCapsule {
                 Label {
                     if toCapsule == 0 { Text("Capsule next level!") } else { Text("Next capsule: \(toCapsule + 1) more") }
@@ -603,6 +634,13 @@ struct WinCard: View {
             }
             Button("Next") { go() }.buttonStyle(SquishButtonStyle()).font(Theme.title(22))
                 .accessibilityIdentifier("win-next")
+            if stars < 3, let retry {
+                Button { guard !left else { return }; left = true; retry() } label: {
+                    Label("Go for 3 stars", systemImage: "star.fill")
+                }
+                .font(Theme.body(15)).foregroundStyle(Theme.plum.opacity(0.75))
+                .accessibilityIdentifier("win-retry")
+            }
             if let removeAds {
                 Button("Like playing without breaks? Remove Ads is in the shop.", action: removeAds)
                     .font(Theme.body(12)).foregroundStyle(Theme.plum.opacity(0.6))
