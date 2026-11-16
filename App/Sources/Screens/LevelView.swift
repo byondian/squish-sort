@@ -609,6 +609,7 @@ struct WinCard: View {
     let next: () -> Void
     @State private var shown = 0
     @State private var coinsShown = 0
+    @State private var streakShown = false
     @State private var left = false
 
     var body: some View {
@@ -638,10 +639,14 @@ struct WinCard: View {
                     Label { Text("+\(coinsShown)") } icon: { CoinIcon() }.font(Theme.title(22)).foregroundStyle(Theme.plum)
                         .contentTransition(.numericText())
                         .accessibilityIdentifier("win-coins")
-                    if summary.streak >= 2 {
-                        // First-try streak. Never shown when it breaks, never in gentle mode.
-                        Label("\(summary.streak)", systemImage: "flame.fill").font(Theme.body(16)).foregroundStyle(Theme.bubblegum)
-                    }
+                }
+                if summary.streak >= 2 && streakShown {
+                    // First-try streak, on its own line after the coins. Never shown when it breaks, never in gentle mode.
+                    Label("\(summary.streak) in a row! +\(summary.streakBonus)", systemImage: "flame.fill")
+                        .font(Theme.body(16)).foregroundStyle(.white)
+                        .padding(.horizontal, 12).padding(.vertical, 4)
+                        .background(Capsule().fill(Theme.bubblegum))
+                        .transition(.scale(scale: 0.3).combined(with: .opacity))
                 }
                 if summary.dailyBonus > 0 {
                     Text("First win today: +\(summary.dailyBonus)").font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.7))
@@ -725,7 +730,10 @@ struct WinCard: View {
                     if n % 3 == 0 { sounds?.coin() }
                 }
                 haptics?.complete()
-                if summary.streak >= 2 { sounds?.play("streak") }
+                if summary.streak >= 2 {
+                    sounds?.play("streak")
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.5)) { streakShown = true }
+                }
             }
             if summary.stamped {
                 sounds?.play("new_stamp")

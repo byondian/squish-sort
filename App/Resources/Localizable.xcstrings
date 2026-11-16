@@ -70,6 +70,28 @@
         }
       }
     },
+    "%lld in a row! +%lld": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld連続！ +%2$lld"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld연속! +%2$lld"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "連續 %1$lld 關！ +%2$lld"
+          }
+        }
+      }
+    },
     "%lld more hearts to the next trick": {
       "localizations": {
         "ja": {
