@@ -26,6 +26,19 @@ final class LevelController: ObservableObject {
     /// Squishy streak: moves that land on a match, one soon after another.
     private var chain: SortChain
     private var landsOnMatch = false
+    /// Squish Fever: a streak of eight matching moves makes the next five moves free.
+    static let feverStreak = SortChain.Word.onARoll
+    static let feverMoves = 5
+    @Published private(set) var feverLeft = 0
+    private var feverCoins = 0
+    private var lastMoveWasFever = false
+    /// Free moves left before each move in the session's history, so undo gives them back.
+    private var feverBefore: [Int] = []
+    /// Shake-up: the move count at which the pieces are shuffled. Nil when there is none (left).
+    @Published private(set) var shakeAt: Int?
+    @Published private(set) var shaking = false
+    /// Moves left before the shake-up.
+    var shakeIn: Int? { shakeAt.map { max(0, $0 - session.history.count) } }
     /// Bonus levels are Coin Rush: every finished jar throws double on a first clear.
     private var jarMultiplier: Int { level.file.beat == .bonus ? 2 : 1 }
     /// The hint search is running.
@@ -47,6 +60,7 @@ final class LevelController: ObservableObject {
         self.model = model
         level = model.levels[index]
         starSlack = model.starSlack(index: index)
+        shakeAt = model.shakeUpMove(index: index)
         session = GameSession(board: level.board, par: level.par, undoLimit: model.undoLimit, starSlack: starSlack)
         scene = BoardScene(board: level.board, kinds: level.kinds)
         scene.world = level.file.world
@@ -79,7 +93,10 @@ final class LevelController: ObservableObject {
                 model?.haptics.land()
             }
         }
-        scene.onMoveFinished = { [weak self] _ in self?.checkOutcome() }
+        scene.onMoveFinished = { [weak self] _ in
+            self?.checkOutcome()
+            self?.shakeUpIfDue()
+        }
         // The very first board opens mid-move: one squishy already lifted and a
         // hand on the jar it belongs in, so the first tap finishes a jar.
         if index == 0, model.progress.stars.isEmpty, let first = level.solution.first {
@@ -89,7 +106,12 @@ final class LevelController: ObservableObject {
 
     private func play(_ move: Move) -> (MoveResult, Board)? {
         let ontoMatch = session.board.jars.indices.contains(move.to) && !session.board.jars[move.to].isEmpty
-        guard let result = session.play(move) else { return nil }
+        let free = feverLeft > 0
+        let before = feverLeft
+        guard !shaking, let result = session.play(move, free: free) else { return nil }
+        feverBefore.append(before)
+        lastMoveWasFever = free
+        if free { feverLeft -= 1 }
         landsOnMatch = ontoMatch
         noWayThrough = false; hintGaveUp = false
         return (result, session.board)
@@ -97,7 +119,19 @@ final class LevelController: ObservableObject {
 
     /// A move has landed: it may earn a squishy streak word. Nothing shows when a streak ends.
     private func landed() {
-        guard let model, let word = chain.move(ontoMatch: landsOnMatch, at: Date().timeIntervalSince(started)) else { return }
+        guard let model else { return }
+        let earned = chain.move(ontoMatch: landsOnMatch, at: Date().timeIntervalSince(started))
+        if lastMoveWasFever {
+            // Each free pour rings a note higher. The last one ends the fever, after its jar has paid.
+            model.sounds.star(LevelController.feverMoves - feverLeft)
+            if feverLeft == 0 { DispatchQueue.main.async { [weak self] in self?.endFever() } }
+        }
+        guard let word = earned else { return }
+        if word == LevelController.feverStreak, feverLeft == 0, !lastMoveWasFever {
+            _ = pot.streakWord(word)
+            startFever()
+            return
+        }
         let text: String
         switch word {
         case .nice: text = String(localized: "Nice!")
@@ -128,7 +162,13 @@ final class LevelController: ObservableObject {
         jarsDone += 1
         model.sounds.jarComplete(number: jarsDone)
         // First clear: the jar throws its share of coins into the level pot.
-        let payout = pot.jarCompleted(kind: Int(piece.kind), at: Date().timeIntervalSince(started))
+        var payout = pot.jarCompleted(kind: Int(piece.kind), at: Date().timeIntervalSince(started))
+        if lastMoveWasFever {
+            // A jar finished in a fever pays double.
+            let extra = pot.feverBonus(payout.coins)
+            payout.coins += extra
+            feverCoins += payout.coins
+        }
         guard payout.coins > 0 else { return }
         scene.throwCoins(fromJar: jar, count: min(10, max(3, payout.coins / 6)))
         for i in 0..<3 {
@@ -141,6 +181,69 @@ final class LevelController: ObservableObject {
         } else if payout.doublePop {
             model.sounds.play("double_pop")
             scene.popLabel(String(localized: "Double pop!"), atJar: jar)
+        }
+    }
+
+    // MARK: - Squish Fever
+
+    private func startFever() {
+        guard let model else { return }
+        feverLeft = LevelController.feverMoves
+        feverCoins = 0
+        scene.setFever(true)
+        scene.popWord(String(localized: "SQUISH FEVER!"), size: 1.05)
+        model.sounds.play("streak", or: "run_x3")
+        model.haptics.win()
+    }
+
+    private func endFever() {
+        guard feverLeft == 0, scene.feverOn else { return }
+        scene.setFever(false)
+        guard let model, feverCoins > 0, outcome == nil else { return }
+        scene.popWord("+\(feverCoins)", size: 0.9)
+        model.sounds.play("coin_shower")
+    }
+
+    // MARK: - Shake-up
+
+    /// The pieces in unfinished jars land in new spots. The new layout is always one that can be
+    /// solved, and the star limit starts again from it, so a shake-up never costs stars.
+    private func shakeUpIfDue() {
+        guard let model, let at = shakeAt, session.history.count >= at, session.status == .playing, !shaking else { return }
+        shakeAt = nil
+        shaking = true
+        chain.end()
+        feverLeft = 0
+        feverBefore = []
+        scene.setFever(false)
+        scene.clearSelection()
+        model.sounds.play("drumroll")
+        model.haptics.complete()
+        scene.tremble(seconds: 1.1)
+        let board = session.board
+        Task {
+            let found: (board: Board, best: Int)? = await Task.detached(priority: .userInitiated) {
+                var rng = SystemRandomNumberGenerator()
+                for _ in 0..<14 {
+                    let next = board.shakenUp(using: &rng)
+                    if next == board || next.isWon || next.isStuck { continue }
+                    if next.jars.indices.contains(where: { next.isComplete($0) && !board.isComplete($0) }) { continue }
+                    if let result = Solver.solve(next, maxStates: 120_000), result.moves.count >= 2 {
+                        return (next, result.moves.count)
+                    }
+                }
+                return nil
+            }.value
+            try? await Task.sleep(nanoseconds: 1_100_000_000)
+            shaking = false
+            guard let found, session.board == board, outcome == nil else { return }
+            session.shakeUp(to: found.board, bestFromHere: found.best)
+            foundHint = nil
+            noWayThrough = false; hintGaveUp = false
+            scene.reload(session.board, dropIn: true)
+            scene.popWord(String(localized: "Shake-up!"), size: 0.95)
+            model.sounds.play("splat", or: "land_soft")
+            model.haptics.win()
         }
     }
 
@@ -173,8 +276,13 @@ final class LevelController: ObservableObject {
     }
 
     func undo() {
-        guard session.undo() else { return }
+        guard !shaking, session.undo() else { return }
         chain.end()
+        // The free moves of a fever come back with the move.
+        if let before = feverBefore.popLast() {
+            feverLeft = before
+            scene.setFever(before > 0)
+        }
         noWayThrough = false; hintGaveUp = false
         outcome = nil
         scene.reload(session.board)
@@ -254,6 +362,11 @@ final class LevelController: ObservableObject {
         started = Date()
         // A retry empties the pot, so coins can't be farmed.
         newPot()
+        feverLeft = 0
+        feverBefore = []
+        lastMoveWasFever = false
+        scene.setFever(false)
+        shakeAt = model?.shakeUpMove(index: index)
         session = GameSession(board: level.board, par: level.par, undoLimit: model?.undoLimit ?? 5, starSlack: starSlack)
         // Real walls soften: one extra jar after enough fails.
         if let soften = level.file.softenAfterFails, attempts > soften { session.addExtraJar() }
@@ -340,8 +453,8 @@ struct LevelView: View {
                     WinCard(stars: stars, showpiece: controller.level.file.beat == .showpiece,
                             summary: model.lastWin,
                             moves: controller.session.moveCount,
-                            perfect: controller.session.moveCount <= controller.level.par,
-                            threeStarMoves: Stars.moveLimit(forStars: 3, par: controller.level.par, slack: controller.starSlack),
+                            perfect: controller.session.moveCount <= controller.session.par,
+                            threeStarMoves: Stars.moveLimit(forStars: 3, par: controller.session.par, slack: controller.starSlack),
                             // Not while good news is waiting behind the win card: that is told first.
                             retry: controller.index < 2 || !model.news.isEmpty ? nil : { controller.retry() },
                             toCapsule: model.levelsToNextCapsule(after: controller.index),
@@ -462,8 +575,20 @@ struct LevelView: View {
                     Text("HARD").font(Theme.body(13)).foregroundStyle(Theme.bubblegum)
                 }
                 // The stars still to be won, and the moves left before the next one goes.
-                StarMeter(moves: controller.session.moveCount, par: controller.level.par, slack: controller.starSlack,
+                StarMeter(moves: controller.session.moveCount, par: controller.session.par, slack: controller.starSlack,
                           gentle: model.isGentleMode, haptics: model.haptics, sounds: model.sounds)
+                if controller.feverLeft > 0 {
+                    Label { Text("\(controller.feverLeft) free moves") } icon: { Image(systemName: "flame.fill") }
+                        .font(Theme.body(14)).foregroundStyle(.white)
+                        .padding(.horizontal, 10).padding(.vertical, 3)
+                        .background(Capsule().fill(LinearGradient(colors: [Color(hex: 0xFFB13D), Color(hex: 0xFF7EB6)], startPoint: .leading, endPoint: .trailing)))
+                        .transition(.scale.combined(with: .opacity))
+                } else if let left = controller.shakeIn {
+                    Label { Text("Shake-up in \(left)") } icon: { Image(systemName: "tornado") }
+                        .font(Theme.body(13)).foregroundStyle(Theme.plum)
+                        .padding(.horizontal, 10).padding(.vertical, 3)
+                        .background(Capsule().fill(left <= 3 ? Theme.butter : Color.white.opacity(0.7)))
+                }
                 // The level pot: coins thrown by finished jars, banked on the win.
                 if controller.pot.paysCoins {
                     // Says what it is until the first jar pays, then just the number.
@@ -493,7 +618,7 @@ struct LevelView: View {
     private var starsSlipped: Bool {
         let moves = controller.session.moveCount
         return moves > 0 && !model.isGentleMode && controller.index >= 2
-            && Stars.rating(moves: moves, par: controller.level.par, slack: controller.starSlack) < 3
+            && Stars.rating(moves: moves, par: controller.session.par, slack: controller.starSlack) < 3
     }
 
     // Undo appears after level 2, Hint after 4, Extra jar after 7 (game design doc).

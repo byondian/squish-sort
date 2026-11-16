@@ -59,13 +59,93 @@ final class BoardScene: SKScene {
         if oldSize != size && size.width > 0 { rebuild() }
     }
 
-    /// Replace the board without animation (undo, retry, extra jar).
-    func reload(_ board: Board) {
+    /// Replace the board without animation (undo, retry, extra jar). With `dropIn` the squishies
+    /// of unfinished jars fall into their new places (shake-up).
+    func reload(_ board: Board, dropIn: Bool = false) {
         removeAllActions()
         self.board = board
         lifted = nil
         busy = false
         rebuild()
+        guard dropIn else { return }
+        let calm = UIAccessibility.isReduceMotionEnabled
+        for j in pieces.indices where !board.isComplete(j) {
+            for (i, node) in pieces[j].enumerated() {
+                let home = slot(j, i)
+                node.alpha = 0
+                if calm {
+                    node.run(.fadeIn(withDuration: 0.3))
+                    continue
+                }
+                node.position = CGPoint(x: home.x, y: home.y + geometry.piece * 1.6)
+                let fall = SKAction.move(to: home, duration: 0.22)
+                fall.timingMode = .easeIn
+                node.run(.sequence([
+                    .wait(forDuration: 0.03 * Double(j) + 0.04 * Double(i)),
+                    .group([.fadeIn(withDuration: 0.1), fall]),
+                    .run { [weak node] in node?.land(speed: 6) },
+                ]), withKey: "travel")
+            }
+        }
+    }
+
+    /// Puts down anything held, without a move.
+    func clearSelection() {
+        if let l = lifted { putBack(l) }
+        clearHint()
+    }
+
+    /// Shake-up is coming: every jar trembles and the squishies shake their heads.
+    func tremble(seconds: Double) {
+        guard !UIAccessibility.isReduceMotionEnabled else { return }
+        busy = true
+        let steps = max(2, Int(seconds / 0.08))
+        for (j, jar) in jarNodes.enumerated() where j < geometry.centers.count {
+            let x = geometry.centers[j].x
+            var moves: [SKAction] = []
+            for s in 0..<steps {
+                let reach = 1.5 + 3.5 * CGFloat(s) / CGFloat(steps)
+                moves.append(.moveTo(x: x + (s % 2 == 0 ? reach : -reach), duration: 0.04))
+            }
+            moves.append(.moveTo(x: x, duration: 0.04))
+            jar.run(.sequence(moves))
+        }
+        for node in pieces.joined() { node.shakeHead() }
+        run(.sequence([.wait(forDuration: seconds), .run { [weak self] in self?.busy = false }]))
+    }
+
+    // MARK: - Squish Fever
+
+    private(set) var feverOn = false
+
+    /// A warm glow behind the jars that breathes slowly, with sparkles drifting up.
+    /// Glow and shimmer only: nothing flashes.
+    func setFever(_ on: Bool) {
+        feverOn = on
+        childNode(withName: "fever")?.removeFromParent()
+        guard on, size.width > 0 else { return }
+        let glow = SKSpriteNode(color: UIColor(hex: 0xFFD86B), size: size)
+        glow.name = "fever"
+        glow.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        glow.zPosition = -5
+        glow.alpha = 0.16
+        addChild(glow)
+        guard !UIAccessibility.isReduceMotionEnabled else { return }
+        glow.run(.repeatForever(.sequence([.fadeAlpha(to: 0.26, duration: 1.0), .fadeAlpha(to: 0.12, duration: 1.0)])))
+        let w = size.width, h = size.height
+        glow.run(.repeatForever(.sequence([.wait(forDuration: 0.22), .run { [weak glow] in
+            guard let glow else { return }
+            let spark = SKLabelNode(text: "✦")
+            spark.fontSize = CGFloat.random(in: 12...22)
+            spark.fontColor = .white
+            spark.position = CGPoint(x: CGFloat.random(in: -w / 2...w / 2), y: CGFloat.random(in: -h / 2...h / 4))
+            spark.alpha = 0
+            glow.addChild(spark)
+            spark.run(.sequence([
+                .group([.fadeAlpha(to: 0.9, duration: 0.3), .moveBy(x: 0, y: 40, duration: 0.9)]),
+                .fadeOut(withDuration: 0.3), .removeFromParent(),
+            ]))
+        }])))
     }
 
     // MARK: - Layout
@@ -132,6 +212,7 @@ final class BoardScene: SKScene {
             pieces.append(nodes)
             if board.isComplete(j) { jar.putLid(animated: false, tint: nodes.first.map { SquishyStyle.forID($0.kindID).color }) }
         }
+        if feverOn { setFever(true) }
         showTutorialIfNeeded()
     }
 

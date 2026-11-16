@@ -153,7 +153,7 @@ struct NewsCard: View {
             default: return "Every star in this world! You won a golden capsule."
             }
         case .trick:
-            return "Tap Trick at home to see it again."
+            return "Tap the trick under your Buddy at home to see it again."
         case .unlocked(let extra):
             switch extra {
             case .mysteryBag: return "Poke the bag and guess who's inside. A new bag every day, on your shelf at home."

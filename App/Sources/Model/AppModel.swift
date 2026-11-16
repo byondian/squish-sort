@@ -338,6 +338,15 @@ final class AppModel: ObservableObject {
         return wrapped ? max(1, slack) : slack
     }
 
+    /// Shake-up: on a boss level from the second world on, the pieces are shuffled once, after
+    /// this many moves. Nil where the level has none.
+    func shakeUpMove(index: Int) -> Int? {
+        guard levels.indices.contains(index), !isSideLevel(index), !AppModel.isUITesting else { return nil }
+        let level = levels[index]
+        guard level.file.beat == .boss, (LevelCatalog.worlds.firstIndex(of: level.file.world) ?? 0) >= 1 else { return nil }
+        return max(4, level.par / 2)
+    }
+
     // MARK: - Star jar
 
     static let starJarCoins = 300

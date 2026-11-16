@@ -189,6 +189,14 @@ public struct LevelPot: Equatable, Sendable {
     }
 
     private var paidWords: Set<SortChain.Word> = []
+
+    /// Squish Fever: a jar finished during it pays its coins a second time (first clears only).
+    @discardableResult
+    public mutating func feverBonus(_ amount: Int) -> Int {
+        guard paysCoins, amount > 0 else { return 0 }
+        coins += amount
+        return amount
+    }
 }
 
 /// Squishy streak (fix list B3): a chain of moves that each land on a matching squishy

@@ -92,6 +92,28 @@
         }
       }
     },
+    "%lld free moves": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "フリームーブ あと%lld回"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "무료 이동 %lld회"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "免費 %lld 步"
+          }
+        }
+      }
+    },
     "%lld in a row! +%lld": {
       "localizations": {
         "ja": {
@@ -1157,6 +1179,28 @@
         }
       }
     },
+    "Dance": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ダンス"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "댄스"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "跳舞"
+          }
+        }
+      }
+    },
     "Delete": {
       "localizations": {
         "ja": {
@@ -1439,6 +1483,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "今日首勝：+%lld"
+          }
+        }
+      }
+    },
+    "Flip": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "フリップ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "플립"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "翻跟斗"
           }
         }
       }
@@ -3357,6 +3423,28 @@
         }
       }
     },
+    "SQUISH FEVER!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スクイーズフィーバー！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스퀴시 피버!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "捏捏狂熱！"
+          }
+        }
+      }
+    },
     "Santa's Grotto": {
       "localizations": {
         "ja": {
@@ -3463,6 +3551,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "設定"
+          }
+        }
+      }
+    },
+    "Shake-up in %lld": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "シャッフルまで あと%lld"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "셰이크업까지 %lld"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再 %lld 步大洗牌"
+          }
+        }
+      }
+    },
+    "Shake-up!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "シャッフル！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "셰이크업!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大洗牌！"
           }
         }
       }
@@ -3639,6 +3771,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "音效"
+          }
+        }
+      }
+    },
+    "Spin": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スピン"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스핀"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "轉圈"
           }
         }
       }
@@ -4039,28 +4193,6 @@
         }
       }
     },
-    "Tap Trick at home to see it again.": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ホームの「わざ」をタップすると、また見られるよ。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "홈에서 「재주」를 누르면 다시 볼 수 있어요."
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在主畫面點「特技」就能再看一次。"
-          }
-        }
-      }
-    },
     "Tap again": {
       "localizations": {
         "ja": {
@@ -4079,6 +4211,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "再點一次"
+          }
+        }
+      }
+    },
+    "Tap the trick under your Buddy at home to see it again.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ホームでバディの下にある「わざ」をタップすると、また見られるよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "홈에서 버디 아래의 재주를 누르면 다시 볼 수 있어요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在主畫面點夥伴下方的特技，就能再看一次。"
           }
         }
       }
@@ -4299,28 +4453,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "點心 ×%lld"
-          }
-        }
-      }
-    },
-    "Trick": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "わざ"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "재주"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "特技"
           }
         }
       }

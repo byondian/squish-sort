@@ -383,10 +383,60 @@ struct BuddyHomeView: View {
     @State private var trickTurn = 0
     @State private var giftWobble = false
     @State private var talking = false
+    /// The trick chip a bouncing hand points at (a trick just learned).
+    @State private var pointAt: Int?
+    @State private var handBounce = false
+
+    /// One chip per trick. A learned one plays its trick; a locked one shows the hearts still needed.
+    /// A bouncing hand points at a trick that has just been learned until it is tapped once.
+    private var trickChips: some View {
+        let buddy = model.progress.buddy
+        let names: [LocalizedStringKey] = ["Spin", "Flip", "Dance"]
+        let icons = ["arrow.triangle.2.circlepath", "arrow.up.and.down.circle.fill", "music.note"]
+        return HStack(spacing: 8) {
+            ForEach(1...3, id: \.self) { n in
+                let learned = n <= buddy.tricksUnlocked
+                Button {
+                    if pointAt == n { pointAt = nil }
+                    playTrick(n)
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: learned ? icons[n - 1] : "lock.fill")
+                        Text(names[n - 1])
+                        if !learned {
+                            Label { Text(verbatim: "\(max(1, n * BuddyState.heartsPerTrick - buddy.hearts))") } icon: { Image(systemName: "heart.fill") }
+                                .labelStyle(.titleAndIcon)
+                        }
+                    }
+                    .font(Theme.body(13)).lineLimit(1).minimumScaleFactor(0.7)
+                    .foregroundStyle(Theme.plum.opacity(learned ? 1 : 0.5))
+                    .padding(.horizontal, 10).padding(.vertical, 7)
+                    .background(Capsule().fill(learned ? Theme.mint : Color.white.opacity(0.5)))
+                    .overlay(Capsule().stroke(pointAt == n ? Theme.bubblegum : Theme.plum.opacity(0.15), lineWidth: pointAt == n ? 3 : 2))
+                }
+                .buttonStyle(PressSquish())
+                .disabled(!learned)
+                .accessibilityIdentifier("trick-\(n)")
+                .overlay(alignment: .bottom) {
+                    if pointAt == n {
+                        Text(verbatim: "👆").font(.system(size: 34))
+                            .offset(y: handBounce ? 34 : 44)
+                            .allowsHitTesting(false)
+                            .onAppear {
+                                handBounce = false
+                                withAnimation(.easeInOut(duration: 0.45).repeatForever(autoreverses: true)) { handBounce = true }
+                            }
+                    }
+                }
+                .zIndex(pointAt == n ? 1 : 0)
+            }
+        }
+    }
 
     private func showOffTrick() {
         guard let number = model.trickToShow else { return }
         model.trickToShow = nil
+        pointAt = number
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
             spin = 0; flip = 0; sway = 0
             playTrick(number)
@@ -538,6 +588,7 @@ struct BuddyHomeView: View {
                         .padding(.horizontal, 14).padding(.vertical, 8)
                         .background(Capsule().fill(Color.white.opacity(0.7)))
                 }
+                trickChips
                 HStack(spacing: 10) {
                     if model.progress.buddy.treats > 0 {
                         Button { feed { model.feedBuddy() } } label: {
@@ -571,12 +622,6 @@ struct BuddyHomeView: View {
                         } label: { Label("Get treats", systemImage: "birthday.cake.fill") }
                         .buttonStyle(SquishButtonStyle(fill: Theme.butter, text: Theme.plum))
                         .accessibilityIdentifier("get-treats")
-                    }
-                    if model.progress.buddy.tricksUnlocked > 0 {
-                        // Tricks are easy to find: one tap, and the Buddy does the next one it knows.
-                        Button { playTrick() } label: { Label("Trick", systemImage: "sparkles").font(Theme.body(14)) }
-                            .buttonStyle(SquishButtonStyle(fill: Theme.mint, text: Theme.plum))
-                            .accessibilityIdentifier("buddy-trick")
                     }
                     Button { picking = true } label: {
                         Label("Change Buddy", systemImage: "arrow.left.arrow.right").font(Theme.body(14))
