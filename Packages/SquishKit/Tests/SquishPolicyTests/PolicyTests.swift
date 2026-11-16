@@ -310,7 +310,10 @@ final class CapsuleTests: XCTestCase {
     }
 
     func testEverySquishyHasABioInEveryLanguage() throws {
-        let data = try content("squishy-bios.json")
+        let data = try Data(contentsOf: URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+            .deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("Content/squishy-bios.json"))
         let file = try JSONSerialization.jsonObject(with: data) as? [String: Any]
         let bios = file?["bios"] as? [String: [String: String]] ?? [:]
         let riddles = file?["riddles"] as? [String: [String: String]] ?? [:]
