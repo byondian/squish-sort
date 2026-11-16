@@ -23,6 +23,15 @@ This permanently deletes your progress, collection, coins, names and settings fr
 
 **Data held by Google:** we can't delete the advertising data Google has received. You can ask Google directly through its [privacy help centre](https://support.google.com/policies/troubleshooter/9009584).
 
+## Turn off or reset game statistics
+
+For players 13 and over (14 in Korea), the game may send game statistics to Google Analytics for Firebase (see the [privacy policy]({{h}}/privacy#analytics)). To stop them:
+
+- In the game: Settings > **Privacy choices** > switch off **Share game statistics**. This also resets the random app ID on the phone.
+- Turning on gentle mode, or deleting the app, also stops them and resets the ID.
+
+Statistics are linked only to that random ID, never to your name, so after a reset nobody can connect older statistics to you. They are deleted automatically after 14 months.
+
 ## Delete support messages
 
 If you've written to us, email privacy@squishsort.app from the same address and ask us to delete the conversation. We'll confirm within one month (usually much sooner).

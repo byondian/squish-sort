@@ -8,7 +8,8 @@ description: How Squish Sort and squishsort.app use personal data, in plain word
 - Squish Sort has **no accounts**. Your progress, collection, coins, settings and any names you type stay **on your iPhone**. We never receive them.
 - The game asks your age once, and keeps only an age group (child, teen or adult) and, for players 13 and over, a minimum age between 13 and 18. It never keeps your birth date or birth year.
 - Ads are shown by **Google AdMob**. Google receives technical data such as your IP address and device information to show and measure ads. Ads are only **personalised** for players old enough to agree **and** who tap Allow on Apple's tracking prompt (and, in the UK, EEA and Switzerland, also agree in Google's consent form).
-- Players under 13 (under 14 in Korea), and anyone who skips the age question, get **gentle mode**: child-safe, non-personalised ads, no tracking prompt and no tracking.
+- For players 13 and over (14 and over in Korea), the game sends **game statistics** (such as levels played and features used) to **Google Analytics for Firebase**, linked to a random app ID and never to your name. It is never switched on in gentle mode, waits for your agreement in the UK, EEA, Switzerland and Korea, and can be turned off in Settings.
+- Players under 13 (under 14 in Korea), and anyone who skips the age question, get **gentle mode**: child-safe, non-personalised ads, no tracking prompt, no tracking and no game statistics.
 - **Purchases** go through Apple. We never see your card or Apple Account details.
 - If you write to support, we use your email only to reply.
 - We do not sell personal data.
@@ -47,11 +48,23 @@ iPhone backups (iCloud or computer) may include this game data. Those backups ar
 | IP address, device and app information, ad interactions, approximate location worked out from the IP address, and an app-specific device identifier | Google (AdMob) | To show ads, limit how often you see the same ad, measure ads and prevent fraud | Legitimate interests (funding a free game with ads and preventing ad fraud); consent where we collect it through Google's form (see below) |
 | Apple's advertising identifier (IDFA) and personalised ads | Google (AdMob) | Personalised ads, only if you are old enough and allowed tracking | Consent (Apple's prompt and, in the UK/EEA/CH, Google's form) |
 | Your choices in Google's consent form | Google | To remember and respect your ad choices | Legal obligation and legitimate interests |
+| Game statistics: levels started and finished (with stars, moves, time taken, undos and hints), features opened, coins earned and spent, shop items looked at, purchases started and finished, ads offered and watched, plus a random app instance ID, device model, iOS version, language and country. Only for players 13 and over (14 in Korea) | Google (Analytics for Firebase), on our behalf | To understand how the game is played and make it better, for example which levels are too hard, where players stop and which features are used. Not used for ads or tracking across apps | Consent in the UK, EEA and Switzerland (Settings > Privacy choices); legitimate interests (improving the game) elsewhere |
 | The list of products and prices | Apple | To show the coin shop and Remove Ads in your currency | Contract |
 | Purchase details | Apple | To process payments, refunds and Family Sharing | Contract (Apple is responsible for this processing) |
 | Anonymous, aggregated install and usage numbers | Apple, then us in App Store Connect | Apple shares statistics only from people who chose to share with app developers | Your choice in iPhone settings |
 
-The app contains **no analytics or crash-reporting tools** of its own, and no social features, chat, accounts or location access in this version.
+The app contains no crash-reporting tools, and no social features, chat, accounts or location access in this version.
+
+## Game statistics (analytics) {#analytics}
+
+To find out which levels are too hard, where players stop and which features they enjoy, the game uses **Google Analytics for Firebase**. The rules:
+
+- **Off until the age question.** Nothing is sent before the age step. It is switched on only for players 13 and over (14 and over in Korea). It is **never switched on in gentle mode**, for a skipped age question or for an unknown age. Switching to gentle mode later turns it off and resets its data on the phone.
+- **Asks first in the UK, EEA, Switzerland and Korea.** There it stays off until you agree on the privacy choices screen.
+- **You can turn it off at any time** in **Settings > Privacy choices > Share game statistics**. That stops collection and resets the random app ID on the phone.
+- **What is never sent:** names you type, your age or birth year, your email or any account, Apple's advertising identifier or anything else used for tracking. We don't set a user ID, and Analytics' advertising features are switched off.
+- **Who sees it:** Google processes the statistics for us as our processor, under Google's data processing terms. We have switched off Firebase's settings that let Google use the data for its own purposes. We see only reports, not individual players' names, because we don't have them.
+
 
 ## Ads, tracking and your choices
 
@@ -65,10 +78,10 @@ Google's own policies explain how it uses data from apps that show its ads: [How
 
 Squish Sort is designed for a mixed audience, including children. We follow the US Children's Online Privacy Protection Act (COPPA), the UK Age Appropriate Design Code, the GDPR rules for children and Korea's rules for under-14s. In short:
 
-- The ads system does not start until the age question is answered or skipped. Before that, the game only fetches its settings file from our website and the product list from Apple, which involve an IP address as any internet request does.
+- The ads and game statistics systems do not start until the age question is answered or skipped. Before that, the game only fetches its settings file from our website and the product list from Apple, which involve an IP address as any internet request does.
 - A child's age group is set to gentle mode. Unknown or unclear ages are treated as a child.
 - We do not collect children's names, contact details, photos, voice, precise location or any other information that identifies them.
-- For children, the only data that leaves the device for ads is what Google AdMob needs to run child-directed ads: the IP address, an app-specific device identifier, basic device and app information, and which ads were shown or tapped. It is used only for these internal operations: showing contextual (non-personalised) ads, limiting how often an ad repeats, counting ad views and clicks, preventing fraud and keeping the service secure, and meeting legal duties. We make sure of this by marking every ad request from a child as child-directed, which switches off personalised advertising, remarketing and third-party ad vendors at Google, by never asking for Apple's advertising identifier, and by not adding any other analytics or advertising tools. It is not used to contact a child, to build a profile or for behavioural advertising. Google keeps this data under its own retention policy (see "How long we keep data"); we keep none of it.
+- For children, the only data that leaves the device for ads is what Google AdMob needs to run child-directed ads: the IP address, an app-specific device identifier, basic device and app information, and which ads were shown or tapped. It is used only for these internal operations: showing contextual (non-personalised) ads, limiting how often an ad repeats, counting ad views and clicks, preventing fraud and keeping the service secure, and meeting legal duties. We make sure of this by marking every ad request from a child as child-directed, which switches off personalised advertising, remarketing and third-party ad vendors at Google, by never asking for Apple's advertising identifier, by never switching on game statistics (analytics) for children, and by not adding any other analytics or advertising tools. It is not used to contact a child, to build a profile or for behavioural advertising. Google keeps this data under its own retention policy (see "How long we keep data"); we keep none of it.
 - Children are asked to pass a grown-up check (a sum most young children can't do) before making purchases or leaving gentle mode. There are no pop-ups pushing purchases in gentle mode.
 - If a child writes to support, we use the message only to reply once (ideally to a parent) and aim to delete it within 30 days of answering.
 
@@ -97,11 +110,13 @@ If you email us or use the contact form, we receive your email address, your fir
 | Website statistics | Aggregated counts only, no personal profile |
 | Support emails and form messages | Up to 24 months after the conversation ends, then deleted. Messages from or about a child: we aim to delete them within 30 days of answering |
 | Records of privacy requests | 3 years, to show we handled them |
+| Game statistics (Google Analytics for Firebase) | 14 months, then deleted automatically. Turning statistics off or deleting the app resets the random app ID, so older statistics can no longer be linked to that phone |
 | Data received by Google for ads | Under Google's retention policies (for example, Google anonymises IP addresses in ad logs after 9 months and cookie or identifier data after 18 months) |
 
 ## Who receives data
 
 - **Google LLC / Google Ireland Ltd** (AdMob and the consent form). Google decides how it uses the data it collects to serve and measure ads, as an independent controller under its own privacy policy.
+- **Google LLC / Google Ireland Ltd** (Analytics for Firebase), as our processor for game statistics.
 - **Apple Inc.** handles App Store purchases, refunds and App Store statistics as an independent controller under its own privacy policy.
 - **Vercel Inc.** (USA) hosts the website and the settings file for us, as our processor.
 - **Resend (Plus Five Five, Inc.)** (USA) delivers and stores email for us, as our processor.
@@ -125,14 +140,14 @@ You can also complain to your data protection authority, for example the CNPD in
 ### United States (including California and other states)
 
 - We don't sell personal information. Personalised ads for adults who allow tracking may count as "sharing" for cross-context behavioural advertising under California law. You can opt out at any time by choosing Ask App Not to Track or switching tracking off in iPhone settings. Nobody under 18 in the US gets personalised ads, so their data is never sold or shared for cross-context behavioural advertising.
-- Categories collected in the last 12 months: identifiers (IP address, device identifiers, IDFA only with permission), internet activity (ad interactions), approximate location (from IP), and, if you contact us, your name and email. Sources: your device and you. Purposes: as described above.
+- Categories collected in the last 12 months: identifiers (IP address, device identifiers, IDFA only with permission), internet activity (ad interactions and, for players 13 and over, game statistics), approximate location (from IP), and, if you contact us, your name and email. Sources: your device and you. Purposes: as described above.
 - We honour Global Privacy Control signals on this website (it does not track you anyway).
 - We will not discriminate against you for using your rights. To use them, email privacy@squishsort.app. An authorised agent may make a request for you with your written permission.
 
 ### Republic of Korea
 
 - Players under 14 in Korea are treated as children: no personalised ads and no tracking, and we do not ask children for any information.
-- Overseas transfer: data is sent to Google LLC (USA), Vercel Inc. (USA) and Resend (USA) over the internet when the app or site is used, for the purposes and periods above. You can refuse by not allowing tracking, or by not using the service. Refusing personalised ads does not stop you playing.
+- Overseas transfer: data is sent to Google LLC (USA), Vercel Inc. (USA) and Resend (USA) over the internet when the app or site is used, for the purposes and periods above. You can refuse by not allowing tracking, by not agreeing to game statistics (they are off until you agree in Korea), or by not using the service. Refusing personalised ads does not stop you playing.
 - Person responsible for personal information: {{operator}}, privacy@squishsort.app.
 - You can also ask for help from the Personal Information Infringement Report Center (privacy.kisa.or.kr, call 118) or the Personal Information Dispute Mediation Committee (www.kopico.go.kr, 1833-6972).
 - The [Korean version](/ko/privacy) of this policy contains the full details required by the Personal Information Protection Act.

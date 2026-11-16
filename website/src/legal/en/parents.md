@@ -21,6 +21,7 @@ Gentle mode is on for players under 13 (under 14 in Korea) and for anyone who sk
 - Ads are child-directed, non-personalised and general audience only.
 - The first ad between levels comes at level 12 or later, and ads are half as frequent.
 - Apple's tracking prompt is never shown.
+- Game statistics (analytics) are never sent.
 - Purchases and the coin shop sit behind a grown-up check, and are only reachable from Settings.
 - Optional reward videos are only offered for an extra jar or a hint, and the Buddy's daily gift is free. No win streaks.
 - The link to our Squishy Shop for grown-ups is hidden. For players 13 and over it sits in Settings behind a grown-up check, and the shop page itself asks for an adult's year of birth.
@@ -39,7 +40,7 @@ Full details, including the capsule odds, are on [purchases and drop rates]({{h}
 
 ## Data and privacy
 
-Progress, collections and any names your child types (for their Squishy Buddy or made squishies) stay on the device. The game has no accounts and sends nothing about your child to us beyond the standard request for its settings file (an IP address, which we don't link to any player). The only data that leaves the device is the technical information Google needs to serve child-safe ads. See the [privacy policy]({{h}}/privacy#children-s-privacy).
+Progress, collections and any names your child types (for their Squishy Buddy or made squishies) stay on the device. The game has no accounts and sends nothing about your child to us beyond the standard request for its settings file (an IP address, which we don't link to any player). The only data that leaves the device is the technical information Google needs to serve child-safe ads. Game statistics (analytics) are never switched on in gentle mode, and turning gentle mode on switches them off. See the [privacy policy]({{h}}/privacy#children-s-privacy).
 
 ## Social features
 
