@@ -640,8 +640,8 @@ final class AppModel: ObservableObject {
         let unlockedExtra = Extra.allCases.filter { isExtraUnlocked($0) } != extrasBefore
         lastWinHadReward = (firstClear && level.file.capsule) || unlockedExtra || barFull
         if unlockedExtra { sounds.play("unlock_new") }
-        // Told when the player moves on from the win card. The Squish Room and the Buddy
-        // arrive with the first capsule, which introduces them itself.
+        // Told when the player moves on from the win card. The Squish Room's card is queued
+        // by the first capsule (see openCapsule), because that capsule is what unlocks it.
         if !worldWasComplete, isWorldComplete(level.file.world) {
             let order = LevelCatalog.worlds
             let next = order.firstIndex(of: level.file.world).flatMap { $0 + 1 < order.count ? order[$0 + 1] : nil }
@@ -649,7 +649,7 @@ final class AppModel: ObservableObject {
             update { $0.wallet.earn(config.coins.worldComplete) }
         }
         // The Buddy is met in the first capsule itself ("Is this your Buddy?"), so it has no card.
-        for extra in [Extra.squishRoom, .mysteryBag, .maker] where isExtraUnlocked(extra) && !extrasBefore.contains(extra) {
+        for extra in [Extra.mysteryBag, .maker] where isExtraUnlocked(extra) && !extrasBefore.contains(extra) {
             news.append(.unlocked(extra))
         }
         // A full capsule bar opens its capsule after the level's own, never on top of it.
@@ -739,8 +739,13 @@ final class AppModel: ObservableObject {
         var state = progress.collection
         if let got = CapsuleDrops.open(world: world, roster: roster, state: &state, rng: &rng, odds: config.capsuleOdds) {
             capsuleIsNew = !progress.collection.owns(got.id)
+            let roomWasOpen = isExtraUnlocked(.squishRoom)
             update { $0.collection = state }
             capsule = got
+            // The first capsule opens the Squish Room: its card is told at the next "Next".
+            if !roomWasOpen, isExtraUnlocked(.squishRoom), !news.contains(.unlocked(.squishRoom)) {
+                news.append(.unlocked(.squishRoom))
+            }
         }
     }
 
