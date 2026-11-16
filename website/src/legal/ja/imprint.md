@@ -8,6 +8,7 @@ Squish Sortとsquishsort.appは、次の者が運営しています。
 
 **{{operator}}**（個人開発者）
 拠点：{{country}}
+ルクセンブルク商業・会社登記簿（RCS）には登録していません
 郵送先（郵便転送サービス）：{{postal}}
 メール：support@squishsort.app
 電話：{{phone}}

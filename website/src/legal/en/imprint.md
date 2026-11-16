@@ -8,6 +8,7 @@ Squish Sort and squishsort.app are run by:
 
 **{{operator}}**, independent developer
 Established in: {{country}}
+Not registered in the Luxembourg Trade and Companies Register (RCS)
 Postal address (mail forwarding service): {{postal}}
 Email: support@squishsort.app
 Phone: {{phone}}

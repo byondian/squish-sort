@@ -8,6 +8,7 @@ Squish Sort와 squishsort.app은 다음이 운영합니다.
 
 **{{operator}}**, 개인 개발자
 소재지: {{country}}
+룩셈부르크 상업·회사 등기부(RCS)에 등록되어 있지 않음
 우편 주소(우편 대행 서비스): {{postal}}
 이메일: support@squishsort.app
 전화: {{phone}}

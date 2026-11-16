@@ -8,6 +8,7 @@ Squish Sort 和 squishsort.app 由以下人士營運：
 
 **{{operator}}**，獨立開發者
 所在地：{{country}}
+未在盧森堡商業及公司登記處（RCS）登記
 郵寄地址（郵件轉寄服務）：{{postal}}
 電子郵件：support@squishsort.app
 電話：{{phone}}
