@@ -13,44 +13,21 @@ concurrency:
 jobs:
   rules-and-levels:
     name: Rules and levels (gates 1 and 2)
-    runs-on: macos-15
+    # Plain Swift with no Apple frameworks, so it runs on Linux, where a minute costs a tenth of a Mac one.
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
       - name: Toolchain
-        run: |
-          xcodebuild -version
-          swift --version
+        run: swift --version
       - name: Gate 1 — unit tests (rules, policy, levels)
         run: swift test --package-path Packages/SquishKit
       - name: Gate 2 — re-solve every level and check par
         run: swift run -c release --package-path Packages/SquishKit squish-levels check Levels
 
-  app-build:
-    name: App builds for the simulator
-    runs-on: macos-15
-    timeout-minutes: 40
-    steps:
-      - uses: actions/checkout@v5
-      - name: Select the newest Xcode
-        run: |
-          XCODE=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
-          sudo xcode-select -s "$XCODE"
-          xcodebuild -version
-      - name: Generate the Xcode project
-        run: |
-          brew install xcodegen
-          xcodegen generate
-      - name: Build
-        run: |
-          set -o pipefail
-          xcodebuild build -project SquishSort.xcodeproj -scheme SquishSort \
-            -destination 'generic/platform=iOS Simulator' \
-            CODE_SIGNING_ALLOWED=NO | tee build.log | grep -E "error:|warning: .*Squish|BUILD" || true
-          grep -q "BUILD SUCCEEDED" build.log
-
   golden-path:
-    name: Golden path UI test (gate 3)
+    name: App build and golden path UI test (gate 3)
+    # The only Mac job: it builds the app and runs it, so a separate build job would pay twice.
     runs-on: macos-15
     timeout-minutes: 45
     steps:
