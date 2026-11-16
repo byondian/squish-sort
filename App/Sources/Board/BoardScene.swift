@@ -333,7 +333,12 @@ final class BoardScene: SKScene {
             node.zPosition = 5
             let target = slot(j, i)
             let drop = Double(node.position.y - target.y) / Double(max(geometry.piece, 1))
-            guard drop > 0.05 else { continue }
+            guard drop > 0.05 else {
+                // Already home, or as good as: make sure it sits exactly in its slot.
+                node.removeAction(forKey: "settle")
+                node.position = target
+                continue
+            }
             node.run(.sequence([.move(to: target, duration: 0.12), .run { [weak self, weak node] in
                 guard let self, let node else { return }
                 self.land(node, jar: j, index: i, speed: drop / 0.12)

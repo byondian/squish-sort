@@ -10,11 +10,16 @@ final class SquishHaptics {
     private var sharpness: Float = 0
     private var lastTap = Date.distantPast
     private let supported = CHHapticEngine.capabilitiesForHardware().supportsHaptics
+    /// After a failed start, wait a second before trying again.
+    private var retryAfter = Date.distantPast
 
     private func ready() -> CHHapticEngine? {
-        guard supported else { return nil }
+        guard supported, Date() >= retryAfter else { return nil }
         if engine == nil {
-            guard let made = try? CHHapticEngine() else { return nil }
+            guard let made = try? CHHapticEngine() else {
+                retryAfter = Date().addingTimeInterval(1)
+                return nil
+            }
             made.playsHapticsOnly = true
             made.isAutoShutdownEnabled = true
             made.resetHandler = { [weak self] in
@@ -25,7 +30,10 @@ final class SquishHaptics {
             }
             engine = made
         }
-        guard let engine, (try? engine.start()) != nil else { return nil }
+        guard let engine, (try? engine.start()) != nil else {
+            retryAfter = Date().addingTimeInterval(1)
+            return nil
+        }
         return engine
     }
 

@@ -20,6 +20,8 @@ final class SquishSound {
     private var nextVoice = 0
     private var loaded = false
     private var failed = false
+    /// How long nothing has sounded. The engine sleeps after a second of that.
+    private var quietFor = 0.0
 
     private func read(_ file: String) -> AVAudioPCMBuffer? {
         let name = (file as NSString).deletingPathExtension
@@ -91,6 +93,17 @@ final class SquishSound {
             rest()
             return
         }
+        // The engine only runs while there is something to hear (a resting Buddy costs nothing).
+        let audible = frame.thud != nil || !frame.grains.isEmpty || frame.loops.values.contains { $0 > 0.001 }
+        if audible {
+            quietFor = 0
+        } else {
+            quietFor += dt
+            if quietFor > 1 || !engine.isRunning {
+                rest()
+                return
+            }
+        }
         guard wake() else { return }
         // Volumes glide over about 35 ms, so nothing clicks.
         let ease = Float(1 - exp(-dt / 0.035))
@@ -110,6 +123,7 @@ final class SquishSound {
 
     func pop(volume: Double, pan: Double, enabled: Bool) {
         guard enabled, wake(), let buffer = oneShots["pop"] else { return }
+        quietFor = 0
         fire(buffer, volume: volume, pan: pan)
     }
 
