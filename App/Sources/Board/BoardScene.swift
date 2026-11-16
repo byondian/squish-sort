@@ -478,14 +478,25 @@ final class BoardScene: SKScene {
         }
     }
 
-    /// Every jar bounces in turn, left to right.
+    /// Every jar bounces in turn, left to right. Then the sorted squishies keep
+    /// hopping in their jars for as long as the win card is up.
     func celebrate() {
         for (j, jar) in jarNodes.enumerated() {
             let lift = geometry.piece * 0.5
             let wait = SKAction.wait(forDuration: 0.08 * Double(j))
             let bounce = SKAction.sequence([.moveBy(x: 0, y: lift, duration: 0.15), .moveBy(x: 0, y: -lift, duration: 0.15)])
             jar.run(.sequence([wait, bounce]))
-            for node in pieces[j] { node.run(.sequence([wait, bounce])) }
+            let hop = geometry.piece * 0.16
+            for (i, node) in pieces[j].enumerated() {
+                let up = SKAction.moveBy(x: 0, y: hop, duration: 0.13)
+                up.timingMode = .easeOut
+                let down = SKAction.moveBy(x: 0, y: -hop, duration: 0.13)
+                down.timingMode = .easeIn
+                let rest = SKAction.wait(forDuration: 0.45)
+                let hops = SKAction.repeatForever(.sequence([up, down, rest]))
+                let stagger = SKAction.wait(forDuration: 0.25 + 0.07 * Double(i))
+                node.run(UIAccessibility.isReduceMotionEnabled ? .sequence([wait, bounce]) : .sequence([wait, bounce, stagger, hops]), withKey: "hop")
+            }
         }
     }
 

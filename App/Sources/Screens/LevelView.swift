@@ -327,6 +327,7 @@ struct LevelView: View {
                 }
                 switch outcome {
                 case .won(let stars):
+                    Confetti(count: stars >= 3 ? 80 : 45, seconds: 3).ignoresSafeArea()
                     WinCard(stars: stars, showpiece: controller.level.file.beat == .showpiece,
                             summary: model.lastWin,
                             perfect: controller.session.moveCount <= controller.level.par,
