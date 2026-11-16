@@ -234,13 +234,11 @@ final class CadenceTests: XCTestCase {
         XCTAssertFalse(AdCadence.shouldShowInterstitial(after: win(20), state: s, group: .adult, ownsRemoveAds: false))
     }
 
-    func testRatingPromptOnlyAfterAFirstTryBossWinFromLevelTen() {
-        XCTAssertTrue(RatingPrompt.shouldAsk(after: win(10, boss: true), group: .adult, alreadyAsked: false))
-        XCTAssertTrue(RatingPrompt.shouldAsk(after: win(20, boss: true), group: .teen, alreadyAsked: false))
-        XCTAssertFalse(RatingPrompt.shouldAsk(after: win(10, boss: true), group: .child, alreadyAsked: false), "never in gentle mode")
-        XCTAssertFalse(RatingPrompt.shouldAsk(after: win(10, attempts: 2, boss: true), group: .adult, alreadyAsked: false), "never after a fail")
-        XCTAssertFalse(RatingPrompt.shouldAsk(after: win(10, boss: true), group: .adult, alreadyAsked: true))
-        XCTAssertFalse(RatingPrompt.shouldAsk(after: win(9), group: .adult, alreadyAsked: false))
+    func testRatingPromptOnceAndNeverInGentleMode() {
+        XCTAssertTrue(RatingPrompt.shouldAsk(at: .worldComplete, group: .adult, alreadyAsked: false))
+        XCTAssertTrue(RatingPrompt.shouldAsk(at: .ultraCapsule, group: .teen, alreadyAsked: false))
+        XCTAssertFalse(RatingPrompt.shouldAsk(at: .worldComplete, group: .child, alreadyAsked: false), "never in gentle mode")
+        XCTAssertFalse(RatingPrompt.shouldAsk(at: .ultraCapsule, group: .adult, alreadyAsked: true), "asked once")
     }
 
     func testTiersRampUp() {

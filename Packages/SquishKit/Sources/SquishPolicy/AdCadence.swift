@@ -116,9 +116,11 @@ public enum AdCadence {
 /// first try from level 10 on, never in gentle mode. Boss wins never show a
 /// forced ad, so it never follows an ad or a fail.
 public enum RatingPrompt {
-    public static let fromLevel = 10
+    /// Apple's own star pop-up is asked for once, at a happy moment: after the first
+    /// world-complete celebration or the first ultra-rare capsule, whichever comes first.
+    public enum Moment: Sendable { case worldComplete, ultraCapsule }
 
-    public static func shouldAsk(after win: LevelWin, group: AgeGroup, alreadyAsked: Bool) -> Bool {
-        !alreadyAsked && group != .child && win.isBoss && win.attempts == 1 && win.level >= fromLevel
+    public static func shouldAsk(at moment: Moment, group: AgeGroup, alreadyAsked: Bool) -> Bool {
+        !alreadyAsked && group != .child
     }
 }

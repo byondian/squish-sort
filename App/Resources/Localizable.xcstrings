@@ -2873,6 +2873,28 @@
         }
       }
     },
+    "Rate Squish Sort": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Squish Sortを評価する"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Squish Sort 평가하기"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "為 Squish Sort 評分"
+          }
+        }
+      }
+    },
     "Real squishies (website)": {
       "localizations": {
         "ja": {

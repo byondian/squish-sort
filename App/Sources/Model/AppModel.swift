@@ -69,6 +69,8 @@ final class AppModel: ObservableObject {
     @Published var buddySays: String?
     /// Goes up each time the daily gift is opened, so the home screen can throw the coins.
     @Published var giftsOpened = 0
+    private var ultraJustOpened = false
+    private var squeezeAfterCapsule: String?
     @Published var buddyAsksMood = false
     /// The Buddy's line on the win or stuck card.
     @Published var levelCheer: String?
@@ -760,16 +762,38 @@ final class AppModel: ObservableObject {
     /// waits for `capsuleDismissed`, because nothing can be presented while the
     /// cover is still closing.
     func capsuleClosed() {
+        if capsule?.rarity == .ultra { ultraJustOpened = true }
         capsule = nil
     }
 
     /// Called by the capsule cover's onDismiss.
     func capsuleDismissed() {
+        let ultra = ultraJustOpened
+        ultraJustOpened = false
         if progress.age == nil {
             askAge = true
+        } else if let ref = squeezeAfterCapsule {
+            // "Squeeze me!" on the capsule: straight to the Squish Room with the new squishy.
+            squeezeAfterCapsule = nil
+            squeeze(ref)
         } else {
             openPendingCapsule()
+            if ultra, capsule == nil { maybeAskForRating(at: .ultraCapsule) }
         }
+    }
+
+    /// "Squeeze me!" on the capsule screen, offered once the Squish Room is open and
+    /// nothing else (good news, another capsule) is waiting to be shown.
+    var offersSqueezeFromCapsule: Bool {
+        isExtraUnlocked(.squishRoom) && progress.age != nil && news.isEmpty && progress.pendingCapsules.isEmpty
+            && progress.buddy.squishy != nil
+    }
+
+    func squeezeFromCapsule(_ ref: String) {
+        guard offersSqueezeFromCapsule else { capsuleClosed(); return }
+        squeezeAfterCapsule = ref
+        levelCheer = nil
+        capsuleClosed()
     }
 
     func rerollSpares(world: String) -> Collectible? {
@@ -888,6 +912,7 @@ final class AppModel: ObservableObject {
     /// The player has read a news card. `open` goes straight to the new place.
     func newsRead(open: Bool = false) {
         let read = showingNews
+        if case .worldComplete = read { maybeAskForRating(at: .worldComplete) }
         if open, case .unlocked(let extra) = read {
             news = []
             showingNews = nil
@@ -913,10 +938,6 @@ final class AppModel: ObservableObject {
         // Ad tiers count every level cleared, on the main path and in side worlds.
         let win = LevelWin(level: max(progress.stars.count, isSideLevel(index) ? 0 : index + 1), attempts: attempts, isBoss: level.file.beat == .boss,
                            secondsIntoSession: Date().timeIntervalSince(sessionStart), hadReward: lastWinHadReward)
-        if RatingPrompt.shouldAsk(after: win, group: ageGroup, alreadyAsked: progress.ratingAsked) {
-            update { $0.ratingAsked = true }
-            askForRating()
-        }
         let show = progress.age != nil && config.adsEnabled
             && AdCadence.shouldShowInterstitial(after: win, state: progress.cadence, group: ageGroup,
                                                 ownsRemoveAds: ownsRemoveAds, config: config.adCadence)
@@ -955,6 +976,13 @@ final class AppModel: ObservableObject {
                 self.toast = String(localized: "Thanks! No ad breaks for a while.")
             }
         }
+    }
+
+    /// Apple's star pop-up, once, at a happy moment. Never in gentle mode.
+    private func maybeAskForRating(at moment: RatingPrompt.Moment) {
+        guard RatingPrompt.shouldAsk(at: moment, group: ageGroup, alreadyAsked: progress.ratingAsked) else { return }
+        update { $0.ratingAsked = true }
+        askForRating()
     }
 
     private func askForRating() {

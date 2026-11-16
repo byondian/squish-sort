@@ -75,6 +75,10 @@ struct SettingsView: View {
                     if model.showsPrivacyChoices {
                         Button("Privacy choices") { model.showPrivacyChoices() }
                     }
+                    if !model.isGentleMode {
+                        // Apple's own review page. Never offered in gentle mode.
+                        Link("Rate Squish Sort", destination: URL(string: "https://apps.apple.com/app/id6835495515?action=write-review")!)
+                    }
                     Link("Privacy policy", destination: URL(string: "https://squishsort.app/privacy")!)
                     Link("Support", destination: URL(string: "https://squishsort.app/support")!)
                 }
