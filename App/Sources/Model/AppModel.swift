@@ -67,6 +67,8 @@ final class AppModel: ObservableObject {
     @Published var storefront = ""
     /// The Buddy's speech bubble on the home screen. Never shown during a level.
     @Published var buddySays: String?
+    /// Goes up each time the daily gift is opened, so the home screen can throw the coins.
+    @Published var giftsOpened = 0
     @Published var buddyAsksMood = false
     /// The Buddy's line on the win or stuck card.
     @Published var levelCheer: String?
@@ -507,16 +509,28 @@ final class AppModel: ObservableObject {
     // MARK: - The Buddy's daily gift
 
     /// Once a day the Buddy holds a gift box of coins: by opt-in ad, or free in gentle mode.
-    var dailyGiftReady: Bool {
-        buddyActive && progress.dailyGiftDay != today && (isGentleMode || canOptIn(.dailyGift))
+    /// Waiting: the box is there today. Ready: it can be opened right now (a video is loaded if one is needed).
+    var dailyGiftWaiting: Bool {
+        guard buddyActive, progress.dailyGiftDay != today else { return false }
+        if isGentleMode { return true }
+        return progress.optInAds.canWatch(today: today, cap: config.optInAdsPerDay) && (ownsRemoveAds || config.adsEnabled)
     }
+
+    var dailyGiftReady: Bool {
+        dailyGiftWaiting && (isGentleMode || canOptIn(.dailyGift))
+    }
+
+    var dailyGiftNeedsVideo: Bool { !isGentleMode && !ownsRemoveAds }
 
     func takeDailyGift() {
         guard dailyGiftReady else { return }
         let grant: () -> Void = { [weak self] in
             guard let self else { return }
-            self.update { $0.dailyGiftDay = self.today; $0.wallet.earn(self.config.coins.dailyGift) }
-            self.sounds.play("coin_shower")
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) {
+                self.update { $0.dailyGiftDay = self.today; $0.wallet.earn(self.config.coins.dailyGift) }
+                self.giftsOpened += 1
+            }
+            self.sounds.play("gift_open", or: "coin_shower")
             self.haptics.win()
             self.buddySays = self.buddyLine("treat")
         }

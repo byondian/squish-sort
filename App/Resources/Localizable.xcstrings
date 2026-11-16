@@ -2345,6 +2345,28 @@
         }
       }
     },
+    "No video right now": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "いまは動画がありません"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "지금은 동영상이 없어요"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "現在沒有影片"
+          }
+        }
+      }
+    },
     "No way through from here. Undo a few moves.": {
       "localizations": {
         "ja": {
@@ -2561,6 +2583,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "離扭蛋又近一步！"
+          }
+        }
+      }
+    },
+    "Open gift: %lld coins": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "プレゼントを開ける：コイン%lld"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "선물 열기: 코인 %lld"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打開禮物：金幣 %lld"
           }
         }
       }

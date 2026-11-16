@@ -8,6 +8,8 @@ struct HomeView: View {
     @EnvironmentObject var model: AppModel
     @State private var wobble = false
     @State private var showStamps = false
+    @State private var coinsFlying = false
+    @State private var coinsLanded = false
 
     var body: some View {
         VStack(spacing: 10) {
@@ -16,6 +18,10 @@ struct HomeView: View {
                 Button { if !model.isGentleMode { model.screen = .shop } } label: {
                     Label("\(model.progress.wallet.balance)", systemImage: "circle.hexagongrid.fill")
                         .font(Theme.body(17)).foregroundStyle(Theme.plum)
+                        .monospacedDigit()
+                        .contentTransition(.numericText(value: Double(model.progress.wallet.balance)))
+                        .animation(.easeOut(duration: 0.9), value: model.progress.wallet.balance)
+                        .scaleEffect(coinsLanded && coinsFlying ? 1.12 : 1)
                         .padding(.horizontal, 12).padding(.vertical, 8)
                         .background(Capsule().fill(.white))
                 }
@@ -51,6 +57,31 @@ struct HomeView: View {
         }
         .padding(16)
         .background(Theme.marshmallow.ignoresSafeArea())
+        .overlay {
+            // Coins from the daily gift fly up to the coin counter.
+            GeometryReader { geo in
+                if coinsFlying {
+                    ForEach(0..<10, id: \.self) { i in
+                        Image(systemName: "circle.hexagongrid.fill")
+                            .font(.system(size: 22)).foregroundStyle(Theme.butter)
+                            .shadow(color: Theme.plum.opacity(0.6), radius: 1)
+                            .position(coinsLanded
+                                ? CGPoint(x: 50, y: 34)
+                                : CGPoint(x: geo.size.width * 0.5 + CGFloat((i * 37) % 120 - 60),
+                                          y: geo.size.height * 0.62 + CGFloat((i * 53) % 70 - 35)))
+                            .opacity(coinsLanded ? 0 : 1)
+                            .animation(.easeIn(duration: 0.5).delay(0.15 + Double(i) * 0.05), value: coinsLanded)
+                    }
+                }
+            }
+            .allowsHitTesting(false)
+        }
+        .onChange(of: model.giftsOpened) { _, _ in
+            coinsLanded = false
+            coinsFlying = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { coinsLanded = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.3) { coinsFlying = false; coinsLanded = false }
+        }
         .onAppear {
             model.homeAppeared()
             withAnimation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true)) { wobble = true }
@@ -280,6 +311,7 @@ struct BuddyHomeView: View {
     @State private var flip = 0.0
     @State private var sway: CGFloat = 0
     @State private var trickTurn = 0
+    @State private var giftWobble = false
 
     private let moods: [(id: String, face: String, label: LocalizedStringKey)] = [
         ("happy", "😊", "Happy"), ("okay", "🙂", "Okay"), ("sleepy", "😴", "Sleepy"), ("grumpy", "😠", "Grumpy"),
@@ -329,6 +361,20 @@ struct BuddyHomeView: View {
                                                     removal: .offset(x: 50, y: -120).combined(with: .opacity)))
                     }
                 }
+                .overlay(alignment: .bottomTrailing) {
+                    // The daily gift sits by the Buddy and wobbles until it is opened, then bursts.
+                    if model.dailyGiftWaiting {
+                        Text(verbatim: "🎁").font(.system(size: 46))
+                            .rotationEffect(.degrees(giftWobble ? 9 : -9), anchor: .bottom)
+                            .animation(.easeInOut(duration: 0.45).repeatForever(autoreverses: true), value: giftWobble)
+                            .offset(x: 34, y: 6)
+                            .onAppear { giftWobble = true }
+                            .onDisappear { giftWobble = false }
+                            .onTapGesture { model.takeDailyGift() }
+                            .transition(.asymmetric(insertion: .scale(scale: 0.4).combined(with: .opacity),
+                                                    removal: .scale(scale: 2.2).combined(with: .opacity)))
+                    }
+                }
                 .accessibilityElement()
                 .accessibilityLabel(Text(verbatim: model.progress.buddy.name))
                 .accessibilityAddTraits(.isButton)
@@ -356,11 +402,18 @@ struct BuddyHomeView: View {
                 }
                 if model.dailyGiftReady {
                     // The Buddy's daily gift: coins by opt-in ad, or free in gentle mode.
-                    Button { withAnimation { model.takeDailyGift() }; squish() } label: {
-                        Label("Daily gift", systemImage: model.isGentleMode || model.ownsRemoveAds ? "gift.fill" : "play.rectangle.fill")
+                    Button { model.takeDailyGift(); squish() } label: {
+                        Label("Open gift: \(model.config.coins.dailyGift) coins",
+                              systemImage: model.dailyGiftNeedsVideo ? "play.rectangle.fill" : "gift.fill")
                     }
                     .buttonStyle(SquishButtonStyle(fill: Theme.grape))
                     .accessibilityIdentifier("daily-gift")
+                } else if model.dailyGiftWaiting {
+                    // The box is here but no video has loaded: say so rather than do nothing.
+                    Label("No video right now", systemImage: "gift.fill")
+                        .font(Theme.body(14)).foregroundStyle(Theme.plum.opacity(0.6))
+                        .padding(.horizontal, 14).padding(.vertical, 8)
+                        .background(Capsule().fill(Color.white.opacity(0.7)))
                 }
                 HStack(spacing: 10) {
                     if model.progress.buddy.treats > 0 {
