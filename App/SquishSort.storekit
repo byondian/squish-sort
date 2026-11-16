@@ -1,32 +1,77 @@
 {
-  "identifier" : "5B6F1C2A",
-  "nonRenewingSubscriptions" : [],
-  "products" : [
+  "identifier": "5B6F1C2A",
+  "nonRenewingSubscriptions": [],
+  "products": [
     {
-      "displayPrice" : "3.99",
-      "familyShareable" : true,
-      "internalID" : "6835495967",
-      "localizations" : [
+      "displayPrice": "3.99",
+      "familyShareable": true,
+      "internalID": "6835495967",
+      "localizations": [
         {
-          "description" : "No more forced ads. Squishies are never for sale.",
-          "displayName" : "Remove Ads",
-          "locale" : "en_US"
+          "description": "No more forced ads. Squishies are never for sale.",
+          "displayName": "Remove Ads",
+          "locale": "en_US"
         }
       ],
-      "productID" : "com.ianatkinson.squishsort.removeads",
-      "referenceName" : "Remove Ads",
-      "type" : "NonConsumable"
+      "productID": "com.ianatkinson.squishsort.removeads",
+      "referenceName": "Remove Ads",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "9000100",
+      "localizations": [
+        {
+          "description": "100 coins for hints, extra jars and board themes.",
+          "displayName": "100 Coins",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.ianatkinson.squishsort.coins100",
+      "referenceName": "100 Coins",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "2.99",
+      "familyShareable": false,
+      "internalID": "9000350",
+      "localizations": [
+        {
+          "description": "350 coins for hints, extra jars and board themes.",
+          "displayName": "350 Coins",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.ianatkinson.squishsort.coins350",
+      "referenceName": "350 Coins",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "4.99",
+      "familyShareable": false,
+      "internalID": "9000750",
+      "localizations": [
+        {
+          "description": "750 coins for hints, extra jars and board themes.",
+          "displayName": "750 Coins",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.ianatkinson.squishsort.coins750",
+      "referenceName": "750 Coins",
+      "type": "Consumable"
     }
   ],
-  "settings" : {
-    "_applicationInternalID" : "6835495515",
-    "_developerTeamID" : "WVLPAK48UN",
-    "_locale" : "en_US",
-    "_storefront" : "GBR"
+  "settings": {
+    "_applicationInternalID": "6835495515",
+    "_developerTeamID": "WVLPAK48UN",
+    "_locale": "en_US",
+    "_storefront": "GBR"
   },
-  "subscriptionGroups" : [],
-  "version" : {
-    "major" : 4,
-    "minor" : 0
+  "subscriptionGroups": [],
+  "version": {
+    "major": 4,
+    "minor": 0
   }
 }

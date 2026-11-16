@@ -14,8 +14,15 @@ struct MapView: View {
             TopBar(title: "Levels")
             ScrollView {
                 VStack(spacing: 24) {
-                    Button { model.screen = .room } label: { Label("Squish Room", systemImage: "hand.tap.fill") }
-                        .buttonStyle(SquishButtonStyle(fill: Theme.grape))
+                    HStack {
+                        Button { model.screen = .room } label: { Label("Squish Room", systemImage: "hand.tap.fill") }
+                            .buttonStyle(SquishButtonStyle(fill: Theme.grape))
+                        // Under-13s reach the shop only from Settings.
+                        if !model.isGentleMode {
+                            Button { model.screen = .shop } label: { Label("Shop", systemImage: "bag.fill") }
+                                .buttonStyle(SquishButtonStyle(fill: Theme.butter, text: Theme.plum))
+                        }
+                    }
                     ForEach(worlds, id: \.id) { world in
                         VStack(alignment: .leading, spacing: 10) {
                             Text(world.name).font(Theme.title(22)).foregroundStyle(Theme.plum)

@@ -1,0 +1,28 @@
+{
+  "sourceLanguage": "en",
+  "version": "1.0",
+  "strings": {
+    "NSUserTrackingUsageDescription": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あなたに合った広告を表示するために使います。許可しなくても、すべて遊べます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "더 잘 맞는 광고를 보여 주기 위해 사용해요. 허용하지 않아도 모두 플레이할 수 있어요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用來顯示更適合你的廣告。不允許也能玩所有內容。"
+          }
+        }
+      }
+    }
+  }
+}

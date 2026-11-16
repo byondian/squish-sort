@@ -18,6 +18,13 @@ public struct AdRequestPolicy: Equatable, Sendable {
 }
 
 public enum AdPolicy {
+    /// Apple's tracking prompt: only for players who may get personalised ads,
+    /// never in gentle mode, once, after the first win at level 5 or later.
+    public static func shouldAskTracking(profile: AgeProfile?, levelWon: Int, alreadyAsked: Bool) -> Bool {
+        guard let profile, profile.group != .child, profile.mayPersonaliseAds, !alreadyAsked else { return false }
+        return levelWon >= 5
+    }
+
     /// EEA plus UK and Switzerland, where the consent form applies.
     public static let consentRegion: Set<String> = [
         "AUT", "BEL", "BGR", "HRV", "CYP", "CZE", "DNK", "EST", "FIN", "FRA", "DEU", "GRC",
@@ -29,19 +36,26 @@ public enum AdPolicy {
         consentRegion.contains(storefront.uppercased())
     }
 
-    public static func requestPolicy(group: AgeGroup, storefront: String, consent: ConsentStatus) -> AdRequestPolicy {
+    /// - Parameters:
+    ///   - mayPersonalise: the player is at or over the local personalisation age.
+    ///   - trackingAllowed: the player tapped Allow on Apple's ATT prompt.
+    public static func requestPolicy(group: AgeGroup, storefront: String, consent: ConsentStatus,
+                                     mayPersonalise: Bool = false, trackingAllowed: Bool = false) -> AdRequestPolicy {
+        let region = isConsentRegion(storefront)
+        let personalised = group != .child && mayPersonalise && trackingAllowed && (region ? consent == .obtained : true)
         switch group {
         case .child:
             return AdRequestPolicy(tagForChildDirectedTreatment: true, tagForUnderAgeOfConsent: false,
                                    maxAdContentRating: .g, allowPersonalisedAds: false, showConsentForm: false)
         case .teen:
-            return AdRequestPolicy(tagForChildDirectedTreatment: false, tagForUnderAgeOfConsent: true,
-                                   maxAdContentRating: .pg, allowPersonalisedAds: false, showConsentForm: false)
+            // Teens at or over the consent age can personalise after ATT Allow;
+            // below it they're tagged under the age of consent.
+            return AdRequestPolicy(tagForChildDirectedTreatment: false, tagForUnderAgeOfConsent: !mayPersonalise,
+                                   maxAdContentRating: .pg, allowPersonalisedAds: personalised,
+                                   showConsentForm: region && mayPersonalise)
         case .adult:
-            let region = isConsentRegion(storefront)
             return AdRequestPolicy(tagForChildDirectedTreatment: false, tagForUnderAgeOfConsent: false,
-                                   maxAdContentRating: .pg,
-                                   allowPersonalisedAds: region ? consent == .obtained : true,
+                                   maxAdContentRating: .pg, allowPersonalisedAds: personalised,
                                    showConsentForm: region)
         }
     }

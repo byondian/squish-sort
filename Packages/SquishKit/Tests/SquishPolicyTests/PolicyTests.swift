@@ -49,18 +49,55 @@ final class AdPolicyTests: XCTestCase {
         XCTAssertFalse(p.showConsentForm)
     }
 
-    func testTeensAreNeverPersonalised() {
-        let p = AdPolicy.requestPolicy(group: .teen, storefront: "USA", consent: .obtained)
-        XCTAssertTrue(p.tagForUnderAgeOfConsent)
-        XCTAssertFalse(p.allowPersonalisedAds)
-        XCTAssertEqual(p.maxAdContentRating, .pg)
+    func testNothingIsPersonalisedWithoutTrackingAllow() {
+        for group in [AgeGroup.teen, .adult] {
+            let p = AdPolicy.requestPolicy(group: group, storefront: "USA", consent: .notRequired, mayPersonalise: true, trackingAllowed: false)
+            XCTAssertFalse(p.allowPersonalisedAds)
+        }
     }
 
-    func testAdultsInTheUKSeeTheConsentForm() {
+    func testTeensOverTheConsentAgePersonaliseAfterAllow() {
+        let p = AdPolicy.requestPolicy(group: .teen, storefront: "JPN", consent: .notRequired, mayPersonalise: true, trackingAllowed: true)
+        XCTAssertTrue(p.allowPersonalisedAds)
+        XCTAssertFalse(p.tagForUnderAgeOfConsent)
+        XCTAssertEqual(p.maxAdContentRating, .pg)
+        let young = AdPolicy.requestPolicy(group: .teen, storefront: "KOR", consent: .notRequired, mayPersonalise: false, trackingAllowed: true)
+        XCTAssertFalse(young.allowPersonalisedAds)
+        XCTAssertTrue(young.tagForUnderAgeOfConsent)
+    }
+
+    func testChildrenNeverPersonaliseEvenWithAllow() {
+        let p = AdPolicy.requestPolicy(group: .child, storefront: "USA", consent: .obtained, mayPersonalise: true, trackingAllowed: true)
+        XCTAssertFalse(p.allowPersonalisedAds)
+        XCTAssertTrue(p.tagForChildDirectedTreatment)
+    }
+
+    func testAdultsInTheUKNeedTheConsentFormToo() {
         XCTAssertTrue(AdPolicy.requestPolicy(group: .adult, storefront: "GBR", consent: .unknown).showConsentForm)
-        XCTAssertFalse(AdPolicy.requestPolicy(group: .adult, storefront: "GBR", consent: .denied).allowPersonalisedAds)
-        XCTAssertTrue(AdPolicy.requestPolicy(group: .adult, storefront: "GBR", consent: .obtained).allowPersonalisedAds)
+        XCTAssertFalse(AdPolicy.requestPolicy(group: .adult, storefront: "GBR", consent: .denied, mayPersonalise: true, trackingAllowed: true).allowPersonalisedAds)
+        XCTAssertTrue(AdPolicy.requestPolicy(group: .adult, storefront: "GBR", consent: .obtained, mayPersonalise: true, trackingAllowed: true).allowPersonalisedAds)
         XCTAssertFalse(AdPolicy.requestPolicy(group: .adult, storefront: "JPN", consent: .unknown).showConsentForm)
+    }
+
+    func testPersonalisationAges() {
+        XCTAssertEqual(AgePolicy.personalisationAge(storefront: "USA"), 13)
+        XCTAssertEqual(AgePolicy.personalisationAge(storefront: "KOR"), 14)
+        XCTAssertEqual(AgePolicy.personalisationAge(storefront: "GBR"), 18, "UK teens stay non-personalised")
+        XCTAssertEqual(AgePolicy.personalisationAge(storefront: "DEU"), 16)
+        XCTAssertFalse(AgePolicy.mayPersonaliseAds(range: nil, storefront: "USA"), "unknown age never personalises")
+        XCTAssertTrue(AgePolicy.mayPersonaliseAds(range: AgeRange(lower: 13, upper: 17), storefront: "USA"))
+        XCTAssertFalse(AgePolicy.mayPersonaliseAds(range: AgeRange(lower: 13, upper: 17), storefront: "GBR"))
+    }
+
+    func testTrackingPromptOnlyForEligiblePlayersAfterLevelFive() {
+        let teen = AgeProfile(group: .teen, source: .birthYear, storefront: "USA", mayPersonaliseAds: true)
+        let child = AgeProfile(group: .child, source: .skipped, storefront: "USA", mayPersonaliseAds: true)
+        XCTAssertFalse(child.mayPersonaliseAds, "children can never be marked for personalisation")
+        XCTAssertFalse(AdPolicy.shouldAskTracking(profile: teen, levelWon: 4, alreadyAsked: false))
+        XCTAssertTrue(AdPolicy.shouldAskTracking(profile: teen, levelWon: 5, alreadyAsked: false))
+        XCTAssertFalse(AdPolicy.shouldAskTracking(profile: teen, levelWon: 9, alreadyAsked: true))
+        XCTAssertFalse(AdPolicy.shouldAskTracking(profile: child, levelWon: 9, alreadyAsked: false))
+        XCTAssertFalse(AdPolicy.shouldAskTracking(profile: nil, levelWon: 9, alreadyAsked: false))
     }
 }
 
@@ -240,5 +277,30 @@ final class ConfigTests: XCTestCase {
         XCTAssertFalse(c.isWorldUnlocked("christmas", today: "2026-12-17"))
         XCTAssertTrue(c.isWorldUnlocked("christmas", today: "2026-12-18"))
         XCTAssertTrue(c.isWorldUnlocked("toyshop", today: "2026-11-25"))
+    }
+}
+
+final class CoinTests: XCTestCase {
+    func testEarningAndSpending() {
+        var w = CoinWallet()
+        w.earn(Coins.earned(forWinWithStars: 3))
+        w.earn(Coins.earned(forWinWithStars: 1))
+        XCTAssertEqual(w.balance, 15)
+        XCTAssertFalse(w.spend(on: .hint), "can't go below zero")
+        w.earn(10)
+        XCTAssertTrue(w.spend(on: .hint))
+        XCTAssertEqual(w.balance, 0)
+    }
+
+    func testAPackIsCreditedOnce() {
+        var w = CoinWallet()
+        let pack = Coins.packs[1]
+        XCTAssertTrue(w.credit(pack: pack, transactionID: 42))
+        XCTAssertFalse(w.credit(pack: pack, transactionID: 42))
+        XCTAssertEqual(w.balance, 350)
+    }
+
+    func testNothingInTheShopIsASquishy() {
+        XCTAssertEqual(Set(Coins.Item.allCases), [.hint, .extraJar, .theme])
     }
 }

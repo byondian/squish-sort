@@ -22,6 +22,25 @@ final class AdsService: NSObject, ObservableObject, FullScreenContentDelegate {
     private var rewarded: RewardedAd?
     private var onDismiss: (() -> Void)?
 
+    var consentStatus: SquishPolicy.ConsentStatus {
+        switch UserMessagingPlatform.ConsentInformation.shared.consentStatus {
+        case .obtained: return .obtained
+        case .required: return .required
+        case .notRequired: return .notRequired
+        default: return .unknown
+        }
+    }
+
+    /// New flags after the age step or the tracking prompt. Applies to the next ad request.
+    func update(policy: AdRequestPolicy) {
+        self.policy = policy
+        guard started else { return }
+        let config = MobileAds.shared.requestConfiguration
+        config.tagForChildDirectedTreatment = NSNumber(value: policy.tagForChildDirectedTreatment)
+        config.tagForUnderAgeOfConsent = NSNumber(value: policy.tagForUnderAgeOfConsent)
+        config.maxAdContentRating = policy.maxAdContentRating == .g ? .general : .parentalGuidance
+    }
+
     func start(policy: AdRequestPolicy) async {
         guard !started else { return }
         self.policy = policy
@@ -52,7 +71,7 @@ final class AdsService: NSObject, ObservableObject, FullScreenContentDelegate {
 
     private func request() -> Request {
         let r = Request()
-        if let policy, !policy.allowPersonalisedAds && !policy.showConsentForm {
+        if let policy, !policy.allowPersonalisedAds {
             let extras = Extras()
             extras.additionalParameters = ["npa": "1"]
             r.register(extras)

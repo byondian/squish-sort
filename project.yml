@@ -67,6 +67,7 @@ targets:
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UIApplicationSupportsIndirectInputEvents: true
         # Google's public test app id until the AdMob account is verified.
+        NSUserTrackingUsageDescription: Squish Sort uses this to show ads that suit you better. You can still play everything if you say no.
         GADApplicationIdentifier: ca-app-pub-3940256099942544~1458002511
         GADDelayAppMeasurementInit: true
         SKAdNetworkItems:

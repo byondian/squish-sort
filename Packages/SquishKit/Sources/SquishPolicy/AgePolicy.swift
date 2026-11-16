@@ -40,11 +40,23 @@ public struct AgeProfile: Codable, Equatable, Sendable {
     public var group: AgeGroup
     public var source: AgeSource
     public var storefront: String
+    /// At or over the age where personalised ads may be offered (after ATT Allow).
+    /// Stored as a yes/no only; the age itself is never kept.
+    public var mayPersonaliseAds: Bool
 
-    public init(group: AgeGroup, source: AgeSource, storefront: String) {
+    public init(group: AgeGroup, source: AgeSource, storefront: String, mayPersonaliseAds: Bool = false) {
         self.group = group
         self.source = source
         self.storefront = storefront
+        self.mayPersonaliseAds = mayPersonaliseAds && group != .child
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        group = try c.decode(AgeGroup.self, forKey: .group)
+        source = try c.decode(AgeSource.self, forKey: .source)
+        storefront = try c.decode(String.self, forKey: .storefront)
+        mayPersonaliseAds = (try c.decodeIfPresent(Bool.self, forKey: .mayPersonaliseAds) ?? false) && group != .child
     }
 
     public var isGentleMode: Bool { group == .child }
@@ -77,6 +89,33 @@ public enum AgePolicy {
         guard let birthYear, birthYear <= currentYear, currentYear - birthYear <= 120 else { return nil }
         let oldest = currentYear - birthYear
         return AgeRange(lower: max(0, oldest - 1), upper: oldest)
+    }
+
+    /// Age of digital consent (GDPR Art. 8 national ages; 13 elsewhere, 14 in Korea).
+    public static func consentAge(storefront: String) -> Int {
+        let code = storefront.uppercased()
+        return max(consentAges[code] ?? 13, childCutoff(storefront: code))
+    }
+
+    static let consentAges: [String: Int] = [
+        "AUT": 14, "BEL": 13, "BGR": 14, "HRV": 16, "CYP": 14, "CZE": 15, "DNK": 13,
+        "EST": 13, "FIN": 13, "FRA": 15, "DEU": 16, "GRC": 15, "HUN": 16, "IRL": 16,
+        "ITA": 14, "LVA": 13, "LTU": 14, "LUX": 16, "MLT": 13, "NLD": 16, "POL": 16,
+        "PRT": 13, "ROU": 16, "SVK": 16, "SVN": 15, "ESP": 14, "SWE": 13,
+        "ISL": 13, "LIE": 16, "NOR": 13, "GBR": 13, "KOR": 14,
+    ]
+
+    /// Youngest age that may be offered personalised ads (Ian, 16 Nov 2026: the
+    /// local consent age). The UK stays at 18 because the Children's Code expects
+    /// profiling off for all under-18s.
+    public static func personalisationAge(storefront: String) -> Int {
+        storefront.uppercased() == "GBR" ? adultAge : consentAge(storefront: storefront)
+    }
+
+    /// True only when the whole range is at or over the personalisation age.
+    public static func mayPersonaliseAds(range: AgeRange?, storefront: String) -> Bool {
+        guard let lower = range?.lower else { return false }
+        return lower >= personalisationAge(storefront: storefront)
     }
 
     /// Changing group: older needs the parental gate, younger is always allowed.

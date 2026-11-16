@@ -1,4 +1,5 @@
 import StoreKit
+import SquishPolicy
 
 /// Remove Ads with StoreKit 2, checked on the device (tech design).
 /// Refunds turn ads back on through Transaction.updates.
@@ -7,6 +8,9 @@ final class PurchaseService: ObservableObject {
     static let removeAdsID = "com.ianatkinson.squishsort.removeads"
 
     @Published private(set) var product: Product?
+    @Published private(set) var coinProducts: [Product] = []
+    /// A coin pack was paid for: credit it (idempotent by transaction id).
+    var onCoins: ((Coins.Pack, UInt64) -> Void)?
     @Published private(set) var ownsRemoveAds: Bool
     var onChange: ((Bool) -> Void)?
     private var updates: Task<Void, Never>?
@@ -23,7 +27,10 @@ final class PurchaseService: ObservableObject {
     deinit { updates?.cancel() }
 
     func start() async {
-        product = try? await Product.products(for: [Self.removeAdsID]).first
+        let ids = [Self.removeAdsID] + Coins.packs.map(\.productID)
+        let all = (try? await Product.products(for: ids)) ?? []
+        product = all.first { $0.id == Self.removeAdsID }
+        coinProducts = Coins.packs.compactMap { pack in all.first { $0.id == pack.productID } }
         await refreshEntitlements()
     }
 
@@ -59,6 +66,25 @@ final class PurchaseService: ObservableObject {
         }
     }
 
+    @discardableResult
+    func buyCoins(_ product: Product) async -> Bool {
+        do {
+            if case .success(let verification) = try await product.purchase(),
+               case .verified(let t) = verification {
+                credit(t)
+                await t.finish()
+                return true
+            }
+        } catch {}
+        return false
+    }
+
+    private func credit(_ t: Transaction) {
+        if let pack = Coins.pack(for: t.productID), t.revocationDate == nil {
+            onCoins?(pack, t.id)
+        }
+    }
+
     func restore() async {
         try? await AppStore.sync()
         await refreshEntitlements()
@@ -66,7 +92,7 @@ final class PurchaseService: ObservableObject {
 
     private func handle(_ result: VerificationResult<Transaction>) async {
         guard case .verified(let t) = result else { return }
-        if t.productID == Self.removeAdsID { set(t.revocationDate == nil) }
+        if t.productID == Self.removeAdsID { set(t.revocationDate == nil) } else { credit(t) }
         await t.finish()
     }
 

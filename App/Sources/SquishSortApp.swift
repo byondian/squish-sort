@@ -33,6 +33,8 @@ struct RootView: View {
                 SquishRoomView()
             case .settings:
                 SettingsView()
+            case .shop:
+                ShopView()
             }
         }
         .fullScreenCover(item: $model.capsule) { c in

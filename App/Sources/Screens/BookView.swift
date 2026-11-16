@@ -17,6 +17,14 @@ struct BookView: View {
             TopBar(title: "Collection book")
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
+                    // Gentle mode's only place for the bonus capsule (Ian, 16 Nov): calm, never a pop-up.
+                    if model.isGentleMode && model.bonusCapsuleWorld != nil && model.canWatchRewarded {
+                        Button { model.openBonusCapsule() } label: {
+                            Label("Bonus capsule (watch an ad)", systemImage: "play.rectangle.fill")
+                        }
+                        .buttonStyle(SquishButtonStyle(fill: Theme.grape))
+                        .font(Theme.body(15))
+                    }
                     ForEach(worlds, id: \.id) { world in
                         shelf(world.id, world.name)
                     }

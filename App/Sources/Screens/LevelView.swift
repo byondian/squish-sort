@@ -17,6 +17,8 @@ final class LevelController: ObservableObject {
     @Published private(set) var session: GameSession
     @Published private(set) var outcome: Outcome?
     @Published private(set) var extraJarUsed = false
+    /// Paid-for helper choice sheet: watch an ad or spend coins.
+    @Published var choosing: Coins.Item?
     private(set) var attempts = 1
     private var started = Date()
     private weak var model: AppModel?
@@ -65,23 +67,34 @@ final class LevelController: ObservableObject {
         scene.reload(session.board)
     }
 
-    var canExtraJar: Bool {
-        guard let model else { return false }
-        return model.canUseFreeExtraJar(usedThisLevel: extraJarUsed) || (!extraJarUsed && model.canWatchRewarded)
-    }
-
-    var canHint: Bool {
-        guard let model else { return false }
-        return model.hintsAvailable || model.canWatchRewarded
-    }
+    var canExtraJar: Bool { !extraJarUsed }
+    var canHint: Bool { true }
 
     func extraJar() {
-        guard let model else { return }
+        guard let model, !extraJarUsed else { return }
         if model.canUseFreeExtraJar(usedThisLevel: extraJarUsed) {
             model.useFreeExtraJar()
             addJar()
-        } else if !extraJarUsed && model.canWatchRewarded {
-            model.watchRewarded { [weak self] in self?.addJar() }
+        } else {
+            choosing = .extraJar
+        }
+    }
+
+    /// The player picked how to pay for a helper.
+    func pay(for item: Coins.Item, withAd: Bool) {
+        guard let model else { return }
+        choosing = nil
+        let grant: () -> Void = { [weak self] in
+            switch item {
+            case .hint: self?.showHint()
+            case .extraJar: self?.addJar()
+            case .theme: break
+            }
+        }
+        if withAd {
+            model.watchRewarded(grant)
+        } else if model.spend(item) {
+            grant()
         }
     }
 
@@ -97,8 +110,8 @@ final class LevelController: ObservableObject {
         if model.hintsAvailable {
             model.useHint()
             showHint()
-        } else if model.canWatchRewarded {
-            model.watchRewarded { [weak self] in self?.showHint() }
+        } else {
+            choosing = .hint
         }
     }
 
@@ -142,7 +155,9 @@ struct LevelView: View {
                 Color.black.opacity(0.15).ignoresSafeArea()
                 switch outcome {
                 case .won(let stars):
-                    WinCard(stars: stars, showpiece: controller.level.file.beat == .showpiece) {
+                    WinCard(stars: stars, showpiece: controller.level.file.beat == .showpiece,
+                            coins: Coins.earned(forWinWithStars: stars),
+                            gift: model.giftOffered ? { model.openGift() } : nil) {
                         model.continueAfterWin(index: controller.index, attempts: controller.attempts)
                     }
                 case .stuck:
@@ -152,7 +167,26 @@ struct LevelView: View {
                 }
             }
         }
+        .background(LinearGradient(colors: model.boardTheme.colors, startPoint: .top, endPoint: .bottom).ignoresSafeArea())
         .animation(.spring(response: 0.35, dampingFraction: 0.7), value: controller.outcome)
+        .confirmationDialog(Text(controller.choosing == .hint ? "Hint" : "Extra jar"),
+                            isPresented: Binding(get: { controller.choosing != nil }, set: { if !$0 { controller.choosing = nil } }),
+                            titleVisibility: .visible) {
+            if let item = controller.choosing {
+                if model.canWatchRewarded {
+                    Button("Watch an ad") { controller.pay(for: item, withAd: true) }
+                }
+                if model.progress.wallet.canAfford(item) {
+                    Button("Use \(item.price) coins") { controller.pay(for: item, withAd: false) }
+                }
+                // Under-13s never get a shop pop-up from the board.
+                if !model.isGentleMode && !model.progress.wallet.canAfford(item) {
+                    Button("Get coins") { controller.choosing = nil; model.screen = .shop }
+                }
+            }
+        } message: {
+            Text("You have \(model.progress.wallet.balance) coins")
+        }
     }
 
     private var header: some View {
@@ -247,6 +281,9 @@ struct IconButton: View {
 struct WinCard: View {
     let stars: Int
     let showpiece: Bool
+    var coins = 0
+    /// Opt-in bonus gift box (rewarded ad). Nil when not offered.
+    var gift: (() -> Void)?
     let next: () -> Void
     @State private var shown = 0
 
@@ -260,6 +297,13 @@ struct WinCard: View {
                         .foregroundStyle(i < shown ? Theme.butter : Theme.plum.opacity(0.25))
                         .scaleEffect(i < shown ? 1 : 0.7)
                 }
+            }
+            if coins > 0 {
+                Label("+\(coins)", systemImage: "circle.hexagongrid.fill").font(Theme.body(18)).foregroundStyle(Theme.plum)
+            }
+            if let gift {
+                Button(action: gift) { Label("Bonus gift", systemImage: "gift.fill") }
+                    .buttonStyle(SquishButtonStyle(fill: Theme.grape))
             }
             Button("Next", action: next).buttonStyle(SquishButtonStyle()).font(Theme.title(22))
         }
@@ -285,6 +329,9 @@ struct StuckCard: View {
     var body: some View {
         VStack(spacing: 14) {
             Text("No moves left").font(Theme.title(28)).foregroundStyle(Theme.plum)
+            if canExtraJar {
+                Text("An extra jar gives you room to keep going.").font(Theme.body(15)).foregroundStyle(Theme.plum.opacity(0.7))
+            }
             Button("Try again", action: retry).buttonStyle(SquishButtonStyle()).font(Theme.title(22))
             HStack {
                 if canUndo { Button("Undo", action: undo).buttonStyle(SquishButtonStyle(fill: .white, text: Theme.plum)) }

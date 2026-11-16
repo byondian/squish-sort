@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import SquishPolicy
 
 /// Everything the player has, in one Codable file with atomic writes.
@@ -26,6 +27,45 @@ struct PlayerProgress: Codable, Equatable {
     /// Random id, never linked to a person. Not sent for children.
     var installID = UUID().uuidString
     var favouriteSquishy: String?
+    var wallet = CoinWallet()
+    /// Apple's tracking prompt has been shown (it's shown at most once).
+    var trackingAsked = false
+    var ownedThemes: Set<String> = [BoardTheme.cream.rawValue]
+    var theme = BoardTheme.cream.rawValue
+    /// Worlds of capsule levels whose bonus capsule (opt-in ad) hasn't been taken.
+    var bonusCapsules: [String] = []
+    var winsSinceGift = 0
+
+    init() {}
+
+    /// Every field is optional on disk, so adding fields never loses a player's progress.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let d = PlayerProgress()
+        func v<T: Decodable>(_ key: CodingKeys, _ fallback: T) -> T { ((try? c.decodeIfPresent(T.self, forKey: key)) ?? nil) ?? fallback }
+        version = v(.version, d.version)
+        stars = v(.stars, d.stars)
+        highestUnlocked = v(.highestUnlocked, d.highestUnlocked)
+        collection = v(.collection, d.collection)
+        age = (try? c.decodeIfPresent(AgeProfile.self, forKey: .age)) ?? nil
+        cadence = v(.cadence, d.cadence)
+        soundOn = v(.soundOn, d.soundOn)
+        musicOn = v(.musicOn, d.musicOn)
+        hapticsOn = v(.hapticsOn, d.hapticsOn)
+        ownsRemoveAds = v(.ownsRemoveAds, d.ownsRemoveAds)
+        freeExtraJarDay = (try? c.decodeIfPresent(String.self, forKey: .freeExtraJarDay)) ?? nil
+        hintDay = (try? c.decodeIfPresent(String.self, forKey: .hintDay)) ?? nil
+        hintsUsedToday = v(.hintsUsedToday, d.hintsUsedToday)
+        freeHintUsed = v(.freeHintUsed, d.freeHintUsed)
+        installID = v(.installID, d.installID)
+        favouriteSquishy = (try? c.decodeIfPresent(String.self, forKey: .favouriteSquishy)) ?? nil
+        wallet = v(.wallet, d.wallet)
+        trackingAsked = v(.trackingAsked, d.trackingAsked)
+        ownedThemes = v(.ownedThemes, d.ownedThemes)
+        theme = v(.theme, d.theme)
+        bonusCapsules = v(.bonusCapsules, d.bonusCapsules)
+        winsSinceGift = v(.winsSinceGift, d.winsSinceGift)
+    }
 
     static func today(_ date: Date = Date()) -> String {
         let f = DateFormatter()
@@ -33,6 +73,33 @@ struct PlayerProgress: Codable, Equatable {
         f.locale = Locale(identifier: "en_US_POSIX")
         f.dateFormat = "yyyy-MM-dd"
         return f.string(from: date)
+    }
+}
+
+/// Cosmetic board backgrounds, bought with coins.
+enum BoardTheme: String, CaseIterable, Identifiable {
+    case cream, mint, sky, bubblegum, night
+
+    var id: String { rawValue }
+
+    var colors: [Color] {
+        switch self {
+        case .cream: return [Color(red: 1, green: 0.957, blue: 0.91), Color(red: 1, green: 0.92, blue: 0.85)]
+        case .mint: return [Color(red: 0.85, green: 0.98, blue: 0.93), Color(red: 0.7, green: 0.93, blue: 0.85)]
+        case .sky: return [Color(red: 0.87, green: 0.94, blue: 1), Color(red: 0.74, green: 0.87, blue: 1)]
+        case .bubblegum: return [Color(red: 1, green: 0.9, blue: 0.95), Color(red: 1, green: 0.78, blue: 0.88)]
+        case .night: return [Color(red: 0.25, green: 0.2, blue: 0.38), Color(red: 0.14, green: 0.11, blue: 0.24)]
+        }
+    }
+
+    var name: LocalizedStringKey {
+        switch self {
+        case .cream: return "Cream"
+        case .mint: return "Mint Fizz"
+        case .sky: return "Blue Sky"
+        case .bubblegum: return "Bubblegum"
+        case .night: return "Night"
+        }
     }
 }
 

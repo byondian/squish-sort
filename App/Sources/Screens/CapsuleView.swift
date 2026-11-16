@@ -23,6 +23,14 @@ struct CapsuleView: View {
                         .onEnded { _ in withAnimation(.spring(response: 1.2, dampingFraction: 0.6)) { squeeze = 0 } })
                 Text(collectible.name).font(Theme.title(30)).foregroundStyle(Theme.plum)
                 Text("Squeeze me!").font(Theme.body(18)).foregroundStyle(Theme.plum.opacity(0.7))
+                // Double capsule: opt-in ad, same odds. Gentle mode gets it only in the book.
+                if !model.isGentleMode && model.bonusCapsuleWorld != nil && model.canWatchRewarded {
+                    Button {
+                        done()
+                        model.openBonusCapsule()
+                    } label: { Label("Another capsule", systemImage: "play.rectangle.fill") }
+                    .buttonStyle(SquishButtonStyle(fill: Theme.grape))
+                }
                 Button("Next", action: done).buttonStyle(SquishButtonStyle())
             } else {
                 capsule

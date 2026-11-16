@@ -22,6 +22,11 @@ struct SettingsView: View {
                     Toggle("Haptics", isOn: Binding(get: { model.progress.hapticsOn }, set: { model.setHaptics($0) }))
                 }
                 Section {
+                    Button { model.screen = .shop } label: {
+                        Label("Shop: coins and board themes", systemImage: "bag.fill")
+                    }
+                }
+                Section {
                     if purchases.ownsRemoveAds {
                         Label("Ads removed. Thank you!", systemImage: "heart.fill")
                     } else {
