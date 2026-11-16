@@ -30,11 +30,11 @@ struct NewsCard: View {
                         .accessibilityIdentifier("news-next")
                 } else if case .unlocked = news {
                     Button { model.newsRead(open: true) } label: {
-                        Label("Try it now", systemImage: "sparkles").frame(maxWidth: .infinity)
+                        Label("Try it", systemImage: "sparkles").frame(maxWidth: .infinity)
                     }
                     .buttonStyle(SquishButtonStyle(fill: Theme.grape))
                     .accessibilityIdentifier("news-open")
-                    Button("Keep playing") { model.newsRead() }
+                    Button("Later") { model.newsRead() }
                         .font(Theme.body(16)).foregroundStyle(Theme.plum.opacity(0.7))
                         .accessibilityIdentifier("news-next")
                 } else {
@@ -65,10 +65,10 @@ struct NewsCard: View {
                 Text(verbatim: "🎪").font(.system(size: 70))
             }
         case .unlocked(let extra):
-            Image(systemName: extra == .mysteryBag ? "bag.fill" : "paintbrush.fill")
+            Image(systemName: extra == .mysteryBag ? "bag.fill" : extra == .maker ? "paintbrush.fill" : "hand.point.up.left.fill")
                 .font(.system(size: 44, weight: .bold)).foregroundStyle(.white)
                 .frame(width: 96, height: 96)
-                .background(RoundedRectangle(cornerRadius: 28).fill(extra == .mysteryBag ? Theme.grape : Theme.mint))
+                .background(RoundedRectangle(cornerRadius: 28).fill(extra == .mysteryBag ? Theme.grape : extra == .maker ? Theme.mint : Theme.bubblegum))
                 .overlay(RoundedRectangle(cornerRadius: 28).stroke(Theme.plum, lineWidth: 4))
         }
     }
@@ -83,7 +83,12 @@ struct NewsCard: View {
             default: return "World complete!"
             }
         case .unlocked(let extra):
-            return extra == .mysteryBag ? "New: Mystery Bag!" : "New: Squishy Maker!"
+            switch extra {
+            case .mysteryBag: return "You unlocked the Mystery Bag!"
+            case .maker: return "You unlocked the Squishy Maker!"
+            case .squishRoom: return "You unlocked the Squish Room!"
+            case .buddy: return "You have a Buddy!"
+            }
         case .trick(let number):
             switch number {
             case 1: return "New trick: Spin!"
@@ -104,9 +109,12 @@ struct NewsCard: View {
         case .trick:
             return "Double tap your Buddy at home to see it."
         case .unlocked(let extra):
-            return extra == .mysteryBag
-                ? "Poke the bag and guess who's inside. A new bag every day, on your shelf at home."
-                : "Finishing Toy Shop opened the Maker. Make your very own squishy and give it a name."
+            switch extra {
+            case .mysteryBag: return "Poke the bag and guess who's inside. A new bag every day, on your shelf at home."
+            case .maker: return "Finishing Toy Shop opened the Maker. Make your very own squishy and give it a name."
+            case .squishRoom: return "Squeeze, poke and stretch your squishies whenever you like."
+            case .buddy: return "Your Buddy lives at home. Give it treats and pats."
+            }
         }
     }
 }

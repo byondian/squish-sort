@@ -241,9 +241,15 @@ final class AppModel: ObservableObject {
 
     var levelsWon: Int { progress.stars.count }
 
-    private func isWorldComplete(_ world: String) -> Bool {
+    func isWorldComplete(_ world: String) -> Bool {
         let ids = levels.filter { $0.file.world == world }.map(\.id)
         return !ids.isEmpty && ids.allSatisfy { progress.stars[$0] != nil }
+    }
+
+    /// Stars earned in a world, and how many it has to give.
+    func stars(inWorld world: String) -> (earned: Int, possible: Int) {
+        let ids = levels.filter { $0.file.world == world }.map(\.id)
+        return (ids.reduce(0) { $0 + (progress.stars[$1] ?? 0) }, ids.count * 3)
     }
 
     var worldsCompleted: Int { LevelCatalog.allWorlds.filter { isWorldComplete($0) }.count }
@@ -262,7 +268,7 @@ final class AppModel: ObservableObject {
         case .squishRoom: screen = .room
         case .mysteryBag: screen = .mystery
         case .maker: screen = .maker
-        case .buddy: break // lives on the home screen
+        case .buddy: screen = homeScreen // lives on the home screen
         }
     }
 
@@ -640,8 +646,10 @@ final class AppModel: ObservableObject {
             let order = LevelCatalog.worlds
             let next = order.firstIndex(of: level.file.world).flatMap { $0 + 1 < order.count ? order[$0 + 1] : nil }
             news.append(.worldComplete(world: level.file.world, next: next))
+            update { $0.wallet.earn(config.coins.worldComplete) }
         }
-        for extra in [Extra.mysteryBag, .maker] where isExtraUnlocked(extra) && !extrasBefore.contains(extra) {
+        // The Buddy is met in the first capsule itself ("Is this your Buddy?"), so it has no card.
+        for extra in [Extra.squishRoom, .mysteryBag, .maker] where isExtraUnlocked(extra) && !extrasBefore.contains(extra) {
             news.append(.unlocked(extra))
         }
         // A full capsule bar opens its capsule after the level's own, never on top of it.
@@ -863,9 +871,10 @@ final class AppModel: ObservableObject {
         // Good news comes first, and no ad ever follows it.
         if !news.isEmpty {
             afterNews = index
-            sounds.play("win_boss")
-            haptics.win()
-            showingNews = news.removeFirst()
+            let first = news.removeFirst()
+            // The world complete screen brings its own fanfare.
+            if case .worldComplete = first {} else { sounds.play("win_boss"); haptics.win() }
+            showingNews = first
             return
         }
         showInterstitialThenNext(index: index, attempts: attempts)
@@ -884,6 +893,7 @@ final class AppModel: ObservableObject {
         }
         if !news.isEmpty {
             showingNews = news.removeFirst()
+            sounds.play("unlock_new")
             return
         }
         showingNews = nil

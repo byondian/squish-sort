@@ -17,6 +17,8 @@ public struct CoinRules: Codable, Equatable, Sendable {
     public var streakCap = 50
     public var dailyGift = 200
     public var adventCoins = 100
+    /// Paid once when every level of a world is finished.
+    public var worldComplete = 500
     /// Coins for stamps 1 to 6 of the stamp card (the 7th moves the capsule bar).
     public var stampCoins = [50, 50, 100, 100, 150, 150]
 
@@ -39,6 +41,7 @@ public struct CoinRules: Codable, Equatable, Sendable {
         streakCap = int(.streakCap, d.streakCap)
         dailyGift = int(.dailyGift, d.dailyGift)
         adventCoins = int(.adventCoins, d.adventCoins)
+        worldComplete = int(.worldComplete, d.worldComplete)
         stampCoins = (((try? c.decodeIfPresent([Int].self, forKey: .stampCoins)) ?? nil) ?? d.stampCoins).map { max(0, $0) }
     }
 }

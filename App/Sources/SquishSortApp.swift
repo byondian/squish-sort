@@ -45,7 +45,11 @@ struct RootView: View {
         }
         .overlay {
             if let news = model.showingNews {
-                NewsCard(news: news).id(news.id).transition(.opacity)
+                if case .worldComplete(let world, let next) = news {
+                    WorldCompleteView(world: world, next: next).id(news.id).transition(.opacity)
+                } else {
+                    NewsCard(news: news).id(news.id).transition(.opacity)
+                }
             }
         }
         .animation(.easeOut(duration: 0.2), value: model.showingNews)

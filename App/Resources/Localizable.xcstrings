@@ -114,6 +114,28 @@
         }
       }
     },
+    "%lld of %lld stars": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スター %1$lld / %2$lld"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "별 %1$lld / %2$lld"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "星星 %1$lld / %2$lld"
+          }
+        }
+      }
+    },
     "%lld treats for your Buddy!": {
       "localizations": {
         "ja": {
@@ -1619,6 +1641,50 @@
         }
       }
     },
+    "Later": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あとで"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "나중에"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "稍後"
+          }
+        }
+      }
+    },
+    "Let's go!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "レッツゴー！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가 보자!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "出發！"
+          }
+        }
+      }
+    },
     "Level %lld": {
       "localizations": {
         "ja": {
@@ -2077,6 +2143,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "新增"
+          }
+        }
+      }
+    },
+    "New squishies to find!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あたらしいスクイーズを見つけよう！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "새로운 스퀴시를 찾아봐요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "來找新的捏捏樂吧！"
           }
         }
       }
@@ -3269,6 +3357,28 @@
         }
       }
     },
+    "Squeeze, poke and stretch your squishies whenever you like.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "いつでもスクイーズをにぎって、つついて、のばそう。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "언제든지 스퀴시를 쥐고, 찌르고, 늘려 보세요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隨時捏一捏、戳一戳、拉一拉你的捏捏樂。"
+          }
+        }
+      }
+    },
     "Squish Room": {
       "localizations": {
         "ja": {
@@ -3775,6 +3885,28 @@
         }
       }
     },
+    "Try it": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "やってみる"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "해 보기"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "試試看"
+          }
+        }
+      }
+    },
     "Try it now": {
       "localizations": {
         "ja": {
@@ -4215,6 +4347,28 @@
         }
       }
     },
+    "You finished every world! More are on the way.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ぜんぶのワールドをクリア！あたらしいワールドがもうすぐ来るよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모든 월드를 완료했어요! 새 월드가 곧 와요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你完成了所有世界！更多世界即將推出。"
+          }
+        }
+      }
+    },
     "You have %lld coins": {
       "localizations": {
         "ja": {
@@ -4233,6 +4387,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "你有 %lld 金幣"
+          }
+        }
+      }
+    },
+    "You have a Buddy!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バディができたよ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "버디가 생겼어요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你有夥伴了！"
           }
         }
       }
@@ -4299,6 +4475,94 @@
           "stringUnit": {
             "state": "translated",
             "value": "你整理好所有罐子了。太厲害了！"
+          }
+        }
+      }
+    },
+    "You unlocked the Mystery Bag!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ミステリーバッグが使えるようになったよ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "미스터리 백이 열렸어요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你解鎖了神秘袋！"
+          }
+        }
+      }
+    },
+    "You unlocked the Squish Room!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スクイーズルームが使えるようになったよ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스퀴시 룸이 열렸어요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你解鎖了軟軟房間！"
+          }
+        }
+      }
+    },
+    "You unlocked the Squishy Maker!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スクイーズメーカーが使えるようになったよ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스퀴시 메이커가 열렸어요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你解鎖了捏捏樂製作所！"
+          }
+        }
+      }
+    },
+    "Your Buddy lives at home. Give it treats and pats.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バディはホームにいるよ。おやつをあげて、なでてあげよう。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "버디는 홈에 살아요. 간식을 주고 쓰다듬어 주세요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "夥伴住在主畫面。給牠點心，摸摸牠。"
           }
         }
       }

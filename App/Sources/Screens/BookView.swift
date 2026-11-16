@@ -51,6 +51,12 @@ struct BookView: View {
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Text(name).font(Theme.title(20))
+                // A gold badge once every level of the world is finished.
+                if model.isWorldComplete(world) {
+                    Image(systemName: "rosette").font(.system(size: 20, weight: .bold))
+                        .foregroundStyle(Color(red: 0.93, green: 0.69, blue: 0.13))
+                        .accessibilityIdentifier("world-badge-\(world)")
+                }
                 Spacer()
                 Text("\(owned)/\(items.count)").font(Theme.body(15)).opacity(0.7)
             }
