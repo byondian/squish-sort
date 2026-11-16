@@ -9,19 +9,19 @@ struct CapsuleView: View {
     @State private var angle: Double = 0
     @State private var lastDrag: CGPoint?
     @State private var opened = false
-    @State private var squeeze: CGFloat = 0
     @State private var shake: CGFloat = 0
 
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
             if opened {
-                SquishyView(id: collectible.id, rarity: collectible.rarity, squash: squeeze)
-                    .frame(width: 220, height: 220)
-                    .transition(.scale(scale: 0.2).combined(with: .opacity))
-                    .gesture(DragGesture(minimumDistance: 0)
-                        .onChanged { _ in withAnimation(.easeOut(duration: 0.6)) { squeeze = 1 } }
-                        .onEnded { _ in withAnimation(.spring(response: 1.2, dampingFraction: 0.6)) { squeeze = 0 } })
+                SoftSquishy(toy: collectible.id, look: collectible.id, feel: model.feel(for: collectible.id)) {
+                    SquishyView(id: collectible.id, rarity: collectible.rarity)
+                }
+                .frame(width: 240, height: 240)
+                .transition(.scale(scale: 0.2).combined(with: .opacity))
+                .accessibilityElement()
+                .accessibilityLabel(Text(verbatim: collectible.name(in: model.language)))
                 Text(verbatim: collectible.name(in: model.language)).font(Theme.title(30)).foregroundStyle(Theme.plum)
                 if model.capsuleIsNew {
                     Text("NEW!").font(Theme.title(20)).foregroundStyle(.white)

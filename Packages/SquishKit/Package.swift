@@ -10,15 +10,18 @@ let package = Package(
         .library(name: "SquishCore", targets: ["SquishCore"]),
         .library(name: "SquishLevels", targets: ["SquishLevels"]),
         .library(name: "SquishPolicy", targets: ["SquishPolicy"]),
+        .library(name: "SquishSoft", targets: ["SquishSoft"]),
         .executable(name: "squish-levels", targets: ["squish-levels"]),
     ],
     targets: [
         .target(name: "SquishCore"),
         .target(name: "SquishLevels", dependencies: ["SquishCore"]),
         .target(name: "SquishPolicy"),
+        .target(name: "SquishSoft"),
         .executableTarget(name: "squish-levels", dependencies: ["SquishLevels"]),
         .testTarget(name: "SquishCoreTests", dependencies: ["SquishCore"]),
         .testTarget(name: "SquishLevelsTests", dependencies: ["SquishLevels", "SquishPolicy"]),
         .testTarget(name: "SquishPolicyTests", dependencies: ["SquishPolicy"]),
+        .testTarget(name: "SquishSoftTests", dependencies: ["SquishSoft"]),
     ]
 )

@@ -1,5 +1,6 @@
 import SpriteKit
 import SquishCore
+import SquishSoft
 
 /// One squishy on the board: body, face, and overlays for wrapped, frozen and duet.
 final class PieceNode: SKNode {
@@ -14,6 +15,14 @@ final class PieceNode: SKNode {
     /// Everything is drawn centred in here; the node's own origin is the
     /// bottom centre, so squash and stretch are anchored at the bottom.
     private let content = SKNode()
+    /// Squash and lean act here, anchored at the bottom centre (squish motion spec, section 8).
+    private let soft = SKNode()
+    private var squashSpring = PieceSpring()
+    private var leanSpring = PieceSpring()
+    /// Jar complete: squeezed down by hand, not by the spring, until it is let go.
+    private var squeeze: (elapsed: Double, duration: Double)?
+    private var lastX: CGFloat?
+    private var settled = true
     private var art: SKSpriteNode?
     private let glitter = SKLabelNode(text: "✨")
     /// The level's lucky squishy glitters (unless it is still wrapped).
@@ -29,7 +38,8 @@ final class PieceNode: SKNode {
         duetMark = SKLabelNode(text: "♥")
         super.init()
         content.position = CGPoint(x: 0, y: d / 2)
-        addChild(content)
+        soft.addChild(content)
+        addChild(soft)
 
         if UIImage(named: "squishy-\(kindID)") != nil {
             // Launch art from the design thread.
@@ -137,6 +147,79 @@ final class PieceNode: SKNode {
         m.lineCap = .round
         face.addChild(m)
         blinkForever()
+    }
+
+    // MARK: - Springs
+
+    /// Lift: a quick stretch upwards, then it rings.
+    func stretchUp() {
+        squashSpring.velocity = PieceSpring.liftKick
+        settled = false
+    }
+
+    /// Landing at `speed` piece heights a second. Returns how far it will squash.
+    @discardableResult
+    func land(speed: Double) -> Double {
+        let kick = PieceSpring.landingKick(speed: speed)
+        squashSpring.velocity += kick
+        settled = false
+        return PieceSpring.peak(forKick: kick)
+    }
+
+    /// The stack gives: a squash of about `peak` passed down from the piece above.
+    func ripple(peak: Double, after delay: Double) {
+        run(.sequence([.wait(forDuration: delay), .run { [weak self] in
+            self?.squashSpring.velocity += PieceSpring.kick(forPeak: peak)
+            self?.settled = false
+        }]))
+    }
+
+    /// Jar complete: squash right down, then let go so it overshoots.
+    func squeezeAndRelease() {
+        squeeze = (0, PieceSpring.completeSqueezeSeconds)
+        settled = false
+    }
+
+    /// Rejected move: the lean kicks one way, then the other. No squash.
+    func shakeHead() {
+        let kick = PieceSpring.kick(forPeak: PieceSpring.rejectLean)
+        leanSpring.velocity += kick
+        settled = false
+        run(.sequence([.wait(forDuration: 0.1), .run { [weak self] in
+            self?.leanSpring.velocity -= kick * 1.3
+            self?.settled = false
+        }]))
+    }
+
+    /// Once a frame from the board.
+    func advance(_ dt: Double) {
+        // The lean trails behind sideways movement.
+        let x = position.x
+        let speed = lastX.map { Double(x - $0) / max(dt, 1.0 / 240) / Double(max(diameter, 1)) } ?? 0
+        lastX = x
+        leanSpring.target = max(-PieceSpring.maxLean, min(PieceSpring.maxLean, -PieceSpring.leanPerSpeed * speed))
+        if speed != 0 { settled = false }
+        guard !settled else { return }
+        if var held = squeeze {
+            held.elapsed += dt
+            let t = min(1, held.elapsed / held.duration)
+            squashSpring.value += (PieceSpring.maxSquash - squashSpring.value) * t
+            squashSpring.velocity = 0
+            squeeze = t >= 1 ? nil : held
+        } else {
+            squashSpring.advance(dt)
+        }
+        leanSpring.advance(dt)
+        let s = min(PieceSpring.maxSquash, squashSpring.value)
+        soft.yScale = CGFloat(1 - s)
+        soft.xScale = CGFloat(1 + 0.8 * s)
+        // The spec counts a lean clockwise; SpriteKit turns the other way.
+        soft.zRotation = CGFloat(-leanSpring.value)
+        if squeeze == nil, squashSpring.isResting, leanSpring.isResting {
+            soft.setScale(1)
+            soft.zRotation = 0
+            settled = true
+        }
     }
 
     func apply(_ piece: Piece) {

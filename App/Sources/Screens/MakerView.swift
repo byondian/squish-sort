@@ -7,7 +7,6 @@ struct MakerView: View {
     @EnvironmentObject var model: AppModel
     @State private var draft = MadeSquishy(id: UUID().uuidString)
     @State private var problem = false
-    @State private var squeeze: CGFloat = 0
 
     private var worlds: Int { model.worldsCompleted }
     private var isSaved: Bool { model.progress.made.contains { $0.id == draft.id } }
@@ -16,11 +15,10 @@ struct MakerView: View {
     var body: some View {
         VStack(spacing: 0) {
             TopBar(title: "Squishy Maker")
-            MadeSquishyView(made: draft, squash: squeeze)
-                .frame(width: 190, height: 190)
-                .gesture(DragGesture(minimumDistance: 0)
-                    .onChanged { _ in withAnimation(.easeOut(duration: 0.3)) { squeeze = 1 } }
-                    .onEnded { _ in withAnimation(.spring(response: 0.8, dampingFraction: 0.5)) { squeeze = 0 } })
+            SoftSquishy(toy: "\(draft.shape)-\(draft.ears)-\(draft.accessory)", look: String(describing: draft), feel: .foam) {
+                MadeSquishyView(made: draft)
+            }
+            .frame(width: 200, height: 200)
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
                     TextField("Name", text: $draft.name)

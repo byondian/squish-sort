@@ -270,7 +270,7 @@ struct NewBadge: View {
 struct BuddyHomeView: View {
     @EnvironmentObject var model: AppModel
     @State private var picking = false
-    @State private var bounce = false
+    @State private var pokes = 0
 
     private let moods: [(id: String, face: String, label: LocalizedStringKey)] = [
         ("happy", "😊", "Happy"), ("okay", "🙂", "Okay"), ("sleepy", "😴", "Sleepy"), ("grumpy", "😠", "Grumpy"),
@@ -295,10 +295,17 @@ struct BuddyHomeView: View {
                         }
                     }
                 }
-                SquishRefView(ref: ref, squash: bounce ? 0.7 : 0)
-                    .frame(width: 180, height: 180)
-                    .onTapGesture { poke() }
-                    .accessibilityIdentifier("buddy")
+                // Poke and squeeze only, no throwing.
+                SoftSquishy(toy: ref, look: ref, feel: model.feel(for: ref), pokes: pokes,
+                            onTouch: { withAnimation { model.pokeBuddy() } }) {
+                    SquishRefView(ref: ref)
+                }
+                .frame(width: 190, height: 190)
+                .accessibilityElement()
+                .accessibilityLabel(Text(verbatim: model.progress.buddy.name))
+                .accessibilityAddTraits(.isButton)
+                .accessibilityAction { poke() }
+                .accessibilityIdentifier("buddy")
                 HStack(spacing: 8) {
                     Text(verbatim: model.progress.buddy.name).font(Theme.title(22))
                     Label("\(model.progress.buddy.hearts)", systemImage: "heart.fill")
@@ -343,10 +350,7 @@ struct BuddyHomeView: View {
     }
 
     private func squish() {
-        withAnimation(.easeOut(duration: 0.12)) { bounce = true }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.14) {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.45)) { bounce = false }
-        }
+        pokes += 1
     }
 }
 

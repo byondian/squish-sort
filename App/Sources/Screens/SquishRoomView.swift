@@ -1,5 +1,6 @@
 import SwiftUI
 import SquishPolicy
+import SquishSoft
 
 /// Squish Room: squeeze anything you own. No score, timer, reward or ad, so it
 /// suits gentle mode. Morph Squad squishies change shape on a squeeze.
@@ -8,11 +9,8 @@ struct SquishRoomView: View {
     @State private var selected: String?
     /// What a Morph Squad squishy currently looks like, if it has changed.
     @State private var morphedInto: String?
-    @State private var squash: CGFloat = 0
-    @State private var stretch: CGFloat = 0
-    @State private var wiggle = false
+    @State private var wiggles = 0
     @State private var mood = 0
-    @State private var pressStart: Date?
 
     private let moods: [(LocalizedStringKey, Color)] = [
         ("Cream", Color("Marshmallow")), ("Night", Color(red: 0.2, green: 0.17, blue: 0.32)), ("Clouds", Color(red: 0.86, green: 0.93, blue: 1)),
@@ -23,20 +21,23 @@ struct SquishRoomView: View {
     var body: some View {
         VStack(spacing: 0) {
             TopBar(title: "Squish Room")
-            Spacer()
             if let id = current {
-                SquishRefView(ref: morphedInto ?? id, squash: squash)
-                    .colorMultiply(morphedInto == nil ? .white : Color(red: 0.86, green: 0.82, blue: 1))
-                    .frame(width: 280, height: 280)
-                    .scaleEffect(x: 1 + stretch, y: 1 - stretch * 0.5)
-                    .rotationEffect(.degrees(wiggle ? 6 : 0))
-                    .gesture(squishGesture)
-                    .simultaneousGesture(TapGesture(count: 2).onEnded { tickle() })
-                    .accessibilityIdentifier("room-squishy")
+                // Soft all the way through: knead it, pull it, pinch it, pick it up and throw it.
+                SoftSquishy(toy: id, look: morphedInto ?? id, feel: model.feel(for: id), mode: .room, wiggles: wiggles,
+                            onLetGo: { depth in morph(depth: depth) }, onDoubleTap: { tickle() }) {
+                    SquishRefView(ref: morphedInto ?? id)
+                        .colorMultiply(morphedInto == nil ? .white : Color(red: 0.86, green: 0.82, blue: 1))
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .accessibilityElement()
+                .accessibilityLabel(Text(verbatim: model.displayName(for: id)))
+                .accessibilityIdentifier("room-squishy")
                 Text(verbatim: model.displayName(for: id)).font(Theme.title(22))
                     .foregroundStyle(mood == 1 ? Color.white : Theme.plum)
+                    .padding(.bottom, 10)
+            } else {
+                Spacer()
             }
-            Spacer()
             Picker("Mood", selection: $mood) {
                 ForEach(moods.indices, id: \.self) { i in Text(moods[i].0).tag(i) }
             }
@@ -58,40 +59,15 @@ struct SquishRoomView: View {
         .background(moods[mood].1.ignoresSafeArea())
     }
 
-    /// Hold to squeeze deeper the longer you press; drag to stretch; let go and it springs back.
-    private var squishGesture: some Gesture {
-        DragGesture(minimumDistance: 0)
-            .onChanged { value in
-                if pressStart == nil {
-                    pressStart = Date()
-                    model.haptics.lift()
-                }
-                let held = Date().timeIntervalSince(pressStart ?? Date())
-                withAnimation(.easeOut(duration: 0.2)) {
-                    squash = max(0.35, min(1, CGFloat(held) / 1.5))
-                    stretch = max(-0.2, min(0.3, value.translation.width / 600))
-                }
-            }
-            .onEnded { _ in
-                pressStart = nil
-                model.haptics.land()
-                morph()
-                withAnimation(.spring(response: 0.9, dampingFraction: 0.5)) {
-                    squash = 0
-                    stretch = 0
-                }
-            }
-    }
-
-    /// Morph Squad: a squeeze turns it into someone from its own world; the next squeeze turns it back.
-    private func morph() {
-        guard let id = current, model.roster.collectible(id)?.shapeshifter == true else { return }
+    /// Morph Squad: letting go of a deep squeeze turns it into someone from its own world; the next one turns it back.
+    private func morph(depth: Double) {
+        guard depth > SquishTuning.standard.morphOverDepth,
+              let id = current, model.roster.collectible(id)?.shapeshifter == true else { return }
         morphedInto = morphedInto == nil ? model.morphTarget(for: id)?.id : nil
     }
 
     private func tickle() {
         model.haptics.reject()
-        withAnimation(.easeInOut(duration: 0.08).repeatCount(6, autoreverses: true)) { wiggle.toggle() }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { wiggle = false }
+        wiggles += 1
     }
 }

@@ -298,6 +298,11 @@ final class CapsuleTests: XCTestCase {
                            "one Morph Squad member per world")
         }
         XCTAssertEqual(Set(roster.squishRoomToys.map(\.id)), ["gloop", "tapey"])
+        // Every toy says how it squishes (squish motion spec, section 4).
+        let feels: Set<String> = ["foam", "jelly", "gel", "mochi"]
+        for c in roster.collectibles { XCTAssertTrue(feels.contains(c.feel ?? ""), c.id) }
+        for toy in roster.squishRoomToys { XCTAssertTrue(feels.contains(toy.feel ?? ""), toy.id) }
+        XCTAssertEqual(roster.squishRoomToys.first { $0.id == "gloop" }?.feel, "gel")
     }
 
     func testEverySquishyHasANameInEveryLanguage() {

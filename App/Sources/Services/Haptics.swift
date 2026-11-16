@@ -3,7 +3,9 @@ import UIKit
 /// Light and soft, never a rattle (game design doc, haptics).
 @MainActor
 final class Haptics {
-    var enabled = true
+    var enabled = true { didSet { if !enabled { squish.letGo() } } }
+    /// The haptics that follow a soft squishy.
+    let squish = SquishHaptics()
     private let soft = UIImpactFeedbackGenerator(style: .soft)
     private let light = UIImpactFeedbackGenerator(style: .light)
     private let notify = UINotificationFeedbackGenerator()

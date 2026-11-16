@@ -1,0 +1,610 @@
+import Foundation
+
+/// The soft body behind every squeezable squishy: a small lattice of points
+/// pulled towards a best-fit copy of its rest shape ("shape matching", Mueller
+/// et al. 2005, quadratic variant). Fingers grab a soft patch of points.
+///
+/// This is a line-for-line port of `Squish.SquishBody` in the design thread's
+/// squish-engine.js, which is the reference. Keep the two in step: storage is
+/// single precision and the arithmetic double, exactly as in the page, and
+/// SquishSoftTests replays the page's own numbers against it.
+/// Coordinates are y-down, like the page.
+public final class SquishBody {
+    public struct World: Sendable {
+        public var floor: Double
+        public var left: Double
+        public var right: Double
+        public var top: Double?
+
+        public init(floor: Double, left: Double, right: Double, top: Double? = nil) {
+            self.floor = floor
+            self.left = left
+            self.right = right
+            self.top = top
+        }
+    }
+
+    /// The numbers that drive sound and haptics.
+    public struct Metric: Sendable {
+        /// How far the body is from an undeformed copy of itself, in body sizes.
+        public var D = 0.0
+        /// How fast `D` is changing: positive is pressing in, negative is rising back.
+        public var rate = 0.0
+        public var stretch = 0.0
+        public var squash = 0.0
+        /// The hardest landing since this was last set to zero, in body sizes per second.
+        public var impact = 0.0
+        public var speed = 0.0
+        public var held = 0
+        public var air = false
+        public var cx = 0.0
+        public var cy = 0.0
+    }
+
+    public struct Pointer {
+        public var x: Double
+        public var y: Double
+        var sx: Double
+        var sy: Double
+        public var vx = 0.0
+        public var vy = 0.0
+        var w: [Float]
+        var off: [Float]
+        var sc: [Float]
+        var press = 0.0
+        var px: Double
+        var py: Double
+        var t = 0.0
+        var drag = 0.0
+    }
+
+    public struct Bounds: Sendable {
+        public var x0: Double
+        public var x1: Double
+        public var y0: Double
+        public var y1: Double
+    }
+
+    /// Cells per side. The lattice has `(n + 1) * (n + 1)` points.
+    public let n: Int
+    public let count: Int
+    /// Size of the sprite's square, in points.
+    public let size: Double
+    public var material: SquishMaterial
+    /// Rest positions in 0...1, row by row from the top left.
+    public private(set) var uv: [Float]
+    /// Current positions, two numbers per point.
+    public private(set) var p: [Float]
+    public private(set) var metric = Metric()
+    public private(set) var theta = 0.0
+    public var breath: Double
+    /// 0 turns the idle breath off (Reduce Motion).
+    public var breathScale = 1.0
+
+    private var u: [Float]
+    private var f: [Float]
+    private var v: [Float]
+    private var g: [Float]
+    private var sim: [Bool]
+    private var core: [Bool]
+    private var pointers: [Int: Pointer] = [:]
+    private var push = (x: 0.0, y: 0.0, sx: 1.0, sy: 1.0)
+    private var m = 1.0
+    private var minv = [Double](repeating: 0, count: 25)
+    public private(set) var footPad = 0.0
+    public private(set) var baseV = 0.0
+    public private(set) var halfW = 0.0
+    public private(set) var c0 = (x: 0.5, y: 0.5)
+
+    /// - Parameters:
+    ///   - inside: whether the art covers the point (u, v), both 0...1 with v downwards.
+    ///   - footV: where the art's true lowest pixel sits (0...1), if below the lowest lattice point.
+    ///   - x, y: the centre of the sprite's square.
+    public init(size: Double, n: Int = 12, material: SquishMaterial, x: Double = 0, y: Double = 0,
+                footV: Double? = nil, breath: Double = Double.random(in: 0..<6),
+                inside: (Double, Double) -> Bool = { _, _ in true }) {
+        self.n = n
+        let cnt = (n + 1) * (n + 1)
+        count = cnt
+        self.size = size
+        self.material = material
+        self.breath = breath
+        uv = [Float](repeating: 0, count: cnt * 2)
+        u = [Float](repeating: 0, count: cnt * 2)
+        f = [Float](repeating: 0, count: cnt * 5)
+        p = [Float](repeating: 0, count: cnt * 2)
+        v = [Float](repeating: 0, count: cnt * 2)
+        g = [Float](repeating: 0, count: cnt * 2)
+        sim = [Bool](repeating: false, count: cnt)
+        core = [Bool](repeating: false, count: cnt)
+        let dn = Double(n)
+        for j in 0...n {
+            for i in 0...n {
+                let k = j * (n + 1) + i
+                uv[k * 2] = Float(Double(i) / dn)
+                uv[k * 2 + 1] = Float(Double(j) / dn)
+                core[k] = inside(Double(i) / dn, Double(j) / dn)
+            }
+        }
+        // Simulate the silhouette plus one ring of cells, so the outline itself deforms.
+        for j in 0...n {
+            for i in 0...n {
+                var s = false
+                for dj in -1...1 {
+                    for di in -1...1 {
+                        let a = i + di, b = j + dj
+                        if a >= 0, b >= 0, a <= n, b <= n, core[b * (n + 1) + a] { s = true }
+                    }
+                }
+                sim[j * (n + 1) + i] = s
+            }
+        }
+        var cx = 0.0, cy = 0.0, mm = 0.0, foot = 0.0, top = 1.0, left = 1.0, right = 0.0
+        for k in 0..<cnt where sim[k] {
+            cx += Double(uv[k * 2])
+            cy += Double(uv[k * 2 + 1])
+            mm += 1
+        }
+        for k in 0..<cnt where core[k] {
+            foot = max(foot, Double(uv[k * 2 + 1]))
+            top = min(top, Double(uv[k * 2 + 1]))
+            left = min(left, Double(uv[k * 2]))
+            right = max(right, Double(uv[k * 2]))
+        }
+        // An empty silhouette would divide by zero: treat the whole square as the toy.
+        if mm == 0 {
+            for k in 0..<cnt {
+                sim[k] = true
+                core[k] = true
+                cx += Double(uv[k * 2])
+                cy += Double(uv[k * 2 + 1])
+            }
+            mm = Double(cnt)
+            foot = 1
+            top = 0
+            left = 0
+            right = 1
+        }
+        cx /= mm
+        cy /= mm
+        m = mm
+        c0 = (cx, cy)
+        footPad = max(0, (footV ?? foot) - foot) * size
+        baseV = foot - cy
+        halfW = (right - left) / 2
+        var mean = [0.0, 0.0, 0.0]
+        for k in 0..<cnt {
+            let x = Double(uv[k * 2]) - cx, y = Double(uv[k * 2 + 1]) - cy
+            u[k * 2] = Float(x)
+            u[k * 2 + 1] = Float(y)
+            if sim[k] {
+                mean[0] += x * x
+                mean[1] += y * y
+                mean[2] += x * y
+            }
+        }
+        mean[0] /= mm
+        mean[1] /= mm
+        mean[2] /= mm
+        var aqq = [Double](repeating: 0, count: 25)
+        for k in 0..<cnt {
+            let x = Double(u[k * 2]), y = Double(u[k * 2 + 1])
+            let q = [x, y, x * x - mean[0], y * y - mean[1], x * y - mean[2]]
+            for a in 0..<5 { f[k * 5 + a] = Float(q[a]) }
+            if sim[k] {
+                for a in 0..<5 {
+                    for b in 0..<5 { aqq[a * 5 + b] += q[a] * q[b] }
+                }
+            }
+        }
+        minv = SquishBody.inv5(aqq)
+        place(x: x, y: y)
+    }
+
+    /// Puts the body, undeformed and still, with the centre of its square at (x, y).
+    public func place(x: Double, y: Double) {
+        for k in 0..<count {
+            p[k * 2] = Float(x + (Double(uv[k * 2]) - 0.5) * size)
+            p[k * 2 + 1] = Float(y + (Double(uv[k * 2 + 1]) - 0.5) * size)
+            v[k * 2] = 0
+            v[k * 2 + 1] = 0
+        }
+        g = p
+        theta = 0
+    }
+
+    /// Stops all movement where it is (Reduce Motion: let go without a throw).
+    public func stop() {
+        for i in v.indices { v[i] = 0 }
+    }
+
+    /// The landing has been heard and felt: start listening for the next one.
+    public func clearImpact() { metric.impact = 0 }
+
+    public func centre() -> (x: Double, y: Double) {
+        var x = 0.0, y = 0.0
+        for k in 0..<count where sim[k] {
+            x += Double(p[k * 2])
+            y += Double(p[k * 2 + 1])
+        }
+        return (x / m, y / m)
+    }
+
+    public func bounds() -> Bounds {
+        var x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9
+        for k in 0..<count where core[k] {
+            let x = Double(p[k * 2]), y = Double(p[k * 2 + 1])
+            if x < x0 { x0 = x }
+            if x > x1 { x1 = x }
+            if y < y0 { y0 = y }
+            if y > y1 { y1 = y }
+        }
+        return Bounds(x0: x0, x1: x1, y0: y0, y1: y1 + footPad)
+    }
+
+    // MARK: - Fingers
+
+    /// Returns true if the finger landed on the squishy.
+    @discardableResult
+    public func grab(_ id: Int, x: Double, y: Double) -> Bool {
+        let S = size, R = material.grabR * S
+        var best = 1e9
+        for k in 0..<count where core[k] {
+            let d = hypot(Double(p[k * 2]) - x, Double(p[k * 2 + 1]) - y)
+            if d < best { best = d }
+        }
+        if best > S * 0.16 { return false }
+        var w = [Float](repeating: 0, count: count)
+        var off = [Float](repeating: 0, count: count * 2)
+        var sc = [Float](repeating: 0, count: count)
+        let halo = material.halo
+        for k in 0..<count where sim[k] {
+            let dx = Double(p[k * 2]) - x, dy = Double(p[k * 2 + 1]) - y, d2 = (dx * dx + dy * dy) / (R * R)
+            // A firm dimple plus a soft halo.
+            w[k] = Float(min(1, exp(-d2) + halo * exp(-d2 / 5.3)))
+            off[k * 2] = Float(dx)
+            off[k * 2 + 1] = Float(dy)
+        }
+        let c = centre(), b = bounds()
+        // A press pushes towards the base when resting, or towards the middle when held in the air.
+        let tx = c.x, ty = metric.air ? c.y : b.y1
+        let ax = x - tx, ay = y - ty
+        var al = ax * ax + ay * ay
+        if al == 0 { al = 1 }
+        // 0 at the base, 1 at the finger: how much of the press each point takes.
+        for k in 0..<count {
+            let share = ((Double(p[k * 2]) - tx) * ax + (Double(p[k * 2 + 1]) - ty) * ay) / al
+            sc[k] = Float(SquishBody.clamp(share, 0, 1.15))
+        }
+        pointers[id] = Pointer(x: x, y: y, sx: x, sy: y, w: w, off: off, sc: sc,
+                               px: (tx - x) * material.press, py: (ty - y) * material.press)
+        return true
+    }
+
+    public func move(_ id: Int, x: Double, y: Double, dt: Double) {
+        guard var q = pointers[id] else { return }
+        let h = max(dt > 0 ? dt : 1.0 / 60, 1.0 / 240), a = 0.5
+        q.vx += a * ((x - q.x) / h - q.vx)
+        q.vy += a * ((y - q.y) / h - q.vy)
+        q.x = x
+        q.y = y
+        q.drag = max(q.drag, hypot(x - q.sx, y - q.sy))
+        pointers[id] = q
+    }
+
+    @discardableResult
+    public func release(_ id: Int) -> Pointer? {
+        pointers.removeValue(forKey: id)
+    }
+
+    public func releaseAll() { pointers.removeAll() }
+
+    public var isHeld: Bool { !pointers.isEmpty }
+
+    // MARK: - Step
+
+    public func step(_ h: Double, world: World?) {
+        let M = material, S = size, n = count
+        var cx = 0.0, cy = 0.0, vx = 0.0, vy = 0.0
+        for k in 0..<n where sim[k] {
+            cx += Double(p[k * 2])
+            cy += Double(p[k * 2 + 1])
+            vx += Double(v[k * 2])
+            vy += Double(v[k * 2 + 1])
+        }
+        cx /= m
+        cy /= m
+        vx /= m
+        vy /= m
+        // Best quadratic fit of the current points to the rest shape.
+        var B = [Double](repeating: 0, count: 10)
+        var L = 0.0, I = 0.0
+        for k in 0..<n where sim[k] {
+            let rx = Double(p[k * 2]) - cx, ry = Double(p[k * 2 + 1]) - cy
+            for a in 0..<5 {
+                let fa = Double(f[k * 5 + a])
+                B[a] += rx * fa
+                B[5 + a] += ry * fa
+            }
+            L += rx * (Double(v[k * 2 + 1]) - vy) - ry * (Double(v[k * 2]) - vx)
+            I += rx * rx + ry * ry
+        }
+        var A = [Double](repeating: 0, count: 10)
+        for r in 0..<2 {
+            for c in 0..<5 {
+                var s = 0.0
+                for j in 0..<5 { s += B[r * 5 + j] * minv[j * 5 + c] }
+                A[r * 5 + c] = s
+            }
+        }
+        var a00 = A[0] / S, a01 = A[1] / S, a10 = A[5] / S, a11 = A[6] / S
+        if !(a00 + a01 + a10 + a11).isFinite {
+            a00 = 1
+            a01 = 0
+            a10 = 0
+            a11 = 1
+        }
+        let th = atan2(a10 - a01, a00 + a11), ct = cos(th), st = sin(th)
+        // Stretch part, symmetric: Rt * A.
+        let sxx = ct * a00 + st * a10
+        let sxy = 0.5 * ((ct * a01 + st * a11) + (-st * a00 + ct * a10))
+        let syy = -st * a01 + ct * a11
+        let ph = 0.5 * atan2(2 * sxy, sxx - syy), cp = cos(ph), sp = sin(ph)
+        var l1 = cp * cp * sxx + 2 * cp * sp * sxy + sp * sp * syy
+        var l2 = sp * sp * sxx - 2 * cp * sp * sxy + cp * cp * syy
+        let raw1 = l1, raw2 = l2
+        l1 = SquishBody.clamp(l1, M.smin, M.smax)
+        l2 = SquishBody.clamp(l2, M.smin, M.smax)
+        let vol = pow(l1 * l2, -0.5 * M.vp)
+        l1 = SquishBody.clamp(l1 * vol, M.smin, M.smax)
+        l2 = SquishBody.clamp(l2 * vol, M.smin, M.smax)
+        // Goal = mostly the rest shape, partly the fitted stretch; a slow breath keeps it alive.
+        breath += h
+        let br = 0.012 * sin(breath * 1.9) * (isHeld ? 0 : 1) * breathScale
+        let be = M.beta, e1 = be * l1 + (1 - be), e2 = be * l2 + (1 - be)
+        let gxx = cp * cp * e1 + sp * sp * e2 - br * 0.5
+        let gxy = cp * sp * (e1 - e2)
+        let gyy = sp * sp * e1 + cp * cp * e2 + br
+        let tg = SquishBody.clamp(th * 0.6, -0.35, 0.35), cg = cos(tg), sg = sin(tg)
+        let g00 = (cg * gxx - sg * gxy) * S, g01 = (cg * gxy - sg * gyy) * S
+        let g10 = (sg * gxx + cg * gxy) * S, g11 = (sg * gxy + cg * gyy) * S
+        let dq = tg - th, cq = cos(dq), sq = sin(dq), qs = be * M.quad, lim = S * 1.6
+        var Q = [Double](repeating: 0, count: 6)
+        for c in 0..<3 {
+            let x = SquishBody.clamp(A[2 + c], -lim, lim), y = SquishBody.clamp(A[7 + c], -lim, lim)
+            Q[c] = (cq * x - sq * y) * qs
+            Q[3 + c] = (sq * x + cq * y) * qs
+        }
+        var om = I > 0 ? L / I : 0
+        om /= (1 + 6 * h)
+        let grav = M.grav * S, damp = 1 / (1 + M.c * h)
+        var D = 0.0, sp2 = 0.0
+        for k in 0..<n {
+            let ux = Double(u[k * 2]), uy = Double(u[k * 2 + 1])
+            let f2 = Double(f[k * 5 + 2]), f3 = Double(f[k * 5 + 3]), f4 = Double(f[k * 5 + 4])
+            let gx = cx + g00 * ux + g01 * uy + Q[0] * f2 + Q[1] * f3 + Q[2] * f4
+            let gy = cy + g10 * ux + g11 * uy + Q[3] * f2 + Q[4] * f3 + Q[5] * f4
+            g[k * 2] = Float(gx)
+            g[k * 2 + 1] = Float(gy)
+            if !sim[k] { continue }
+            let rx = Double(p[k * 2]) - cx, ry = Double(p[k * 2 + 1]) - cy
+            // The rigid part of the motion is not damped.
+            let rvx = vx - om * ry, rvy = vy + om * rx
+            var dvx = Double(v[k * 2]) - rvx, dvy = Double(v[k * 2 + 1]) - rvy
+            dvx = (dvx + h * M.k * (gx - Double(p[k * 2]))) * damp
+            dvy = (dvy + h * M.k * (gy - Double(p[k * 2 + 1]))) * damp
+            v[k * 2] = Float(rvx + dvx)
+            v[k * 2 + 1] = Float(rvy + dvy + grav * h)
+            p[k * 2] = Float(Double(p[k * 2]) + Double(v[k * 2]) * h)
+            p[k * 2 + 1] = Float(Double(p[k * 2 + 1]) + Double(v[k * 2 + 1]) * h)
+            // Distance from an undeformed copy, for sound and haptics.
+            let ex = Double(p[k * 2]) - (cx + (ct * ux - st * uy) * S)
+            let ey = Double(p[k * 2 + 1]) - (cy + (st * ux + ct * uy) * S)
+            D += ex * ex + ey * ey
+            sp2 += dvx * dvx + dvy * dvy
+        }
+        // Fingers hold a soft patch.
+        var held = 0
+        let flr = world.map { $0.floor - footPad } ?? 1e9
+        for id in pointers.keys.sorted() {
+            guard var q = pointers[id] else { continue }
+            held += 1
+            q.t += h
+            q.press += (1 - q.press) * (1 - exp(-h / 0.11))
+            pointers[id] = q
+            let fade = 1 - SquishBody.smooth(S * 0.07, S * 0.45, q.drag)
+            let ox = q.px * q.press * fade, oy = q.py * q.press * fade
+            var fx = q.x, fy = q.y
+            // A patch can only be pulled so far from the body.
+            let ddx = fx - cx, ddy = fy - cy, dd = hypot(ddx, ddy), mx = S * 1.15
+            if dd > mx {
+                fx = cx + ddx / dd * mx
+                fy = cy + ddy / dd * mx
+            }
+            for k in 0..<n {
+                let w = Double(q.w[k])
+                if w < 0.01 { continue }
+                let s = w * 0.5
+                var tx = fx + Double(q.off[k * 2]) + ox * Double(q.sc[k])
+                var ty = fy + Double(q.off[k * 2 + 1]) + oy * Double(q.sc[k])
+                // A finger cannot push the toy through the floor or a wall.
+                if let world {
+                    if ty > flr { ty = flr }
+                    if let top = world.top, ty < top { ty = top }
+                    if tx < world.left { tx = world.left }
+                    if tx > world.right { tx = world.right }
+                }
+                p[k * 2] = Float(Double(p[k * 2]) + s * (tx - Double(p[k * 2])))
+                p[k * 2 + 1] = Float(Double(p[k * 2 + 1]) + s * (ty - Double(p[k * 2 + 1])))
+                v[k * 2] = Float(Double(v[k * 2]) + s * (q.vx - Double(v[k * 2])))
+                v[k * 2 + 1] = Float(Double(v[k * 2 + 1]) + s * (q.vy - Double(v[k * 2 + 1])))
+            }
+        }
+        // Floor, walls, ceiling. The whole body is pushed out together (so it never sags under its
+        // own weight), and a landing adds a squash on purpose: the far side keeps moving for a moment.
+        var impact = 0.0
+        var contacts = 0
+        if let world {
+            let fl = world.floor - footPad
+            let top = world.top
+            var dn = 0.0, upp = 0.0, lf = 0.0, rt = 0.0, y0 = 1e9, x0 = 1e9, x1 = -1e9, my = 0.0, mx = 0.0
+            for k in 0..<n {
+                if sim[k] {
+                    my += Double(v[k * 2 + 1])
+                    mx += Double(v[k * 2])
+                }
+                if !core[k] { continue }
+                let x = Double(p[k * 2]), y = Double(p[k * 2 + 1])
+                if y - fl > dn { dn = y - fl }
+                if let top, top - y > upp { upp = top - y }
+                if world.left - x > lf { lf = world.left - x }
+                if x - world.right > rt { rt = x - world.right }
+                if y < y0 { y0 = y }
+                if x < x0 { x0 = x }
+                if x > x1 { x1 = x }
+            }
+            my /= m
+            mx /= m
+            let land = M.land, Hc = max(S * 0.2, fl - y0), Wc = max(S * 0.2, x1 - x0)
+            let cap = S * 0.08
+            let sy = dn > 0 ? -min(dn, cap) : (upp > 0 ? min(upp, cap) : 0)
+            let sx = lf > 0 ? min(lf, cap) : (rt > 0 ? -min(rt, cap) : 0)
+            let hitF = dn > 0 && my > 0, hitT = upp > 0 && my < 0, hitL = lf > 0 && mx < 0, hitR = rt > 0 && mx > 0
+            if dn > 0 { contacts = 1 }
+            if hitF && metric.air { impact = max(impact, my) }
+            if hitT { impact = max(impact, -my * 0.7) }
+            if hitL { impact = max(impact, -mx * 0.8) }
+            if hitR { impact = max(impact, mx * 0.8) }
+            let slide = dn > 0 ? mx * min(1, M.fric * h * 14) : 0
+            let soft = S * 6, grip = M.grip
+            // A real landing (not resting contact) starts a short push that squashes the body against the surface.
+            if hitF && my > S * 0.6 {
+                push.y = min(my, soft) * land
+                push.sy = 1
+            } else if hitT && -my > S * 0.6 {
+                push.y = min(-my, soft) * land
+                push.sy = -1
+            }
+            if hitL && -mx > S * 0.6 {
+                push.x = min(-mx, soft) * land
+                push.sx = -1
+            } else if hitR && mx > S * 0.6 {
+                push.x = min(mx, soft) * land
+                push.sx = 1
+            }
+            if push.x > 1 || push.y > 1 {
+                let topY = top ?? 0
+                for k in 0..<n where sim[k] {
+                    if push.y > 1 {
+                        let py = Double(p[k * 2 + 1])
+                        let share = push.sy > 0 ? SquishBody.clamp((fl - py) / Hc, 0, 1) : SquishBody.clamp((py - topY) / Hc, 0, 1)
+                        p[k * 2 + 1] = Float(py + push.sy * push.y * h * share)
+                    }
+                    if push.x > 1 {
+                        let px = Double(p[k * 2])
+                        let share = push.sx > 0 ? SquishBody.clamp((world.right - px) / Wc, 0, 1) : SquishBody.clamp((px - world.left) / Wc, 0, 1)
+                        p[k * 2] = Float(px + push.sx * push.x * h * share)
+                    }
+                }
+                let dec = exp(-h / 0.04)
+                push.x *= dec
+                push.y *= dec
+            }
+            for k in 0..<n where sim[k] {
+                p[k * 2] = Float(Double(p[k * 2]) + sx)
+                p[k * 2 + 1] = Float(Double(p[k * 2 + 1]) + sy)
+                v[k * 2] = Float(Double(v[k * 2]) - slide)
+                if dn > 0 && grip != 0 {
+                    // The base grips the floor, fading smoothly upwards, so a sideways pull leans and stretches.
+                    let gw = 1 - SquishBody.clamp((fl - Double(p[k * 2 + 1])) / (Hc * 0.7), 0, 1)
+                    let gf = grip * gw * gw * min(1, h * 30)
+                    p[k * 2] = Float(Double(p[k * 2]) - Double(v[k * 2]) * h * gf)
+                    v[k * 2] = Float(Double(v[k * 2]) * (1 - gf))
+                }
+                if hitF { v[k * 2 + 1] = Float(Double(v[k * 2 + 1]) - my * (1 + M.rest)) }
+                if hitT { v[k * 2 + 1] = Float(Double(v[k * 2 + 1]) - my * (1 + M.rest)) }
+                if hitL { v[k * 2] = Float(Double(v[k * 2]) - mx * (1 + M.rest)) }
+                if hitR { v[k * 2] = Float(Double(v[k * 2]) - mx * (1 + M.rest)) }
+                if core[k] {
+                    // Whatever is still outside is put back point by point.
+                    if Double(p[k * 2 + 1]) > fl {
+                        p[k * 2 + 1] = Float(fl)
+                    } else if let top, Double(p[k * 2 + 1]) < top {
+                        p[k * 2 + 1] = Float(top)
+                    }
+                    if Double(p[k * 2]) < world.left {
+                        p[k * 2] = Float(world.left)
+                    } else if Double(p[k * 2]) > world.right {
+                        p[k * 2] = Float(world.right)
+                    }
+                }
+            }
+        }
+        for k in 0..<n where !sim[k] {
+            p[k * 2] = g[k * 2]
+            p[k * 2 + 1] = g[k * 2 + 1]
+        }
+        var Dn = (D / m).squareRoot() / S
+        if !(Dn < 2.5) {
+            // Never let it explode.
+            for k in 0..<n {
+                p[k * 2] = g[k * 2].isFinite ? g[k * 2] : Float(cx)
+                p[k * 2 + 1] = g[k * 2 + 1].isFinite ? g[k * 2 + 1] : Float(cy)
+                v[k * 2] = 0
+                v[k * 2 + 1] = 0
+            }
+            Dn = 0
+        }
+        metric.rate += 0.25 * (((Dn - metric.D) / h) - metric.rate)
+        metric.D = Dn
+        metric.stretch = max(raw1, raw2) - 1
+        metric.squash = 1 - min(raw1, raw2)
+        metric.impact = max(metric.impact, impact / S)
+        metric.speed = (sp2 / m).squareRoot() / S
+        metric.held = held
+        metric.air = contacts == 0
+        metric.cx = cx
+        metric.cy = cy
+        theta = th
+    }
+
+    // MARK: - Helpers
+
+    static func clamp(_ x: Double, _ a: Double, _ b: Double) -> Double { x < a ? a : (x > b ? b : x) }
+
+    static func smooth(_ a: Double, _ b: Double, _ x: Double) -> Double {
+        let t = clamp((x - a) / (b - a), 0, 1)
+        return t * t * (3 - 2 * t)
+    }
+
+    /// Inverse of a 5 by 5 matrix, row by row (Gauss-Jordan).
+    static func inv5(_ mat: [Double]) -> [Double] {
+        let n = 5
+        var a = [Double](repeating: 0, count: 50)
+        for r in 0..<n {
+            for c in 0..<n { a[r * 10 + c] = mat[r * n + c] }
+            a[r * 10 + n + r] = 1
+        }
+        for col in 0..<n {
+            var piv = col
+            for r in (col + 1)..<max(col + 1, n) where abs(a[r * 10 + col]) > abs(a[piv * 10 + col]) { piv = r }
+            if piv != col {
+                for c in 0..<10 { a.swapAt(col * 10 + c, piv * 10 + c) }
+            }
+            var d = a[col * 10 + col]
+            if d == 0 { d = 1e-9 }
+            for c in 0..<10 { a[col * 10 + c] /= d }
+            for r in 0..<n where r != col {
+                let factor = a[r * 10 + col]
+                if factor != 0 {
+                    for c in 0..<10 { a[r * 10 + c] -= factor * a[col * 10 + c] }
+                }
+            }
+        }
+        var out = [Double](repeating: 0, count: 25)
+        for r in 0..<n {
+            for c in 0..<n { out[r * n + c] = a[r * 10 + n + c] }
+        }
+        return out
+    }
+}

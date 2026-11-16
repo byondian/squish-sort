@@ -5,7 +5,9 @@ import AVFoundation
 /// replace them later under the same names.
 @MainActor
 final class SoundService {
-    var enabled = true
+    var enabled = true { didSet { if !enabled { squish.rest() } } }
+    /// The sounds that follow a soft squishy.
+    let squish = SquishSound()
     private var pools: [String: [AVAudioPlayer]] = [:]
     private var moveStep = 0
     private var lastMoveAt = Date.distantPast

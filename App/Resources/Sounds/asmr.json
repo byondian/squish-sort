@@ -1,0 +1,80 @@
+{
+ "sampleRate": 44100,
+ "loops": {
+  "air_out": "air_out_loop.wav",
+  "air_in": "air_in_loop.wav",
+  "squelch_low": "squelch_low_loop.wav",
+  "squelch_high": "squelch_high_loop.wav",
+  "creak": "creak_loop.wav",
+  "hum": "hum_loop.wav"
+ },
+ "grains": {
+  "crackle_press": [
+   "crackle_press_01.wav",
+   "crackle_press_02.wav",
+   "crackle_press_03.wav",
+   "crackle_press_04.wav",
+   "crackle_press_05.wav",
+   "crackle_press_06.wav",
+   "crackle_press_07.wav",
+   "crackle_press_08.wav",
+   "crackle_press_09.wav",
+   "crackle_press_10.wav",
+   "crackle_press_11.wav",
+   "crackle_press_12.wav"
+  ],
+  "crackle_rise": [
+   "crackle_rise_01.wav",
+   "crackle_rise_02.wav",
+   "crackle_rise_03.wav",
+   "crackle_rise_04.wav",
+   "crackle_rise_05.wav",
+   "crackle_rise_06.wav",
+   "crackle_rise_07.wav",
+   "crackle_rise_08.wav",
+   "crackle_rise_09.wav",
+   "crackle_rise_10.wav",
+   "crackle_rise_11.wav",
+   "crackle_rise_12.wav"
+  ],
+  "tack_press": [
+   "tack_press_01.wav",
+   "tack_press_02.wav",
+   "tack_press_03.wav",
+   "tack_press_04.wav",
+   "tack_press_05.wav",
+   "tack_press_06.wav",
+   "tack_press_07.wav",
+   "tack_press_08.wav"
+  ],
+  "tack_rise": [
+   "tack_rise_01.wav",
+   "tack_rise_02.wav",
+   "tack_rise_03.wav",
+   "tack_rise_04.wav",
+   "tack_rise_05.wav",
+   "tack_rise_06.wav",
+   "tack_rise_07.wav",
+   "tack_rise_08.wav"
+  ],
+  "bubble": [
+   "bubble_01.wav",
+   "bubble_02.wav",
+   "bubble_03.wav",
+   "bubble_04.wav",
+   "bubble_05.wav",
+   "bubble_06.wav",
+   "bubble_07.wav",
+   "bubble_08.wav",
+   "bubble_09.wav",
+   "bubble_10.wav",
+   "bubble_11.wav",
+   "bubble_12.wav"
+  ]
+ },
+ "oneShots": {
+  "thud": "thud.wav",
+  "pop": "pop.wav"
+ },
+ "howToUse": "See /mnt/project-files/content/squish-motion-spec.md, section \"Sound\". Volumes and grain rates per feel are in that table."
+}

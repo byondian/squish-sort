@@ -15,6 +15,8 @@ public struct Collectible: Codable, Hashable, Identifiable, Sendable {
     public var shapeshifter: Bool
     /// Translated names by language code (ja, ko, zh-Hant). `name` is English.
     public var names: [String: String]
+    /// How it squishes: foam, jelly, gel or mochi. Missing means slow-rise foam.
+    public var feel: String?
 
     public func name(in language: String) -> String { names[language] ?? name }
 
@@ -35,6 +37,7 @@ public struct Collectible: Codable, Hashable, Identifiable, Sendable {
         rarity = try c.decode(Rarity.self, forKey: .rarity)
         shapeshifter = try c.decodeIfPresent(Bool.self, forKey: .shapeshifter) ?? false
         names = try c.decodeIfPresent([String: String].self, forKey: .names) ?? [:]
+        feel = try c.decodeIfPresent(String.self, forKey: .feel)
     }
 }
 
@@ -43,6 +46,7 @@ public struct RoomToy: Codable, Hashable, Identifiable, Sendable {
     public var id: String
     public var name: String
     public var names: [String: String]?
+    public var feel: String?
 
     public func name(in language: String) -> String { names?[language] ?? name }
 }

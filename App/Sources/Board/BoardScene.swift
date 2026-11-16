@@ -1,6 +1,7 @@
 import SpriteKit
 import UIKit
 import SquishCore
+import SquishSoft
 
 /// The board: jars, squishies and the squish motion (game design doc, game feel).
 /// Rules live in SquishCore; this scene only draws and animates.
@@ -279,7 +280,31 @@ final class BoardScene: SKScene {
 
     // MARK: - Motion
 
-    /// Stretch up to 115% tall and 90% wide, rise above the jar, hang with a wobble.
+    private var lastUpdate: TimeInterval = 0
+
+    /// Every piece has two springs (squash and lean) that run here.
+    override func update(_ currentTime: TimeInterval) {
+        let dt = lastUpdate == 0 ? 1.0 / 60 : min(0.05, max(0, currentTime - lastUpdate))
+        lastUpdate = currentTime
+        for jar in pieces {
+            for node in jar { node.advance(dt) }
+        }
+    }
+
+    /// A piece has landed in `jar` at `index`: it squashes, and the whole stack under it gives a little.
+    private func land(_ node: PieceNode, jar: Int, index: Int, speed: Double) {
+        var peak = node.land(speed: speed)
+        var below = index - 1
+        var delay = PieceSpring.rippleDelay
+        while below >= 0, below < pieces[jar].count, peak > 0.01 {
+            peak *= PieceSpring.rippleShare
+            pieces[jar][below].ripple(peak: peak, after: delay)
+            delay += PieceSpring.rippleDelay
+            below -= 1
+        }
+    }
+
+    /// A quick stretch upwards, rise above the jar, hang with a wobble.
     private func lift(_ j: Int) {
         lifted = j
         jarNodes[j].setHighlighted(true)
@@ -287,11 +312,9 @@ final class BoardScene: SKScene {
         for (k, node) in pieces[j].suffix(n).enumerated() {
             node.removeAction(forKey: "wobble")
             node.zPosition = 10
-            let rise = SKAction.group([
-                .move(to: liftPoint(j, k), duration: 0.12),
-                .sequence([.scaleX(to: 0.9, y: 1.15, duration: 0.08), .scaleX(to: 1, y: 1, duration: 0.1)]),
-            ])
+            let rise = SKAction.move(to: liftPoint(j, k), duration: 0.12)
             rise.timingMode = .easeOut
+            node.stretchUp()
             let wobble = SKAction.repeatForever(.sequence([
                 .rotate(toAngle: 0.06, duration: 0.35),
                 .rotate(toAngle: -0.06, duration: 0.35),
@@ -308,7 +331,13 @@ final class BoardScene: SKScene {
             node.removeAction(forKey: "wobble")
             node.zRotation = 0
             node.zPosition = 5
-            node.run(.sequence([.move(to: slot(j, i), duration: 0.12), squash()]))
+            let target = slot(j, i)
+            let drop = Double(node.position.y - target.y) / Double(max(geometry.piece, 1))
+            guard drop > 0.05 else { continue }
+            node.run(.sequence([.move(to: target, duration: 0.12), .run { [weak self, weak node] in
+                guard let self, let node else { return }
+                self.land(node, jar: j, index: i, speed: drop / 0.12)
+            }]))
         }
     }
 
@@ -319,16 +348,9 @@ final class BoardScene: SKScene {
             .moveTo(x: x - 6, duration: 0.05), .moveTo(x: x + 6, duration: 0.07),
             .moveTo(x: x - 3, duration: 0.05), .moveTo(x: x, duration: 0.05),
         ]))
-    }
-
-    /// Squash to 80% tall and 120% wide, then spring back with two overshoots.
-    private func squash() -> SKAction {
-        .sequence([
-            .scaleX(to: 1.2, y: 0.8, duration: 0.06),
-            .scaleX(to: 0.92, y: 1.08, duration: 0.08),
-            .scaleX(to: 1.04, y: 0.97, duration: 0.06),
-            .scaleX(to: 1, y: 1, duration: 0.05),
-        ])
+        // The squishies that can't go there shake their heads.
+        let unhappy = lifted.map { from in Array(pieces[from].suffix(board.runLength(at: from))) } ?? pieces[j]
+        for node in unhappy { node.shakeHead() }
     }
 
     private func animate(_ result: MoveResult, newBoard: Board) {
@@ -359,12 +381,17 @@ final class BoardScene: SKScene {
             let arc = SKAction.follow(path, asOffset: false, orientToPath: false, duration: hop)
             arc.timingMode = .easeInEaseOut
             let spin: SKAction = k >= 3 ? .rotate(byAngle: .pi * 2, duration: hop) : .wait(forDuration: 0)
-            let stretch = SKAction.sequence([.scaleX(to: 1.1, y: 0.92, duration: hop / 2), .scaleX(to: 1, y: 1, duration: hop / 2)])
+            // It falls from the top of the arc in half the hop.
+            let fall = Double(max(start.y, target.y) + geometry.piece * 0.6 - target.y) / Double(max(geometry.piece, 1))
+            let index = base + i
             node.run(.sequence([
                 .wait(forDuration: stagger * Double(i)),
-                .group([arc, spin, stretch]),
-                squash(),
-                .run { node.zPosition = 5 },
+                .group([arc, spin]),
+                .run { [weak self, weak node] in
+                    guard let self, let node else { return }
+                    node.zPosition = 5
+                    self.land(node, jar: to, index: index, speed: fall / (hop / 2))
+                },
             ]))
         }
         pieces[to].append(contentsOf: moving)
@@ -387,11 +414,11 @@ final class BoardScene: SKScene {
             }
         }
         if let done = result.completedJar {
-            jarNodes[done].putLid(animated: true)
+            // All four squash down together, let go at once, and the lid drops as they spring past their shape.
+            let jar = jarNodes[done]
+            jar.run(.sequence([.wait(forDuration: PieceSpring.completeSqueezeSeconds), .run { jar.putLid(animated: true) }]))
             sparkle(at: geometry.centers[done])
-            for node in pieces[done] {
-                node.run(.sequence([.scaleX(to: 1.15, y: 0.75, duration: 0.15), .scaleX(to: 1, y: 1, duration: 0.25)]))
-            }
+            for node in pieces[done] { node.squeezeAndRelease() }
         }
         busy = false
         onMoveFinished?(result)

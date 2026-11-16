@@ -6,6 +6,7 @@ import UIKit
 import SquishCore
 import SquishLevels
 import SquishPolicy
+import SquishSoft
 
 /// App state: levels, progress, collection, age, purchases.
 @MainActor
@@ -245,6 +246,12 @@ final class AppModel: ObservableObject {
         if let made = progress.made.first(where: { $0.ref == ref }) { return made.name }
         if let c = roster.collectible(ref) { return c.name(in: language) }
         return roster.squishRoomToys.first { $0.id == ref }?.name(in: language) ?? ""
+    }
+
+    /// How a squeezable thing squishes. Made squishies are slow-rise foam.
+    func feel(for ref: String) -> SquishFeel {
+        if let c = roster.collectible(ref) { return SquishFeel(named: c.feel) }
+        return SquishFeel(named: roster.squishRoomToys.first { $0.id == ref }?.feel)
     }
 
     func morphTarget(for id: String) -> Collectible? {

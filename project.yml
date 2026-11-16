@@ -45,6 +45,8 @@ targets:
         product: SquishLevels
       - package: SquishKit
         product: SquishPolicy
+      - package: SquishKit
+        product: SquishSoft
       - package: GoogleMobileAds
         product: GoogleMobileAds
       - package: GoogleUMP
