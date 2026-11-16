@@ -660,7 +660,9 @@ public final class SquishBody {
                 for i in 1..<nz {
                     let k = j * N1 + i
                     if zmask[k] {
-                        zl[k] = Float(Double(z[k - 1]) + Double(z[k + 1]) + Double(z[k - N1]) + Double(z[k + N1]) - 4 * Double(z[k]))
+                        let across: Double = Double(z[k - 1]) + Double(z[k + 1])
+                        let down: Double = Double(z[k - N1]) + Double(z[k + N1])
+                        zl[k] = Float(across + down - 4 * Double(z[k]))
                     }
                 }
             }
@@ -673,8 +675,11 @@ public final class SquishBody {
                 guard let q = pointers[id] else { continue }
                 let R = M.pokeR
                 let depth = M.poke * q.press * q.force * (1 - 0.3 * SquishBody.smooth(S * 0.07, S * 0.45, q.drag))
-                let i0 = max(1, Int(((q.fu - 2.6 * R) * dz).rounded(.down))), i1 = min(nz - 1, Int(((q.fu + 2.6 * R) * dz).rounded(.up)))
-                let j0 = max(1, Int(((q.fv - 2.6 * R) * dz).rounded(.down))), j1 = min(nz - 1, Int(((q.fv + 2.6 * R) * dz).rounded(.up)))
+                let reach: Double = 2.6 * R
+                let i0: Int = max(1, Int(((q.fu - reach) * dz).rounded(.down)))
+                let i1: Int = min(nz - 1, Int(((q.fu + reach) * dz).rounded(.up)))
+                let j0: Int = max(1, Int(((q.fv - reach) * dz).rounded(.down)))
+                let j1: Int = min(nz - 1, Int(((q.fv + reach) * dz).rounded(.up)))
                 if i0 <= i1 && j0 <= j1 {
                     for j in j0...j1 {
                         for i in i0...i1 {
@@ -721,7 +726,8 @@ public final class SquishBody {
                 tx = 0.012 * sin(breath * 0.63) * breathScale
                 ty = 0.006 * sin(breath * 0.41 + 1) * breathScale
             }
-            let lvx = SquishBody.clamp(vx / S * 0.007, -0.035, 0.035), lvy = SquishBody.clamp(vy / S * 0.007, -0.035, 0.035)
+            let lvx: Double = SquishBody.clamp(vx / S * 0.007, -0.035, 0.035)
+            let lvy: Double = SquishBody.clamp(vy / S * 0.007, -0.035, 0.035)
             let cT = cos(th), sT = sin(th)
             tx -= cT * lvx + sT * lvy
             ty -= -sT * lvx + cT * lvy
@@ -773,7 +779,7 @@ public final class SquishBody {
                 let a = j * N1 + i, b = a + 1, c = a + N1, d = c + 1
                 let ax = Double(p[d * 2]) - Double(p[a * 2]), ay = Double(p[c * 2 + 1]) - Double(p[b * 2 + 1])
                 let bx = Double(p[c * 2]) - Double(p[b * 2]), by = Double(p[d * 2 + 1]) - Double(p[a * 2 + 1])
-                let J = 0.5 * abs(ax * ay - bx * by) / cell
+                let J: Double = 0.5 * abs(ax * ay - bx * by) / cell
                 for k in [a, b, c, d] {
                     surfaceSum[k] = Float(Double(surfaceSum[k]) + J)
                     surfaceWeight[k] += 1
@@ -792,7 +798,8 @@ public final class SquishBody {
                 let i = x / F, w = W[x % F]
                 let a = Double(z[r + (i > 0 ? i - 1 : 0)]), b = Double(z[r + min(i, nz)])
                 let c = Double(z[r + (i < nz ? i + 1 : nz)]), d = Double(z[r + (i + 2 < nz ? i + 2 : nz)])
-                surfaceRows[j * R + x] = Float(w[0] * a + w[1] * b + w[2] * c + w[3] * d)
+                let row: Double = w[0] * a + w[1] * b + w[2] * c + w[3] * d
+                surfaceRows[j * R + x] = Float(row)
             }
         }
         let dn = Double(n)
@@ -801,12 +808,13 @@ public final class SquishBody {
             let r0 = (j > 0 ? j - 1 : 0) * R, r1 = min(j, nz) * R, r2 = (j < nz ? j + 1 : nz) * R, r3 = (j + 2 < nz ? j + 2 : nz) * R
             let fy = Double(y) / Double(R - 1) * dn, iy = min(n - 1, Int(fy)), ay = fy - Double(iy)
             for x in 0..<R {
-                let zf = w[0] * Double(surfaceRows[r0 + x]) + w[1] * Double(surfaceRows[r1 + x])
-                    + w[2] * Double(surfaceRows[r2 + x]) + w[3] * Double(surfaceRows[r3 + x])
+                let s0: Double = w[0] * Double(surfaceRows[r0 + x]), s1: Double = w[1] * Double(surfaceRows[r1 + x])
+                let s2: Double = w[2] * Double(surfaceRows[r2 + x]), s3: Double = w[3] * Double(surfaceRows[r3 + x])
+                let zf: Double = s0 + s1 + s2 + s3
                 let fx = Double(x) / Double(R - 1) * dn, ix = min(n - 1, Int(fx)), ax = fx - Double(ix), a = iy * N1 + ix
-                let top = Double(thick[a]) * (1 - ax) + Double(thick[a + 1]) * ax
-                let bottom = Double(thick[a + N1]) * (1 - ax) + Double(thick[a + N1 + 1]) * ax
-                let th = top * (1 - ay) + bottom * ay
+                let top: Double = Double(thick[a]) * (1 - ax) + Double(thick[a + 1]) * ax
+                let bottom: Double = Double(thick[a + N1]) * (1 - ax) + Double(thick[a + N1 + 1]) * ax
+                let th: Double = top * (1 - ay) + bottom * ay
                 let zz = Int((SquishBody.clamp((zf + 2) / 4, 0, 1) * 65535).rounded())
                 let k = (y * R + x) * 4
                 bytes[k] = UInt8(zz >> 8)
@@ -818,8 +826,18 @@ public final class SquishBody {
         return bytes
     }
 
-    private static let splineWeights: [[Double]] = [0.0, 1.0 / 3, 2.0 / 3].map { t in
-        [(1 - t) * (1 - t) * (1 - t) / 6, (3 * t * t * t - 6 * t * t + 4) / 6, (-3 * t * t * t + 3 * t * t + 3 * t + 1) / 6, t * t * t / 6]
+    private static let splineWeights: [[Double]] = [0.0, 1.0 / 3, 2.0 / 3].map(splineWeight)
+
+    /// Cubic B-spline weights of the four nearest dent values, `t` of the way from one to the next.
+    private static func splineWeight(_ t: Double) -> [Double] {
+        let u: Double = 1 - t
+        let t2: Double = t * t
+        let t3: Double = t2 * t
+        let w0: Double = u * u * u / 6
+        let w1: Double = (3 * t3 - 6 * t2 + 4) / 6
+        let w2: Double = (-3 * t3 + 3 * t2 + 3 * t + 1) / 6
+        let w3: Double = t3 / 6
+        return [w0, w1, w2, w3]
     }
 
     /// The toy's puffy rest shape, made once per toy from its alpha (`size` by `size` bytes, top row first).
@@ -834,7 +852,9 @@ public final class SquishBody {
             for x in 0..<N {
                 let k = y * N + x
                 if d[k] == 0 { continue }
-                let best = min(Double(d[k]), at(x - 1, y) + 1, at(x, y - 1) + 1, at(x - 1, y - 1) + 1.414, at(x + 1, y - 1) + 1.414)
+                let straight: Double = min(at(x - 1, y) + 1, at(x, y - 1) + 1)
+                let slant: Double = min(at(x - 1, y - 1) + 1.414, at(x + 1, y - 1) + 1.414)
+                let best: Double = min(Double(d[k]), straight, slant)
                 d[k] = Float(best)
             }
         }
@@ -842,7 +862,9 @@ public final class SquishBody {
             for x in stride(from: N - 1, through: 0, by: -1) {
                 let k = y * N + x
                 if d[k] == 0 { continue }
-                let best = min(Double(d[k]), at(x + 1, y) + 1, at(x, y + 1) + 1, at(x + 1, y + 1) + 1.414, at(x - 1, y + 1) + 1.414)
+                let straight: Double = min(at(x + 1, y) + 1, at(x, y + 1) + 1)
+                let slant: Double = min(at(x + 1, y + 1) + 1.414, at(x - 1, y + 1) + 1.414)
+                let best: Double = min(Double(d[k]), straight, slant)
                 d[k] = Float(best)
             }
         }
