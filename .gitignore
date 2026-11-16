@@ -9,3 +9,4 @@ DerivedData/
 *.p12
 __pycache__/
 build/
+SquishSort.xcodeproj/

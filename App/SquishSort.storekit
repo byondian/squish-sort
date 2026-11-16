@@ -1,0 +1,32 @@
+{
+  "identifier" : "5B6F1C2A",
+  "nonRenewingSubscriptions" : [],
+  "products" : [
+    {
+      "displayPrice" : "3.99",
+      "familyShareable" : true,
+      "internalID" : "6835495967",
+      "localizations" : [
+        {
+          "description" : "No more forced ads. Squishies are never for sale.",
+          "displayName" : "Remove Ads",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.ianatkinson.squishsort.removeads",
+      "referenceName" : "Remove Ads",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "6835495515",
+    "_developerTeamID" : "WVLPAK48UN",
+    "_locale" : "en_US",
+    "_storefront" : "GBR"
+  },
+  "subscriptionGroups" : [],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}
