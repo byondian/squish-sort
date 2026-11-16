@@ -147,7 +147,7 @@ final class SoftSquishyScene: SKScene {
     private var touchStarts: [Int: (x: Double, y: Double, radius: Double)] = [:]
     /// A let-go dent that has not popped out past flat yet (jelly's light tap).
     private var waitsForPop = false
-    private var shader: SKShader?
+    private var lightShader: SKShader?
     /// Seconds the toy has sat untouched and settled, and a frame count for drawing less often then.
     private var stillFor = 0.0
     private var drawTick = 0
@@ -271,12 +271,12 @@ final class SoftSquishyScene: SKScene {
         lookUniform.vectorFloat4Value = SIMD4(Float(look.kd), Float(look.gloss), Float(look.shin), Float(tuning.restRelief))
         dentUniform.vectorFloat4Value = SIMD4(Float(tuning.dentPinch), Float(look.ao), Float(tuning.dentRelief), 1)
         sizeUniform.vectorFloat3Value = SIMD3(1 / Float(side), Float(body.zres - 1), 1 / Float(body.zres))
-        if shader == nil {
+        if lightShader == nil {
             let made = SKShader(source: SquishLight.source)
             made.uniforms = [lightUniform, tiltUniform, lookUniform, dentUniform, sizeUniform, faceUniform, centreUniform, restUniform, surfaceUniform]
-            shader = made
+            lightShader = made
         }
-        sprite.shader = shader
+        sprite.shader = lightShader
     }
 
     // MARK: - Fingers
