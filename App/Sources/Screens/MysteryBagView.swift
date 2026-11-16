@@ -172,7 +172,18 @@ struct MysteryBagView: View {
     /// A poke jiggles the bag and shows a clue (nil: all three are already out).
     private func poke(_ index: Int?) {
         model.haptics.land()
-        model.sounds.play("mystery_poke")
+        // The squeak clue is heard as well as read: rarer squishies squeak lower.
+        if index == 1, let bag {
+            let squeak: String
+            switch bag.squeak {
+            case .high: squeak = "squeak_high"
+            case .middle: squeak = "squeak_mid"
+            case .low: squeak = "squeak_low"
+            }
+            model.sounds.play(squeak, or: "mystery_poke")
+        } else {
+            model.sounds.play("mystery_poke")
+        }
         if let index {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { _ = poked.insert(index) }
         }
