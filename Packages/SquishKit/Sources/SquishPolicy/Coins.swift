@@ -47,7 +47,7 @@ public struct CoinRules: Codable, Equatable, Sendable {
 }
 
 /// Coins (Ian, 16 Nov 2026): earned by playing, also sold in packs. Spent on
-/// hints, extra jars, board themes and Buddy treats and gifts only. Nothing paid leads to squishies or
+/// hints, shuffles, board themes and Buddy treats and gifts only. Nothing paid leads to squishies or
 /// capsules: capsules come only from finishing levels, and every level can be
 /// finished free (no move limit, unlimited retries, auto-softening).
 public enum Coins {
@@ -98,7 +98,7 @@ public enum Coins {
     }
 
     public enum Item: String, Codable, CaseIterable, Sendable {
-        case hint, extraJar, theme
+        case hint, theme
         /// Buddy items. Cosmetic fun only: hearts never affect squishies, capsules, odds or level help.
         case treat, gift
         /// A second or later shuffle on a level. The first one each level is free.
@@ -107,7 +107,6 @@ public enum Coins {
         public var price: Int {
             switch self {
             case .hint: return 250
-            case .extraJar: return 400
             case .theme: return 1500
             case .treat: return 100
             case .gift: return 600
@@ -309,12 +308,12 @@ public struct OptInAdState: Codable, Equatable, Sendable {
 }
 
 public enum OptInReward: String, CaseIterable, Sendable {
-    case hint, extraJar, doubleCoins, extraGuess, dailyGift
+    case hint, shuffle, doubleCoins, extraGuess, dailyGift
 
-    /// Gentle mode is offered opt-in ads only for a hint and for the extra jar.
+    /// Gentle mode is offered opt-in ads only for a hint and for a shuffle on the stuck screen.
     /// (Its daily gift is free, with no ad.)
     public func isOffered(to group: AgeGroup) -> Bool {
-        group != .child || self == .hint || self == .extraJar
+        group != .child || self == .hint || self == .shuffle
     }
 }
 

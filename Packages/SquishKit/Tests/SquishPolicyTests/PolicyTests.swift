@@ -546,7 +546,7 @@ final class CoinTests: XCTestCase {
     }
 
     func testNothingInTheShopIsASquishy() {
-        XCTAssertEqual(Set(Coins.Item.allCases), [.hint, .extraJar, .theme, .treat, .gift, .shuffle])
+        XCTAssertEqual(Set(Coins.Item.allCases), [.hint, .theme, .treat, .gift, .shuffle])
     }
 
     func testALevelPaysOnceSoReplaysCannotBeFarmed() {
@@ -562,7 +562,7 @@ final class CoinTests: XCTestCase {
     }
 
     func testPricesAreTenTimesTheOldOnes() {
-        XCTAssertEqual(Coins.Item.allCases.map(\.price), [250, 400, 1500, 100, 600, 150])
+        XCTAssertEqual(Coins.Item.allCases.map(\.price), [250, 1500, 100, 600, 150])
         XCTAssertEqual(CoinRules().dailyGift, 200)
     }
 
@@ -627,7 +627,7 @@ final class CoinTests: XCTestCase {
         XCTAssertEqual(StampCard.reward(stamp: 7), .capsuleStep)
     }
 
-    func testOptInAdsAreCappedADayAndGentleModeGetsOnlyHintAndExtraJar() {
+    func testOptInAdsAreCappedADayAndGentleModeGetsOnlyHintAndShuffle() {
         var ads = OptInAdState()
         for _ in 0..<6 {
             XCTAssertTrue(ads.canWatch(today: "2026-12-01", cap: 6))
@@ -635,7 +635,7 @@ final class CoinTests: XCTestCase {
         }
         XCTAssertFalse(ads.canWatch(today: "2026-12-01", cap: 6))
         XCTAssertTrue(ads.canWatch(today: "2026-12-02", cap: 6), "a new day starts again")
-        XCTAssertEqual(OptInReward.allCases.filter { $0.isOffered(to: .child) }, [.hint, .extraJar])
+        XCTAssertEqual(OptInReward.allCases.filter { $0.isOffered(to: .child) }, [.hint, .shuffle])
         XCTAssertEqual(OptInReward.allCases.filter { $0.isOffered(to: .teen) }, OptInReward.allCases)
     }
 

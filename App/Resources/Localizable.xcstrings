@@ -651,6 +651,28 @@
         }
       }
     },
+    "A shuffle gets things moving again.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "シャッフルすれば、また動かせるよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "섞으면 다시 움직일 수 있어요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "洗牌一下就能繼續了。"
+          }
+        }
+      }
+    },
     "Add to shelf": {
       "localizations": {
         "ja": {
@@ -779,28 +801,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "額外猜測只能獲得金幣，不會增加扭蛋進度。"
-          }
-        }
-      }
-    },
-    "An extra jar gives you room to keep going.": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ビンを追加すると、続けられます。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "병을 추가하면 계속할 수 있어요."
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "多一個罐子就能繼續玩。"
           }
         }
       }
@@ -1399,24 +1399,24 @@
         }
       }
     },
-    "Coins buy hints, extra jars and themes. Squishies are earned by playing and are never for sale.": {
+    "Coins buy hints, shuffles and themes. Squishies are earned by playing and are never for sale.": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "コインはヒント、ビン追加、テーマに使えます。スクイーズはプレイでもらえるもので、販売はしていません。"
+            "value": "コインはヒント、シャッフル、テーマに使えます。スクイーズはプレイでもらえるもので、販売はしていません。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "코인으로 힌트, 병 추가, 테마를 살 수 있어요. 스퀴시는 플레이로만 얻으며 판매하지 않아요."
+            "value": "코인으로 힌트, 섞기, 테마를 살 수 있어요. 스퀴시는 플레이로 얻는 것이며 판매하지 않아요."
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "金幣可買提示、多一個罐子和主題。軟軟只能靠遊玩獲得，絕不販售。"
+            "value": "金幣可以買提示、洗牌和主題。軟軟只能靠玩遊戲獲得，絕不販售。"
           }
         }
       }
@@ -1795,28 +1795,6 @@
         }
       }
     },
-    "Extra jar": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ビンを追加"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "병 추가"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "多一個罐子"
-          }
-        }
-      }
-    },
     "Extras": {
       "localizations": {
         "ja": {
@@ -2011,6 +1989,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "免費"
+          }
+        }
+      }
+    },
+    "Free shuffle": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無料シャッフル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "무료 섞기"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "免費洗牌"
           }
         }
       }
@@ -3111,28 +3111,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "名字"
-          }
-        }
-      }
-    },
-    "Need one more jar?": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "びんがもう1つほしい？"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "병이 하나 더 필요해?"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "需要多一個罐子嗎？"
           }
         }
       }
@@ -5773,6 +5751,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "想要提示嗎？"
+          }
+        }
+      }
+    },
+    "Watch a video to shuffle": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "動画を見てシャッフル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "영상 보고 섞기"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "看影片洗牌"
           }
         }
       }

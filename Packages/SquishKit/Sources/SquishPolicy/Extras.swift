@@ -389,7 +389,7 @@ public struct BuddyState: Codable, Equatable, Sendable {
         switch item {
         case .treat: hearts += BuddyState.heartsPerTreat
         case .gift: hearts += BuddyState.heartsPerGift
-        case .hint, .extraJar, .theme, .shuffle: break
+        case .hint, .theme, .shuffle: break
         }
     }
 

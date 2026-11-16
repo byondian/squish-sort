@@ -137,6 +137,8 @@ final class AppModel: ObservableObject {
         sounds.buddyVoice = loaded.buddyVoiceOn
         // New players land straight on Level 1; the home screen arrives with the first capsule.
         screen = loaded.highestUnlocked >= 3 ? .home : .level(min(loaded.highestUnlocked, max(0, levels.count - 1)))
+        // A save that already holds every other squishy of a world is owed that world's secret.
+        for world in LevelCatalog.worlds + [ChristmasWorld.id] { queueSecretIfWon(world: world) }
         purchases.onChange = { [weak self] owns in self?.update { $0.ownsRemoveAds = owns } }
         purchases.onCoins = { [weak self] pack, transactionID in
             self?.update { $0.wallet.credit(pack: pack, transactionID: transactionID) }
@@ -1306,15 +1308,6 @@ final class AppModel: ObservableObject {
     // MARK: - Helpers
 
     var undoLimit: Int? { ownsRemoveAds ? nil : 5 }
-
-    /// Extra jar: 1 free a day (1 free per level with Remove Ads).
-    func canUseFreeExtraJar(usedThisLevel: Bool) -> Bool {
-        ownsRemoveAds ? !usedThisLevel : progress.freeExtraJarDay != today
-    }
-
-    func useFreeExtraJar() {
-        if !ownsRemoveAds { update { $0.freeExtraJarDay = today } }
-    }
 
     /// Hint: first one free, then 3 a day with Remove Ads (rewarded ads for others once ads are in).
     var hintsAvailable: Bool {

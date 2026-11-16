@@ -51,7 +51,7 @@ struct ShopView: View {
                         Text("Hearts teach your Buddy tricks and help it grow. Every level you win gives a free treat. Just for fun.")
                             .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.6))
                     }
-                    Text("Coins buy hints, extra jars and themes. Squishies are earned by playing and are never for sale.")
+                    Text("Coins buy hints, shuffles and themes. Squishies are earned by playing and are never for sale.")
                         .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.6))
                 }
                 .padding(16)
