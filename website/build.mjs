@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 // Static site builder for squishsort.app. No dependencies: `node build.mjs`.
 // Reads src/, writes dist/. Pages: landing, demo, legal set, support, shop,
 // in English, Japanese, Korean and Traditional Chinese.
@@ -9,6 +10,8 @@ import { SITE } from './src/site.mjs';
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const SRC = path.join(ROOT, 'src'), OUT = path.join(ROOT, 'dist');
 const roster = JSON.parse(fs.readFileSync(path.join(SRC, 'roster.json'), 'utf8'));
+// cache-buster: assets are cached for a day, so their URLs change whenever any of them does
+const V = (() => { const h = crypto.createHash('sha1'); for (const f of fs.readdirSync(path.join(SRC, 'assets'), { recursive: true }).sort()) { const fp = path.join(SRC, 'assets', f); if (/\.(js|css)$/.test(f)) h.update(fs.readFileSync(fp)); } return h.digest('hex').slice(0, 8); })();
 const T = {};
 for (const l of SITE.langs) T[l.code] = (await import(`./src/i18n/${l.code}.mjs`)).default;
 
@@ -110,7 +113,7 @@ ${SITE.APP_LIVE ? `<meta name="apple-itunes-app" content="app-id=${SITE.appStore
 ${noindex ? '<meta name="robots" content="noindex">' : ''}
 <link rel="icon" href="/assets/img/icon-32.png" sizes="32x32"><link rel="apple-touch-icon" href="/assets/img/icon-180.png">
 <link rel="preload" href="/assets/fonts/fredoka-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/site.css">
+<link rel="stylesheet" href="/assets/site.css?v=${V}">
 <script defer src="/_vercel/insights/script.js"></script>
 </head><body>`;
 }
@@ -219,7 +222,7 @@ ${waveTo('#DDF7EE', true)}
   <h2>${esc(t.final.title)}</h2><p class="lede" style="margin:0 auto 22px">${esc(t.final.text)}</p>
   <div class="cta-row" style="justify-content:center">${storeCta(code, 'footer', true)}</div>
 </section>
-</main>` + footer(code) + end('<script src="/assets/squish/squish-engine.js" defer></script><script src="/assets/squish/squish-audio.js" defer></script><script src="/assets/morph.js" defer></script><script src="/assets/demo.js" defer></script>');
+</main>` + footer(code) + end(`<script src="/assets/squish/squish-engine.js?v=${V}" defer></script><script src="/assets/squish/squish-audio.js?v=${V}" defer></script><script src="/assets/morph.js?v=${V}" defer></script><script src="/assets/demo.js?v=${V}" defer></script>`);
 }
 
 // ---------- documents ----------
@@ -270,7 +273,7 @@ function support(code) {
   <button class="btn" type="submit">${esc(s.send)}</button>
   <p class="status" role="status" aria-live="polite"></p>
 </form>
-<p>${sub(s.direct)}</p></main>` + footer(code) + end('<script src="/assets/contact.js" defer></script>');
+<p>${sub(s.direct)}</p></main>` + footer(code) + end(`<script src="/assets/contact.js?v=${V}" defer></script>`);
 }
 function shop(code) {
   const t = T[code], s = t.shop;
@@ -285,7 +288,7 @@ function shop(code) {
 <p><label>${esc(s.country)} <select id="shop-country"></select></label></p>
 <div class="shelf" id="shelf"></div>
 <h2>${esc(s.safetyTitle)}</h2><ul>${s.safety.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
-</div></main>` + footer(code) + end('<script src="/assets/shop.js" defer></script>');
+</div></main>` + footer(code) + end(`<script src="/assets/shop.js?v=${V}" defer></script>`);
 }
 function notFound() {
   const t = T.en.notFound;
