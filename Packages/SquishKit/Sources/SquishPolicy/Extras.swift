@@ -83,11 +83,20 @@ public enum Advent {
 
 public struct AdventState: Codable, Equatable, Sendable {
     public var opened: Set<Int> = []
+    /// The season the opened doors belong to (the window's first day), so next
+    /// December starts with 24 closed doors.
+    public var season: String?
 
     public init() {}
 
+    public func openedDoors(season: String) -> Set<Int> { self.season == season ? opened : [] }
+
     /// Opens a door once. False when it is already open or not yet available.
-    public mutating func open(day: Int, available: Int) -> Bool {
+    public mutating func open(day: Int, available: Int, season: String = GameConfig().christmasOpenFrom) -> Bool {
+        if self.season != season {
+            opened = []
+            self.season = season
+        }
         guard (1...Advent.doors).contains(day), day <= available, !opened.contains(day) else { return false }
         opened.insert(day)
         return true

@@ -453,6 +453,9 @@ final class ConfigTests: XCTestCase {
         XCTAssertFalse(state.open(day: 3, available: 4), "once each")
         XCTAssertFalse(state.open(day: 25, available: 24))
         XCTAssertFalse(state.open(day: 0, available: 24))
+        XCTAssertEqual(state.openedDoors(season: "2026-12-01"), [3])
+        XCTAssertEqual(state.openedDoors(season: "2027-12-01"), [], "next December starts closed")
+        XCTAssertTrue(state.open(day: 3, available: 4, season: "2027-12-01"))
     }
 }
 

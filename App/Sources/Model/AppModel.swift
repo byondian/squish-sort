@@ -166,13 +166,17 @@ final class AppModel: ObservableObject {
     /// Doors that can be open today (0 hides the shelf).
     var adventDoors: Int { showsCornerButtons ? Advent.doorsAvailable(today: today, config: config) : 0 }
 
+    /// Doors opened this season (last year's doors don't count).
+    var adventOpened: Set<Int> { progress.advent.openedDoors(season: config.christmasOpenFrom) }
+
     /// Opens one advent door. Rewards are fixed and need no ad.
     @discardableResult
     func openAdventDoor(_ day: Int) -> Advent.Reward? {
         // Read before `update`: nothing may read `progress` while it is being changed.
         let available = adventDoors
         var opened = false
-        update { opened = $0.advent.open(day: day, available: available) }
+        let season = config.christmasOpenFrom
+        update { opened = $0.advent.open(day: day, available: available, season: season) }
         guard opened else { return nil }
         let reward = Advent.reward(day: day, rules: config.coins)
         sounds.play("sleigh")
@@ -715,7 +719,7 @@ final class AppModel: ObservableObject {
     private func showInterstitialThenNext(index: Int, attempts: Int) {
         let level = levels[index]
         // Ad tiers count every level cleared, on the main path and in side worlds.
-        let win = LevelWin(level: isSideLevel(index) ? progress.stars.count : index + 1, attempts: attempts, isBoss: level.file.beat == .boss,
+        let win = LevelWin(level: max(progress.stars.count, isSideLevel(index) ? 0 : index + 1), attempts: attempts, isBoss: level.file.beat == .boss,
                            secondsIntoSession: Date().timeIntervalSince(sessionStart), hadReward: lastWinHadReward)
         if RatingPrompt.shouldAsk(after: win, group: ageGroup, alreadyAsked: progress.ratingAsked) {
             update { $0.ratingAsked = true }

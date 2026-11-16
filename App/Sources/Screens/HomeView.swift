@@ -175,11 +175,11 @@ struct AdventShelf: View {
     }
 
     private func canOpen(_ day: Int) -> Bool {
-        day <= model.adventDoors && !model.progress.advent.opened.contains(day)
+        day <= model.adventDoors && !model.adventOpened.contains(day)
     }
 
     private func door(_ day: Int) -> some View {
-        let opened = model.progress.advent.opened.contains(day)
+        let opened = model.adventOpened.contains(day)
         let ready = canOpen(day)
         return Button {
             guard let reward = model.openAdventDoor(day) else { return }

@@ -256,9 +256,10 @@ struct LevelView: View {
                 .background(RoundedRectangle(cornerRadius: 28).fill(Theme.marshmallow))
                 .padding(30)
             }
-            if let item = controller.choosing, controller.outcome == nil {
-                Color.black.opacity(0.15).ignoresSafeArea().onTapGesture { controller.choosing = nil }
-                helperBubble(item)
+            if let item = controller.choosing {
+                // Above the stuck card too: its extra jar button leads here.
+                Color.black.opacity(0.15).ignoresSafeArea().onTapGesture { controller.choosing = nil }.zIndex(9)
+                helperBubble(item).zIndex(10)
             }
             if (controller.noWayThrough || controller.hintGaveUp) && controller.outcome == nil {
                 VStack {
@@ -323,7 +324,9 @@ struct LevelView: View {
                 }
                 SpeechBubble(text: item == .hint ? String(localized: "Want a hint?") : String(localized: "Need one more jar?"))
             }
-            if model.canOptIn(item == .hint ? .hint : .extraJar) {
+            // Gentle mode is offered the extra jar ad only from the stuck screen.
+            if model.canOptIn(item == .hint ? .hint : .extraJar)
+                && (item == .hint || !model.isGentleMode || controller.outcome == .stuck) {
                 // Remove Ads owners get it with one tap and no ad.
                 Button { controller.pay(for: item, withAd: true) } label: {
                     Label(model.ownsRemoveAds ? LocalizedStringKey("Free") : LocalizedStringKey("Watch an ad"),
