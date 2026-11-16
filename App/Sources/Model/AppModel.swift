@@ -70,6 +70,8 @@ final class AppModel: ObservableObject {
     @Published var storefront = ""
     /// The Buddy's speech bubble on the home screen. Never shown during a level.
     @Published var buddySays: String?
+    /// A trick the Buddy should do now on Home (1 spin, 2 flip, 3 dance). Home clears it.
+    @Published var trickToShow: Int?
     /// The trigger of the line being said ("joke", "fact", "poke", ...).
     private(set) var buddySaysKind = ""
     /// Goes up each time the daily gift is opened, so the home screen can throw the coins.
@@ -1076,6 +1078,8 @@ final class AppModel: ObservableObject {
     /// The player has read a news card. `open` goes straight to the new place.
     func newsRead(open: Bool = false) {
         let read = showingNews
+        // A trick just learned is done straight away, as soon as its card is closed.
+        if case .trick(let number) = read { trickToShow = number }
         if case .worldComplete = read { maybeAskForRating(at: .worldComplete) }
         if open, case .unlocked(let extra) = read {
             news = []

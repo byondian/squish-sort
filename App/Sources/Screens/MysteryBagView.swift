@@ -1,5 +1,6 @@
 import SwiftUI
 import SquishPolicy
+import SquishSoft
 
 /// Mystery Bag: once a day, poke the bag three ways, then guess who's inside.
 /// Any guess pays coins, and a right guess moves the capsule bar on one step.

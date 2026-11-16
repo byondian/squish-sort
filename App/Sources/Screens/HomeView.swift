@@ -384,6 +384,19 @@ struct BuddyHomeView: View {
     @State private var giftWobble = false
     @State private var talking = false
 
+    private func showOffTrick() {
+        guard let number = model.trickToShow else { return }
+        model.trickToShow = nil
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            spin = 0; flip = 0; sway = 0
+            playTrick(number)
+            burstShown = true
+            burst = false
+            withAnimation(.easeOut(duration: 0.7)) { burst = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { burstShown = false; burst = false }
+        }
+    }
+
     /// Three little squashes, like a mouth moving.
     private func talk() {
         for i in 0..<3 {
@@ -443,7 +456,7 @@ struct BuddyHomeView: View {
                 .frame(maxWidth: .infinity, minHeight: 200, maxHeight: 340)
                 // Tricks: spin, flip and dance. Then the little growth from hearts, which never goes back.
                 .rotationEffect(.degrees(spin))
-                .rotation3DEffect(.degrees(flip), axis: (x: 1, y: 0, z: 0))
+                .modifier(FlipEffect(turn: flip))
                 .offset(x: sway)
                 // It squashes a little as it talks.
                 .scaleEffect(x: talking ? 1.04 : 1, y: talking ? 0.94 : 1, anchor: .bottom)
@@ -559,6 +572,12 @@ struct BuddyHomeView: View {
                         .buttonStyle(SquishButtonStyle(fill: Theme.butter, text: Theme.plum))
                         .accessibilityIdentifier("get-treats")
                     }
+                    if model.progress.buddy.tricksUnlocked > 0 {
+                        // Tricks are easy to find: one tap, and the Buddy does the next one it knows.
+                        Button { playTrick() } label: { Label("Trick", systemImage: "sparkles").font(Theme.body(14)) }
+                            .buttonStyle(SquishButtonStyle(fill: Theme.mint, text: Theme.plum))
+                            .accessibilityIdentifier("buddy-trick")
+                    }
                     Button { picking = true } label: {
                         Label("Change Buddy", systemImage: "arrow.left.arrow.right").font(Theme.body(14))
                     }
@@ -572,6 +591,9 @@ struct BuddyHomeView: View {
             }
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.7), value: model.buddySays)
+        // A trick just learned is shown off at once, with a burst of hearts.
+        .onChange(of: model.trickToShow) { _, _ in showOffTrick() }
+        .onAppear { showOffTrick() }
         // Something bought in the shop arrives here, so the Buddy is seen enjoying it.
         .onAppear {
             guard let item = model.buddyDelivery else { return }
@@ -624,19 +646,21 @@ struct BuddyHomeView: View {
     }
 
     /// A double tap plays a trick the Buddy knows: spin, flip or dance.
-    private func playTrick() {
+    /// Does trick `number` (1 spin, 2 flip, 3 dance), or the next one the Buddy knows.
+    private func playTrick(_ number: Int? = nil) {
         let known = model.progress.buddy.tricksUnlocked
         guard known > 0, spin == 0, flip == 0, sway == 0 else { return }
         trickTurn += 1
+        let which = number.map { min(max(1, $0), known) } ?? (trickTurn - 1) % known + 1
         model.sounds.play("trick", or: "buddy_giggle")
         model.haptics.complete()
-        switch trickTurn % known {
-        case 0:
+        switch which {
+        case 1:
             withAnimation(.easeInOut(duration: 0.6)) { spin = 360 }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) { spin = 0 }
-        case 1:
-            withAnimation(.easeInOut(duration: 0.6)) { flip = 360 }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) { flip = 0 }
+        case 2:
+            withAnimation(.easeInOut(duration: 0.7)) { flip = 1 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) { flip = 0 }
         default:
             withAnimation(.easeInOut(duration: 0.15).repeatCount(6, autoreverses: true)) { sway = 14 }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.95) { withAnimation(.easeOut(duration: 0.1)) { sway = 0 } }
@@ -717,5 +741,25 @@ struct BuddyPickerView: View {
             name = model.progress.buddy.name
             filled = name
         }
+    }
+}
+
+/// The flip trick: a jump with a full head-over-heels turn. Drawn as a flat turn, so it works on
+/// the soft squishy, which a 3D turn does not move. `turn` runs from 0 to 1.
+struct FlipEffect: GeometryEffect {
+    var turn: Double
+    var animatableData: Double {
+        get { turn }
+        set { turn = newValue }
+    }
+
+    func effectValue(size: CGSize) -> ProjectionTransform {
+        let angle = CGFloat(turn) * 2 * .pi
+        let jump = -sin(CGFloat(turn) * .pi) * size.height * 0.35
+        let center = CGPoint(x: size.width / 2, y: size.height / 2)
+        let t = CGAffineTransform(translationX: center.x, y: center.y + jump)
+            .rotated(by: -angle)
+            .translatedBy(x: -center.x, y: -center.y)
+        return ProjectionTransform(t)
     }
 }

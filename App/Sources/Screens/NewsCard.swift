@@ -7,6 +7,9 @@ struct NewsCard: View {
     @EnvironmentObject var model: AppModel
     let news: AppModel.News
     @State private var burst = false
+    @State private var spin = 0.0
+    @State private var flip = 0.0
+    @State private var sway: CGFloat = 0
 
     var body: some View {
         ZStack {
@@ -60,7 +63,19 @@ struct NewsCard: View {
             Text(verbatim: "🏆").font(.system(size: 70))
         case .trick:
             if let ref = model.progress.buddy.squishy {
+                // The Buddy does its new trick right here, again and again while the card is open.
                 SquishRefView(ref: ref).frame(width: 120, height: 120)
+                    .rotationEffect(.degrees(spin))
+                    .modifier(FlipEffect(turn: flip))
+                    .offset(x: sway)
+                    .padding(.top, 30)
+                    .onTapGesture { doTrick() }
+                    .task {
+                        while !Task.isCancelled {
+                            doTrick()
+                            try? await Task.sleep(nanoseconds: 2_000_000_000)
+                        }
+                    }
             } else {
                 Text(verbatim: "🎪").font(.system(size: 70))
             }
@@ -77,6 +92,22 @@ struct NewsCard: View {
                 .frame(width: 96, height: 96)
                 .background(RoundedRectangle(cornerRadius: 28).fill(extra == .mysteryBag ? Theme.grape : extra == .maker ? Theme.mint : Theme.bubblegum))
                 .overlay(RoundedRectangle(cornerRadius: 28).stroke(Theme.plum, lineWidth: 4))
+        }
+    }
+
+    private func doTrick() {
+        guard case .trick(let number) = news, spin == 0, flip == 0, sway == 0 else { return }
+        if !AppModel.isUITesting { model.sounds.play("trick", or: "buddy_giggle") }
+        switch number {
+        case 1:
+            withAnimation(.easeInOut(duration: 0.6)) { spin = 360 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) { spin = 0 }
+        case 2:
+            withAnimation(.easeInOut(duration: 0.7)) { flip = 1 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) { flip = 0 }
+        default:
+            withAnimation(.easeInOut(duration: 0.15).repeatCount(6, autoreverses: true)) { sway = 14 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.95) { withAnimation(.easeOut(duration: 0.1)) { sway = 0 } }
         }
     }
 
@@ -122,7 +153,7 @@ struct NewsCard: View {
             default: return "Every star in this world! You won a golden capsule."
             }
         case .trick:
-            return "Double tap your Buddy at home to see it."
+            return "Tap Trick at home to see it again."
         case .unlocked(let extra):
             switch extra {
             case .mysteryBag: return "Poke the bag and guess who's inside. A new bag every day, on your shelf at home."

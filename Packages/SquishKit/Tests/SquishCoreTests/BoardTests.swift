@@ -137,6 +137,43 @@ final class BoardTests: XCTestCase {
 }
 
 final class SessionTests: XCTestCase {
+    func testFreeMovesAreNotCountedAndUndoGivesThemBack() {
+        let board = Board(capacity: 2, jars: [[Piece(kind: 0), Piece(kind: 1)], [Piece(kind: 1), Piece(kind: 0)], []])
+        var s = GameSession(board: board, par: 3)
+        XCTAssertNotNil(s.play(Move(from: 0, to: 2)))
+        XCTAssertNotNil(s.play(Move(from: 1, to: 0), free: true))
+        XCTAssertEqual(s.moveCount, 1, "a free move is not counted")
+        XCTAssertTrue(s.undo())
+        XCTAssertEqual(s.moveCount, 1)
+        XCTAssertTrue(s.undo())
+        XCTAssertEqual(s.moveCount, 0)
+    }
+
+    func testShakeUpKeepsMovesResetsParAndBlocksUndo() {
+        let board = Board(capacity: 2, jars: [[Piece(kind: 0), Piece(kind: 1)], [Piece(kind: 1), Piece(kind: 0)], []])
+        var s = GameSession(board: board, par: 3)
+        XCTAssertNotNil(s.play(Move(from: 0, to: 2)))
+        var rng = SystemRandomNumberGenerator()
+        let shaken = s.board.shakenUp(using: &rng)
+        XCTAssertEqual(shaken.jars.map(\.count), s.board.jars.map(\.count), "every jar keeps its number of pieces")
+        XCTAssertEqual(shaken.jars.joined().map(\.kind).sorted(), s.board.jars.joined().map(\.kind).sorted())
+        s.shakeUp(to: shaken, bestFromHere: 4)
+        XCTAssertEqual(s.moveCount, 1)
+        XCTAssertEqual(s.par, 5)
+        XCTAssertFalse(s.canUndo, "undo cannot go back past a shake-up")
+    }
+
+    func testShakeUpLeavesFinishedJarsAlone() {
+        let done = [Piece(kind: 2), Piece(kind: 2)]
+        let board = Board(capacity: 2, jars: [done, [Piece(kind: 0), Piece(kind: 1)], [Piece(kind: 1), Piece(kind: 0)], []])
+        var rng = SystemRandomNumberGenerator()
+        for _ in 0..<10 {
+            let shaken = board.shakenUp(using: &rng)
+            XCTAssertEqual(shaken.jars[0].map(\.kind), [2, 2])
+            XCTAssertTrue(shaken.jars[3].isEmpty)
+        }
+    }
+
     func testUndoIsLimitedToFivePerAttempt() {
         var s = GameSession(board: board(["AB", "BA", "", ""]), par: 4)
         XCTAssertNotNil(s.play(Move(from: 0, to: 2)))

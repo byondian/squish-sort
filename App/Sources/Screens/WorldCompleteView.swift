@@ -132,7 +132,7 @@ struct WorldCompleteView: View {
                 if let ref = model.progress.buddy.squishy {
                     SquishRefView(ref: ref).frame(width: 110, height: 110)
                         .rotationEffect(.degrees(spin))
-                        .rotation3DEffect(.degrees(flip), axis: (x: 1, y: 0, z: 0))
+                        .modifier(FlipEffect(turn: flip))
                         .offset(x: sway)
                 }
             }
@@ -238,7 +238,7 @@ struct WorldCompleteView: View {
         withAnimation(.easeInOut(duration: 0.6)) { spin = 360 }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
             spin = 0
-            withAnimation(.easeInOut(duration: 0.6)) { flip = 360 }
+            withAnimation(.easeInOut(duration: 0.6)) { flip = 1 }
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
             flip = 0

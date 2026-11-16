@@ -1245,28 +1245,6 @@
         }
       }
     },
-    "Double tap your Buddy at home to see it.": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ホームでバディをダブルタップすると見られるよ。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "홈에서 버디를 두 번 탭하면 볼 수 있어."
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在主畫面點兩下夥伴就能看到。"
-          }
-        }
-      }
-    },
     "Ears": {
       "localizations": {
         "ja": {
@@ -4061,6 +4039,28 @@
         }
       }
     },
+    "Tap Trick at home to see it again.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ホームの「わざ」をタップすると、また見られるよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "홈에서 「재주」를 누르면 다시 볼 수 있어요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在主畫面點「特技」就能再看一次。"
+          }
+        }
+      }
+    },
     "Tap again": {
       "localizations": {
         "ja": {
@@ -4299,6 +4299,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "點心 ×%lld"
+          }
+        }
+      }
+    },
+    "Trick": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "わざ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "재주"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "特技"
           }
         }
       }

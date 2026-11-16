@@ -7,7 +7,8 @@ public struct GameSession: Sendable {
     }
 
     public let initialBoard: Board
-    public let par: Int
+    /// The best possible number of moves. A shake-up works it out again from the new layout.
+    public private(set) var par: Int
     /// Moves over the best answer that still earn three stars (nil: the roomy early rule).
     public let starSlack: Int?
     public private(set) var board: Board
@@ -15,6 +16,10 @@ public struct GameSession: Sendable {
     /// Undos left this attempt; nil means unlimited (Remove Ads).
     public private(set) var undosLeft: Int?
     public private(set) var extraJarsAdded = 0
+    /// One flag per move in `history`: a free move (Squish Fever) is not counted.
+    private var free: [Bool] = []
+    /// Moves counted before the last shake-up, which undo cannot go back past.
+    private var movesBefore = 0
 
     public init(board: Board, par: Int, undoLimit: Int? = 5, starSlack: Int? = nil) {
         self.initialBoard = board
@@ -25,7 +30,7 @@ public struct GameSession: Sendable {
     }
 
     /// Moves made, net of undos. Stars are judged on this.
-    public var moveCount: Int { history.count }
+    public var moveCount: Int { movesBefore + free.reduce(0) { $0 + ($1 ? 0 : 1) } }
 
     public var status: Status {
         if board.isWon { return .won(stars: Stars.rating(moves: moveCount, par: par, slack: starSlack)) }
@@ -34,12 +39,23 @@ public struct GameSession: Sendable {
     }
 
     @discardableResult
-    public mutating func play(_ move: Move) -> MoveResult? {
+    public mutating func play(_ move: Move, free isFree: Bool = false) -> MoveResult? {
         guard status == .playing else { return nil }
         let before = board
         guard let result = board.apply(move) else { return nil }
         history.append(before)
+        free.append(isFree)
         return result
+    }
+
+    /// Shake-up: the pieces land in new spots. The moves made so far stay counted, the best answer
+    /// is worked out again from here (so a shake-up never costs stars), and undo cannot go back past it.
+    public mutating func shakeUp(to newBoard: Board, bestFromHere: Int) {
+        movesBefore = moveCount
+        history = []
+        free = []
+        board = newBoard
+        par = movesBefore + max(0, bestFromHere)
     }
 
     public var canUndo: Bool {
@@ -51,6 +67,7 @@ public struct GameSession: Sendable {
     @discardableResult
     public mutating func undo() -> Bool {
         guard canUndo, let previous = history.popLast() else { return false }
+        if !free.isEmpty { free.removeLast() }
         board = previous
         if let left = undosLeft { undosLeft = left - 1 }
         return true
