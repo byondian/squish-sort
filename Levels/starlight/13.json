@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "id": "starlight-13",
+  "world": "starlight",
+  "index": 13,
+  "beat": "easy",
+  "capacity": 4,
+  "jars": [
+    ["nova", "lumi", "pip", "zuzu"],
+    ["nova", "nova", "nova", "lumi"],
+    ["zuzu", "pip", "pip", "riff"],
+    ["lumi", "coco", "zuzu", "lumi"],
+    ["riff", "riff", "coco", "riff"],
+    ["pip", "coco", "coco", "zuzu"],
+    [],
+    []
+  ],
+  "mechanics": {"hidden": [], "sticky": [[1, 1], [2, 1], [4, 0]], "frozen": []},
+  "par": 16,
+  "solution": [[2, 6], [4, 6], [2, 7], [0, 2], [0, 7], [1, 0], [3, 0], [3, 2], [3, 4], [0, 3], [0, 1], [5, 2], [4, 0], [4, 6], [5, 0], [5, 7]],
+  "capsule": false,
+  "softenAfterFails": null
+}

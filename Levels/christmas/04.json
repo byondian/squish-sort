@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "id": "christmas-04",
+  "world": "christmas",
+  "index": 4,
+  "beat": "medium",
+  "capacity": 4,
+  "jars": [
+    ["elfie", "reindeer", "elfie", "reindeer"],
+    ["elfie", "snowbo", "elfie", "santa"],
+    ["santa", "santa", "snowbo", "snowbo"],
+    ["reindeer", "reindeer", "santa", "snowbo"],
+    [],
+    []
+  ],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": [[3, 3]]},
+  "par": 10,
+  "solution": [[2, 4], [1, 2], [3, 4], [3, 2], [0, 3], [0, 1], [0, 3], [1, 0], [1, 4], [0, 1]],
+  "capsule": false,
+  "softenAfterFails": null
+}

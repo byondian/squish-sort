@@ -1,0 +1,798 @@
+{
+ "collectibles": [
+  {
+   "id": "strawbie",
+   "name": "Strawbie",
+   "world": "toyshop",
+   "rarity": "common",
+   "names": {
+    "ja": "ストロビー",
+    "ko": "딸기콩",
+    "zh-Hant": "莓莓"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "tango",
+   "name": "Tango",
+   "world": "toyshop",
+   "rarity": "common",
+   "names": {
+    "ja": "タンゴ",
+    "ko": "탱고",
+    "zh-Hant": "小橘狐"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "sunny",
+   "name": "Sunny",
+   "world": "toyshop",
+   "rarity": "common",
+   "names": {
+    "ja": "サニー",
+    "ko": "삐약이",
+    "zh-Hant": "啾啾"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "minty",
+   "name": "Minty",
+   "world": "toyshop",
+   "rarity": "common",
+   "names": {
+    "ja": "ゲコミン",
+    "ko": "민트개굴",
+    "zh-Hant": "呱呱"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "blu",
+   "name": "Blu",
+   "world": "toyshop",
+   "rarity": "common",
+   "names": {
+    "ja": "ブルー",
+    "ko": "블루",
+    "zh-Hant": "小藍鯨"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "grapey",
+   "name": "Grapey",
+   "world": "toyshop",
+   "rarity": "common",
+   "names": {
+    "ja": "グレピー",
+    "ko": "포도문어",
+    "zh-Hant": "葡萄章魚"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "peach-bun",
+   "name": "Peach Bun",
+   "world": "toyshop",
+   "rarity": "rare",
+   "names": {
+    "ja": "ももまん",
+    "ko": "복숭아빵",
+    "zh-Hant": "桃桃包"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "dino-rex",
+   "name": "Dino Rex",
+   "world": "toyshop",
+   "rarity": "rare",
+   "names": {
+    "ja": "ちびレックス",
+    "ko": "꼬마렉스",
+    "zh-Hant": "小暴龍"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "capy",
+   "name": "Capy",
+   "world": "toyshop",
+   "rarity": "rare",
+   "names": {
+    "ja": "カピー",
+    "ko": "카삐",
+    "zh-Hant": "水豚豚"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "axo",
+   "name": "Axo",
+   "world": "toyshop",
+   "rarity": "rare",
+   "names": {
+    "ja": "ルーパちゃん",
+    "ko": "우파루파",
+    "zh-Hant": "小六角"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "spike",
+   "name": "Spike",
+   "world": "toyshop",
+   "rarity": "rare",
+   "names": {
+    "ja": "ハリまる",
+    "ko": "뾰족이",
+    "zh-Hant": "刺刺"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "snooze",
+   "name": "Snooze",
+   "world": "toyshop",
+   "rarity": "rare",
+   "names": {
+    "ja": "ねむりん",
+    "ko": "쿨쿨늘보",
+    "zh-Hant": "懶懶"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "buzzy",
+   "name": "Buzzy",
+   "world": "toyshop",
+   "rarity": "rare",
+   "names": {
+    "ja": "ブンブン",
+    "ko": "윙윙이",
+    "zh-Hant": "嗡嗡"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "sparkle-unicorn",
+   "name": "Sparkle",
+   "world": "toyshop",
+   "rarity": "ultra",
+   "names": {
+    "ja": "キラユニ",
+    "ko": "반짝유니콘",
+    "zh-Hant": "閃閃獨角獸"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "blaze-dragon",
+   "name": "Blaze",
+   "world": "toyshop",
+   "rarity": "ultra",
+   "names": {
+    "ja": "メラドラ",
+    "ko": "불꽃드래곤",
+    "zh-Hant": "焰焰龍"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "morphy",
+   "name": "Morphy",
+   "world": "toyshop",
+   "rarity": "ultra",
+   "shapeshifter": true,
+   "names": {
+    "ja": "へんしんプニ",
+    "ko": "변신말랑이",
+    "zh-Hant": "變變"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "golden-shop-cat",
+   "name": "Golden Shop Cat",
+   "world": "toyshop",
+   "rarity": "secret",
+   "names": {
+    "ja": "きんのまねきねこ",
+    "ko": "황금복냥이",
+    "zh-Hant": "金招財貓"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "macaron",
+   "name": "Macaron",
+   "world": "sweetfactory",
+   "rarity": "common",
+   "names": {
+    "ja": "マカロン",
+    "ko": "카롱이",
+    "zh-Hant": "馬卡卡"
+   },
+   "feel": "foam"
+  },
+  {
+   "id": "donut",
+   "name": "Donut",
+   "world": "sweetfactory",
+   "rarity": "common",
+   "names": {
+    "ja": "ドーナツ",
+    "ko": "동글도넛",
+    "zh-Hant": "甜圈圈"
+   },
+   "feel": "foam"
+  },
+  {
+   "id": "jelly",
+   "name": "Jelly",
+   "world": "sweetfactory",
+   "rarity": "common",
+   "names": {
+    "ja": "ゼリー",
+    "ko": "탱글젤리",
+    "zh-Hant": "果凍凍"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "cupcake",
+   "name": "Cupcake",
+   "world": "sweetfactory",
+   "rarity": "common",
+   "names": {
+    "ja": "カップケーキ",
+    "ko": "컵키",
+    "zh-Hant": "杯杯糕"
+   },
+   "feel": "foam"
+  },
+  {
+   "id": "gummy-bear",
+   "name": "Gummy Bear",
+   "world": "sweetfactory",
+   "rarity": "common",
+   "names": {
+    "ja": "グミベア",
+    "ko": "곰젤리",
+    "zh-Hant": "軟糖熊"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "lolly",
+   "name": "Lolly",
+   "world": "sweetfactory",
+   "rarity": "common",
+   "names": {
+    "ja": "ペロペロ",
+    "ko": "뱅글롤리",
+    "zh-Hant": "捲捲糖"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "mochi-ice",
+   "name": "Mochi Ice",
+   "world": "sweetfactory",
+   "rarity": "rare",
+   "names": {
+    "ja": "もちアイス",
+    "ko": "모찌아이스",
+    "zh-Hant": "冰冰麻糬"
+   },
+   "feel": "mochi"
+  },
+  {
+   "id": "panda-dumpling",
+   "name": "Panda Dumpling",
+   "world": "sweetfactory",
+   "rarity": "rare",
+   "names": {
+    "ja": "パンダまん",
+    "ko": "판다만두",
+    "zh-Hant": "熊貓餃"
+   },
+   "feel": "mochi"
+  },
+  {
+   "id": "butter-bar",
+   "name": "Butter Bar",
+   "world": "sweetfactory",
+   "rarity": "rare",
+   "names": {
+    "ja": "バターくん",
+    "ko": "버터바",
+    "zh-Hant": "奶油寶"
+   },
+   "feel": "foam"
+  },
+  {
+   "id": "strawberry-cow",
+   "name": "Strawberry Cow",
+   "world": "sweetfactory",
+   "rarity": "rare",
+   "names": {
+    "ja": "いちごモー",
+    "ko": "딸기젖소",
+    "zh-Hant": "草莓牛牛"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "cream-puff",
+   "name": "Cream Puff",
+   "world": "sweetfactory",
+   "rarity": "rare",
+   "names": {
+    "ja": "シューちゃん",
+    "ko": "슈크림",
+    "zh-Hant": "泡芙芙"
+   },
+   "feel": "foam"
+  },
+  {
+   "id": "taffy-snake",
+   "name": "Taffy Snake",
+   "world": "sweetfactory",
+   "rarity": "rare",
+   "names": {
+    "ja": "のびニョロ",
+    "ko": "쭉쭉뱀",
+    "zh-Hant": "伸伸蛇"
+   },
+   "feel": "mochi"
+  },
+  {
+   "id": "choco-bat",
+   "name": "Choco Bat",
+   "world": "sweetfactory",
+   "rarity": "rare",
+   "names": {
+    "ja": "チョコウモリ",
+    "ko": "초코박쥐",
+    "zh-Hant": "巧克蝠"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "birthday-cake",
+   "name": "Birthday Cake",
+   "world": "sweetfactory",
+   "rarity": "ultra",
+   "names": {
+    "ja": "バースデーケーキ",
+    "ko": "생일케이크",
+    "zh-Hant": "生日糕糕"
+   },
+   "feel": "foam"
+  },
+  {
+   "id": "rainbow-toast",
+   "name": "Rainbow Toast",
+   "world": "sweetfactory",
+   "rarity": "ultra",
+   "names": {
+    "ja": "にじいろトースト",
+    "ko": "무지개토스트",
+    "zh-Hant": "彩虹吐司"
+   },
+   "feel": "foam"
+  },
+  {
+   "id": "swirl",
+   "name": "Swirl",
+   "world": "sweetfactory",
+   "rarity": "ultra",
+   "shapeshifter": true,
+   "names": {
+    "ja": "くるりんソフト",
+    "ko": "변신소프티",
+    "zh-Hant": "旋旋甜筒"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "golden-gummy",
+   "name": "Golden Gummy",
+   "world": "sweetfactory",
+   "rarity": "secret",
+   "names": {
+    "ja": "きんのグミベア",
+    "ko": "황금곰젤리",
+    "zh-Hant": "黃金Q熊"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "lumi",
+   "name": "Lumi",
+   "world": "starlight",
+   "rarity": "common",
+   "names": {
+    "ja": "ルミ",
+    "ko": "룰루",
+    "zh-Hant": "露露兔"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "riff",
+   "name": "Riff",
+   "world": "starlight",
+   "rarity": "common",
+   "names": {
+    "ja": "リフ",
+    "ko": "리프",
+    "zh-Hant": "弦弦熊"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "zuzu",
+   "name": "Zuzu",
+   "world": "starlight",
+   "rarity": "common",
+   "names": {
+    "ja": "ズズ",
+    "ko": "살랑냥",
+    "zh-Hant": "珠珠貓"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "pip",
+   "name": "Pip",
+   "world": "starlight",
+   "rarity": "common",
+   "names": {
+    "ja": "ピピ",
+    "ko": "막내멍",
+    "zh-Hant": "皮皮汪"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "nova",
+   "name": "Nova",
+   "world": "starlight",
+   "rarity": "common",
+   "names": {
+    "ja": "ノノ",
+    "ko": "노바",
+    "zh-Hant": "諾諾虎"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "coco",
+   "name": "Coco",
+   "world": "starlight",
+   "rarity": "common",
+   "names": {
+    "ja": "ココ",
+    "ko": "쿵쿵이",
+    "zh-Hant": "琴琴龍"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "lightstick-lamb",
+   "name": "Lightstick Lamb",
+   "world": "starlight",
+   "rarity": "rare",
+   "names": {
+    "ja": "ペンライトひつじ",
+    "ko": "응원봉양",
+    "zh-Hant": "應援小羊"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "photocard-panda",
+   "name": "Photocard Panda",
+   "world": "starlight",
+   "rarity": "rare",
+   "names": {
+    "ja": "トレカパンダ",
+    "ko": "포카판다",
+    "zh-Hant": "小卡熊貓"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "encore-otter",
+   "name": "Encore Otter",
+   "world": "starlight",
+   "rarity": "rare",
+   "names": {
+    "ja": "アンコラッコ",
+    "ko": "앵콜수달",
+    "zh-Hant": "安可水獺"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "fan-sign-hamster",
+   "name": "Fan Sign Hamster",
+   "world": "starlight",
+   "rarity": "rare",
+   "names": {
+    "ja": "サインハムちゃん",
+    "ko": "팬싸햄찌",
+    "zh-Hant": "簽名倉鼠"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "chomp",
+   "name": "Chomp",
+   "world": "starlight",
+   "rarity": "rare",
+   "names": {
+    "ja": "ぱくぱくザメ",
+    "ko": "와앙상어",
+    "zh-Hant": "咬咬鯊"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "mushie",
+   "name": "Mushie",
+   "world": "starlight",
+   "rarity": "rare",
+   "names": {
+    "ja": "キノたん",
+    "ko": "몽글버섯",
+    "zh-Hant": "菇菇"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "sleepy-moon",
+   "name": "Sleepy Moon",
+   "world": "starlight",
+   "rarity": "rare",
+   "names": {
+    "ja": "すやムーン",
+    "ko": "꾸벅달님",
+    "zh-Hant": "睏睏月"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "centre-star",
+   "name": "Centre Star",
+   "world": "starlight",
+   "rarity": "ultra",
+   "names": {
+    "ja": "センタースター",
+    "ko": "센터스타",
+    "zh-Hant": "主角星星"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "star-narwhal",
+   "name": "Starlight Narwhal",
+   "world": "starlight",
+   "rarity": "ultra",
+   "names": {
+    "ja": "ほしぞらイッカク",
+    "ko": "별빛일각고래",
+    "zh-Hant": "星光一角鯨"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "glimmer",
+   "name": "Glimmer",
+   "world": "starlight",
+   "rarity": "ultra",
+   "shapeshifter": true,
+   "names": {
+    "ja": "キラメキ",
+    "ko": "변신반짝이",
+    "zh-Hant": "亮晶晶"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "golden-mic",
+   "name": "Golden Mic",
+   "world": "starlight",
+   "rarity": "secret",
+   "names": {
+    "ja": "きんのマイク",
+    "ko": "황금마이크",
+    "zh-Hant": "金麥克風"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "santa",
+   "name": "Santa Squish",
+   "world": "christmas",
+   "rarity": "common",
+   "names": {
+    "ja": "ぷにサンタ",
+    "ko": "말랑산타",
+    "zh-Hant": "聖誕老公公"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "elfie",
+   "name": "Elfie",
+   "world": "christmas",
+   "rarity": "common",
+   "names": {
+    "ja": "エルフィ",
+    "ko": "요정엘피",
+    "zh-Hant": "小精靈"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "reindeer",
+   "name": "Reindeer Dot",
+   "world": "christmas",
+   "rarity": "common",
+   "names": {
+    "ja": "トナカイドット",
+    "ko": "땡땡사슴",
+    "zh-Hant": "點點鹿"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "snowbo",
+   "name": "Snowbo",
+   "world": "christmas",
+   "rarity": "common",
+   "names": {
+    "ja": "ゆきだるまる",
+    "ko": "눈보",
+    "zh-Hant": "胖胖雪人"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "ginger",
+   "name": "Ginger",
+   "world": "christmas",
+   "rarity": "common",
+   "names": {
+    "ja": "ジンジャー",
+    "ko": "진저쿠키",
+    "zh-Hant": "小薑餅"
+   },
+   "feel": "foam"
+  },
+  {
+   "id": "waddles",
+   "name": "Waddles",
+   "world": "christmas",
+   "rarity": "common",
+   "names": {
+    "ja": "よちペン",
+    "ko": "뒤뚱이",
+    "zh-Hant": "搖搖企鵝"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "candy-cane-cat",
+   "name": "Candy Cane Cat",
+   "world": "christmas",
+   "rarity": "rare",
+   "names": {
+    "ja": "キャンディにゃん",
+    "ko": "캔디케인냥",
+    "zh-Hant": "拐杖糖喵"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "hot-cocoa-bear",
+   "name": "Hot Cocoa Bear",
+   "world": "christmas",
+   "rarity": "rare",
+   "names": {
+    "ja": "ココアくま",
+    "ko": "코코아곰",
+    "zh-Hant": "熱可可熊"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "polar-bear",
+   "name": "Polar Bear",
+   "world": "christmas",
+   "rarity": "rare",
+   "names": {
+    "ja": "もふしろくま",
+    "ko": "포근북극곰",
+    "zh-Hant": "白熊熊"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "nutcracker-mouse",
+   "name": "Nutcracker Mouse",
+   "world": "christmas",
+   "rarity": "rare",
+   "names": {
+    "ja": "くるみネズミ",
+    "ko": "호두까기쥐",
+    "zh-Hant": "胡桃鉗鼠"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "starry-tree",
+   "name": "Starry Tree",
+   "world": "christmas",
+   "rarity": "ultra",
+   "names": {
+    "ja": "おほしツリー",
+    "ko": "반짝별트리",
+    "zh-Hant": "星星聖誕樹"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "flurry",
+   "name": "Flurry",
+   "world": "christmas",
+   "rarity": "ultra",
+   "shapeshifter": true,
+   "names": {
+    "ja": "フルリン",
+    "ko": "변신눈송이",
+    "zh-Hant": "雪花花"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "golden-bell",
+   "name": "Golden Bell",
+   "world": "christmas",
+   "rarity": "secret",
+   "names": {
+    "ja": "きんのベル",
+    "ko": "황금방울",
+    "zh-Hant": "金鈴鈴"
+   },
+   "feel": "jelly"
+  }
+ ],
+ "squishRoomToys": [
+  {
+   "id": "gloop",
+   "name": "Gloop",
+   "names": {
+    "ja": "グニョン",
+    "ko": "슬라임볼",
+    "zh-Hant": "黏黏球"
+   },
+   "feel": "gel"
+  },
+  {
+   "id": "tapey",
+   "name": "Tapey",
+   "names": {
+    "ja": "テーピー",
+    "ko": "테이피",
+    "zh-Hant": "貼貼球"
+   },
+   "feel": "mochi"
+  }
+ ]
+}

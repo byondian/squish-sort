@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "id": "christmas-02",
+  "world": "christmas",
+  "index": 2,
+  "beat": "easy",
+  "capacity": 4,
+  "jars": [
+    ["santa", "santa", "elfie", "elfie"],
+    ["elfie", "elfie", "santa", "santa"],
+    []
+  ],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": [[0, 1]]},
+  "par": 3,
+  "solution": [[0, 2], [1, 0], [1, 2]],
+  "capsule": false,
+  "softenAfterFails": null
+}

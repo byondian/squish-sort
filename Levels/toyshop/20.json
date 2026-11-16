@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "id": "toyshop-20",
+  "world": "toyshop",
+  "index": 20,
+  "beat": "boss",
+  "capacity": 4,
+  "jars": [
+    ["strawbie", "tango", "macaron", "grapey"],
+    ["minty", "donut", "sunny", "blu"],
+    ["donut", "strawbie", "tango", "strawbie"],
+    ["tango", "macaron", "sunny", "grapey"],
+    ["donut", "tango", "minty", "blu"],
+    ["strawbie", "sunny", "donut", "blu"],
+    ["macaron", "grapey", "macaron", "sunny"],
+    ["minty", "grapey", "blu", "minty"],
+    [],
+    []
+  ],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": []},
+  "par": 27,
+  "solution": [[1, 8], [4, 8], [5, 8], [6, 1], [7, 4], [7, 8], [0, 7], [6, 0], [6, 7], [0, 6], [3, 9], [7, 9], [4, 7], [0, 4], [2, 0], [2, 4], [2, 0], [5, 2], [3, 5], [3, 6], [4, 3], [2, 4], [1, 2], [1, 4], [1, 7], [5, 2], [0, 5]],
+  "capsule": true,
+  "softenAfterFails": 3
+}

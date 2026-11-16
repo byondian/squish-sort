@@ -1,0 +1,117 @@
+import Foundation
+import SquishCore
+
+/// The 10-level sawtooth from the structure blueprint.
+public enum Beat: String, Codable, CaseIterable, Sendable {
+    case intro, easy, medium, showpiece, breather, bonus, tension, calm, boss
+
+    /// The beat a level at this position in its world must have.
+    public static func expected(forIndex index: Int) -> Beat {
+        let pattern: [Beat] = [.intro, .easy, .easy, .medium, .showpiece, .breather, .bonus, .tension, .calm, .boss]
+        return pattern[(index - 1) % pattern.count]
+    }
+}
+
+/// One level, exactly as stored in Levels/<world>/<nn>.json (schema 1).
+public struct LevelFile: Codable, Equatable, Sendable {
+    public struct Mechanics: Codable, Equatable, Sendable {
+        /// [jar, position] of wrapped pieces.
+        public var hidden: [[Int]]?
+        /// [jar, position] of the lower piece of each duet (it and the one above move together).
+        public var sticky: [[Int]]?
+        /// [jar, position] or [jar, position, movesToThaw] (default 2).
+        public var frozen: [[Int]]?
+
+        public init(hidden: [[Int]]? = nil, sticky: [[Int]]? = nil, frozen: [[Int]]? = nil) {
+            self.hidden = hidden
+            self.sticky = sticky
+            self.frozen = frozen
+        }
+    }
+
+    public var schema: Int
+    public var id: String
+    public var world: String
+    public var index: Int
+    public var beat: Beat
+    public var capacity: Int
+    /// Piece names per jar, bottom to top.
+    public var jars: [[String]]
+    public var mechanics: Mechanics?
+    public var par: Int?
+    public var solution: [[Int]]?
+    public var capsule: Bool
+    public var softenAfterFails: Int?
+
+    public static let currentSchema = 1
+    public static let defaultThaw = 2
+
+    public static func decode(_ data: Data) throws -> LevelFile {
+        try JSONDecoder().decode(LevelFile.self, from: data)
+    }
+}
+
+public enum LevelError: Error, Equatable, CustomStringConvertible {
+    case invalid(String)
+
+    public var description: String {
+        switch self {
+        case .invalid(let s): return s
+        }
+    }
+}
+
+/// A decoded level ready to play.
+public struct Level: Sendable {
+    public let file: LevelFile
+    /// Piece names, indexed by `Piece.kind`, in order of first appearance.
+    public let kinds: [String]
+    public let board: Board
+
+    public var id: String { file.id }
+    public var par: Int { file.par ?? 0 }
+
+    public var solution: [Move] {
+        (file.solution ?? []).compactMap { $0.count == 2 ? Move(from: $0[0], to: $0[1]) : nil }
+    }
+
+    public init(file: LevelFile) throws {
+        var kinds: [String] = []
+        for jar in file.jars {
+            for name in jar where !kinds.contains(name) { kinds.append(name) }
+        }
+        guard kinds.count <= 15 else { throw LevelError.invalid("\(file.id): more than 15 kinds") }
+
+        let m = file.mechanics ?? LevelFile.Mechanics()
+        func positions(_ list: [[Int]]?, _ label: String) throws -> [[Int]] {
+            for p in list ?? [] {
+                guard p.count >= 2, file.jars.indices.contains(p[0]), file.jars[p[0]].indices.contains(p[1]) else {
+                    throw LevelError.invalid("\(file.id): \(label) position \(p) is not on the board")
+                }
+            }
+            return list ?? []
+        }
+        let hidden = Set(try positions(m.hidden, "hidden").map { [$0[0], $0[1]] })
+        let sticky = Set(try positions(m.sticky, "sticky").map { [$0[0], $0[1]] })
+        var frozen: [[Int]: UInt8] = [:]
+        for p in try positions(m.frozen, "frozen") {
+            frozen[[p[0], p[1]]] = UInt8(clamping: p.count > 2 ? p[2] : LevelFile.defaultThaw)
+        }
+
+        var jars: [[Piece]] = []
+        for (j, jar) in file.jars.enumerated() {
+            var pieces: [Piece] = []
+            for (i, name) in jar.enumerated() {
+                let kind = UInt8(kinds.firstIndex(of: name)!)
+                pieces.append(Piece(kind: kind,
+                                    hidden: hidden.contains([j, i]),
+                                    frozen: frozen[[j, i]] ?? 0,
+                                    bondedAbove: sticky.contains([j, i])))
+            }
+            jars.append(pieces)
+        }
+        self.file = file
+        self.kinds = kinds
+        self.board = Board(capacity: file.capacity, jars: jars)
+    }
+}
