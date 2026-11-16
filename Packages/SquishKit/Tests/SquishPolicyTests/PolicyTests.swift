@@ -957,28 +957,30 @@ final class ExtrasTests: XCTestCase {
         XCTAssertEqual(b.tricksUnlocked, 0)
         XCTAssertEqual(b.heartsToNextTrick, 10)
         XCTAssertEqual(b.growth, 0)
+        b.hearts = 1
+        XCTAssertEqual(b.growth, 0.02, accuracy: 1e-9, "the first treat already shows")
         b.hearts = 7
         XCTAssertEqual(b.heartsToNextTrick, 3)
         XCTAssertEqual(b.trickProgress, 0.7, accuracy: 1e-9)
         b.hearts = 10
         XCTAssertEqual(b.tricksUnlocked, 1)
-        XCTAssertEqual(b.growth, 0.05, accuracy: 1e-9)
+        XCTAssertEqual(b.growth, 0.20, accuracy: 1e-9, "2% a heart")
         XCTAssertEqual(b.heartsToNextTrick, 10)
         b.hearts = 30
         XCTAssertEqual(b.tricksUnlocked, 3)
         XCTAssertNil(b.heartsToNextTrick)
         XCTAssertEqual(b.trickProgress, 1)
         b.hearts = 500
-        XCTAssertEqual(b.growth, 0.25, accuracy: 1e-9, "growth stops at a quarter bigger")
+        XCTAssertEqual(b.growth, 0.40, accuracy: 1e-9, "growth stops at 40% bigger")
         // A treat's puff eases back over a day, and the earned growth stays.
         XCTAssertEqual(b.puff(at: 1000), 0)
         b.lastTreatAt = 1000
-        XCTAssertEqual(b.puff(at: 1000), 0.10, accuracy: 1e-9)
-        XCTAssertEqual(b.puff(at: 1000 + 43_200), 0.05, accuracy: 1e-9)
+        XCTAssertEqual(b.puff(at: 1000), 0.15, accuracy: 1e-9)
+        XCTAssertEqual(b.puff(at: 1000 + 43_200), 0.075, accuracy: 1e-9)
         XCTAssertEqual(b.puff(at: 1000 + 200_000), 0)
         XCTAssertEqual(b.puff(at: 500), 0, "a clock set back gives no puff")
         // Gentle mode: gone within a minute, so there is nothing to come back for.
-        XCTAssertEqual(b.puff(at: 1030, lasting: BuddyState.puffSecondsGentle), 0.05, accuracy: 1e-9)
+        XCTAssertEqual(b.puff(at: 1030, lasting: BuddyState.puffSecondsGentle), 0.075, accuracy: 1e-9)
         XCTAssertEqual(b.puff(at: 1061, lasting: BuddyState.puffSecondsGentle), 0)
         XCTAssertEqual(b.growth, 0.25, accuracy: 1e-9)
     }

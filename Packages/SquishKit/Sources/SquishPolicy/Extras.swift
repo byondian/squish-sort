@@ -410,13 +410,15 @@ public struct BuddyState: Codable, Equatable, Sendable {
         heartsToNextTrick == nil ? 1 : Double(hearts % BuddyState.heartsPerTrick) / Double(BuddyState.heartsPerTrick)
     }
 
-    /// The Buddy grows a little at 10, 20, 30, 40 and 50 hearts: 5% a step, to 25%. It never shrinks.
-    public static func growthSteps(hearts: Int) -> Int { min(5, max(0, hearts) / 10) }
-    public var growth: Double { Double(BuddyState.growthSteps(hearts: hearts)) * 0.05 }
+    /// Every heart makes the Buddy a little bigger for good: 2% a heart, up to 40% at 20 hearts.
+    /// It never shrinks.
+    public static let growthPerHeart = 0.02
+    public static let maxGrowth = 0.40
+    public var growth: Double { min(BuddyState.maxGrowth, Double(max(0, hearts)) * BuddyState.growthPerHeart) }
 
-    /// A treat puffs the Buddy up by a tenth, easing back over a day to the size it has
+    /// A treat also puffs the Buddy up by 15% on top, easing back over a day to the size it has
     /// earned for good. Nothing earned is ever lost, and nothing is shown when the puff is gone.
-    public static let puffSize = 0.10
+    public static let puffSize = 0.15
     public static let puffSeconds = 86_400.0
     /// Gentle mode: a short happy reaction, never something to come back in time for.
     public static let puffSecondsGentle = 60.0

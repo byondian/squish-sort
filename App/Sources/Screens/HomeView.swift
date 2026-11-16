@@ -385,6 +385,8 @@ struct BuddyHomeView: View {
     @State private var pokes = 0
     @State private var confirmTreat = false
     @State private var feeding = false
+    @State private var gulp = false
+    @State private var biggerPop = false
     @State private var flying = "🧁"
     @State private var burst = false
     @State private var burstShown = false
@@ -522,9 +524,33 @@ struct BuddyHomeView: View {
                 .offset(x: sway)
                 // It squashes a little as it talks.
                 .scaleEffect(x: talking ? 1.04 : 1, y: talking ? 0.94 : 1, anchor: .bottom)
+                // Every treat: a big gulp that springs back to a size a little bigger than before.
+                .scaleEffect(gulp ? 1.22 : 1, anchor: .bottom)
                 .scaleEffect(1 + buddySize, anchor: .bottom)
-                .padding(.top, 60 * buddySize)
+                .padding(.top, 130 * buddySize)
                 .animation(.spring(response: 0.5, dampingFraction: 0.5), value: model.progress.buddy.lastTreatAt)
+                .animation(.spring(response: 0.5, dampingFraction: 0.5), value: model.progress.buddy.hearts)
+                .onChange(of: model.progress.buddy.hearts) { old, new in
+                    guard new > old else { return }
+                    withAnimation(.easeOut(duration: 0.18)) { gulp = true }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                        withAnimation(.spring(response: 0.45, dampingFraction: 0.35)) { gulp = false }
+                    }
+                    if model.progress.buddy.growth < BuddyState.maxGrowth || old < Int(BuddyState.maxGrowth / BuddyState.growthPerHeart) {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { biggerPop = true }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.3) { withAnimation { biggerPop = false } }
+                    }
+                }
+                .overlay(alignment: .top) {
+                    if biggerPop {
+                        Text("Bigger!").font(Theme.title(22)).foregroundStyle(.white)
+                            .padding(.horizontal, 14).padding(.vertical, 4)
+                            .background(Capsule().fill(Theme.bubblegum))
+                            .rotationEffect(.degrees(-5))
+                            .transition(.scale(scale: 0.3).combined(with: .opacity))
+                            .allowsHitTesting(false)
+                    }
+                }
                 .overlay {
                     // A treat flies up to the Buddy, and a heart floats off it.
                     if feeding {

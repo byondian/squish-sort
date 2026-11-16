@@ -1003,6 +1003,28 @@
         }
       }
     },
+    "Bigger!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "おおきくなった！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "더 커졌다!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "變大了！"
+          }
+        }
+      }
+    },
     "Blue Sky": {
       "localizations": {
         "ja": {
