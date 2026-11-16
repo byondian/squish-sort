@@ -89,7 +89,7 @@
     const ticket = ++o.pend;
     softTexture(o, id, t => {
       if (ticket !== o.pend) return; // a newer swap won
-      const feel = feels[id] || 'foam', S = o.S;
+      const feel = feels[id] || 'jelly', S = o.S;
       const b = new Squish.SquishBody({ size: S, n: 12, inside: t.inside, footV: t.footV, material: feel, x: o.w / 2, y: o.world.floor - S / 2 - (drop ? S * .32 : 0) });
       b.tex = t.tex; b.htex = t.htex; b.hsize = t.hsize; o.body = b; o.feel = feel; o.ptrs = {};
       if (!SB) { // first toy ready: switch the hero over from SVG to the soft body
