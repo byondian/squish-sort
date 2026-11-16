@@ -1,62 +1,68 @@
 ---
-title: Ads and tracking
-description: When ads appear in Squish Sort, which ads children see, how Apple's tracking prompt works and how to change your choices.
+title: 広告とトラッキング
+description: Squish Sortで広告が表示されるタイミング、子どもに表示される広告、Appleのトラッキング確認のしくみ、選択の変え方を説明します。
 ---
 :::summary
-Squish Sort is free because of ads. We keep them fair: **no ads in the first six levels, never in the middle of a level, never right after you fail**, and far fewer in gentle mode. Ads are personalised only if you are old enough and say yes.
+Squish Sortは広告のおかげで無料です。広告はフェアに運用しています。**最初の6レベルは広告なし、レベルの途中や失敗の直後には絶対に出さず**、やさしいモードではずっと少なくなります。広告がパーソナライズされるのは、同意できる年齢で、ご自身が「許可」した場合だけです。
 :::
 
-## When ads appear
+## 広告が表示されるタイミング
 
-Ads that play by themselves (between levels) currently follow these limits:
+レベルの合間に自動で流れる広告は、現在次の上限に従っています。
 
-| Levels | At most |
+| レベル | 上限 |
 |---|---|
-| 1 to 6 | No ads |
-| 7 to 15 | One ad every 4 levels, and at least 4 minutes of play apart |
-| 16 to 30 | One ad every 3 levels, and at least 3 minutes of play apart |
-| 31 onwards | One ad every 2 levels, and at least 90 seconds of play apart |
+| 1〜6 | 広告なし |
+| 7〜15 | 4レベルに1回、プレイ時間で4分以上の間隔 |
+| 16〜30 | 3レベルに1回、プレイ時間で3分以上の間隔 |
+| 31以降 | 2レベルに1回、プレイ時間で90秒以上の間隔 |
 
-And always:
+さらに、いつでも：
 
-- Never in the first minute after you open the game.
-- Only after a level is won: never mid-level and never after a fail.
-- Never after a boss level that took more than one try.
-- In **gentle mode**, the first ad comes at level 12 or later, and every gap is doubled.
+- ゲームを開いてから最初の1分間は表示しません。
+- レベルをクリアした後だけに表示します。レベルの途中や失敗の後には表示しません。
+- ボスレベルの後、カプセルがもらえたレベルの後、新しいものが解放されたクリアの後には表示しません。
+- 任意のごほうび動画を見るとカウントがリセットされ、しばらく広告はお休みになります。
+- **やさしいモード**では、最初の広告はレベル12以降になり、すべての間隔が2倍になります。
 
-We may adjust these numbers, and if we do we'll update this page.
+これらの数値は調整することがあり、その場合はこのページを更新します。
 
-**Remove Ads** (a one-time purchase) switches these ads off for good.
+**広告を削除**（買い切り）を購入すると、これらの広告はずっと表示されなくなります。
 
-## Reward videos: always your choice
+## ごほうび動画：いつでも任意
 
-Some buttons offer a reward for watching a short video: an extra jar, more moves after a fail, a bonus gift of coins, or doubling the capsule you just earned. These only play when you tap them, are the same for everyone (including Remove Ads owners), and never change capsule odds. In gentle mode they are offered quietly, never in a pop-up.
+一部のボタンでは、短い動画を見るとごほうびがもらえます。詰まったときのビン追加やヒント、初回クリア後のコイン2倍、ミステリーバッグのもう1回、バディの毎日のコインプレゼントなどです。ごほうび動画は：
 
-## Which ads you see
+- タップしたときだけ再生され、1日最大6回までです。
+- カプセルやスクイーズはもらえず、カプセルの確率も変わりません。
+- **広告を削除**を購入済みの方は、動画なしのワンタップで受け取れます。
+- **やさしいモード**では、ビン追加とヒントだけに提供され、バディの毎日のプレゼントは動画なしで無料です。
 
-| Player | Ads |
+## 表示される広告
+
+| プレイヤー | 広告 |
 |---|---|
-| Under 13 (under 14 in Korea), or age question skipped | Child-directed, non-personalised, general-audience (G-rated) ads. No tracking prompt, no advertising identifier |
-| Teens below their country's age of digital consent (all under-18s in the UK) | Non-personalised ads, marked as under the age of consent, rated up to PG |
-| Older players | Non-personalised ads, unless you allow tracking and, in the UK/EEA/Switzerland, also agree in Google's consent form |
+| 13歳未満（韓国では14歳未満）、または年齢の質問をスキップした方 | 子ども向け、パーソナライズなし、全年齢向け（Gレーティング）の広告。トラッキングの確認なし、広告識別子は使いません |
+| お住まいの国のデジタル同意年齢に達していないティーン（英国では18歳未満全員） | パーソナライズなしの広告。同意年齢未満として扱い、PGレーティングまで |
+| それ以外の方 | パーソナライズなしの広告。トラッキングを許可し、英国・EEA・スイスではGoogleの同意フォームでも同意した場合のみパーソナライズ |
 
-Ads are served by **Google AdMob**. We block ad categories that don't suit a family game where Google lets us.
+広告は**Google AdMob**が配信します。Googleが認める範囲で、家族向けゲームにふさわしくない広告カテゴリーはブロックしています。
 
-## Apple's tracking prompt
+## Appleのトラッキング確認
 
-If you are old enough, the game may ask once (after you win level 5 or later) whether to "Allow" tracking. Saying **Allow** lets Google use Apple's advertising identifier to show ads more relevant to you. Saying **Ask App Not to Track** means you still see ads, just not personalised ones. Either way, the game plays exactly the same.
+同意できる年齢の方には、レベル7の開始時に、1行の説明のあとで、トラッキングを「許可」するかどうかを一度だけたずねます。**許可**をタップすると、GoogleがAppleの広告識別子を使って、よりあなたに合った広告を表示します。**Appにトラッキングしないように要求**をタップしても広告は表示されますが、パーソナライズはされません。どちらを選んでも、ゲームはまったく同じように遊べます。
 
-## Changing your mind
+## 選択を変えるには
 
-- **In the game:** Settings > **Privacy choices** (shown in the UK, EEA and Switzerland) reopens Google's consent form.
-- **On iPhone:** Settings > Privacy & Security > **Tracking**, to switch tracking off for Squish Sort or all apps.
-- **Reset your advertising identifier:** removing and reinstalling the app, or turning tracking off, stops it being shared.
-- **Google ad settings:** adults can manage ad personalisation at [myadcenter.google.com](https://myadcenter.google.com).
+- **ゲーム内：** 設定 > **プライバシーの選択**（英国・EEA・スイスで表示）から、Googleの同意フォームをもう一度開けます。
+- **iPhone：** 設定 > プライバシーとセキュリティ > **トラッキング**で、Squish Sortまたはすべてのアプリのトラッキングをオフにできます。
+- **広告識別子の共有を止める：** アプリを削除して再インストールするか、トラッキングをオフにすると共有されなくなります。
+- **Googleの広告設定：** 大人の方は[myadcenter.google.com](https://myadcenter.google.com)で広告のパーソナライズを管理できます。
 
-## Ad measurement
+## 広告の効果測定
 
-Apple's privacy-preserving SKAdNetwork tells ad networks whether an ad led to an install, without identifying you.
+Appleのプライバシーに配慮したSKAdNetworkは、あなたを特定することなく、広告がインストールにつながったかどうかだけを広告ネットワークに伝えます。
 
-## Seen an ad that shouldn't be there?
+## ふさわしくない広告を見かけたら
 
-Please tell us at support@squishsort.app with a screenshot if you can. We'll block it.
+できればスクリーンショットを添えて、support@squishsort.appまでお知らせください。その広告をブロックします。

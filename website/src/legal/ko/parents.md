@@ -1,58 +1,58 @@
 ---
-title: Parents' guide
-description: A guide for parents and carers: age, gentle mode, ads, purchases, data and safety in Squish Sort.
+title: 보호자 안내
+description: 부모님과 보호자를 위한 안내입니다. Squish Sort의 연령, 순한 모드, 광고, 구매, 개인정보, 안전을 설명합니다.
 ---
 :::summary
-Squish Sort is a calm puzzle game rated 9+ on the App Store. There is **no chat, no friends list, no accounts and no location**. Younger players get **gentle mode** automatically.
+Squish Sort는 App Store에서 9세 이상 등급을 받은 차분한 퍼즐 게임입니다. **채팅, 친구 목록, 계정, 위치 정보가 없습니다.** 어린 사용자에게는 **순한 모드**가 자동으로 적용됩니다.
 :::
 
-## What is the game?
+## 어떤 게임인가요?
 
-Players sort squishy characters into jars until every jar holds one kind. There are no timers, no lives and no move limits, and any level can be retried as often as needed. Squishies are collected from free capsules earned by playing.
+모든 병에 한 종류만 남을 때까지 말랑한 스퀴시 캐릭터를 병에 나누어 담는 게임입니다. 타이머, 생명, 이동 횟수 제한이 없고, 어떤 레벨이든 원하는 만큼 다시 할 수 있습니다. 스퀴시는 분류하거나, 플레이로 얻는 무료 캡슐에서 모읍니다. 12월에는 크리스마스 공방과 어드벤트 선반이 나타나지만, 카운트다운도 살 것도 없습니다.
 
-## The age question
+## 나이 질문
 
-Early in the first play, before any ad can appear, the game asks for the player's age group using Apple's age range feature where available, or a neutral year-of-birth question with no default. We keep only the group (child, teen or adult), never the birth date. If the question is skipped, the game assumes a child.
+처음 플레이할 때, 광고가 나오기 전에 게임이 연령대를 묻습니다. 가능하면 Apple의 연령대 기능을 사용하고, 그렇지 않으면 기본값 없이 출생 연도를 묻는 중립적인 질문을 합니다. 생년월일은 저장하지 않고 연령대(어린이·청소년·성인)만 저장합니다. 질문을 건너뛰면 어린이로 간주합니다.
 
-## Gentle mode
+## 순한 모드
 
-Gentle mode is on for players under 13 (under 14 in Korea) and for anyone who skipped the age question. In gentle mode:
+만 13세 미만(한국은 **만 14세 미만**)과 나이 질문을 건너뛴 사용자에게는 순한 모드가 켜집니다. 순한 모드에서는:
 
-- Ads are child-directed, non-personalised and general audience only.
-- The first ad between levels comes at level 12 or later, and ads are half as frequent.
-- Apple's tracking prompt is never shown.
-- Purchases and the coin shop sit behind a grown-up check, and are only reachable from Settings.
-- Reward offers appear quietly (for example in the collection book), never as pop-ups.
-- The link to our Squishy Shop for grown-ups is hidden.
+- 광고는 아동 대상, 비맞춤형, 전체 이용가 광고만 나옵니다.
+- 레벨 사이 첫 광고는 레벨 12 이후에 나오고, 광고 빈도가 절반으로 줄어듭니다.
+- Apple의 추적 요청을 띄우지 않습니다.
+- 구매와 코인 상점은 어른 확인 뒤에 있으며, 설정에서만 열 수 있습니다.
+- 선택형 보상 영상은 병 추가와 힌트에만 제공되고, 버디의 하루 선물은 무료입니다. 연승 보너스는 없습니다.
+- 어른용 스퀴시 숍 링크는 숨겨집니다. 그 밖의 사용자에게는 설정 안, 어른 확인 뒤에 있습니다.
 
-**To turn gentle mode on:** open Settings in the game and tap **Set up for a child**. This works immediately.
-**To turn it off:** open Settings, tap **Turn off gentle mode**, pass the grown-up check and answer the age question.
+**순한 모드 켜기:** 게임의 설정에서 **어린이용으로 설정**을 누르면 바로 켜집니다.
+**순한 모드 끄기:** 설정에서 **순한 모드 끄기**를 누르고, 어른 확인을 통과한 뒤 나이 질문에 답하세요.
 
-## Purchases
+## 구매
 
-- Remove Ads stops the automatic ads and is shared with your Family Sharing group.
-- Coin packs buy hints, extra jars, themes and Buddy treats. Coins never buy squishies.
-- Use Apple's **Ask to Buy** (Family Sharing) or **Screen Time > Content & Privacy Restrictions > iTunes & App Store Purchases** to stop in-app purchases completely.
-- Refunds are handled by Apple at [reportaproblem.apple.com](https://reportaproblem.apple.com).
+- 광고 제거는 저절로 나오는 광고를 없애며, 가족 공유 그룹과 함께 쓸 수 있습니다.
+- 코인 묶음으로는 힌트, 병 추가, 테마, 버디 간식을 살 수 있습니다. 코인으로 스퀴시를 살 수 없으며, 어떤 구매나 광고로도 캡슐을 얻을 수 없습니다.
+- Apple의 **구매 요청**(가족 공유)이나 **스크린 타임 > 콘텐츠 및 개인정보 보호 제한 > iTunes 및 App Store 구입**을 사용하면 앱 내 구매를 완전히 막을 수 있습니다.
+- 환불은 Apple이 [reportaproblem.apple.com](https://reportaproblem.apple.com)에서 처리합니다.
 
-Full details, including the capsule odds, are on [purchases and drop rates]({{h}}/purchases).
+캡슐 확률을 포함한 자세한 내용은 [구매 및 획득 확률]({{h}}/purchases)에 있습니다.
 
-## Data and privacy
+## 개인정보
 
-Progress, collections and any names your child types (for their Squishy Buddy or made squishies) stay on the device. The game has no accounts and sends nothing about your child to us. The only data that leaves the device is the technical information Google needs to serve child-safe ads. See the [privacy policy]({{h}}/privacy#children-s-privacy).
+진행 상황, 도감, 자녀가 입력한 이름(스퀴시 버디나 직접 만든 스퀴시의 이름)은 기기에만 저장됩니다. 게임에는 계정이 없고, 자녀에 관한 정보를 저희에게 보내지 않습니다. 기기 밖으로 나가는 정보는 Google이 어린이에게 안전한 광고를 보여 주기 위해 필요한 기술 정보뿐입니다. 자세한 내용은 [개인정보 처리방침]({{h}}/privacy#children-s-privacy)을 보세요.
 
-## Social features
+## 소셜 기능
 
-None in this version: no chat, messages, friends, leaderboards, user-generated content sharing or contact with strangers. If we add social features in future, they will be off by default for children and we'll update this guide first.
+이번 버전에는 없습니다. 채팅, 메시지, 친구, 순위표, 사용자 제작 콘텐츠 공유, 낯선 사람과의 연락이 없습니다. 앞으로 소셜 기능을 추가하더라도 어린이에게는 기본적으로 꺼져 있으며, 이 안내를 먼저 수정하겠습니다.
 
-## The Squishy Buddy
+## 스퀴시 버디
 
-The Buddy is a little friend that cheers the player on. It never gets sad, sick or hungry if the player is away, sends no notifications, and its "How are you today?" question is never stored or sent anywhere.
+버디는 플레이어를 응원하는 작은 친구입니다. 오래 접속하지 않아도 슬퍼하거나 아프거나 배고파하지 않고, 알림을 보내지 않으며, "오늘 기분 어때?" 질문의 답은 저장하거나 어디에도 보내지 않습니다.
 
-## Screen time
+## 이용 시간
 
-The game has no daily rewards that punish missing a day and no countdowns designed to bring players back. The daily Mystery Bag is a single quick guess. You can set limits for any app with Apple's Screen Time.
+하루를 놓치면 불이익을 주는 일일 보상이나, 다시 돌아오게 만드는 카운트다운이 없습니다. 하루 한 번 하는 미스터리 백은 짧게 한 번 맞히는 게임이고, 지나간 어드벤트 문은 나중에 열 수 있습니다. Apple의 스크린 타임으로 어떤 앱이든 이용 시간을 제한할 수 있습니다.
 
-## Something worrying?
+## 걱정되는 점이 있나요?
 
-Email support@squishsort.app (or privacy@squishsort.app for data questions). We read every message.
+support@squishsort.app(개인정보 문의는 privacy@squishsort.app)으로 이메일을 보내 주세요. 모든 메시지를 직접 읽습니다.

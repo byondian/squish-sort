@@ -1,72 +1,72 @@
 ---
-title: Terms of use
-description: The rules for playing Squish Sort and buying in-app items, in plain words.
+title: 利用規約
+description: Squish Sortで遊ぶときと、アプリ内アイテムを購入するときのルールを、わかりやすく説明します。
 ---
 :::summary
-**The short version:** Squish Sort is free to play. You can buy Remove Ads and packs of coins through Apple. Coins and squishies have no cash value. Squishies are never for sale. Be kind, enjoy the squish, and your legal rights as a consumer always stay in place.
+**かんたんにまとめると：** Squish Sortは無料で遊べます。Appleを通じて「広告を削除」とコインパックを購入できます。コインとスクイーズに現金としての価値はありません。スクイーズは販売しません。思いやりをもって、むぎゅっと楽しんでください。消費者としての法律上の権利は常に守られます。
 :::
 
-## Who these terms are with
+## この規約の当事者
 
-These terms are between you and {{operator}} ("we"), the developer of Squish Sort. By downloading or playing Squish Sort you agree to them. If you are a child, please read them with a parent or carer.
+この規約は、あなたとSquish Sortの開発者である{{operator}}（以下「私たち」）との間の約束です。Squish Sortをダウンロードまたはプレイすると、この規約に同意したものとみなされます。お子さまは、保護者の方と一緒に読んでください。
 
-The app is licensed to you under Apple's [Licensed Application End User License Agreement](https://www.apple.com/legal/internet-services/itunes/dev/stdeula/) (the "Apple EULA"). These terms add rules specific to Squish Sort. If they conflict with the Apple EULA, the Apple EULA wins, except where these terms give you more rights.
+このアプリは、Appleの[ライセンス対象アプリケーションエンドユーザ使用許諾契約](https://www.apple.com/legal/internet-services/itunes/dev/stdeula/)（以下「Apple EULA」）に基づいてライセンスされます。この規約は、Squish Sortに固有のルールを追加するものです。この規約とApple EULAが矛盾する場合はApple EULAが優先します。ただし、この規約のほうがあなたに多くの権利を与える場合を除きます。
 
-## Playing the game
+## ゲームで遊ぶ
 
-- We give you a personal, non-transferable licence to play Squish Sort on Apple devices you own or control, as allowed by the App Store rules.
-- Please don't copy, modify, reverse engineer or sell the game or its artwork, or use cheats or tools that interfere with it.
-- Names you type for your Squishy Buddy or made squishies stay on your device, but please keep them kind.
-- We may update the game, add or change levels, events and features, or switch features off. If we ever stop offering the game, purchases you have made keep working on your device as far as we can make that possible.
+- 私たちは、App Storeのルールで認められる範囲で、あなたが所有または管理するApple製デバイスでSquish Sortを遊ぶための、個人的で譲渡できないライセンスを付与します。
+- ゲームやアートワークの複製、改変、リバースエンジニアリング、販売、またはゲームを妨害するチートやツールの使用はご遠慮ください。
+- スクイーズバディや作ったスクイーズにつけた名前は端末の中だけに保存されますが、やさしい名前にしてください。
+- 私たちは、ゲームの更新、レベル・イベント・機能の追加や変更、機能の終了を行うことがあります。ゲームの提供を終了する場合でも、購入済みのアイテムが可能な限り端末で引き続き使えるようにします。
 
-## Purchases
+## 購入
 
-- **Remove Ads** is a one-time purchase. It stops the ads that play by themselves (between levels). Optional reward videos stay available for everyone and only play when you tap them. Remove Ads is shared with your Family Sharing group.
-- **Coin packs** are consumable. Coins are spent in the game on hints, extra jars, board themes and Squishy Buddy treats and gifts.
-- **Squishies and capsules can never be bought**, directly or with coins. Paying never changes what you find in capsules. See [purchases and drop rates]({{h}}/purchases).
-- Coins and squishies are a licence to use game content. They have no cash value, can't be exchanged for money or transferred between people, and are not your property.
-- Prices are shown in the App Store in your currency, including any taxes Apple collects.
-- Payments, Ask to Buy, Family Sharing and refunds are handled by Apple under its terms. To request a refund, visit [reportaproblem.apple.com](https://reportaproblem.apple.com). You can restore Remove Ads at any time in **Settings > Restore purchases**.
-- Under EU and UK law you normally have 14 days to withdraw from a digital purchase. By buying an item that is delivered straight away, you agree it is delivered immediately and you lose that right once delivery starts. Apple's refund process is still available to you.
+- **広告を削除**は買い切りの商品です。レベルの合間に自動で流れる広告を止め、任意の動画ごほうびを、同じ1日の上限の範囲内で動画なしのワンタップで受け取れるようにします。ファミリー共有のグループで共有できます。
+- **コインパック**は消耗型の商品です。コインはゲーム内で、ヒント、ビン追加、ボードテーマ、スクイーズバディのおやつやプレゼントに使います。
+- **スクイーズとカプセルは、直接でもコインでも購入できません。** お金を使ってもカプセルから出るものは変わりません。詳しくは[購入と排出率]({{h}}/purchases)をご覧ください。
+- コインとスクイーズは、ゲームコンテンツを利用するためのライセンスです。現金としての価値はなく、換金や他人への譲渡はできず、あなたの所有物ではありません。
+- 価格は、Appleが徴収する税金を含め、お住まいの通貨でApp Storeに表示されます。
+- 支払い、承認と購入のリクエスト、ファミリー共有、返金は、Appleが自身の規約に基づいて取り扱います。返金のご請求は[reportaproblem.apple.com](https://reportaproblem.apple.com)からどうぞ。「広告を削除」は、いつでも**設定 > 購入を復元**で復元できます。
+- EUと英国の法律では、デジタル商品の購入を通常14日以内に撤回できます。すぐに提供されるアイテムを購入すると、直ちに提供されることに同意したことになり、提供が始まった時点でその権利は失われます。その場合でもAppleの返金手続きはご利用いただけます。
 
-## Ads
+## 広告
 
-The game is funded by ads. When and how ads appear, and how to control personalisation, is explained on our [ads and tracking page]({{h}}/ads).
+このゲームは広告によって運営されています。広告が表示されるタイミングと方法、パーソナライズの設定方法は、[広告とトラッキング]({{h}}/ads)のページで説明しています。
 
-## Your data
+## あなたのデータ
 
-Our [privacy policy]({{h}}/privacy) explains what data is used and why.
+どんなデータをなぜ使うかは、[プライバシーポリシー]({{h}}/privacy)で説明しています。
 
-## Our content
+## 私たちのコンテンツ
 
-The game, its squishies, artwork, sounds, levels and the Squish Sort name are ours or licensed to us. All squishies are original characters.
+ゲーム、スクイーズ、アートワーク、サウンド、レベル、Squish Sortという名前は、私たちのもの、または私たちがライセンスを受けたものです。すべてのスクイーズはオリジナルキャラクターです。
 
-## If something goes wrong
+## 問題が起きたとき
 
-- We work hard to make the game fun and reliable, but we provide it "as is" and can't promise it will always be available or free from bugs.
-- Nothing in these terms limits liability that can't be limited by law, including for death or personal injury caused by negligence, or fraud, or your statutory rights as a consumer (for example, that digital content must be as described and fit for purpose).
-- Otherwise, our total liability to you is limited to the amount you paid us for in-app purchases in the 12 months before the claim.
+- 私たちはゲームを楽しく安定したものにするよう努めていますが、ゲームは「現状のまま」提供され、常に利用できることや不具合がないことは約束できません。
+- この規約のいかなる内容も、法律で制限できない責任（過失による死亡や身体の傷害、詐欺に対する責任など）や、消費者としての法律上の権利（デジタルコンテンツが説明どおりで目的に適合していることなど）を制限するものではありません。
+- それ以外の場合、私たちがあなたに負う責任の総額は、請求の前12か月間にあなたがアプリ内購入で支払った金額を上限とします。ただし、私たちの故意または重大な過失による損害には、この上限は適用されません。
 
-## Apple
+## Appleに関する事項
 
-You and we agree that:
+あなたと私たちは、次のことに同意します。
 
-- These terms are between you and us, not Apple. Apple is not responsible for the app or its content.
-- Apple has no obligation to provide maintenance or support for the app.
-- If the app fails to conform to any applicable warranty, you may notify Apple, and Apple will refund the purchase price (if any). To the maximum extent permitted by law, Apple has no other warranty obligation for the app.
-- Apple is not responsible for addressing any claims relating to the app, including product liability claims, claims that the app fails to meet legal or regulatory requirements, and consumer protection or privacy claims.
-- If a third party claims the app infringes their intellectual property, we, not Apple, are responsible for the investigation, defence, settlement and discharge of that claim.
-- You confirm you are not located in a country subject to a US government embargo or designated as a "terrorist supporting" country, and you are not on any US government list of prohibited or restricted parties.
-- Apple and its subsidiaries are third-party beneficiaries of these terms and, once you accept them, Apple has the right to enforce them against you.
+- この規約はAppleではなく、あなたと私たちとの間のものです。Appleはアプリとそのコンテンツについて責任を負いません。
+- Appleには、アプリの保守やサポートを提供する義務はありません。
+- アプリが適用される保証に適合しない場合、あなたはAppleに通知することができ、Appleは購入価格（ある場合）を返金します。法律で認められる最大限の範囲で、Appleはアプリについてその他の保証義務を負いません。
+- 製造物責任の請求、アプリが法令や規制の要件を満たしていないという請求、消費者保護やプライバシーに関する請求など、アプリに関する請求に対応する責任はAppleにはありません。
+- アプリが第三者の知的財産権を侵害しているという主張があった場合、その調査、防御、和解、解決の責任はAppleではなく私たちにあります。
+- あなたは、米国政府の禁輸対象国や「テロ支援国家」に指定された国に所在しておらず、米国政府の禁止または制限対象者リストに掲載されていないことを表明します。
+- Appleとその子会社はこの規約の第三受益者であり、あなたがこの規約を承諾すると、Appleはあなたに対してこの規約を執行する権利を持ちます。
 
-## Changes
+## 規約の変更
 
-We may update these terms when the game changes or the law requires it. We'll update the date at the top, and tell you in the app if a change is important. If you don't agree with a change, you can stop playing and delete the app.
+ゲームが変わったときや法律で必要なときは、この規約を変更することがあります。その場合は上部の日付を更新し、重要な変更であればアプリ内でもお知らせします。変更に同意しない場合は、プレイをやめてアプリを削除できます。
 
-## Law and disputes
+## 準拠法と紛争
 
-These terms are governed by the laws of Luxembourg. If you are a consumer, you also keep the protection of the mandatory laws of the country where you live, and you can bring a claim in your local courts. Please contact us first at support@squishsort.app so we can try to sort things out.
+この規約にはルクセンブルクの法律が適用されます。ただし、消費者の方は、お住まいの国の強行法規による保護をそのまま受けることができ、お住まいの地域の裁判所に訴えを起こすこともできます。まずはsupport@squishsort.appまでご連絡ください。一緒に解決を目指します。
 
-## Contact
+## 連絡先
 
-{{operator}} · support@squishsort.app · Postal address: {{postal}}
+{{operator}} · support@squishsort.app · 郵送先：{{postal}}

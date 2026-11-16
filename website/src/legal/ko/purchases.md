@@ -1,77 +1,89 @@
 ---
-title: Purchases and drop rates
-description: What you can buy in Squish Sort, what coins do, and the published capsule drop rates. Squishies are never for sale.
+title: 구매 및 획득 확률
+description: Squish Sort에서 살 수 있는 것, 코인의 용도, 공개된 캡슐 획득 확률을 안내합니다. 스퀴시는 절대 판매하지 않습니다.
 ---
 :::summary
-- You can buy **Remove Ads** and **coin packs**. That's all.
-- **Squishies and capsules are never for sale.** Capsules are earned only by playing, and paying never changes the odds.
-- Every level can be finished for free.
+- 살 수 있는 것은 **광고 제거**와 **코인 묶음**뿐입니다.
+- **스퀴시와 캡슐은 절대 판매하지 않습니다.** 캡슐은 플레이로만 얻을 수 있고, 돈을 써도 확률은 바뀌지 않습니다.
+- 모든 레벨은 무료로 깰 수 있습니다.
 :::
 
-## What you can buy
+## 살 수 있는 것
 
-| Item | Type | What it does |
+| 상품 | 유형 | 내용 |
 |---|---|---|
-| Remove Ads | One-time purchase (Family Sharing on) | Stops the ads that play by themselves between levels. Reward videos you choose to watch stay available |
-| 100 coins | Consumable | Coins to spend in the game |
-| 350 coins | Consumable | Coins to spend in the game |
-| 750 coins | Consumable | Coins to spend in the game |
+| 광고 제거 | 1회 구매(가족 공유 가능) | 레벨 사이에 저절로 나오는 광고를 없애고, 선택형 보상(병 추가, 힌트, 코인 두 배 등)을 영상 없이 한 번에 받게 해 줍니다 |
+| 코인 1,000개 | 소모성 | 게임에서 쓰는 코인 |
+| 코인 3,500개 | 소모성 | 게임에서 쓰는 코인 |
+| 코인 7,500개 | 소모성 | 게임에서 쓰는 코인 |
 
-Prices are shown in the App Store in your local currency. We do not show prices on this website.
+가격은 App Store에 현지 통화로 표시됩니다. 이 웹사이트에는 가격을 표시하지 않습니다.
 
-## What coins buy
+## 코인으로 살 수 있는 것
 
-| Item | Coins |
+| 항목 | 코인 |
 |---|---|
-| Hint | 25 |
-| Extra jar | 40 |
-| Board theme | 300 |
-| Squishy Buddy treat | 10 |
-| Squishy Buddy gift | 60 |
+| 힌트 | 250 |
+| 병 추가 | 400 |
+| 보드 테마 | 3,000 |
+| 스퀴시 버디 간식 | 100 |
+| 스퀴시 버디 선물 | 600 |
 
-**You can also earn coins by playing:** 5 coins for clearing a level for the first time (10 with three stars), and 20 from the optional bonus gift video. Coins can't buy squishies, capsules or anything that changes capsule odds. Buddy items are just for fun and never affect squishies or levels.
+## 플레이로 코인 모으기
 
-## Capsules: how squishies are earned
+- **레벨을 처음 깼을 때:** 병을 채울 때마다 코인이 튀어나와 50코인, 별 3개면 50코인 추가.
+- **작은 보너스:** 3초 안에 병 두 개 채우기(+10), 가끔 나오는 반짝이는 행운 스퀴시(+100), 오늘의 첫 승리(+50), 연승(단계마다 +10, 최대 +50, 순한 모드 제외), 미스터리 백 맞히기(+50).
+- **선택형 영상:** 처음 깬 레벨의 코인 두 배, 버디의 하루 선물(200코인, 순한 모드에서는 영상 없이 무료).
 
-Capsules are free, and can only be earned by playing:
+이미 깬 레벨을 다시 하면 코인 대신 반짝이를 받으므로 코인을 반복해서 모을 수 없습니다. 코인으로 스퀴시, 캡슐, 캡슐 확률을 바꾸는 것은 살 수 없습니다. 버디 아이템은 재미로만 쓰입니다.
 
-- **Clearing a capsule level for the first time.** In the Toy Shop, capsules come after levels 3, 6, 9, 12, 15 and 18. In the Sweet Factory, Starlight Stage and Christmas Workshop, after levels 5, 10, 15 and 20.
-- **The Mystery Bag** daily guessing game: three right guesses earn a capsule.
-- **Doubling a capsule** by watching an optional video, available to everyone in the same way.
-- **Squishing spares:** three duplicate squishies can be swapped for a squishy you don't have yet.
+## 스퀴시를 얻는 방법
 
-## Drop rates {#drop}
+**일반 스퀴시는 분류하면 도감에 들어옵니다.** 아직 없는 종류로 병을 처음 가득 채우면 도감에 추가됩니다.
 
-Each capsule contains one squishy from the world it was earned in.
+**캡슐에는 레어와 울트라 레어 스퀴시가 들어 있습니다.** 캡슐은 언제나 무료이며 플레이로만 얻을 수 있습니다.
 
-| Rarity | Chance per capsule |
+- **캡슐 레벨을 처음 깼을 때:** 각 월드의 레벨 3, 6, 9, 12, 15, 18, 20(월드마다 캡슐 7개).
+- **미스터리 백** 하루 맞히기 게임: 세 번 맞히면 캡슐 1개.
+- **크리스마스 어드벤트 선반:** 12월 24일 문에는 크리스마스 캡슐이 있고, 6일·12일·18일은 캡슐 바를 채워 줍니다.
+- **중복 스퀴시 교환:** 중복 스퀴시 3개를 아직 없는 스퀴시 1개로 바꿀 수 있습니다.
+
+**어떤 광고나 구매로도 캡슐을 얻을 수 없습니다.**
+
+## 획득 확률 {#drop}
+
+캡슐에는 그 캡슐을 얻은 월드의 스퀴시가 1개 들어 있습니다.
+
+| 등급 | 캡슐당 확률 |
 |---|---|
-| Common | 70% |
-| Rare | 25% |
-| Ultra rare | 5% |
-| Secret | 0% (secrets are found by playing, never in capsules) |
+| 레어 | 80% |
+| 울트라 레어 | 20% |
+| 일반 | 0% (일반은 분류로 획득) |
+| 시크릿 | 0% (시크릿은 플레이 중에 발견하며, 캡슐에서 나오지 않음) |
 
-Within a rarity, every squishy you **don't own yet** is equally likely, so duplicates only appear once you have them all in that rarity. For example, in the Toy Shop there are 6 commons: with none owned, each has a 70% ÷ 6 ≈ 11.7% chance.
+같은 등급 안에서는 **아직 없는** 스퀴시가 모두 같은 확률로 나옵니다. 그 월드에서 뽑힌 등급의 스퀴시를 이미 모두 가지고 있다면 다른 등급에서 하나가 나오므로, 중복은 그 월드의 레어와 울트라 레어를 모두 모은 뒤에만 나옵니다.
 
-| World | Common | Rare | Ultra rare | Secret |
-|---|---|---|---|---|
-| Toy Shop | 6 | 7 | 3 | 1 |
-| Sweet Factory | 6 | 7 | 3 | 1 |
-| Starlight Stage | 6 | 7 | 3 | 1 |
-| Christmas Workshop | 6 | 4 | 2 | 1 |
+| 월드 | 레어 | 울트라 레어 | 시크릿 |
+|---|---|---|---|
+| 장난감 가게 | 7 | 3 | 1 |
+| 과자 공장 | 7 | 3 | 1 |
+| 스타라이트 스테이지 | 7 | 3 | 1 |
+| 크리스마스 공방 | 4 | 2 | 1 |
 
-Two friendly rules on top:
+예: 레어를 하나도 갖고 있지 않은 장난감 가게에서는 레어 7종이 각각 80% ÷ 7 ≈ 11.4%, 울트라 레어 3종이 각각 20% ÷ 3 ≈ 6.7%입니다.
 
-- Your very first capsule always contains **Peach Bun**.
-- If your first three capsules from a world were all common, the **fourth is guaranteed rare or better**.
+여기에 더해 다정한 규칙 두 가지:
 
-## Our promises
+- 맨 처음 여는 캡슐에는 항상 **복숭아빵**이 들어 있습니다.
+- 한 월드에서 그 월드의 울트라 레어 없이 7번째 캡슐에 도달하면, 7번째 캡슐은 **반드시 울트라 레어**입니다.
 
-- Remove Ads and coins never change what you get from capsules: no extra rolls, no better odds and no faster unlocks.
-- No timers, energy or lives to buy.
-- In gentle mode, the coin shop is only reachable from Settings, purchases need a grown-up check, and nothing pops up asking you to buy.
-- These rates match the game's code and we will update this page before any change. Korea's rules on publishing probabilities apply to paid random items; ours are free, but we publish the odds anyway.
+## 저희의 약속
 
-## Refunds and restoring
+- 광고 제거와 코인은 캡슐 결과를 바꾸지 않습니다. 추가 캡슐도, 더 좋은 확률도, 더 빠른 해금도 없습니다.
+- 사야 하는 타이머, 에너지, 생명이 없습니다.
+- 순한 모드에서는 코인 상점이 설정에서만 열리고, 구매에는 어른 확인이 필요하며, 구매를 권하는 팝업이 뜨지 않습니다.
+- 이 확률은 게임과 일치하며, 변경 전에 이 페이지를 먼저 수정합니다. 한국 「게임산업진흥에 관한 법률」의 확률형 아이템 정보 공개 의무는 유료 확률형 아이템에 적용됩니다. 저희 캡슐은 무료이며 유료로 구매하거나 유료 재화로 얻을 수 없지만, 확률을 투명하게 공개합니다.
 
-Purchases are made with Apple. For refunds, visit [reportaproblem.apple.com](https://reportaproblem.apple.com). To restore Remove Ads, open Settings in the game and tap **Restore purchases**. Coins already credited can't be restored after the app is deleted, because they are stored only on your device.
+## 환불과 복원
+
+구매는 Apple을 통해 이루어집니다. 환불은 [reportaproblem.apple.com](https://reportaproblem.apple.com)에서 요청하세요. 광고 제거를 복원하려면 게임의 설정에서 **구매 복원**을 누르세요. 이미 지급된 코인은 기기에만 저장되므로, 앱을 삭제하면 복원할 수 없습니다.

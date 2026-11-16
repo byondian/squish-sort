@@ -22,13 +22,20 @@
     { id: 'tango', fill: '#FF9A3C', face: { y: .16, muzzle: '#FFE7CF' }, pt: t => flatBottom(polar(t, 1 + .46 * gauss(wrap(t - .66), .17) + .46 * gauss(wrap(t + .66), .17))) },
     { id: 'grapey', fill: '#A98BF0', face: { y: -.02 }, pt: t => { const s = Math.sin(t), c = Math.cos(t); if (c > 0) return [s, -c * 1.05]; const n = 2 / 5; let x = sgn(s) * pow(abs(s), n) * .98, y = pow(abs(c), n) * .92; y += .08 * Math.sin(t * 7) * pow(abs(c), 2); return [x, y]; } },
     { id: 'lumi', fill: '#FF8FC0', face: { y: .2 }, pt: t => flatBottom(polar(t, .95 + .8 * gauss(wrap(t - .3), .085) + .8 * gauss(wrap(t + .3), .085))) },
-    { id: 'centre-star', fill: '#A6E07A', face: { y: .06 }, pt: t => polar(t, .78 + .34 * pow((Math.cos(5 * t) + 1) / 2, 1.6)) },
+    { id: 'centre-star', fill: '#A6E07A', sheen: 1, face: { y: .06 }, pt: t => polar(t, .78 + .34 * pow((Math.cos(5 * t) + 1) / 2, 1.6)) },
     { id: 'peach-bun', fill: '#FFAE8A', face: { y: .14 }, decor: 'peach', pt: t => flatBottom(polar(t, 1 + .24 * pow(Math.max(0, Math.cos(t)), 14))) },
     { id: 'dino-rex', fill: '#6FD6B0', face: { y: .16 }, pt: t => flatBottom(polar(t, 1 + (abs(t) < 1.15 ? .17 * pow(Math.max(0, Math.cos(8 * t)), 3) : 0))) },
     { id: 'jelly', fill: '#FF5E7A', face: { y: .1 }, pt: t => { const s = Math.sin(t), c = Math.cos(t), n = 2 / 4.5; let x = sgn(s) * pow(abs(s), n) * .9, y = -sgn(c) * pow(abs(c), n) * .9; x *= 1 - .08 * Math.min(0, y); return [x, y + .02]; } },
     { id: 'gloop', fill: '#FF9EC9', face: { y: .1 }, pt: t => flatBottom(polar(t, 1)) },
   ];
   const names = JSON.parse(stage.dataset.names || '{}');
+  const rarityWords = JSON.parse(stage.dataset.rarity || '[]');
+  // The reveal ladder: a few commons, then a rare, a few more, then an ultra rare.
+  const byId = id => SHAPES.findIndex(s => s.id === id);
+  const TIER = { common: ['strawbie', 'tango', 'grapey', 'lumi', 'jelly', 'gloop'].map(byId), rare: ['peach-bun', 'dino-rex'].map(byId), ultra: ['morphy', 'centre-star'].map(byId) };
+  const LADDER = ['common', 'common', 'common', 'common', 'rare', 'common', 'common', 'common', 'ultra'];
+  const seen = { common: 0, rare: 0, ultra: 0 };
+  let step = 0;
   const ANG = Array.from({ length: N }, (_, i) => (i / N) * TAU);
   for (const s of SHAPES) s.pts = ANG.map(t => s.pt(t));
 
@@ -40,6 +47,9 @@
   el('stop', { offset: '.42', 'stop-color': '#fff', 'stop-opacity': '0' }, shine);
   const rb = el('linearGradient', { id: 'mrainbow', x1: '0', y1: '0', x2: '1', y2: '1' }, defs);
   ['#FF9CC8', '#FFD86B', '#7FE0C4', '#7CC8FF', '#B48CFF'].forEach((c, i) => el('stop', { offset: i / 4, 'stop-color': c }, rb));
+  const halo = el('circle', { cx: CX, cy: CY, r: R, fill: 'none', stroke: 'url(#mrainbow)', 'stroke-width': 14, opacity: 0 }, svg);
+  const rays = el('g', { opacity: 0 }, svg);
+  for (let i = 0; i < 12; i++) el('path', { d: `M-9 ${-R - 30} L0 ${-R - 92} L9 ${-R - 30}Z`, fill: i % 2 ? '#FFD86B' : '#FFF1B8', transform: `rotate(${i * 30})` }, rays);
   const shadow = el('ellipse', { cx: CX, cy: BASE + 12, rx: R * .9, ry: 14, fill: '#3B2A4A', opacity: '.1' }, svg);
   const body = el('path', { stroke: '#3B2A4A', 'stroke-width': 9, 'stroke-linejoin': 'round' }, svg);
   const sheen = el('path', { fill: 'url(#mrainbow)', opacity: 0 }, svg);
@@ -62,7 +72,8 @@
   };
 
   // state
-  let cur = 0, from = 0, to = 0, mt = 1;
+  const START = SHAPES.findIndex(s => s.id === 'gloop');
+  let from = START, to = START, mt = 1, glow = 0, glowKind = '';
   const disp = new Float32Array(N), vel = new Float32Array(N), pull = new Float32Array(N);
   let sx = 1, sy = 1, vsx = 0, vsy = 0, tsx = 1, tsy = 1;
   let held = false, heldAt = 0, ptr = null, look = [0, 0], blinkAt = performance.now() + 2500, blink = 0, squeezeFace = 0;
@@ -109,6 +120,7 @@
     try {
       ac = ac || new (window.AudioContext || window.webkitAudioContext)();
       const t = ac.currentTime, o = ac.createOscillator(), g = ac.createGain();
+      if (kind === 'rare' || kind === 'ultra') return fanfare(kind, t);
       const f = { squish: [520, 160, .22], pop: [380, 900, .16], pour: [300, 520, .12], lid: [700, 1100, .1], win: [520, 1040, .35] }[kind] || [400, 200, .2];
       o.type = 'sine'; o.frequency.setValueAtTime(f[0], t); o.frequency.exponentialRampToValueAtTime(f[1], t + f[2]);
       g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.25, t + .015); g.gain.exponentialRampToValueAtTime(.0001, t + f[2]);
@@ -123,13 +135,48 @@
     } catch (e) {}
   };
 
+  // the "you found a rare one" sounds: a sparkly chime for rare, a bigger fanfare for ultra
+  function fanfare(kind, t) {
+    const tone = (freq, at, dur, type, vol) => {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = type; o.frequency.setValueAtTime(freq, t + at);
+      g.gain.setValueAtTime(.0001, t + at); g.gain.exponentialRampToValueAtTime(vol, t + at + .02); g.gain.exponentialRampToValueAtTime(.0001, t + at + dur);
+      o.connect(g).connect(ac.destination); o.start(t + at); o.stop(t + at + dur + .05);
+    };
+    const notes = kind === 'rare' ? [1047, 1319, 1568, 2093] : [523, 659, 784, 1047, 1319, 1568, 2093];
+    const gapT = kind === 'rare' ? .07 : .075;
+    notes.forEach((f, i) => { tone(f, i * gapT, kind === 'rare' ? .35 : .5, 'triangle', .16); if (kind === 'ultra') tone(f / 2, i * gapT, .5, 'sine', .08); });
+    if (kind === 'ultra') { const end = notes.length * gapT; [1047, 1319, 1568].forEach(f => tone(f, end, 1.1, 'sine', .09)); }
+    // shimmer: bright filtered noise that fades out
+    const dur = kind === 'rare' ? .6 : 1.4, len = ac.sampleRate * dur, buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * pow(1 - i / len, 3) * (Math.random() < .08 ? 1 : .15);
+    const src = ac.createBufferSource(), hp = ac.createBiquadFilter(), g2 = ac.createGain();
+    hp.type = 'highpass'; hp.frequency.value = 5000; g2.gain.value = kind === 'rare' ? .12 : .18; src.buffer = buf;
+    src.connect(hp).connect(g2).connect(ac.destination); src.start(t + .05);
+  }
+
+  // the rarity banner
+  const banner = document.createElement('span');
+  banner.className = 'rarity-pop'; banner.setAttribute('aria-live', 'polite');
+  stage.appendChild(banner);
+  function announce(tier) {
+    const word = tier === 'rare' ? rarityWords[1] : rarityWords[2];
+    if (!word) return;
+    banner.textContent = word + '!';
+    banner.className = 'rarity-pop ' + tier;
+    void banner.offsetWidth; banner.classList.add('show');
+  }
+
   // particles
   const parts = [];
-  function burst(color) {
+  const RAINBOW = ['#FF9CC8', '#FFD86B', '#7FE0C4', '#7CC8FF', '#B48CFF'];
+  function burst(color, tier = 'common') {
     if (reduce) return;
-    for (let i = 0; i < 14; i++) {
-      const a = Math.random() * TAU, sp = 3 + Math.random() * 5;
-      const kind = i % 3;
+    const n = tier === 'ultra' ? 36 : tier === 'rare' ? 24 : 14;
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * TAU, sp = (3 + Math.random() * 5) * (tier === 'common' ? 1 : 1.4);
+      if (tier === 'ultra') color = RAINBOW[i % 5];
+      const kind = tier === 'rare' ? (i % 3 ? 0 : 1) : i % 3;
       const node = kind === 0
         ? el('path', { d: 'M0 -9 L2.6 -2.6 9 0 2.6 2.6 0 9 -2.6 2.6 -9 0 -2.6 -2.6Z', fill: '#FFD86B', stroke: '#3B2A4A', 'stroke-width': 2 }, fx)
         : kind === 1 ? el('circle', { r: 6 + Math.random() * 6, fill: color, stroke: '#3B2A4A', 'stroke-width': 2.5 }, fx)
@@ -139,14 +186,19 @@
   }
 
   function morphNext() {
-    from = to; to = (to + 1) % SHAPES.length; mt = 0;
+    const tier = LADDER[step % LADDER.length]; step++;
+    const pool = TIER[tier];
+    let next = pool[seen[tier]++ % pool.length];
+    if (next === to) next = pool[seen[tier]++ % pool.length];
+    from = to; to = next; mt = 0;
     const s = SHAPES[to];
-    burst(s.fill);
+    burst(s.fill, tier);
+    if (tier !== 'common') { [...rays.children].forEach((r, i) => r.setAttribute('fill', tier === 'ultra' ? RAINBOW[i % 5] : i % 2 ? '#FFD86B' : '#FFF1B8')); glow = 1; glowKind = tier; announce(tier); vsx += .08; vsy -= .14; }
     vsx += .05; vsy -= .09; // boing
     for (let i = 0; i < N; i++) vel[i] += (Math.random() - .5) * 60;
     const who = stage.querySelector('.who');
     if (who) who.textContent = names[s.id] || '';
-    window.ssSound('pop');
+    window.ssSound(tier === 'common' ? 'pop' : tier);
   }
 
   // input
@@ -211,6 +263,18 @@
     gloss.setAttribute('d', d);
     shadow.setAttribute('rx', R * .95 * sx);
 
+    // rare: golden rays spin behind; ultra: a rainbow ring pulses out too
+    if (glow > 0) {
+      glow = Math.max(0, glow - .006 * dt);
+      const g = ease(glow);
+      rays.setAttribute('opacity', g);
+      rays.setAttribute('transform', `translate(${CX} ${CY}) rotate(${reduce ? 0 : now / 30 % 360}) scale(${.9 + .15 * Math.sin(now / 200)})`);
+      if (glowKind === 'ultra') {
+        const ph = (now / 900) % 1;
+        halo.setAttribute('r', R * (1.05 + ph * .6)); halo.setAttribute('opacity', g * (1 - ph));
+      } else halo.setAttribute('opacity', 0);
+    } else { rays.setAttribute('opacity', 0); halo.setAttribute('opacity', 0); }
+
     // face rides on the squash
     const fy = (sA.face.y + (sB.face.y - sA.face.y) * k2);
     const fcx = CX + look[0] * 10, fcy = BASE - (BASE - (CY + fy * R)) * sy + look[1] * 6;
@@ -246,6 +310,6 @@
     requestAnimationFrame(frame);
   }
   new IntersectionObserver(es => { visible = es[0].isIntersecting; }).observe(stage);
-  const who = stage.querySelector('.who'); if (who) who.textContent = names[SHAPES[0].id] || '';
+  const who = stage.querySelector('.who'); if (who) who.textContent = names[SHAPES[START].id] || '';
   requestAnimationFrame(frame);
 })();

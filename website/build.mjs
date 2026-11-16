@@ -160,7 +160,7 @@ function landing(code) {
     <div class="cta-row">${storeCta(code, 'hero')}<a class="btn soft" href="#play">▶ ${esc(t.cta.demo)}</a></div>
     <p class="sub">${esc(t.hero.sub)}</p>
   </div>
-  <div class="stage" id="morph" tabindex="0" role="button" aria-label="${esc(t.hero.stageLabel)}" data-names='${esc(JSON.stringify(names))}'>
+  <div class="stage" id="morph" tabindex="0" role="button" aria-label="${esc(t.hero.stageLabel)}" data-names='${esc(JSON.stringify(names))}' data-rarity='${esc(JSON.stringify(t.collect.rarity))}'>
     <span class="who" aria-live="polite"></span>
     <button class="snd" id="snd" type="button" aria-label="${esc(t.hero.sound)}" aria-pressed="true">🔊</button>
     <span class="hint">👆 ${esc(t.hero.hint)}</span>

@@ -1,30 +1,30 @@
 ---
-title: Cookies on this website
-description: squishsort.app sets no cookies. Here is what the site stores in your browser instead, and which other services are involved.
+title: このサイトのCookie
+description: squishsort.appはCookieを使いません。代わりにブラウザに保存するものと、関わるほかのサービスについて説明します。
 ---
 :::summary
-**This website does not use cookies,** so there is no cookie banner. A few small preferences are kept in your browser only, and never sent to us.
+**このウェブサイトはCookieを使わない**ので、Cookieのバナーもありません。いくつかの小さな設定をブラウザの中だけに保存し、私たちに送ることはありません。
 :::
 
-## What is stored in your browser
+## ブラウザに保存されるもの
 
-| Name | Where | What for | How long |
+| 名前 | 保存場所 | 用途 | 期間 |
 |---|---|---|---|
-| ss-muted | Local storage | Remembers if you muted the demo's sounds | Until you clear it |
-| ss-grownup | Session storage | Remembers you passed the grown-up check on the Squishy Shop | Until you close the tab |
+| ss-muted | ローカルストレージ | デモのサウンドをミュートしたかどうかを記憶 | 消去するまで |
+| ss-grownup | セッションストレージ | スクイーズショップで大人の確認を通過したことを記憶 | タブを閉じるまで |
 
-These are strictly necessary to remember choices you made, and never leave your device.
+これらは、あなたが選んだ内容を覚えておくために必要なもので、端末の外には出ません。
 
-## Visitor statistics
+## アクセス統計
 
-We use **Vercel Web Analytics** to count page visits. It does not use cookies or other identifiers stored on your device, does not track you across websites, and only gives us aggregated numbers (such as how many people visited a page and from which country).
+ページの閲覧数を数えるために**Vercel Web Analytics**を使っています。Cookieや端末に保存される識別子を使わず、サイトをまたいだ追跡も行わず、集計した数値（ページの閲覧者数や国など）だけを提供します。
 
-## Other services
+## ほかのサービス
 
-- **Hosting:** Vercel delivers the site and keeps short-lived logs, including IP addresses, for security.
-- **App Store badge:** once the game is released, Apple's badge image loads from Apple's servers.
-- **Squishy Shop links:** if you follow an affiliate link to a shop such as Amazon, that shop may set its own cookies under its own policy.
+- **ホスティング：** Vercelがサイトを配信し、セキュリティのためにIPアドレスを含む短期間のログを保存します。
+- **App Storeバッジ：** ゲームの配信開始後は、Appleのバッジ画像をAppleのサーバーから読み込みます。
+- **スクイーズショップのリンク：** Amazonなどのショップへのアフィリエイトリンクをたどると、そのショップが独自のポリシーに基づいてCookieを設定することがあります。
 
-Fonts and images are served from our own site. We do not use social media plugins, ad trackers or Google Fonts.
+フォントと画像は私たちのサイトから配信しています。ソーシャルメディアのプラグイン、広告トラッカー、Google Fontsは使っていません。
 
-More detail is in the [privacy policy]({{h}}/privacy).
+詳しくは[プライバシーポリシー]({{h}}/privacy)をご覧ください。

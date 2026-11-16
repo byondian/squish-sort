@@ -1,77 +1,104 @@
 ---
-title: Purchases and drop rates
-description: What you can buy in Squish Sort, what coins do, and the published capsule drop rates. Squishies are never for sale.
+title: 購入と排出率
+description: Squish Sortで買えるもの、コインの使いみち、公開しているカプセルの排出率を説明します。スクイーズは販売しません。
 ---
 :::summary
-- You can buy **Remove Ads** and **coin packs**. That's all.
-- **Squishies and capsules are never for sale.** Capsules are earned only by playing, and paying never changes the odds.
-- Every level can be finished for free.
+- 買えるのは**広告を削除**と**コインパック**だけです。
+- **スクイーズとカプセルは販売しません。** カプセルは遊ぶことでのみ手に入り、お金を使っても確率は変わりません。
+- すべてのレベルは無料でクリアできます。
 :::
 
-## What you can buy
+## 買えるもの
 
-| Item | Type | What it does |
+| 商品 | 種類 | 内容 |
 |---|---|---|
-| Remove Ads | One-time purchase (Family Sharing on) | Stops the ads that play by themselves between levels. Reward videos you choose to watch stay available |
-| 100 coins | Consumable | Coins to spend in the game |
-| 350 coins | Consumable | Coins to spend in the game |
-| 750 coins | Consumable | Coins to spend in the game |
+| 広告を削除 | 買い切り（ファミリー共有あり） | レベルの合間に自動で流れる広告を止め、任意のごほうび（ビン追加、ヒント、コイン2倍など）を動画なしのワンタップで受け取れるようにします |
+| コイン1,000枚 | 消耗型 | ゲーム内で使うコイン |
+| コイン3,500枚 | 消耗型 | ゲーム内で使うコイン |
+| コイン7,500枚 | 消耗型 | ゲーム内で使うコイン |
 
-Prices are shown in the App Store in your local currency. We do not show prices on this website.
+価格はApp Storeに現地の通貨で表示されます。このウェブサイトには価格を掲載していません。
 
-## What coins buy
+## コインで買えるもの
 
-| Item | Coins |
+| アイテム | コイン |
 |---|---|
-| Hint | 25 |
-| Extra jar | 40 |
-| Board theme | 300 |
-| Squishy Buddy treat | 10 |
-| Squishy Buddy gift | 60 |
+| ヒント | 250 |
+| ビン追加 | 400 |
+| ボードテーマ | 3,000 |
+| スクイーズバディのおやつ | 100 |
+| スクイーズバディのプレゼント | 600 |
 
-**You can also earn coins by playing:** 5 coins for clearing a level for the first time (10 with three stars), and 20 from the optional bonus gift video. Coins can't buy squishies, capsules or anything that changes capsule odds. Buddy items are just for fun and never affect squishies or levels.
+## 遊んでコインを集める
 
-## Capsules: how squishies are earned
+- **レベルを初めてクリアしたとき：** ビンを満たすたびにコインが飛び出して50枚、星3つならさらに50枚。
+- **ちょっとしたボーナス：** 3秒以内にビンを2つ満たす（+10）、ときどき現れるキラキラのラッキースクイーズ（+100）、その日最初のクリア（+50）、連勝（1段階ごとに+10、最大+50、やさしいモードではなし）、ミステリーバッグで当てる（+50）。
+- **任意の動画：** 初回クリアのコインを2倍、バディの毎日のプレゼント（200枚、やさしいモードでは動画なしで無料）。
 
-Capsules are free, and can only be earned by playing:
+クリア済みのレベルを遊び直すとコインではなくキラキラがもらえるため、コインを稼ぎ続けることはできません。コインでスクイーズ、カプセル、カプセルの確率を変えるものは買えません。バディのアイテムはお楽しみ用です。
 
-- **Clearing a capsule level for the first time.** In the Toy Shop, capsules come after levels 3, 6, 9, 12, 15 and 18. In the Sweet Factory, Starlight Stage and Christmas Workshop, after levels 5, 10, 15 and 20.
-- **The Mystery Bag** daily guessing game: three right guesses earn a capsule.
-- **Doubling a capsule** by watching an optional video, available to everyone in the same way.
-- **Squishing spares:** three duplicate squishies can be swapped for a squishy you don't have yet.
+## スクイーズの手に入れ方
 
-## Drop rates {#drop}
+**ノーマルのスクイーズは、仕分けると図鑑に加わります。** まだ持っていない種類でビンを初めていっぱいにすると、図鑑に追加されます。
 
-Each capsule contains one squishy from the world it was earned in.
+**カプセルにはレアとウルトラレアのスクイーズが入っています。** カプセルはいつも無料で、遊ぶことでのみ手に入ります。
 
-| Rarity | Chance per capsule |
+- **カプセルレベルを初めてクリアしたとき：** 各ワールドのレベル3、6、9、12、15、18、20（1ワールドにつきカプセル7個）。
+- **ミステリーバッグ**（1日1回の当てっこゲーム）：3回当てるとカプセル1個。
+- **クリスマスのアドベント棚：** 12月24日の扉にはクリスマスカプセルが入っていて、6日・12日・18日はカプセルバーが進みます。
+- **ダブりの交換：** ダブったスクイーズ3つを、まだ持っていないスクイーズ1つと交換できます。
+
+**広告や購入でカプセルがもらえることは一切ありません。**
+
+## 排出率 {#drop}
+
+カプセルには、そのカプセルを手に入れたワールドのスクイーズが1つ入っています。
+
+| レアリティ | カプセル1個あたりの確率 |
 |---|---|
-| Common | 70% |
-| Rare | 25% |
-| Ultra rare | 5% |
-| Secret | 0% (secrets are found by playing, never in capsules) |
+| レア | 80% |
+| ウルトラレア | 20% |
+| ノーマル | 0%（ノーマルは仕分けで入手） |
+| シークレット | 0%（シークレットは遊ぶ中で見つかり、カプセルからは出ません） |
 
-Within a rarity, every squishy you **don't own yet** is equally likely, so duplicates only appear once you have them all in that rarity. For example, in the Toy Shop there are 6 commons: with none owned, each has a 70% ÷ 6 ≈ 11.7% chance.
+同じレアリティの中では、**まだ持っていない**スクイーズがすべて同じ確率で出ます。そのワールドで選ばれたレアリティのスクイーズをすでに全部持っている場合は、もう一方のレアリティから1つ出るため、ダブりはそのワールドのレアとウルトラレアをすべて集めた後にだけ出ます。
 
-| World | Common | Rare | Ultra rare | Secret |
-|---|---|---|---|---|
-| Toy Shop | 6 | 7 | 3 | 1 |
-| Sweet Factory | 6 | 7 | 3 | 1 |
-| Starlight Stage | 6 | 7 | 3 | 1 |
-| Christmas Workshop | 6 | 4 | 2 | 1 |
+| ワールド | レア | ウルトラレア | シークレット |
+|---|---|---|---|
+| おもちゃ屋さん | 7 | 3 | 1 |
+| おかし工場 | 7 | 3 | 1 |
+| スターライトステージ | 7 | 3 | 1 |
+| クリスマス工房 | 4 | 2 | 1 |
 
-Two friendly rules on top:
+例：レアを1つも持っていない状態のおもちゃ屋さんでは、レア7種がそれぞれ80% ÷ 7 ≈ 11.4%、ウルトラレア3種がそれぞれ20% ÷ 3 ≈ 6.7%です。
 
-- Your very first capsule always contains **Peach Bun**.
-- If your first three capsules from a world were all common, the **fourth is guaranteed rare or better**.
+さらに、やさしいルールが2つ：
 
-## Our promises
+- いちばん最初のカプセルには、必ず**ももまん**が入っています。
+- あるワールドで、そのワールドのウルトラレアが出ないまま7個目のカプセルに達した場合、7個目は**必ずウルトラレア**になります。
 
-- Remove Ads and coins never change what you get from capsules: no extra rolls, no better odds and no faster unlocks.
-- No timers, energy or lives to buy.
-- In gentle mode, the coin shop is only reachable from Settings, purchases need a grown-up check, and nothing pops up asking you to buy.
-- These rates match the game's code and we will update this page before any change. Korea's rules on publishing probabilities apply to paid random items; ours are free, but we publish the odds anyway.
+## 私たちの約束
 
-## Refunds and restoring
+- 「広告を削除」とコインは、カプセルから出るものに影響しません。追加のカプセル、より良い確率、早い解放はありません。
+- 購入が必要なタイマー、スタミナ、ライフはありません。
+- やさしいモードでは、コインショップは設定からしか開けず、購入には大人の確認が必要で、購入をすすめるポップアップは出ません。
+- これらの確率はゲームと一致しており、変更する場合は事前にこのページを更新します。
 
-Purchases are made with Apple. For refunds, visit [reportaproblem.apple.com](https://reportaproblem.apple.com). To restore Remove Ads, open Settings in the game and tap **Restore purchases**. Coins already credited can't be restored after the app is deleted, because they are stored only on your device.
+## 返金と復元
+
+購入はAppleを通じて行われます。返金は[reportaproblem.apple.com](https://reportaproblem.apple.com)からご請求ください。「広告を削除」を復元するには、ゲームの設定で**購入を復元**をタップしてください。付与済みのコインは端末の中だけに保存されているため、アプリを削除すると復元できません。
+
+## 特定商取引法に基づく表記
+
+| 項目 | 内容 |
+|---|---|
+| 販売事業者 | {{operator}} |
+| 所在地 | {{postal}} |
+| 電話番号 | {{phone}} |
+| メールアドレス | support@squishsort.app |
+| 販売価格 | App Storeの各商品ページに表示 |
+| 商品代金以外の必要料金 | インターネット接続にかかる通信料 |
+| 支払方法・時期 | Appleが定める方法により、購入時に支払い |
+| 引渡時期 | 購入手続き完了後すぐ |
+| 返品・キャンセル | デジタル商品の性質上、購入後のキャンセルはできません。返金はAppleの手続き（reportaproblem.apple.com）によります |
+| 動作環境 | App Storeの商品ページに記載のiOSバージョン |

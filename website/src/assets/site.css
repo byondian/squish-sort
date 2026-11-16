@@ -239,3 +239,9 @@ details.faq summary::-webkit-details-marker{display:none}
 .item p{margin:0 0 8px;font-size:15px}
 .item .go{font:700 15px var(--title)}
 .tagline{display:inline-block;font:700 12px var(--title);background:var(--mallow-2);border-radius:99px;padding:2px 9px;margin-right:6px}
+.stage .rarity-pop{position:absolute;left:50%;top:9%;transform:translate(-50%,0) scale(0);font:700 clamp(26px,4.2vw,44px)/1 var(--title);padding:10px 22px;border-radius:99px;border:4px solid #3B2A4A;box-shadow:0 6px 0 rgba(59,42,74,.18);pointer-events:none;white-space:nowrap;opacity:0;z-index:2}
+.stage .rarity-pop.rare{background:#FFD86B;color:#3B2A4A}
+.stage .rarity-pop.ultra{background:linear-gradient(90deg,#FF9CC8,#FFD86B,#7FE0C4,#7CC8FF,#B48CFF);color:#3B2A4A}
+.stage .rarity-pop.show{animation:rpop 2.2s cubic-bezier(.2,1.4,.4,1) forwards}
+@keyframes rpop{0%{opacity:0;transform:translate(-50%,10px) scale(.3) rotate(-8deg)}12%{opacity:1;transform:translate(-50%,0) scale(1.12) rotate(3deg)}22%{transform:translate(-50%,0) scale(1) rotate(-2deg)}80%{opacity:1;transform:translate(-50%,0) scale(1) rotate(0)}100%{opacity:0;transform:translate(-50%,-14px) scale(.9)}}
+@media (prefers-reduced-motion:reduce){.stage .rarity-pop.show{animation:rfade 2.2s forwards}@keyframes rfade{0%,80%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,0) scale(1)}}}

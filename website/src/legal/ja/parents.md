@@ -1,58 +1,58 @@
 ---
-title: Parents' guide
-description: A guide for parents and carers: age, gentle mode, ads, purchases, data and safety in Squish Sort.
+title: 保護者向けガイド
+description: 保護者の方へのご案内です。Squish Sortの年齢、やさしいモード、広告、購入、データ、安全について説明します。
 ---
 :::summary
-Squish Sort is a calm puzzle game rated 9+ on the App Store. There is **no chat, no friends list, no accounts and no location**. Younger players get **gentle mode** automatically.
+Squish Sortは、App Storeで9+に指定されている、のんびり遊べるパズルゲームです。**チャット、フレンドリスト、アカウント、位置情報はありません。** 年齢の低いプレイヤーには、自動で**やさしいモード**が適用されます。
 :::
 
-## What is the game?
+## どんなゲーム？
 
-Players sort squishy characters into jars until every jar holds one kind. There are no timers, no lives and no move limits, and any level can be retried as often as needed. Squishies are collected from free capsules earned by playing.
+すべてのビンが1種類ずつになるまで、ふわふわのスクイーズをビンに仕分けていくゲームです。タイマー、ライフ、手数制限はなく、どのレベルも何度でもやり直せます。スクイーズは仕分けることで、また遊んで手に入る無料のカプセルから集めます。12月にはクリスマス工房とアドベント棚が登場しますが、カウントダウンも買うものもありません。
 
-## The age question
+## 年齢の質問
 
-Early in the first play, before any ad can appear, the game asks for the player's age group using Apple's age range feature where available, or a neutral year-of-birth question with no default. We keep only the group (child, teen or adult), never the birth date. If the question is skipped, the game assumes a child.
+最初に遊ぶとき、広告が表示される前に、プレイヤーの年齢区分をたずねます。利用できる場合はAppleの年齢範囲の機能を使い、それ以外の場合は初期値のない中立的な「生まれた年」の質問をします。保存するのは区分（子ども・ティーン・大人）だけで、生年月日は保存しません。質問をスキップした場合は子どもとして扱います。
 
-## Gentle mode
+## やさしいモード
 
-Gentle mode is on for players under 13 (under 14 in Korea) and for anyone who skipped the age question. In gentle mode:
+やさしいモードは、13歳未満（韓国では14歳未満）の方と、年齢の質問をスキップした方に適用されます。やさしいモードでは：
 
-- Ads are child-directed, non-personalised and general audience only.
-- The first ad between levels comes at level 12 or later, and ads are half as frequent.
-- Apple's tracking prompt is never shown.
-- Purchases and the coin shop sit behind a grown-up check, and are only reachable from Settings.
-- Reward offers appear quietly (for example in the collection book), never as pop-ups.
-- The link to our Squishy Shop for grown-ups is hidden.
+- 広告は子ども向け、パーソナライズなし、全年齢向けのものだけです。
+- レベルの合間の最初の広告はレベル12以降で、頻度は半分になります。
+- Appleのトラッキング確認は表示しません。
+- 購入とコインショップは大人の確認の後ろにあり、設定からしか開けません。
+- 任意のごほうび動画はビン追加とヒントだけに提供され、バディの毎日のプレゼントは無料です。連勝ボーナスはありません。
+- 大人向けのスクイーズショップへのリンクは表示されません。それ以外のプレイヤーには、設定の中の大人の確認の後ろにあります。
 
-**To turn gentle mode on:** open Settings in the game and tap **Set up for a child**. This works immediately.
-**To turn it off:** open Settings, tap **Turn off gentle mode**, pass the grown-up check and answer the age question.
+**やさしいモードをオンにするには：** ゲームの設定を開き、**子ども用に設定**をタップします。すぐにオンになります。
+**オフにするには：** 設定を開いて**やさしいモードをオフ**をタップし、大人の確認を通過して年齢の質問に答えてください。
 
-## Purchases
+## 購入
 
-- Remove Ads stops the automatic ads and is shared with your Family Sharing group.
-- Coin packs buy hints, extra jars, themes and Buddy treats. Coins never buy squishies.
-- Use Apple's **Ask to Buy** (Family Sharing) or **Screen Time > Content & Privacy Restrictions > iTunes & App Store Purchases** to stop in-app purchases completely.
-- Refunds are handled by Apple at [reportaproblem.apple.com](https://reportaproblem.apple.com).
+- 「広告を削除」は自動で流れる広告を止め、ファミリー共有のグループで共有できます。
+- コインパックでは、ヒント、ビン追加、テーマ、バディのおやつが買えます。コインでスクイーズは買えず、購入や広告でカプセルがもらえることもありません。
+- Appleの**承認と購入のリクエスト**（ファミリー共有）や、**スクリーンタイム > コンテンツとプライバシーの制限 > iTunesおよびApp Storeでの購入**を使えば、アプリ内課金を完全に止められます。
+- 返金はAppleが[reportaproblem.apple.com](https://reportaproblem.apple.com)で取り扱います。
 
-Full details, including the capsule odds, are on [purchases and drop rates]({{h}}/purchases).
+カプセルの確率を含む詳細は、[購入と排出率]({{h}}/purchases)をご覧ください。
 
-## Data and privacy
+## データとプライバシー
 
-Progress, collections and any names your child types (for their Squishy Buddy or made squishies) stay on the device. The game has no accounts and sends nothing about your child to us. The only data that leaves the device is the technical information Google needs to serve child-safe ads. See the [privacy policy]({{h}}/privacy#children-s-privacy).
+進行状況、コレクション、お子さまが入力した名前（スクイーズバディや作ったスクイーズの名前）は、端末の中にとどまります。ゲームにはアカウントがなく、お子さまに関する情報を私たちに送ることはありません。端末の外に出るのは、Googleが子どもに安全な広告を配信するために必要な技術的な情報だけです。[プライバシーポリシー]({{h}}/privacy#children-s-privacy)をご覧ください。
 
-## Social features
+## ソーシャル機能
 
-None in this version: no chat, messages, friends, leaderboards, user-generated content sharing or contact with strangers. If we add social features in future, they will be off by default for children and we'll update this guide first.
+このバージョンにはありません。チャット、メッセージ、フレンド、ランキング、ユーザー作成コンテンツの共有、知らない人との接触はありません。将来ソーシャル機能を追加する場合は、子どもには初期設定でオフにし、先にこのガイドを更新します。
 
-## The Squishy Buddy
+## スクイーズバディ
 
-The Buddy is a little friend that cheers the player on. It never gets sad, sick or hungry if the player is away, sends no notifications, and its "How are you today?" question is never stored or sent anywhere.
+バディは、プレイヤーを応援してくれる小さな友だちです。しばらく遊ばなくても悲しんだり、病気になったり、おなかをすかせたりせず、通知も送りません。「今日の気分はどう？」への答えは、保存も送信もしません。
 
-## Screen time
+## スクリーンタイム
 
-The game has no daily rewards that punish missing a day and no countdowns designed to bring players back. The daily Mystery Bag is a single quick guess. You can set limits for any app with Apple's Screen Time.
+1日休むと損をするような毎日のごほうびや、プレイヤーを呼び戻すためのカウントダウンはありません。毎日のミステリーバッグは1回だけの短い当てっこで、見逃したアドベントの扉は後から開けられます。Appleのスクリーンタイムで、どのアプリにも利用時間の制限を設定できます。
 
-## Something worrying?
+## 気になることがあれば
 
-Email support@squishsort.app (or privacy@squishsort.app for data questions). We read every message.
+support@squishsort.app（データに関するご質問はprivacy@squishsort.app）までメールしてください。すべてのメッセージに目を通しています。

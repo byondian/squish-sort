@@ -1,30 +1,30 @@
 ---
-title: Cookies on this website
-description: squishsort.app sets no cookies. Here is what the site stores in your browser instead, and which other services are involved.
+title: 이 웹사이트의 쿠키
+description: squishsort.app은 쿠키를 사용하지 않습니다. 대신 브라우저에 저장하는 것과 관련된 다른 서비스를 안내합니다.
 ---
 :::summary
-**This website does not use cookies,** so there is no cookie banner. A few small preferences are kept in your browser only, and never sent to us.
+**이 웹사이트는 쿠키를 사용하지 않으므로** 쿠키 배너가 없습니다. 몇 가지 작은 설정만 브라우저에 저장되며, 저희에게 전송되지 않습니다.
 :::
 
-## What is stored in your browser
+## 브라우저에 저장되는 것
 
-| Name | Where | What for | How long |
+| 이름 | 저장 위치 | 용도 | 기간 |
 |---|---|---|---|
-| ss-muted | Local storage | Remembers if you muted the demo's sounds | Until you clear it |
-| ss-grownup | Session storage | Remembers you passed the grown-up check on the Squishy Shop | Until you close the tab |
+| ss-muted | 로컬 스토리지 | 체험판 소리를 껐는지 기억 | 직접 지울 때까지 |
+| ss-grownup | 세션 스토리지 | 스퀴시 숍의 어른 확인을 통과했는지 기억 | 탭을 닫을 때까지 |
 
-These are strictly necessary to remember choices you made, and never leave your device.
+이 정보는 사용자가 한 선택을 기억하는 데 꼭 필요한 것이며, 기기 밖으로 나가지 않습니다.
 
-## Visitor statistics
+## 방문 통계
 
-We use **Vercel Web Analytics** to count page visits. It does not use cookies or other identifiers stored on your device, does not track you across websites, and only gives us aggregated numbers (such as how many people visited a page and from which country).
+페이지 방문 수를 세기 위해 **Vercel Web Analytics**를 사용합니다. 쿠키나 기기에 저장되는 식별자를 사용하지 않고, 여러 웹사이트에 걸쳐 추적하지 않으며, 집계된 수치(예: 페이지 방문자 수와 국가)만 제공합니다.
 
-## Other services
+## 그 밖의 서비스
 
-- **Hosting:** Vercel delivers the site and keeps short-lived logs, including IP addresses, for security.
-- **App Store badge:** once the game is released, Apple's badge image loads from Apple's servers.
-- **Squishy Shop links:** if you follow an affiliate link to a shop such as Amazon, that shop may set its own cookies under its own policy.
+- **호스팅:** Vercel이 사이트를 제공하며, 보안을 위해 IP 주소를 포함한 단기 로그를 보관합니다.
+- **App Store 배지:** 게임 출시 후에는 Apple의 배지 이미지를 Apple 서버에서 불러옵니다.
+- **스퀴시 숍 링크:** Amazon 같은 쇼핑몰의 제휴 링크를 누르면, 해당 쇼핑몰이 자체 정책에 따라 쿠키를 설정할 수 있습니다.
 
-Fonts and images are served from our own site. We do not use social media plugins, ad trackers or Google Fonts.
+글꼴과 이미지는 저희 사이트에서 직접 제공합니다. 소셜 미디어 플러그인, 광고 추적기, Google Fonts를 사용하지 않습니다.
 
-More detail is in the [privacy policy]({{h}}/privacy).
+자세한 내용은 [개인정보 처리방침]({{h}}/privacy)에 있습니다.

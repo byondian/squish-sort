@@ -1,62 +1,68 @@
 ---
-title: Ads and tracking
-description: When ads appear in Squish Sort, which ads children see, how Apple's tracking prompt works and how to change your choices.
+title: 광고 및 추적
+description: Squish Sort에서 광고가 언제 나오는지, 어린이에게는 어떤 광고가 나오는지, Apple의 추적 요청이 어떻게 작동하는지, 선택을 바꾸는 방법을 안내합니다.
 ---
 :::summary
-Squish Sort is free because of ads. We keep them fair: **no ads in the first six levels, never in the middle of a level, never right after you fail**, and far fewer in gentle mode. Ads are personalised only if you are old enough and say yes.
+Squish Sort는 광고 덕분에 무료입니다. 광고는 공정하게 운영합니다. **처음 6개 레벨에는 광고가 없고, 레벨 도중이나 실패 직후에는 절대 나오지 않으며,** 순한 모드에서는 훨씬 적게 나옵니다. 맞춤형 광고는 동의할 수 있는 나이이고 직접 "허용"한 경우에만 표시됩니다.
 :::
 
-## When ads appear
+## 광고가 나오는 때
 
-Ads that play by themselves (between levels) currently follow these limits:
+레벨 사이에 저절로 나오는 광고는 현재 다음 한도를 따릅니다.
 
-| Levels | At most |
+| 레벨 | 최대 빈도 |
 |---|---|
-| 1 to 6 | No ads |
-| 7 to 15 | One ad every 4 levels, and at least 4 minutes of play apart |
-| 16 to 30 | One ad every 3 levels, and at least 3 minutes of play apart |
-| 31 onwards | One ad every 2 levels, and at least 90 seconds of play apart |
+| 1~6 | 광고 없음 |
+| 7~15 | 4레벨마다 1회, 플레이 시간 기준 최소 4분 간격 |
+| 16~30 | 3레벨마다 1회, 플레이 시간 기준 최소 3분 간격 |
+| 31 이후 | 2레벨마다 1회, 플레이 시간 기준 최소 90초 간격 |
 
-And always:
+그리고 항상:
 
-- Never in the first minute after you open the game.
-- Only after a level is won: never mid-level and never after a fail.
-- Never after a boss level that took more than one try.
-- In **gentle mode**, the first ad comes at level 12 or later, and every gap is doubled.
+- 게임을 연 뒤 처음 1분 동안은 나오지 않습니다.
+- 레벨을 깬 뒤에만 나옵니다. 레벨 도중이나 실패 뒤에는 절대 나오지 않습니다.
+- 보스 레벨 뒤, 캡슐을 준 레벨 뒤, 새로운 것이 열리는 승리 뒤에는 나오지 않습니다.
+- 선택형 보상 영상을 보면 시간이 처음부터 다시 계산되어, 한동안 광고가 쉬어 갑니다.
+- **순한 모드**에서는 첫 광고가 레벨 12 이후에 나오고, 모든 간격이 두 배가 됩니다.
 
-We may adjust these numbers, and if we do we'll update this page.
+이 수치는 조정될 수 있으며, 조정하면 이 페이지를 수정합니다.
 
-**Remove Ads** (a one-time purchase) switches these ads off for good.
+**광고 제거**(한 번만 구매)를 사면 이 광고가 완전히 사라집니다.
 
-## Reward videos: always your choice
+## 보상 영상: 언제나 선택
 
-Some buttons offer a reward for watching a short video: an extra jar, more moves after a fail, a bonus gift of coins, or doubling the capsule you just earned. These only play when you tap them, are the same for everyone (including Remove Ads owners), and never change capsule odds. In gentle mode they are offered quietly, never in a pop-up.
+일부 버튼은 짧은 영상을 보면 보상을 줍니다. 막혔을 때 병 추가나 힌트, 처음 깬 레벨의 코인 두 배, 미스터리 백 추가 기회, 버디의 하루 코인 선물 등입니다. 보상 영상은:
 
-## Which ads you see
+- 사용자가 눌렀을 때만 재생되며, 하루 최대 6회입니다.
+- 캡슐이나 스퀴시를 주지 않고, 캡슐 확률도 바꾸지 않습니다.
+- **광고 제거** 구매자는 영상 없이 한 번에 받습니다.
+- **순한 모드**에서는 병 추가와 힌트에만 제공되며, 버디의 하루 선물은 영상 없이 무료입니다.
 
-| Player | Ads |
+## 어떤 광고가 나오나요
+
+| 사용자 | 광고 |
 |---|---|
-| Under 13 (under 14 in Korea), or age question skipped | Child-directed, non-personalised, general-audience (G-rated) ads. No tracking prompt, no advertising identifier |
-| Teens below their country's age of digital consent (all under-18s in the UK) | Non-personalised ads, marked as under the age of consent, rated up to PG |
-| Older players | Non-personalised ads, unless you allow tracking and, in the UK/EEA/Switzerland, also agree in Google's consent form |
+| 만 13세 미만(한국은 만 14세 미만) 또는 나이 질문을 건너뛴 경우 | 아동 대상, 비맞춤형, 전체 이용가(G등급) 광고. 추적 요청 없음, 광고 식별자 사용 안 함 |
+| 거주 국가의 디지털 동의 연령 미만 청소년(영국은 만 18세 미만 전원) | 비맞춤형 광고, 동의 연령 미만으로 표시, PG 등급까지 |
+| 그 밖의 사용자 | 비맞춤형 광고. 추적을 허용하고, 영국·EEA·스위스에서는 Google 동의 양식에도 동의한 경우에만 맞춤형 |
 
-Ads are served by **Google AdMob**. We block ad categories that don't suit a family game where Google lets us.
+광고는 **Google AdMob**이 제공합니다. Google이 허용하는 범위에서 가족 게임에 어울리지 않는 광고 카테고리는 차단합니다.
 
-## Apple's tracking prompt
+## Apple의 추적 요청
 
-If you are old enough, the game may ask once (after you win level 5 or later) whether to "Allow" tracking. Saying **Allow** lets Google use Apple's advertising identifier to show ads more relevant to you. Saying **Ask App Not to Track** means you still see ads, just not personalised ones. Either way, the game plays exactly the same.
+동의할 수 있는 나이라면, 레벨 7을 시작할 때 한 줄 설명과 함께 추적을 "허용"할지 한 번 묻습니다. **허용**을 누르면 Google이 Apple의 광고 식별자를 사용해 더 관련성 높은 광고를 보여 줍니다. **앱에 추적 금지 요청**을 누르면 광고는 계속 나오지만 맞춤형이 아닙니다. 어느 쪽을 골라도 게임은 똑같이 플레이됩니다.
 
-## Changing your mind
+## 선택 바꾸기
 
-- **In the game:** Settings > **Privacy choices** (shown in the UK, EEA and Switzerland) reopens Google's consent form.
-- **On iPhone:** Settings > Privacy & Security > **Tracking**, to switch tracking off for Squish Sort or all apps.
-- **Reset your advertising identifier:** removing and reinstalling the app, or turning tracking off, stops it being shared.
-- **Google ad settings:** adults can manage ad personalisation at [myadcenter.google.com](https://myadcenter.google.com).
+- **게임에서:** 설정 > **개인정보 선택**(영국, EEA, 스위스에서 표시)을 누르면 Google 동의 양식이 다시 열립니다.
+- **아이폰에서:** 설정 > 개인정보 보호 및 보안 > **추적**에서 Squish Sort 또는 모든 앱의 추적을 끌 수 있습니다.
+- **광고 식별자 공유 중지:** 앱을 삭제했다가 다시 설치하거나 추적을 끄면 더 이상 공유되지 않습니다.
+- **Google 광고 설정:** 성인은 [myadcenter.google.com](https://myadcenter.google.com)에서 광고 맞춤 설정을 관리할 수 있습니다.
 
-## Ad measurement
+## 광고 측정
 
-Apple's privacy-preserving SKAdNetwork tells ad networks whether an ad led to an install, without identifying you.
+Apple의 개인정보 보호형 SKAdNetwork는 사용자를 식별하지 않고, 광고가 설치로 이어졌는지만 광고 네트워크에 알려 줍니다.
 
-## Seen an ad that shouldn't be there?
+## 나오면 안 되는 광고를 보셨나요?
 
-Please tell us at support@squishsort.app with a screenshot if you can. We'll block it.
+가능하면 스크린샷과 함께 support@squishsort.app으로 알려 주세요. 해당 광고를 차단하겠습니다.

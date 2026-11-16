@@ -1,34 +1,34 @@
 ---
-title: Your data and deletion
-description: How to see, reset or delete your Squish Sort data, and how to ask us to delete anything we hold.
+title: データと削除
+description: Squish Sortのデータを確認・リセット・削除する方法と、私たちが保有する情報の削除を求める方法を説明します。
 ---
 :::summary
-Squish Sort has no accounts, and your game data is stored only on your iPhone. **Deleting the app deletes your data.**
+Squish Sortにはアカウントがなく、ゲームデータはiPhoneの中だけに保存されます。**アプリを削除すると、データも削除されます。**
 :::
 
-## Delete your game data
+## ゲームデータを削除する
 
-1. Press and hold the Squish Sort icon on your Home Screen.
-2. Tap **Remove App**, then **Delete App**.
+1. ホーム画面でSquish Sortのアイコンを長押しします。
+2. **Appを削除**をタップし、続けて**Appを削除**をタップします。
 
-This permanently deletes your progress, collection, coins, names and settings from the device. If you back up your iPhone, older backups may still contain them until those backups are replaced or deleted.
+進行状況、コレクション、コイン、名前、設定が端末から完全に削除されます。iPhoneをバックアップしている場合、古いバックアップには、そのバックアップが置き換えられるか削除されるまでデータが残ることがあります。
 
-**Before deleting:** Remove Ads can be restored later from Settings > Restore purchases. Coins and squishies cannot be restored, because they exist only on your device.
+**削除する前に：** 「広告を削除」は、後で設定 > 購入を復元から復元できます。コインとスクイーズは端末の中にしかないため、復元できません。
 
-## Reset or limit advertising data
+## 広告データをリセット・制限する
 
-- iPhone Settings > Privacy & Security > **Tracking**: switch tracking off for Squish Sort or all apps.
-- In the game: Settings > **Privacy choices** (UK, EEA and Switzerland) to change your consent.
-- Adults can see and delete Google ad activity linked to their Google Account at [myadcenter.google.com](https://myadcenter.google.com) and [myactivity.google.com](https://myactivity.google.com).
+- iPhoneの設定 > プライバシーとセキュリティ > **トラッキング**：Squish Sortまたはすべてのアプリのトラッキングをオフにします。
+- ゲーム内：設定 > **プライバシーの選択**（英国・EEA・スイス）で同意を変更します。
+- 大人の方は、[myadcenter.google.com](https://myadcenter.google.com)と[myactivity.google.com](https://myactivity.google.com)で、Googleアカウントに紐づく広告のアクティビティを確認・削除できます。
 
-## Delete support messages
+## サポートへのメッセージを削除する
 
-If you've written to us, email privacy@squishsort.app from the same address and ask us to delete the conversation. We'll confirm within one month (usually much sooner).
+私たちにご連絡いただいたことがある場合は、同じメールアドレスからprivacy@squishsort.appへ、やりとりの削除をご依頼ください。1か月以内（通常はもっと早く）に完了をお知らせします。
 
-## Ask what we hold
+## 保有している情報を確認する
 
-You can ask us for a copy of any personal data we hold about you (in practice, only support emails). Email privacy@squishsort.app. Parents can ask the same on behalf of their child.
+私たちが保有するあなたの個人情報（実際にはサポートのメールだけです）の開示を求めることができます。privacy@squishsort.appまでメールしてください。保護者の方がお子さまに代わって同じご請求をすることもできます。
 
-## Need help?
+## お困りのときは
 
-Write to privacy@squishsort.app or use the [support form]({{h}}/support).
+privacy@squishsort.appへメールするか、[お問い合わせフォーム]({{h}}/support)をご利用ください。

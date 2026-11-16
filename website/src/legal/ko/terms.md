@@ -1,72 +1,74 @@
 ---
-title: Terms of use
-description: The rules for playing Squish Sort and buying in-app items, in plain words.
+title: 이용약관
+description: Squish Sort를 플레이하고 앱 내 아이템을 구매할 때의 규칙을 쉬운 말로 안내합니다.
 ---
 :::summary
-**The short version:** Squish Sort is free to play. You can buy Remove Ads and packs of coins through Apple. Coins and squishies have no cash value. Squishies are never for sale. Be kind, enjoy the squish, and your legal rights as a consumer always stay in place.
+**한눈에 보기:** Squish Sort는 무료로 플레이할 수 있습니다. Apple을 통해 광고 제거와 코인 묶음을 구매할 수 있습니다. 코인과 스퀴시는 현금 가치가 없으며, 스퀴시는 절대 판매하지 않습니다. 서로 배려하며 즐겁게 꾹꾹 눌러 주세요. 소비자로서의 법적 권리는 언제나 그대로 유지됩니다.
 :::
 
-## Who these terms are with
+## 약관의 당사자
 
-These terms are between you and {{operator}} ("we"), the developer of Squish Sort. By downloading or playing Squish Sort you agree to them. If you are a child, please read them with a parent or carer.
+이 약관은 사용자와 Squish Sort 개발자인 {{operator}}(이하 "저희") 사이의 약속입니다. Squish Sort를 내려받거나 플레이하면 이 약관에 동의한 것으로 봅니다. 어린이라면 부모님이나 보호자와 함께 읽어 주세요.
 
-The app is licensed to you under Apple's [Licensed Application End User License Agreement](https://www.apple.com/legal/internet-services/itunes/dev/stdeula/) (the "Apple EULA"). These terms add rules specific to Squish Sort. If they conflict with the Apple EULA, the Apple EULA wins, except where these terms give you more rights.
+이 앱은 Apple의 [라이선스가 부여된 애플리케이션 최종 사용자 사용권 계약](https://www.apple.com/legal/internet-services/itunes/dev/stdeula/)(이하 "Apple EULA")에 따라 사용권이 부여됩니다. 이 약관은 Squish Sort에만 해당하는 규칙을 덧붙인 것입니다. 이 약관과 Apple EULA가 충돌하면 Apple EULA가 우선합니다. 단, 이 약관이 사용자에게 더 많은 권리를 주는 경우는 예외입니다.
 
-## Playing the game
+## 게임 플레이
 
-- We give you a personal, non-transferable licence to play Squish Sort on Apple devices you own or control, as allowed by the App Store rules.
-- Please don't copy, modify, reverse engineer or sell the game or its artwork, or use cheats or tools that interfere with it.
-- Names you type for your Squishy Buddy or made squishies stay on your device, but please keep them kind.
-- We may update the game, add or change levels, events and features, or switch features off. If we ever stop offering the game, purchases you have made keep working on your device as far as we can make that possible.
+- 저희는 App Store 규칙이 허용하는 범위에서, 사용자가 소유하거나 관리하는 Apple 기기에서 Squish Sort를 플레이할 수 있는 개인적이고 양도할 수 없는 사용권을 드립니다.
+- 게임이나 그림을 복제·수정·역설계·판매하거나, 게임을 방해하는 치트나 도구를 사용하지 말아 주세요.
+- 스퀴시 버디나 직접 만든 스퀴시에 붙인 이름은 기기에만 저장되지만, 다정한 이름으로 지어 주세요.
+- 저희는 게임을 업데이트하고, 레벨·이벤트·기능을 추가하거나 바꾸거나 종료할 수 있습니다. 게임 제공을 중단하더라도, 이미 구매한 항목은 가능한 한 사용자의 기기에서 계속 작동하도록 하겠습니다.
 
-## Purchases
+## 구매
 
-- **Remove Ads** is a one-time purchase. It stops the ads that play by themselves (between levels). Optional reward videos stay available for everyone and only play when you tap them. Remove Ads is shared with your Family Sharing group.
-- **Coin packs** are consumable. Coins are spent in the game on hints, extra jars, board themes and Squishy Buddy treats and gifts.
-- **Squishies and capsules can never be bought**, directly or with coins. Paying never changes what you find in capsules. See [purchases and drop rates]({{h}}/purchases).
-- Coins and squishies are a licence to use game content. They have no cash value, can't be exchanged for money or transferred between people, and are not your property.
-- Prices are shown in the App Store in your currency, including any taxes Apple collects.
-- Payments, Ask to Buy, Family Sharing and refunds are handled by Apple under its terms. To request a refund, visit [reportaproblem.apple.com](https://reportaproblem.apple.com). You can restore Remove Ads at any time in **Settings > Restore purchases**.
-- Under EU and UK law you normally have 14 days to withdraw from a digital purchase. By buying an item that is delivered straight away, you agree it is delivered immediately and you lose that right once delivery starts. Apple's refund process is still available to you.
+- **광고 제거**는 한 번만 구매하는 상품입니다. 레벨 사이에 저절로 나오는 광고를 없애고, 선택형 영상 보상을 같은 하루 한도 안에서 영상 없이 한 번에 받을 수 있게 해 줍니다. 광고 제거는 가족 공유 그룹과 함께 쓸 수 있습니다.
+- **코인 묶음**은 소모성 상품입니다. 코인은 게임 안에서 힌트, 병 추가, 보드 테마, 스퀴시 버디의 간식과 선물에 사용합니다.
+- **스퀴시와 캡슐은 직접이든 코인으로든 절대 살 수 없습니다.** 돈을 써도 캡슐에서 나오는 것은 달라지지 않습니다. 자세한 내용은 [구매 및 획득 확률]({{h}}/purchases)을 보세요.
+- 코인과 스퀴시는 게임 콘텐츠를 이용할 수 있는 사용권입니다. 현금 가치가 없고, 돈으로 바꾸거나 다른 사람에게 넘길 수 없으며, 사용자의 소유물이 아닙니다.
+- 가격은 App Store에 사용자의 통화로, Apple이 징수하는 세금을 포함해 표시됩니다.
+- 결제, 구매 요청, 가족 공유, 환불은 Apple이 자체 약관에 따라 처리합니다. 환불을 요청하려면 [reportaproblem.apple.com](https://reportaproblem.apple.com)을 방문하세요. 광고 제거는 언제든 **설정 > 구매 복원**에서 복원할 수 있습니다.
+- 한국의 「전자상거래 등에서의 소비자보호에 관한 법률」, EU 및 영국 법률에 따른 청약철회 권리는 법이 정한 대로 보장됩니다. 구매 즉시 제공되어 사용이 시작된 디지털 콘텐츠는 법에서 정한 경우 청약철회가 제한될 수 있으며, 이 경우에도 Apple의 환불 절차는 그대로 이용할 수 있습니다.
 
-## Ads
+## 광고
 
-The game is funded by ads. When and how ads appear, and how to control personalisation, is explained on our [ads and tracking page]({{h}}/ads).
+이 게임은 광고 수익으로 운영됩니다. 광고가 언제, 어떻게 나오는지, 맞춤형 광고를 어떻게 설정하는지는 [광고 및 추적]({{h}}/ads) 페이지에서 안내합니다.
 
-## Your data
+## 개인정보
 
-Our [privacy policy]({{h}}/privacy) explains what data is used and why.
+어떤 정보를 왜 사용하는지는 [개인정보 처리방침]({{h}}/privacy)에서 설명합니다.
 
-## Our content
+## 저희 콘텐츠
 
-The game, its squishies, artwork, sounds, levels and the Squish Sort name are ours or licensed to us. All squishies are original characters.
+게임, 스퀴시, 그림, 소리, 레벨, Squish Sort라는 이름은 저희 것이거나 저희가 사용권을 가진 것입니다. 모든 스퀴시는 오리지널 캐릭터입니다.
 
-## If something goes wrong
+## 문제가 생겼을 때
 
-- We work hard to make the game fun and reliable, but we provide it "as is" and can't promise it will always be available or free from bugs.
-- Nothing in these terms limits liability that can't be limited by law, including for death or personal injury caused by negligence, or fraud, or your statutory rights as a consumer (for example, that digital content must be as described and fit for purpose).
-- Otherwise, our total liability to you is limited to the amount you paid us for in-app purchases in the 12 months before the claim.
+- 저희는 게임이 재미있고 안정적이도록 최선을 다하지만, 게임은 "있는 그대로" 제공되며 항상 이용 가능하거나 오류가 없다고 약속할 수는 없습니다.
+- 이 약관의 어떤 내용도 법으로 제한할 수 없는 책임(과실로 인한 사망이나 신체 상해, 사기에 대한 책임 등)이나 소비자로서의 법적 권리(예: 디지털 콘텐츠가 설명과 같고 목적에 맞아야 한다는 권리)를 제한하지 않습니다.
+- 그 밖의 경우, 사용자에 대한 저희의 총 책임은 청구 전 12개월 동안 사용자가 앱 내 구매로 지불한 금액으로 제한됩니다. 단, 저희의 고의 또는 중대한 과실로 인한 손해에는 이 제한이 적용되지 않습니다.
 
-## Apple
+## Apple 관련 사항
 
-You and we agree that:
+사용자와 저희는 다음에 동의합니다.
 
-- These terms are between you and us, not Apple. Apple is not responsible for the app or its content.
-- Apple has no obligation to provide maintenance or support for the app.
-- If the app fails to conform to any applicable warranty, you may notify Apple, and Apple will refund the purchase price (if any). To the maximum extent permitted by law, Apple has no other warranty obligation for the app.
-- Apple is not responsible for addressing any claims relating to the app, including product liability claims, claims that the app fails to meet legal or regulatory requirements, and consumer protection or privacy claims.
-- If a third party claims the app infringes their intellectual property, we, not Apple, are responsible for the investigation, defence, settlement and discharge of that claim.
-- You confirm you are not located in a country subject to a US government embargo or designated as a "terrorist supporting" country, and you are not on any US government list of prohibited or restricted parties.
-- Apple and its subsidiaries are third-party beneficiaries of these terms and, once you accept them, Apple has the right to enforce them against you.
+- 이 약관은 Apple이 아닌 사용자와 저희 사이의 약관입니다. Apple은 앱과 그 콘텐츠에 대해 책임지지 않습니다.
+- Apple은 앱의 유지보수나 지원을 제공할 의무가 없습니다.
+- 앱이 적용되는 보증을 충족하지 못하면 사용자는 Apple에 알릴 수 있으며, Apple은 구매 가격(있는 경우)을 환불합니다. 법이 허용하는 최대 범위에서 Apple은 앱에 대해 그 밖의 보증 의무를 지지 않습니다.
+- 제조물 책임 청구, 앱이 법적·규제 요건을 충족하지 못한다는 청구, 소비자 보호나 개인정보 관련 청구 등 앱과 관련된 청구를 처리할 책임은 Apple에 없습니다.
+- 제3자가 앱이 자신의 지식재산권을 침해한다고 주장하는 경우, 그 조사·방어·합의·해결에 대한 책임은 Apple이 아닌 저희에게 있습니다.
+- 사용자는 미국 정부의 금수 조치 대상 국가나 "테러 지원국"으로 지정된 국가에 있지 않으며, 미국 정부의 금지 또는 제한 대상자 명단에 올라 있지 않음을 확인합니다.
+- Apple과 그 자회사는 이 약관의 제3자 수혜자이며, 사용자가 이 약관을 수락하면 Apple은 사용자에게 이 약관을 집행할 권리를 갖습니다.
 
-## Changes
+## 약관의 변경
 
-We may update these terms when the game changes or the law requires it. We'll update the date at the top, and tell you in the app if a change is important. If you don't agree with a change, you can stop playing and delete the app.
+게임이 바뀌거나 법이 요구하면 이 약관을 수정할 수 있습니다. 수정하면 위쪽의 날짜를 바꾸고, 중요한 변경이면 앱에서도 알려 드립니다. 변경에 동의하지 않으면 플레이를 멈추고 앱을 삭제할 수 있습니다.
 
-## Law and disputes
+## 준거법과 분쟁
 
-These terms are governed by the laws of Luxembourg. If you are a consumer, you also keep the protection of the mandatory laws of the country where you live, and you can bring a claim in your local courts. Please contact us first at support@squishsort.app so we can try to sort things out.
+이 약관에는 룩셈부르크 법이 적용됩니다. 다만 소비자인 경우 거주하는 나라의 강행 법규에 따른 보호를 그대로 받으며, 거주지 법원에 소송을 제기할 수 있습니다. 한국에 거주하는 사용자는 한국 법에 따른 소비자 보호를 받고 한국 법원에 소를 제기할 수 있습니다. 먼저 support@squishsort.app으로 연락 주시면 문제를 함께 해결해 보겠습니다.
 
-## Contact
+## 연락처
 
-{{operator}} · support@squishsort.app · Postal address: {{postal}}
+{{operator}} · support@squishsort.app · 우편 주소: {{postal}}
+
+이 약관은 영어로도 제공됩니다. 법이 요구하는 경우 한국어판이 적용됩니다.

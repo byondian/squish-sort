@@ -1,30 +1,30 @@
 ---
-title: Accessibility
-description: How we make Squish Sort and squishsort.app usable for as many players as possible, and how to tell us about problems.
+title: アクセシビリティ
+description: Squish Sortとsquishsort.appをできるだけ多くの方に使っていただくための取り組みと、問題をお知らせいただく方法です。
 ---
-We want everyone to be able to enjoy a good squish.
+すべての人に、気持ちよくむぎゅっとしてほしいと思っています。
 
-## In the game
+## ゲームでは
 
-- **Shape as well as colour:** every board squishy has its own silhouette, so players with colour vision deficiency can tell them apart.
-- **No time pressure:** no timers, no move limits, unlimited undo and retries. Levels get a little easier after a few fails.
-- **Tap or drag:** move squishies by tapping two jars or by dragging.
-- **Sound and haptics** can be switched off in Settings, and nothing in the game depends on hearing.
-- The game follows your iPhone's Reduce Motion setting where possible.
+- **色だけでなく形でも：** ボード上のスクイーズにはそれぞれ独自のシルエットがあり、色覚に特性のある方も見分けられます。
+- **時間のプレッシャーなし：** タイマーも手数制限もなく、1手戻すとやり直しは無制限です。何度か失敗すると、レベルが少しだけ簡単になります。
+- **タップでもドラッグでも：** 2つのビンを順にタップするか、ドラッグしてスクイーズを動かせます。
+- **サウンドと触覚フィードバック**は設定でオフにでき、音が聞こえなくてもゲームをすべて楽しめます。
+- 可能な限り、iPhoneの「視差効果を減らす」の設定に従います。
 
-We are still improving support for VoiceOver and larger text sizes in the game. If something gets in your way, please tell us.
+ゲームのVoiceOverと大きな文字サイズへの対応は、引き続き改善しています。使いにくいところがあれば、ぜひお知らせください。
 
-## On this website
+## このウェブサイトでは
 
-We aim to meet the Web Content Accessibility Guidelines (WCAG) 2.2 at level AA:
+ウェブコンテンツ・アクセシビリティ・ガイドライン（WCAG）2.2のレベルAAを目指しています。
 
-- Pages work with a keyboard and screen readers, with a "skip to content" link.
-- The playable demo can be played with a keyboard (Tab to a jar, Enter to pick it), and announces moves to screen readers.
-- Animations calm down if your device asks for reduced motion.
-- Text colours meet contrast guidelines against their backgrounds.
+- キーボードとスクリーンリーダーでページを利用でき、「本文へスキップ」のリンクがあります。
+- デモはキーボードで遊べ（Tabでビンを選び、Enterで持ち上げる）、手の動きをスクリーンリーダーに伝えます。
+- 端末で動きを減らす設定にしていると、アニメーションが控えめになります。
+- 文字の色は、背景とのコントラストの基準を満たしています。
 
-**Known limitations:** the giant squishy at the top of the home page is decorative and mostly visual; it can be squeezed with Enter or Space.
+**既知の制限：** ホームページ上部の大きなスクイーズは装飾で、主に視覚的なものです。EnterキーやSpaceキーでむぎゅっと押せます。
 
-## Tell us
+## お知らせください
 
-Found a barrier? Email support@squishsort.app with what happened and the device you use. We aim to reply within two working days. This statement was last reviewed on {{updated}}.
+使いにくいところがありましたか？何が起きたかとお使いの端末を、support@squishsort.appまでお知らせください。2営業日以内のお返事を心がけています。この内容は{{updated}}に最終確認しました。
