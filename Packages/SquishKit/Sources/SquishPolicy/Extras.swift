@@ -35,7 +35,7 @@ public enum SquishyShop {
     }
 }
 
-// MARK: - Christmas Workshop (side world)
+// MARK: - Santa's Grotto (side world)
 
 /// A side world behind a festive door on the home screen. The door shows once
 /// level 10 is won and the date is inside the window. A player who has opened

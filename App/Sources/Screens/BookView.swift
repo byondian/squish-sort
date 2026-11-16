@@ -9,7 +9,7 @@ struct BookView: View {
 
     private let worlds: [(id: String, name: LocalizedStringKey)] = [
         ("toyshop", "Toy Shop"), ("sweetfactory", "Sweet Factory"),
-        ("starlight", "Starlight Stage"), ("christmas", "Christmas Workshop"),
+        ("starlight", "Starlight Stage"), ("christmas", "Santa's Grotto"),
     ]
 
     var body: some View {

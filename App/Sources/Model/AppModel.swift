@@ -138,7 +138,7 @@ final class AppModel: ObservableObject {
         return index <= progress.highestUnlocked
     }
 
-    // MARK: - Christmas Workshop and the advent shelf
+    // MARK: - Santa's Grotto and the advent shelf
 
     var christmasLevels: [Int] { levels.indices.filter { levels[$0].file.world == ChristmasWorld.id } }
 

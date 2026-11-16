@@ -37,9 +37,9 @@ struct HomeView: View {
             if model.adventDoors > 0 { AdventShelf() }
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 3), spacing: 10) {
                 tile("Levels", "map.fill") { model.screen = .map }
-                // The festive door: Christmas Workshop, a side world. No countdown anywhere.
+                // The festive door: Santa's Grotto, a side world. No countdown anywhere.
                 if model.showsFestiveDoor {
-                    tile("Christmas", "snowflake") { model.openFestiveDoor() }
+                    tile("Santa's Grotto", "snowflake") { model.openFestiveDoor() }
                 }
                 tile("Book", "book.fill") { model.screen = .book }
                 if model.isExtraUnlocked(.squishRoom) {

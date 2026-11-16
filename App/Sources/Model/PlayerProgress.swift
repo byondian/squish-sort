@@ -32,7 +32,7 @@ struct PlayerProgress: Codable, Equatable {
     var trackingAsked = false
     var ownedThemes: Set<String> = [BoardTheme.cream.rawValue]
     var theme = BoardTheme.cream.rawValue
-    /// Christmas Workshop: opened through the festive door (it then stays open for good).
+    /// Santa's Grotto: opened through the festive door (it then stays open for good).
     var christmasEntered = false
     /// Furthest unlocked Christmas level, 0-based within that world.
     var christmasUnlocked = 0

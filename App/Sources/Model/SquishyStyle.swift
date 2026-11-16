@@ -43,7 +43,7 @@ struct SquishyStyle {
         "pip": .init(color: UIColor(hex: 0xFFD54A), shape: .bean, feature: .antenna),
         "nova": .init(color: UIColor(hex: 0xA9B8D6), shape: .star, feature: .none),
         "coco": .init(color: UIColor(hex: 0x5CCB8A), shape: .heart, feature: .fins),
-        // Christmas Workshop
+        // Santa's Grotto
         "santa": .init(color: UIColor(hex: 0xE5484D), shape: .bun, feature: .hat),
         "elfie": .init(color: UIColor(hex: 0x3FB56F), shape: .drop, feature: .ears),
         "reindeer": .init(color: UIColor(hex: 0x8B5E3C), shape: .bean, feature: .antenna),

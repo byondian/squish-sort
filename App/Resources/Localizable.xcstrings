@@ -431,50 +431,6 @@
         }
       }
     },
-    "Christmas": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "クリスマス"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "크리스마스"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "聖誕節"
-          }
-        }
-      }
-    },
-    "Christmas Workshop": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "クリスマス工房"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "크리스마스 공방"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "聖誕工坊"
-          }
-        }
-      }
-    },
     "Close": {
       "localizations": {
         "ja": {
@@ -2165,6 +2121,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "恢復購買"
+          }
+        }
+      }
+    },
+    "Santa's Grotto": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "サンタのおうち"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "산타의 집"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "聖誕老人小屋"
           }
         }
       }

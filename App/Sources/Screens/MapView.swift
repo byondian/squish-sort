@@ -1,12 +1,12 @@
 import SwiftUI
 
-/// World map: the three worlds of the main path, plus Christmas Workshop once its door has been opened.
+/// World map: the three worlds of the main path, plus Santa's Grotto once its door has been opened.
 struct MapView: View {
     @EnvironmentObject var model: AppModel
 
     private let worlds: [(id: String, name: LocalizedStringKey)] = [
         ("toyshop", "Toy Shop"), ("sweetfactory", "Sweet Factory"),
-        ("starlight", "Starlight Stage"), ("christmas", "Christmas Workshop"),
+        ("starlight", "Starlight Stage"), ("christmas", "Santa's Grotto"),
     ]
 
     var body: some View {

@@ -31,7 +31,7 @@ SHAPE = {
 }
 # Later worlds start a little bigger at the same positions.
 WORLD_BUMP = {0: 0, 1: 1, 2: 1, 3: 1}
-# Christmas Workshop is a side world that opens after main level 10, so it is
+# Santa's Grotto is a side world that opens after main level 10, so it is
 # tuned like main levels 12 to 35: Toy Shop sizes for its first half.
 SIDE_WORLD = 3
 
