@@ -6,17 +6,18 @@
   "beat": "calm",
   "capacity": 4,
   "jars": [
-    ["zuzu", "pip", "pip", "riff"],
-    ["lumi", "zuzu", "nova", "nova"],
-    ["lumi", "lumi", "riff", "lumi"],
-    ["riff", "pip", "zuzu", "zuzu"],
-    ["pip", "nova", "nova", "riff"],
+    ["lumi", "lumi", "riff", "riff"],
+    ["zuzu", "zuzu", "zuzu", "lumi"],
+    ["nova", "nova", "pip", "riff"],
+    ["riff", "coco", "coco", "lumi"],
+    ["pip", "zuzu", "pip", "nova"],
+    ["coco", "coco", "pip", "nova"],
     [],
     []
   ],
-  "mechanics": {"hidden": [], "sticky": [[1, 2], [2, 0]], "frozen": []},
-  "par": 12,
-  "solution": [[0, 5], [4, 5], [1, 6], [3, 1], [0, 3], [1, 0], [2, 1], [2, 5], [1, 2], [4, 6], [3, 4], [3, 5]],
+  "mechanics": {"hidden": [], "sticky": [[1, 0], [5, 0]], "frozen": []},
+  "par": 13,
+  "solution": [[0, 6], [1, 0], [2, 6], [3, 0], [2, 7], [4, 2], [4, 7], [4, 1], [4, 7], [5, 2], [5, 7], [3, 5], [3, 6]],
   "capsule": true,
   "softenAfterFails": null
 }

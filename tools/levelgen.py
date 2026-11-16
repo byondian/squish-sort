@@ -43,6 +43,22 @@ WORLD_BUMP = {0: 0, 1: 1, 2: 1, 3: 1}
 SIDE_WORLD = 3
 
 
+def squeeze(world, pos, beat):
+    """Where the game gets properly hard (Ian, 16 Nov: three stars on everything by level 33).
+    Returns (kinds to add, spare jars) or None to leave the level's shape alone.
+    One spare jar instead of two is what makes dead ends real, so Undo and Restart matter."""
+    tier = 1 if (world == "sweetfactory" and pos >= 14) else 2 if (world == "starlight" and pos >= 4) else 0
+    if not tier:
+        return None
+    if beat == "boss":
+        return (-1, 1)          # 7 kinds, one spare jar
+    if beat == "tension":
+        return (-1 if tier == 1 else 0, 1)
+    if tier == 2 and beat in ("medium", "bonus"):
+        return (0, 1)
+    return (1, 2)               # the rests between get one more kind
+
+
 def capsule_level(pos, last=20):
     """Every 3rd level of a world, plus its last level."""
     return pos % 3 == 0 or pos == last
@@ -187,6 +203,13 @@ def make_level(world_idx, pos):
     showpiece = pos in (5, 15) and not finale
     if showpiece or finale:
         k = base_k
+    hard = None if (showpiece or pos <= 3) else squeeze(world, pos, beat)
+    if hard:
+        k = max(4, min(8, k + hard[0]))
+        empties = hard[1]
+        if empties == 1:
+            k = min(k, 7)
+            mult = 9  # no target: the longest answer found wins
     names = kinds_for(world_idx, k)
     rng = random.Random(f"{world}-{pos}")
     level = {

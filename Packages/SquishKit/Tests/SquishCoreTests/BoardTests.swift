@@ -179,12 +179,15 @@ final class SessionTests: XCTestCase {
             XCTAssertEqual(Stars.rating(moves: two + 1, par: par), 1)
         }
         XCTAssertNil(Stars.moveLimit(forStars: 1, par: 10))
-        // Hard levels: about half the slack.
-        XCTAssertEqual(Stars.moveLimit(forStars: 3, par: 24, tight: true), 26)
-        XCTAssertEqual(Stars.moveLimit(forStars: 2, par: 24, tight: true), 28)
-        XCTAssertEqual(Stars.rating(moves: 27, par: 24, tight: true), 2)
-        XCTAssertEqual(Stars.rating(moves: 29, par: 24, tight: true), 1)
-        XCTAssertEqual(Stars.rating(moves: 9, par: 8, tight: true), 3)
+        // Later levels set their own slack, down to none.
+        XCTAssertEqual(Stars.moveLimit(forStars: 3, par: 24, slack: 0), 24)
+        XCTAssertEqual(Stars.moveLimit(forStars: 2, par: 24, slack: 0), 28)
+        XCTAssertEqual(Stars.rating(moves: 24, par: 24, slack: 0), 3)
+        XCTAssertEqual(Stars.rating(moves: 25, par: 24, slack: 0), 2)
+        XCTAssertEqual(Stars.rating(moves: 29, par: 24, slack: 0), 1)
+        XCTAssertEqual(Stars.rating(moves: 9, par: 8, slack: 1), 3)
+        XCTAssertEqual(Stars.rating(moves: 11, par: 8, slack: 1), 2)
+        XCTAssertEqual(Stars.rating(moves: 12, par: 8, slack: 1), 1)
     }
 
     func testStarsAgainstPar() {

@@ -8,19 +8,19 @@ public struct GameSession: Sendable {
 
     public let initialBoard: Board
     public let par: Int
-    /// Hard levels judge stars with less slack.
-    public let tightStars: Bool
+    /// Moves over the best answer that still earn three stars (nil: the roomy early rule).
+    public let starSlack: Int?
     public private(set) var board: Board
     public private(set) var history: [Board] = []
     /// Undos left this attempt; nil means unlimited (Remove Ads).
     public private(set) var undosLeft: Int?
     public private(set) var extraJarsAdded = 0
 
-    public init(board: Board, par: Int, undoLimit: Int? = 5, tightStars: Bool = false) {
+    public init(board: Board, par: Int, undoLimit: Int? = 5, starSlack: Int? = nil) {
         self.initialBoard = board
         self.board = board
         self.par = par
-        self.tightStars = tightStars
+        self.starSlack = starSlack
         self.undosLeft = undoLimit
     }
 
@@ -28,7 +28,7 @@ public struct GameSession: Sendable {
     public var moveCount: Int { history.count }
 
     public var status: Status {
-        if board.isWon { return .won(stars: Stars.rating(moves: moveCount, par: par, tight: tightStars)) }
+        if board.isWon { return .won(stars: Stars.rating(moves: moveCount, par: par, slack: starSlack)) }
         if board.isStuck { return .stuck }
         return .playing
     }

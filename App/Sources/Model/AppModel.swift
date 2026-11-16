@@ -310,6 +310,34 @@ final class AppModel: ObservableObject {
         return (ids.reduce(0) { $0 + (progress.stars[$1] ?? 0) }, ids.count * 3)
     }
 
+    /// How many moves over the best answer still earn three stars. It starts roomy and tightens:
+    /// 2 for the first eight levels, 1 up to the middle of the second world, then none at all on
+    /// tension and boss levels, and in the third world none except on its rests. A level with
+    /// wrapped squishies always keeps one, because nobody can plan round what they cannot see.
+    func starSlack(index: Int) -> Int {
+        guard levels.indices.contains(index) else { return 2 }
+        let level = levels[index]
+        let beat = level.file.beat
+        let wrapped = !(level.file.mechanics?.hidden ?? []).isEmpty
+        var slack: Int
+        if isSideLevel(index) {
+            slack = 1
+        } else {
+            let number = index + 1
+            let worldNumber = LevelCatalog.worlds.firstIndex(of: level.file.world) ?? 0
+            if number <= 8 {
+                slack = 2
+            } else if number <= 25 {
+                slack = 1
+            } else if worldNumber <= 1 {
+                slack = beat == .tension || beat == .boss ? 0 : 1
+            } else {
+                slack = [Beat.intro, Beat.breather, Beat.calm].contains(beat) ? 1 : 0
+            }
+        }
+        return wrapped ? max(1, slack) : slack
+    }
+
     // MARK: - Star jar
 
     static let starJarCoins = 300
