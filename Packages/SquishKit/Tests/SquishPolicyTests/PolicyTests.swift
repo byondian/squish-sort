@@ -234,13 +234,11 @@ final class CadenceTests: XCTestCase {
         XCTAssertFalse(AdCadence.shouldShowInterstitial(after: win(20), state: s, group: .adult, ownsRemoveAds: false))
     }
 
-    func testRatingPromptOnlyAfterAFirstTryBossWinFromLevelTen() {
-        XCTAssertTrue(RatingPrompt.shouldAsk(after: win(10, boss: true), group: .adult, alreadyAsked: false))
-        XCTAssertTrue(RatingPrompt.shouldAsk(after: win(20, boss: true), group: .teen, alreadyAsked: false))
-        XCTAssertFalse(RatingPrompt.shouldAsk(after: win(10, boss: true), group: .child, alreadyAsked: false), "never in gentle mode")
-        XCTAssertFalse(RatingPrompt.shouldAsk(after: win(10, attempts: 2, boss: true), group: .adult, alreadyAsked: false), "never after a fail")
-        XCTAssertFalse(RatingPrompt.shouldAsk(after: win(10, boss: true), group: .adult, alreadyAsked: true))
-        XCTAssertFalse(RatingPrompt.shouldAsk(after: win(9), group: .adult, alreadyAsked: false))
+    func testRatingPromptOnceAndNeverInGentleMode() {
+        XCTAssertTrue(RatingPrompt.shouldAsk(at: .worldComplete, group: .adult, alreadyAsked: false))
+        XCTAssertTrue(RatingPrompt.shouldAsk(at: .ultraCapsule, group: .teen, alreadyAsked: false))
+        XCTAssertFalse(RatingPrompt.shouldAsk(at: .worldComplete, group: .child, alreadyAsked: false), "never in gentle mode")
+        XCTAssertFalse(RatingPrompt.shouldAsk(at: .ultraCapsule, group: .adult, alreadyAsked: true), "asked once")
     }
 
     func testTiersRampUp() {
@@ -907,5 +905,25 @@ final class ExtrasTests: XCTestCase {
             XCTAssertEqual(b.coins, a.coins * 2)
         }
         XCTAssertEqual(rush.coins, plain.coins * 2)
+    }
+
+    func testBuddyHeartsOpenTricksAndGrowth() {
+        var b = BuddyState()
+        XCTAssertEqual(b.tricksUnlocked, 0)
+        XCTAssertEqual(b.heartsToNextTrick, 10)
+        XCTAssertEqual(b.growth, 0)
+        b.hearts = 7
+        XCTAssertEqual(b.heartsToNextTrick, 3)
+        XCTAssertEqual(b.trickProgress, 0.7, accuracy: 1e-9)
+        b.hearts = 10
+        XCTAssertEqual(b.tricksUnlocked, 1)
+        XCTAssertEqual(b.growth, 0.05, accuracy: 1e-9)
+        XCTAssertEqual(b.heartsToNextTrick, 10)
+        b.hearts = 30
+        XCTAssertEqual(b.tricksUnlocked, 3)
+        XCTAssertNil(b.heartsToNextTrick)
+        XCTAssertEqual(b.trickProgress, 1)
+        b.hearts = 500
+        XCTAssertEqual(b.growth, 0.25, accuracy: 1e-9, "growth stops at a quarter bigger")
     }
 }

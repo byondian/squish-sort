@@ -15,7 +15,7 @@ struct ShopView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
                     HStack {
-                        Image(systemName: "circle.hexagongrid.fill").foregroundStyle(Theme.butter)
+                        CoinIcon().foregroundStyle(Theme.butter)
                         Text("\(model.progress.wallet.balance) coins").font(Theme.title(24))
                     }
                     .foregroundStyle(Theme.plum)

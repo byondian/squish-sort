@@ -48,8 +48,10 @@ final class GoldenPathTests: XCTestCase {
         next()
         let label = app.staticTexts[title]
         if label.waitForExistence(timeout: 3) { return }
+        // Good news (a new place to play) may be up first: read it and carry on.
+        let news = app.buttons["news-next"]
         let again = app.buttons["win-next"]
-        if again.exists && again.isHittable { again.tap() }
+        if news.exists && news.isHittable { news.tap() } else if again.exists && again.isHittable { again.tap() }
         if !label.waitForExistence(timeout: 6) {
             dump("\(title) missing after Next")
             XCTFail("\(title) missing after Next")

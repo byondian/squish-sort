@@ -35,7 +35,9 @@ struct CapsuleView: View {
                 if asksToBeBuddy {
                     SpeechBubble(text: String(localized: "Can I be your Buddy?"))
                 } else {
-                    Text("Squeeze me!").font(Theme.body(18)).foregroundStyle(Theme.plum.opacity(0.7))
+                    if !model.offersSqueezeFromCapsule {
+                        Text("Squeeze me!").font(Theme.body(18)).foregroundStyle(Theme.plum.opacity(0.7))
+                    }
                 }
                 if asksToBeBuddy {
                     Button("Yes!") {
@@ -46,6 +48,14 @@ struct CapsuleView: View {
                     .buttonStyle(SquishButtonStyle())
                     .accessibilityIdentifier("capsule-next")
                 } else {
+                    if model.offersSqueezeFromCapsule {
+                        // Opens the Squish Room with the new squishy in hand.
+                        Button { model.squeezeFromCapsule(collectible.id) } label: {
+                            Label("Squeeze me!", systemImage: "hand.point.up.left.fill")
+                        }
+                        .buttonStyle(SquishButtonStyle(fill: Theme.grape))
+                        .accessibilityIdentifier("capsule-squeeze")
+                    }
                     Button("Next", action: done).buttonStyle(SquishButtonStyle())
                         .accessibilityIdentifier("capsule-next")
                 }

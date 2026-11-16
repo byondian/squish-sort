@@ -1,4 +1,5 @@
 import SwiftUI
+import SquishLevels
 import SquishPolicy
 
 struct SettingsView: View {
@@ -18,6 +19,16 @@ struct SettingsView: View {
             case .squishyShop: return 2
             }
         }
+    }
+
+    @State private var versionTaps = 0
+    @State private var testerTools = false
+
+    private var versionLine: String {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? ""
+        let build = info?["CFBundleVersion"] as? String ?? ""
+        return "Squish Sort \(version) (\(build))"
     }
 
     var body: some View {
@@ -75,8 +86,37 @@ struct SettingsView: View {
                     if model.showsPrivacyChoices {
                         Button("Privacy choices") { model.showPrivacyChoices() }
                     }
+                    if !model.isGentleMode {
+                        // Apple's own review page. Never offered in gentle mode.
+                        Link("Rate Squish Sort", destination: URL(string: "https://apps.apple.com/app/id6835495515?action=write-review")!)
+                    }
                     Link("Privacy policy", destination: URL(string: "https://squishsort.app/privacy")!)
                     Link("Support", destination: URL(string: "https://squishsort.app/support")!)
+                }
+                Section {
+                    if testerTools {
+                        // Test builds only: jump to the start of any world, or start over.
+                        ForEach(LevelCatalog.worlds, id: \.self) { world in
+                            Button { model.testerStart(world: world) } label: {
+                                HStack(spacing: 4) {
+                                    Text(verbatim: "Tester: start at")
+                                    Text(AppModel.worldName(world))
+                                }
+                            }
+                        }
+                        Button(role: .destructive) { model.testerReset() } label: {
+                            Text(verbatim: "Tester: reset all progress")
+                        }
+                    }
+                } footer: {
+                    Text(verbatim: versionLine)
+                        .frame(maxWidth: .infinity)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            versionTaps += 1
+                            if versionTaps >= 7 && AppModel.isTesterBuild { testerTools = true }
+                        }
+                        .accessibilityIdentifier("version-line")
                 }
             }
             .scrollContentBackground(.hidden)

@@ -327,6 +327,7 @@ struct LevelView: View {
                 }
                 switch outcome {
                 case .won(let stars):
+                    Confetti(count: stars >= 3 ? 80 : 45, seconds: 3).ignoresSafeArea()
                     WinCard(stars: stars, showpiece: controller.level.file.beat == .showpiece,
                             summary: model.lastWin,
                             perfect: controller.session.moveCount <= controller.level.par,
@@ -379,7 +380,7 @@ struct LevelView: View {
             }
             if model.progress.wallet.canAfford(item) {
                 Button { controller.pay(for: item, withAd: false) } label: {
-                    Label("Use \(item.price) coins", systemImage: "circle.hexagongrid.fill").frame(maxWidth: .infinity)
+                    Label { Text("Use \(item.price) coins") } icon: { CoinIcon() }.frame(maxWidth: .infinity)
                 }
                 .buttonStyle(SquishButtonStyle(fill: Theme.butter, text: Theme.plum))
             } else if !model.isGentleMode {
@@ -400,15 +401,22 @@ struct LevelView: View {
         .transition(.scale(scale: 0.8).combined(with: .opacity))
     }
 
+    /// The title column sits on the middle of the screen whatever buttons are at the edges.
     private var header: some View {
-        HStack {
-            if model.showsCornerButtons {
-                IconButton(system: "house.fill") { model.screen = .home }
-                // Straight to the level map, without going by home.
-                IconButton(system: "circle.grid.3x3.fill") { model.screen = .map }
-                    .accessibilityLabel(Text("Levels"))
+        ZStack(alignment: .top) {
+            HStack {
+                if model.showsCornerButtons {
+                    IconButton(system: "house.fill") { model.screen = .home }
+                    // Straight to the level map, without going by home.
+                    IconButton(system: "circle.grid.3x3.fill") { model.screen = .map }
+                        .accessibilityLabel(Text("Levels"))
+                }
+                Spacer()
+                if model.showsCornerButtons {
+                    IconButton(system: "book.fill") { model.screen = .book }
+                    IconButton(system: "gearshape.fill") { model.screen = .settings }
+                }
             }
-            Spacer()
             VStack(spacing: 2) {
                 Text("Level \(number)").font(Theme.title(22))
                 if controller.level.file.beat == .boss {
@@ -446,7 +454,8 @@ struct LevelView: View {
                 .animation(.spring(response: 0.3, dampingFraction: 0.5), value: controller.session.moveCount)
                 // The level pot: coins thrown by finished jars, banked on the win.
                 if controller.pot.paysCoins {
-                    Label("\(controller.pot.coins)", systemImage: "circle.hexagongrid.fill")
+                    // Says what it is until the first jar pays, then just the number.
+                    Label { controller.pot.coins == 0 ? Text("Level coins") : Text(verbatim: "\(controller.pot.coins)") } icon: { CoinIcon() }
                         .font(Theme.body(14)).foregroundStyle(Theme.plum)
                         .padding(.horizontal, 10).padding(.vertical, 3)
                         .background(Capsule().fill(Theme.butter.opacity(0.6)))
@@ -456,11 +465,8 @@ struct LevelView: View {
                 }
             }
             .foregroundStyle(Theme.plum)
-            Spacer()
-            if model.showsCornerButtons {
-                IconButton(system: "book.fill") { model.screen = .book }
-                IconButton(system: "gearshape.fill") { model.screen = .settings }
-            }
+            .frame(maxWidth: .infinity)
+            .allowsHitTesting(false)
         }
         .padding(.top, 8)
     }
@@ -603,6 +609,7 @@ struct WinCard: View {
     let next: () -> Void
     @State private var shown = 0
     @State private var coinsShown = 0
+    @State private var streakShown = false
     @State private var left = false
 
     var body: some View {
@@ -629,13 +636,17 @@ struct WinCard: View {
             }
             if summary.total > 0 {
                 HStack(spacing: 10) {
-                    Label("+\(coinsShown)", systemImage: "circle.hexagongrid.fill").font(Theme.title(22)).foregroundStyle(Theme.plum)
+                    Label { Text("+\(coinsShown)") } icon: { CoinIcon() }.font(Theme.title(22)).foregroundStyle(Theme.plum)
                         .contentTransition(.numericText())
                         .accessibilityIdentifier("win-coins")
-                    if summary.streak >= 2 {
-                        // First-try streak. Never shown when it breaks, never in gentle mode.
-                        Label("\(summary.streak)", systemImage: "flame.fill").font(Theme.body(16)).foregroundStyle(Theme.bubblegum)
-                    }
+                }
+                if summary.streak >= 2 && streakShown {
+                    // First-try streak, on its own line after the coins. Never shown when it breaks, never in gentle mode.
+                    Label("\(summary.streak) in a row! +\(summary.streakBonus)", systemImage: "flame.fill")
+                        .font(Theme.body(16)).foregroundStyle(.white)
+                        .padding(.horizontal, 12).padding(.vertical, 4)
+                        .background(Capsule().fill(Theme.bubblegum))
+                        .transition(.scale(scale: 0.3).combined(with: .opacity))
                 }
                 if summary.dailyBonus > 0 {
                     Text("First win today: +\(summary.dailyBonus)").font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.7))
@@ -719,7 +730,10 @@ struct WinCard: View {
                     if n % 3 == 0 { sounds?.coin() }
                 }
                 haptics?.complete()
-                if summary.streak >= 2 { sounds?.play("streak") }
+                if summary.streak >= 2 {
+                    sounds?.play("streak")
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.5)) { streakShown = true }
+                }
             }
             if summary.stamped {
                 sounds?.play("new_stamp")

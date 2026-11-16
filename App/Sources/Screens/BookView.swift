@@ -20,6 +20,7 @@ struct BookView: View {
                     ForEach(worlds.filter { showsShelf($0.id) }, id: \.id) { world in
                         shelf(world.id, world.name)
                     }
+                    if !model.progress.made.isEmpty { madeShelf }
                     Text("Capsule odds: rare \(model.capsuleOddsPercent.rare)%, ultra-rare \(model.capsuleOddsPercent.ultra)%. Common squishies join when you sort a jar of them. Squishies are earned by playing and are never sold.")
                         .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.6))
                 }
@@ -38,6 +39,36 @@ struct BookView: View {
         }
     }
 
+    /// Squishies from the Maker have their own page at the end. A tap squeezes one.
+    private var madeShelf: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("My squishies").font(Theme.title(20))
+                Image(systemName: "paintbrush.fill").font(.system(size: 14, weight: .bold)).opacity(0.6)
+                Spacer()
+                Text(verbatim: "\(model.progress.made.count)").font(Theme.body(15)).opacity(0.7)
+            }
+            .foregroundStyle(Theme.plum)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(model.progress.made) { made in
+                        Button { model.squeeze(made.ref) } label: {
+                            VStack(spacing: 4) {
+                                MadeSquishyView(made: made).frame(width: 72, height: 72)
+                                Text(verbatim: made.name).font(Theme.body(11)).lineLimit(1).foregroundStyle(Theme.plum)
+                            }
+                            .frame(width: 80)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.vertical, 8)
+            }
+            .background(RoundedRectangle(cornerRadius: 18).fill(Color.white.opacity(0.6)).offset(y: 30).frame(height: 24), alignment: .bottom)
+        }
+        .accessibilityIdentifier("book-made")
+    }
+
     /// The Christmas shelf appears once the festive door has been opened (or something from it is owned).
     private func showsShelf(_ world: String) -> Bool {
         guard world == ChristmasWorld.id else { return true }
@@ -51,6 +82,12 @@ struct BookView: View {
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Text(name).font(Theme.title(20))
+                // A gold badge once every level of the world is finished.
+                if model.isWorldComplete(world) {
+                    Image(systemName: "rosette").font(.system(size: 20, weight: .bold))
+                        .foregroundStyle(Color(red: 0.93, green: 0.69, blue: 0.13))
+                        .accessibilityIdentifier("world-badge-\(world)")
+                }
                 Spacer()
                 Text("\(owned)/\(items.count)").font(Theme.body(15)).opacity(0.7)
             }
@@ -88,6 +125,7 @@ struct BookView: View {
 
 struct TopBar: View {
     @EnvironmentObject var model: AppModel
+    @State private var picking = false
     let title: LocalizedStringKey
 
     var body: some View {
@@ -98,7 +136,19 @@ struct TopBar: View {
             Spacer()
             // The player's avatar is their Buddy.
             if model.buddyActive, let ref = model.progress.buddy.squishy {
-                SquishRefView(ref: ref).frame(width: 44, height: 44).background(Circle().fill(.white))
+                // A tap squashes it and opens the Buddy picker.
+                Button {
+                    model.haptics.land()
+                    picking = true
+                } label: {
+                    SquishRefView(ref: ref).frame(width: 44, height: 44).background(Circle().fill(.white))
+                }
+                .buttonStyle(PressSquish())
+                .accessibilityLabel(Text("Change Buddy"))
+                .accessibilityIdentifier("top-buddy")
+                .sheet(isPresented: $picking) {
+                    BuddyPickerView { picking = false }.environmentObject(model)
+                }
             } else {
                 Color.clear.frame(width: 44, height: 44)
             }

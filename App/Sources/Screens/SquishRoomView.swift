@@ -57,6 +57,13 @@ struct SquishRoomView: View {
             }
         }
         .background(moods[mood].1.ignoresSafeArea())
+        .onAppear {
+            // Came here from a "Squeeze me" button: start with that squishy.
+            if let start = model.roomStart {
+                selected = start
+                model.roomStart = nil
+            }
+        }
     }
 
     /// Morph Squad: letting go of a deep squeeze turns it into someone from its own world; the next one turns it back.

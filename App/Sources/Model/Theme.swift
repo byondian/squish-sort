@@ -52,3 +52,15 @@ struct PressSquish: ButtonStyle {
             .animation(.spring(response: 0.25, dampingFraction: 0.45), value: configuration.isPressed)
     }
 }
+
+/// A gold coin, drawn the same everywhere coins appear. It takes its size from the font around it.
+struct CoinIcon: View {
+    var body: some View {
+        ZStack {
+            Image(systemName: "circle.fill").foregroundStyle(Color(red: 1.0, green: 0.80, blue: 0.22))
+            Image(systemName: "circle").foregroundStyle(Color(red: 0.80, green: 0.53, blue: 0.08))
+            Image(systemName: "star.fill").scaleEffect(0.45).foregroundStyle(Color(red: 1.0, green: 0.93, blue: 0.62))
+        }
+        .accessibilityHidden(true)
+    }
+}

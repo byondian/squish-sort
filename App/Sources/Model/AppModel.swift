@@ -44,11 +44,14 @@ final class AppModel: ObservableObject {
     enum News: Identifiable, Equatable {
         case unlocked(Extra)
         case worldComplete(world: String, next: String?)
+        /// The Buddy learned its first, second or third trick.
+        case trick(Int)
 
         var id: String {
             switch self {
             case .unlocked(let extra): return "extra-\(extra.rawValue)"
             case .worldComplete(let world, _): return "world-\(world)"
+            case .trick(let number): return "trick-\(number)"
             }
         }
     }
@@ -64,6 +67,10 @@ final class AppModel: ObservableObject {
     @Published var storefront = ""
     /// The Buddy's speech bubble on the home screen. Never shown during a level.
     @Published var buddySays: String?
+    /// Goes up each time the daily gift is opened, so the home screen can throw the coins.
+    @Published var giftsOpened = 0
+    private var ultraJustOpened = false
+    private var squeezeAfterCapsule: String?
     @Published var buddyAsksMood = false
     /// The Buddy's line on the win or stuck card.
     @Published var levelCheer: String?
@@ -157,6 +164,45 @@ final class AppModel: ObservableObject {
         isSideLevel(index) ? levels[index].file.index : index + 1
     }
 
+    // MARK: - Tester tools (TestFlight and debug builds only)
+
+    /// True in debug builds and in TestFlight (sandbox receipt). The tools still stay
+    /// hidden until the version line in Settings is tapped seven times.
+    static var isTesterBuild: Bool {
+        #if DEBUG
+        return true
+        #else
+        return Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
+        #endif
+    }
+
+    /// Opens the main path up to the first level of a world and goes there. Earlier levels
+    /// that were not played count as won with one star, so the extras they open are there too.
+    func testerStart(world: String) {
+        guard AppModel.isTesterBuild,
+              let first = levels.indices.first(where: { levels[$0].file.world == world && !isSideLevel($0) }) else { return }
+        update { p in
+            for i in 0..<first where !isSideLevel(i) && p.stars[levels[i].id] == nil { p.stars[levels[i].id] = 1 }
+            p.highestUnlocked = max(p.highestUnlocked, first)
+        }
+        news = []
+        showingNews = nil
+        afterNews = nil
+        levelCheer = nil
+        screen = .level(first)
+    }
+
+    /// Back to a brand new player.
+    func testerReset() {
+        guard AppModel.isTesterBuild else { return }
+        update { $0 = PlayerProgress() }
+        news = []
+        showingNews = nil
+        afterNews = nil
+        levelCheer = nil
+        screen = .level(0)
+    }
+
     func isUnlocked(_ index: Int) -> Bool {
         guard levels.indices.contains(index) else { return false }
         if isSideLevel(index) {
@@ -236,9 +282,15 @@ final class AppModel: ObservableObject {
 
     var levelsWon: Int { progress.stars.count }
 
-    private func isWorldComplete(_ world: String) -> Bool {
+    func isWorldComplete(_ world: String) -> Bool {
         let ids = levels.filter { $0.file.world == world }.map(\.id)
         return !ids.isEmpty && ids.allSatisfy { progress.stars[$0] != nil }
+    }
+
+    /// Stars earned in a world, and how many it has to give.
+    func stars(inWorld world: String) -> (earned: Int, possible: Int) {
+        let ids = levels.filter { $0.file.world == world }.map(\.id)
+        return (ids.reduce(0) { $0 + (progress.stars[$1] ?? 0) }, ids.count * 3)
     }
 
     var worldsCompleted: Int { LevelCatalog.allWorlds.filter { isWorldComplete($0) }.count }
@@ -257,7 +309,7 @@ final class AppModel: ObservableObject {
         case .squishRoom: screen = .room
         case .mysteryBag: screen = .mystery
         case .maker: screen = .maker
-        case .buddy: break // lives on the home screen
+        case .buddy: screen = homeScreen // lives on the home screen
         }
     }
 
@@ -407,6 +459,16 @@ final class AppModel: ObservableObject {
         }
     }
 
+    /// The squishy the Squish Room should open with (set by "Squeeze me" buttons, used once).
+    var roomStart: String?
+
+    /// Opens the Squish Room with this squishy in hand.
+    func squeeze(_ ref: String) {
+        guard isExtraUnlocked(.squishRoom), squeezables.contains(ref) else { return }
+        roomStart = ref
+        open(.squishRoom)
+    }
+
     var offersFirstBuddy: Bool { isExtraUnlocked(.buddy) && progress.buddy.squishy == nil }
 
     /// False when the name is empty or rude.
@@ -459,34 +521,63 @@ final class AppModel: ObservableObject {
 
     func feedBuddy() {
         guard buddyActive, progress.buddy.treats > 0 else { return }
+        let before = progress.buddy.hearts
         update { _ = $0.buddy.feedStoredTreat() }
         haptics.complete()
-        sounds.play("buddy_munch")
-        buddySays = buddyLine("treat")
+        sounds.play("buddy_yum", or: "buddy_munch")
+        heartsChanged(from: before)
+    }
+
+    /// Hearts only ever add up: every 10 teach a trick, and the Buddy grows a little up to 50.
+    private func heartsChanged(from before: Int) {
+        let now = progress.buddy.hearts
+        if BuddyState.tricksKnown(hearts: now) > BuddyState.tricksKnown(hearts: before) {
+            sounds.play("trick", or: "unlock_new")
+            buddySays = String(localized: "I grew!")
+            if showingNews == nil { showingNews = .trick(BuddyState.tricksKnown(hearts: now)) }
+        } else if BuddyState.growthSteps(hearts: now) > BuddyState.growthSteps(hearts: before) {
+            sounds.play("grow", or: "heart")
+            buddySays = String(localized: "I grew!")
+        } else {
+            buddySays = String(localized: "Yum!")
+        }
     }
 
     /// Treats and gifts bought with coins are given straight away.
     func buyForBuddy(_ item: Coins.Item) {
         guard buddyActive, item == .treat || item == .gift, spend(item) else { return }
+        let before = progress.buddy.hearts
         update { $0.buddy.give(item) }
         haptics.complete()
-        sounds.play(item == .gift ? "heart" : "buddy_munch")
-        buddySays = buddyLine("treat")
+        if item == .gift { sounds.play("heart") } else { sounds.play("buddy_yum", or: "buddy_munch") }
+        heartsChanged(from: before)
     }
 
     // MARK: - The Buddy's daily gift
 
     /// Once a day the Buddy holds a gift box of coins: by opt-in ad, or free in gentle mode.
-    var dailyGiftReady: Bool {
-        buddyActive && progress.dailyGiftDay != today && (isGentleMode || canOptIn(.dailyGift))
+    /// Waiting: the box is there today. Ready: it can be opened right now (a video is loaded if one is needed).
+    var dailyGiftWaiting: Bool {
+        guard buddyActive, progress.dailyGiftDay != today else { return false }
+        if isGentleMode { return true }
+        return progress.optInAds.canWatch(today: today, cap: config.optInAdsPerDay) && (ownsRemoveAds || config.adsEnabled)
     }
+
+    var dailyGiftReady: Bool {
+        dailyGiftWaiting && (isGentleMode || canOptIn(.dailyGift))
+    }
+
+    var dailyGiftNeedsVideo: Bool { !isGentleMode && !ownsRemoveAds }
 
     func takeDailyGift() {
         guard dailyGiftReady else { return }
         let grant: () -> Void = { [weak self] in
             guard let self else { return }
-            self.update { $0.dailyGiftDay = self.today; $0.wallet.earn(self.config.coins.dailyGift) }
-            self.sounds.play("coin_shower")
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) {
+                self.update { $0.dailyGiftDay = self.today; $0.wallet.earn(self.config.coins.dailyGift) }
+                self.giftsOpened += 1
+            }
+            self.sounds.play("gift_open", or: "coin_shower")
             self.haptics.win()
             self.buddySays = self.buddyLine("treat")
         }
@@ -590,13 +681,15 @@ final class AppModel: ObservableObject {
         let unlockedExtra = Extra.allCases.filter { isExtraUnlocked($0) } != extrasBefore
         lastWinHadReward = (firstClear && level.file.capsule) || unlockedExtra || barFull
         if unlockedExtra { sounds.play("unlock_new") }
-        // Told when the player moves on from the win card. The Squish Room and the Buddy
-        // arrive with the first capsule, which introduces them itself.
+        // Told when the player moves on from the win card. The Squish Room's card is queued
+        // by the first capsule (see openCapsule), because that capsule is what unlocks it.
         if !worldWasComplete, isWorldComplete(level.file.world) {
             let order = LevelCatalog.worlds
             let next = order.firstIndex(of: level.file.world).flatMap { $0 + 1 < order.count ? order[$0 + 1] : nil }
             news.append(.worldComplete(world: level.file.world, next: next))
+            update { $0.wallet.earn(config.coins.worldComplete) }
         }
+        // The Buddy is met in the first capsule itself ("Is this your Buddy?"), so it has no card.
         for extra in [Extra.mysteryBag, .maker] where isExtraUnlocked(extra) && !extrasBefore.contains(extra) {
             news.append(.unlocked(extra))
         }
@@ -687,8 +780,13 @@ final class AppModel: ObservableObject {
         var state = progress.collection
         if let got = CapsuleDrops.open(world: world, roster: roster, state: &state, rng: &rng, odds: config.capsuleOdds) {
             capsuleIsNew = !progress.collection.owns(got.id)
+            let roomWasOpen = isExtraUnlocked(.squishRoom)
             update { $0.collection = state }
             capsule = got
+            // The first capsule opens the Squish Room: its card is told at the next "Next".
+            if !roomWasOpen, isExtraUnlocked(.squishRoom), !news.contains(.unlocked(.squishRoom)) {
+                news.append(.unlocked(.squishRoom))
+            }
         }
     }
 
@@ -703,16 +801,38 @@ final class AppModel: ObservableObject {
     /// waits for `capsuleDismissed`, because nothing can be presented while the
     /// cover is still closing.
     func capsuleClosed() {
+        if capsule?.rarity == .ultra { ultraJustOpened = true }
         capsule = nil
     }
 
     /// Called by the capsule cover's onDismiss.
     func capsuleDismissed() {
+        let ultra = ultraJustOpened
+        ultraJustOpened = false
         if progress.age == nil {
             askAge = true
+        } else if let ref = squeezeAfterCapsule {
+            // "Squeeze me!" on the capsule: straight to the Squish Room with the new squishy.
+            squeezeAfterCapsule = nil
+            squeeze(ref)
         } else {
             openPendingCapsule()
+            if ultra, capsule == nil { maybeAskForRating(at: .ultraCapsule) }
         }
+    }
+
+    /// "Squeeze me!" on the capsule screen, offered once the Squish Room is open and
+    /// nothing else (good news, another capsule) is waiting to be shown.
+    var offersSqueezeFromCapsule: Bool {
+        isExtraUnlocked(.squishRoom) && progress.age != nil && news.isEmpty && progress.pendingCapsules.isEmpty
+            && progress.buddy.squishy != nil
+    }
+
+    func squeezeFromCapsule(_ ref: String) {
+        guard offersSqueezeFromCapsule else { capsuleClosed(); return }
+        squeezeAfterCapsule = ref
+        levelCheer = nil
+        capsuleClosed()
     }
 
     func rerollSpares(world: String) -> Collectible? {
@@ -819,9 +939,10 @@ final class AppModel: ObservableObject {
         // Good news comes first, and no ad ever follows it.
         if !news.isEmpty {
             afterNews = index
-            sounds.play("win_boss")
-            haptics.win()
-            showingNews = news.removeFirst()
+            let first = news.removeFirst()
+            // The world complete screen brings its own fanfare.
+            if case .worldComplete = first {} else { sounds.play("win_boss"); haptics.win() }
+            showingNews = first
             return
         }
         showInterstitialThenNext(index: index, attempts: attempts)
@@ -830,6 +951,7 @@ final class AppModel: ObservableObject {
     /// The player has read a news card. `open` goes straight to the new place.
     func newsRead(open: Bool = false) {
         let read = showingNews
+        if case .worldComplete = read { maybeAskForRating(at: .worldComplete) }
         if open, case .unlocked(let extra) = read {
             news = []
             showingNews = nil
@@ -840,6 +962,7 @@ final class AppModel: ObservableObject {
         }
         if !news.isEmpty {
             showingNews = news.removeFirst()
+            sounds.play("unlock_new")
             return
         }
         showingNews = nil
@@ -854,10 +977,6 @@ final class AppModel: ObservableObject {
         // Ad tiers count every level cleared, on the main path and in side worlds.
         let win = LevelWin(level: max(progress.stars.count, isSideLevel(index) ? 0 : index + 1), attempts: attempts, isBoss: level.file.beat == .boss,
                            secondsIntoSession: Date().timeIntervalSince(sessionStart), hadReward: lastWinHadReward)
-        if RatingPrompt.shouldAsk(after: win, group: ageGroup, alreadyAsked: progress.ratingAsked) {
-            update { $0.ratingAsked = true }
-            askForRating()
-        }
         let show = progress.age != nil && config.adsEnabled
             && AdCadence.shouldShowInterstitial(after: win, state: progress.cadence, group: ageGroup,
                                                 ownsRemoveAds: ownsRemoveAds, config: config.adCadence)
@@ -896,6 +1015,13 @@ final class AppModel: ObservableObject {
                 self.toast = String(localized: "Thanks! No ad breaks for a while.")
             }
         }
+    }
+
+    /// Apple's star pop-up, once, at a happy moment. Never in gentle mode.
+    private func maybeAskForRating(at moment: RatingPrompt.Moment) {
+        guard RatingPrompt.shouldAsk(at: moment, group: ageGroup, alreadyAsked: progress.ratingAsked) else { return }
+        update { $0.ratingAsked = true }
+        askForRating()
     }
 
     private func askForRating() {
