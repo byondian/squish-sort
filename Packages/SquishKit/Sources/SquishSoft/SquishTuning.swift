@@ -251,7 +251,7 @@ public struct SquishTuning: Codable, Equatable, Sendable {
     public static let standard = SquishTuning(feels: [
         "foam": SquishFeelTuning(
             material: SquishMaterial(k: 300, beta: 0.68, c: 62, quad: 0.55, vp: 0.9, smin: 0.40, smax: 1.7, grav: 9,
-                                     fric: 0.9, rest: 0.05, press: 0.46, grabR: 0.20, halo: 0.35, land: 0.6, grip: 0.5, firm: 0.44,
+                                     fric: 0.9, rest: 0.3, press: 0.46, grabR: 0.20, halo: 0.35, land: 0.7, grip: 0.5, firm: 0.44,
                                      poke: 0.95, pokeR: 0.13, zk: 77, zd: 60, zc: 0.25, zland: 0, puff: 0.2,
                                      tk: 60, td: 14, look: 0.07, kd: 0.6, gloss: 0, shin: 20, ao: 0.42),
             loops: [
@@ -266,7 +266,7 @@ public struct SquishTuning: Codable, Equatable, Sendable {
         "jelly": SquishFeelTuning(
             // Ian's pick (16 Nov): seven parts the firm jelly, three parts the gel ball.
             material: SquishMaterial(k: 660, beta: 0.73, c: 8.8, quad: 0.63, vp: 1, smin: 0.44, smax: 1.95, grav: 9.6,
-                                     fric: 0.56, rest: 0.17, press: 0.46, grabR: 0.21, halo: 0.4, land: 0.82, grip: 0.31, firm: 0.48,
+                                     fric: 0.56, rest: 0.62, press: 0.46, grabR: 0.21, halo: 0.4, land: 0.95, grip: 0.31, firm: 0.48,
                                      poke: 0.9, pokeR: 0.13, zk: 320, zd: 5.5, zc: 0.62, zland: 0.6, puff: 0.18,
                                      tk: 140, td: 4.7, look: 0.083, kd: 0.5, gloss: 0.64, shin: 31, ao: 0.29),
             loops: [
@@ -281,7 +281,7 @@ public struct SquishTuning: Codable, Equatable, Sendable {
             landingBubbles: 3, popsOnRelease: false, hapticSharpness: 0.4, hapticGrainSet: nil, hapticDentPop: true),
         "gel": SquishFeelTuning(
             material: SquishMaterial(k: 300, beta: 0.8, c: 12, quad: 0.7, vp: 1, smin: 0.42, smax: 2.1, grav: 11,
-                                     fric: 0.6, rest: 0.04, press: 0.5, grabR: 0.22, halo: 0.5, land: 1.0, grip: 0.35, firm: 0.42,
+                                     fric: 0.6, rest: 0.5, press: 0.5, grabR: 0.22, halo: 0.5, land: 1.0, grip: 0.35, firm: 0.42,
                                      poke: 1.15, pokeR: 0.16, zk: 90, zd: 8, zc: 0.45, zland: 0.8, puff: 0.25,
                                      tk: 50, td: 4, look: 0.09, kd: 0.5, gloss: 0.85, shin: 44, ao: 0.26),
             loops: [
@@ -295,7 +295,7 @@ public struct SquishTuning: Codable, Equatable, Sendable {
             landingBubbles: 3, popsOnRelease: true, hapticSharpness: 0.1, hapticGrainSet: nil),
         "mochi": SquishFeelTuning(
             material: SquishMaterial(k: 380, beta: 0.74, c: 12, quad: 0.5, vp: 1, smin: 0.40, smax: 2.6, grav: 9,
-                                     fric: 1, rest: 0, press: 0.46, grabR: 0.19, halo: 0.3, land: 0.65, grip: 0.9, firm: 0.44,
+                                     fric: 1, rest: 0.25, press: 0.46, grabR: 0.19, halo: 0.3, land: 0.75, grip: 0.9, firm: 0.44,
                                      poke: 0.95, pokeR: 0.13, zk: 250, zd: 16, zc: 0.3, zland: 0.2, puff: 0.3,
                                      tk: 80, td: 10, look: 0.07, kd: 0.6, gloss: 0.15, shin: 14, ao: 0.4),
             loops: [

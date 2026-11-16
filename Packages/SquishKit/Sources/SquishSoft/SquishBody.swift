@@ -693,6 +693,8 @@ public final class SquishBody {
             if hitT { impact = max(impact, -my * 0.7) }
             if hitL { impact = max(impact, -mx * 0.8) }
             if hitR { impact = max(impact, mx * 0.8) }
+            // Only a real hit bounces. Slow contact just stops, or a resting toy would hop from its own breathing.
+            let eY = abs(my) > S * 0.6 ? M.rest : 0.0, eX = abs(mx) > S * 0.6 ? M.rest : 0.0
             let slide = dn > 0 ? mx * min(1, M.fric * h * 14) : 0
             let soft = S * 6, grip = M.grip
             // A real landing (not resting contact) starts a short push that squashes the body against the surface.
@@ -739,10 +741,10 @@ public final class SquishBody {
                     p[k * 2] = Float(Double(p[k * 2]) - Double(v[k * 2]) * h * gf)
                     v[k * 2] = Float(Double(v[k * 2]) * (1 - gf))
                 }
-                if hitF { v[k * 2 + 1] = Float(Double(v[k * 2 + 1]) - my * (1 + M.rest)) }
-                if hitT { v[k * 2 + 1] = Float(Double(v[k * 2 + 1]) - my * (1 + M.rest)) }
-                if hitL { v[k * 2] = Float(Double(v[k * 2]) - mx * (1 + M.rest)) }
-                if hitR { v[k * 2] = Float(Double(v[k * 2]) - mx * (1 + M.rest)) }
+                if hitF { v[k * 2 + 1] = Float(Double(v[k * 2 + 1]) - my * (1 + eY)) }
+                if hitT { v[k * 2 + 1] = Float(Double(v[k * 2 + 1]) - my * (1 + eY)) }
+                if hitL { v[k * 2] = Float(Double(v[k * 2]) - mx * (1 + eX)) }
+                if hitR { v[k * 2] = Float(Double(v[k * 2]) - mx * (1 + eX)) }
                 if core[k] {
                     // Whatever is still outside is put back point by point.
                     if Double(p[k * 2 + 1]) > fl {
