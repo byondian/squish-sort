@@ -141,6 +141,7 @@ function landing(code) {
   const nm = c => (c.names && c.names[L(code).html]) || c.name;
   const heroTiers = ['common', 'rare', 'ultra', 'secret'].reduce((o, r) => (o[r] = roster.collectibles.filter(c => c.rarity === r).map(c => c.id), o), {});
   const names = Object.fromEntries([...roster.collectibles, ...roster.squishRoomToys].map(c => [c.id, nm(c)]));
+  const feels = Object.fromEntries([...roster.collectibles, ...roster.squishRoomToys].filter(c => c.feel && c.feel !== 'foam').map(c => [c.id, c.feel]));
   const all = roster.collectibles.filter(c => c.rarity !== 'secret');
   const half = Math.ceil(all.length / 2);
   const sq = c => `<button class="sq" type="button" aria-label="${esc(nm(c))}"><img src="/assets/sq/${c.id}.webp" alt="" width="118" height="118" loading="lazy"><span class="nm">${esc(nm(c))}</span></button>`;
@@ -161,7 +162,7 @@ function landing(code) {
     <div class="cta-row">${storeCta(code, 'hero')}<a class="btn soft" href="#play">▶ ${esc(t.cta.demo)}</a></div>
     <p class="sub">${esc(t.hero.sub)}</p>
   </div>
-  <div class="stage" id="morph" tabindex="0" role="button" aria-label="${esc(t.hero.stageLabel)}" data-names='${esc(JSON.stringify(names))}' data-rarity='${esc(JSON.stringify(t.collect.rarity))}' data-tiers='${esc(JSON.stringify(heroTiers))}'>
+  <div class="stage" id="morph" tabindex="0" role="button" aria-label="${esc(t.hero.stageLabel)}" data-names='${esc(JSON.stringify(names))}' data-rarity='${esc(JSON.stringify(t.collect.rarity))}' data-tiers='${esc(JSON.stringify(heroTiers))}' data-feels='${esc(JSON.stringify(feels))}'>
     <span class="who" aria-live="polite"></span>
     <button class="snd" id="snd" type="button" aria-label="${esc(t.hero.sound)}" aria-pressed="true">🔊</button>
     <span class="hint">👆 ${esc(t.hero.hint)}</span>
@@ -218,7 +219,7 @@ ${waveTo('#DDF7EE', true)}
   <h2>${esc(t.final.title)}</h2><p class="lede" style="margin:0 auto 22px">${esc(t.final.text)}</p>
   <div class="cta-row" style="justify-content:center">${storeCta(code, 'footer', true)}</div>
 </section>
-</main>` + footer(code) + end('<script src="/assets/morph.js" defer></script><script src="/assets/demo.js" defer></script>');
+</main>` + footer(code) + end('<script src="/assets/squish/squish-engine.js" defer></script><script src="/assets/squish/squish-audio.js" defer></script><script src="/assets/morph.js" defer></script><script src="/assets/demo.js" defer></script>');
 }
 
 // ---------- documents ----------

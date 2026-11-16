@@ -1,7 +1,9 @@
 // The giant squishy in the hero, drawn from the game's real art.
 // Squeeze it, stretch it, let go: it pops into another squishy. Every few pops
 // you uncover a rare one, then an ultra rare, each with its own fanfare.
-// Plain SVG + springs, no libraries. Pauses when off screen.
+// With WebGL it is a real soft body (the game's squish engine and live ASMR sound,
+// /assets/squish/); without WebGL, or with Reduce Motion, it falls back to SVG + springs.
+// No libraries. Pauses when off screen.
 (() => {
   const stage = document.getElementById('morph');
   if (!stage) return;
@@ -15,6 +17,7 @@
   const names = JSON.parse(stage.dataset.names || '{}');
   const rarityWords = JSON.parse(stage.dataset.rarity || '[]');
   const tiers = JSON.parse(stage.dataset.tiers || '{}');
+  const feels = JSON.parse(stage.dataset.feels || '{}');
   const ART = id => `/assets/art/${id}.svg`;
   const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
@@ -48,6 +51,60 @@
   imgA.setAttribute('href', ART(current)); imgB.setAttribute('opacity', 0);
   const fx = el('g', {}, svg);
 
+  // ---- soft body (WebGL). SB stays null until the first toy is ready, so the SVG shows meanwhile.
+  let SB = null, softTry = null;
+  if (!reduce && window.Squish && window.SquishAudio) {
+    try {
+      const canvas = document.createElement('canvas'); canvas.className = 'soft'; canvas.setAttribute('aria-hidden', 'true');
+      const glr = new Squish.SquishGL(canvas);
+      softTry = { canvas, glr, audio: new SquishAudio(), tex: {}, world: { floor: 0, left: 0, right: 0, top: 0 }, S: 0, scale: 1, ox: 0, w: 0, body: null, feel: 'foam', acc: 0, ptrs: {}, pend: 0 };
+    } catch (e) { softTry = null; }
+  }
+  function softLayout(o) {
+    const r = stage.getBoundingClientRect(), w = r.width, h = r.height, dpr = Math.min(devicePixelRatio || 1, 2);
+    o.glr.resize(w, h, dpr); o.w = w;
+    o.scale = Math.min(w / W, h / H); o.ox = (w - W * o.scale) / 2; const oy = (h - H * o.scale) / 2;
+    o.world.floor = oy + BASE * o.scale; o.world.left = 2; o.world.right = w - 2; o.world.top = 2;
+    o.S = SIZE * o.scale * .96;
+  }
+  function softTexture(o, id, done) {
+    if (o.tex[id]) return done(o.tex[id]);
+    const img = new Image(), size = 768;
+    img.onload = () => {
+      const c = document.createElement('canvas'); c.width = c.height = size; c.getContext('2d').drawImage(img, 0, 0, size, size);
+      const m = document.createElement('canvas'); m.width = m.height = 64; const mx = m.getContext('2d'); mx.drawImage(c, 0, 0, 64, 64);
+      const d = mx.getImageData(0, 0, 64, 64).data; let foot = 0;
+      for (let y = 63; y >= 0 && !foot; y--) for (let x = 0; x < 64; x++) if (d[(y * 64 + x) * 4 + 3] > 60) { foot = (y + 1) / 64; break; }
+      const inside = (u, v) => { const px = Math.min(63, Math.max(0, Math.round(u * 63))), py = Math.min(63, Math.max(0, Math.round(v * 63))); return d[(py * 64 + px) * 4 + 3] > 60; };
+      done(o.tex[id] = { tex: o.glr.texture(c), footV: foot || 1, inside });
+    };
+    img.onerror = () => {};
+    img.src = ART(id);
+  }
+  function softSpawn(id, drop) {
+    const o = SB || softTry; if (!o) return;
+    const ticket = ++o.pend;
+    softTexture(o, id, t => {
+      if (ticket !== o.pend) return; // a newer swap won
+      const feel = feels[id] || 'foam', S = o.S;
+      const b = new Squish.SquishBody({ size: S, n: 12, inside: t.inside, footV: t.footV, material: feel, x: o.w / 2, y: o.world.floor - S / 2 - (drop ? S * .32 : 0) });
+      b.tex = t.tex; o.body = b; o.feel = feel; o.ptrs = {};
+      if (!SB) { // first toy ready: switch the hero over from SVG to the soft body
+        SB = o; stage.insertBefore(o.canvas, svg.nextSibling);
+        o.shade = document.createElement('div'); o.shade.className = 'shade'; stage.insertBefore(o.shade, svg);
+        const top = el('svg', { viewBox: `0 0 ${W} ${H}`, class: 'fxl', 'aria-hidden': 'true' }); top.appendChild(fx); stage.insertBefore(top, o.canvas.nextSibling);
+        body.style.display = 'none'; shadow.style.display = 'none';
+        stage.classList.add('softon'); // the page can scroll from around the toy; only touches on the toy are kept
+        o.audio.enabled = !muted;
+      }
+    });
+  }
+  const softKick = (vy, shear) => { // whole-body nudge: vy in body sizes/s, shear tips the top sideways
+    const b = SB && SB.body; if (!b || b.held()) return; const S = b.S, fl = SB.world.floor;
+    for (let k = 0; k < b.count; k++) { b.v[k * 2 + 1] += vy * S; b.v[k * 2] += shear * S * Math.max(0, (fl - b.p[k * 2 + 1]) / S); }
+  };
+  const softPan = () => { const b = SB && SB.body; if (!b) return 0; const c = b.centre(); return Math.max(-1, Math.min(1, c[0] / SB.w * 2 - 1)) * .6; };
+
   // state: squash springs (sx, sy), a stretch toward the pointer, a lean, and the wobble
   let sx = 1, sy = 1, vsx = 0, vsy = 0, tsx = 1, tsy = 1;
   let st = 0, vst = 0, sdx = 0, sdy = -1; // stretch amount along a direction
@@ -62,11 +119,11 @@
   const sndBtn = document.getElementById('snd');
   const setSnd = () => { if (sndBtn) { sndBtn.textContent = muted ? '🔇' : '🔊'; sndBtn.setAttribute('aria-pressed', String(!muted)); } };
   setSnd();
-  sndBtn && sndBtn.addEventListener('click', e => { e.stopPropagation(); muted = !muted; setSnd(); try { localStorage.setItem('ss-muted', muted ? '1' : '0'); } catch (err) {} });
+  sndBtn && sndBtn.addEventListener('click', e => { e.stopPropagation(); muted = !muted; setSnd(); if (SB) { SB.audio.unlock(); SB.audio.enabled = !muted; } try { localStorage.setItem('ss-muted', muted ? '1' : '0'); } catch (err) {} });
   window.ssSound = kind => {
     if (muted) return;
     try {
-      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      ac = ac || (SB && SB.audio.ctx) || new (window.AudioContext || window.webkitAudioContext)();
       const t = ac.currentTime;
       if (kind === 'rare' || kind === 'ultra') return fanfare(kind, t);
       const o = ac.createOscillator(), g = ac.createGain();
@@ -145,11 +202,13 @@
   function idlePop() {
     if (!idleBag.length) idleBag = shuffle(everyone);
     let id = idleBag.pop(); if (id === current) id = idleBag.pop() || 'strawbie';
+    if (SB) return swapTo(id, 'auto');
     const im = new Image(); im.src = ART(id);
     tsx = 1.25; tsy = .7; setTimeout(() => { tsx = 1; tsy = 1; swapTo(id, 'auto'); }, reduce ? 0 : 110);
   }
   function swapTo(id, tier) {
     current = id;
+    if (SB) softSpawn(id, true);
     [imgA, imgB] = [imgB, imgA];
     imgA.setAttribute('href', ART(id)); fade = 0;
     vsx -= .1; vsy += .22; vlean += (Math.random() - .5) * .25; wob = Math.max(wob, tier === 'common' || tier === 'auto' ? .6 : 1);
@@ -160,12 +219,24 @@
     }
     const who = stage.querySelector('.who'); if (who) who.textContent = names[id] || '';
   }
-  function letGo() { tsx = 1.3; tsy = .66; swapAt = performance.now() + (reduce ? 0 : 70); }
+  // soft body: let the squish breathe back a moment, then the next squishy plops in
+  function letGo() { if (SB) { swapAt = performance.now() + 650; return; } tsx = 1.3; tsy = .66; swapAt = performance.now() + (reduce ? 0 : 70); }
 
   // input
   const toLocal = e => { const r = svg.getBoundingClientRect(); return [(e.clientX - r.left) * (W / r.width), (e.clientY - r.top) * (H / r.height)]; };
+  const softXY = e => { const r = stage.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
   stage.addEventListener('pointerdown', e => {
     if (e.target.closest('.snd')) return;
+    if (SB) {
+      if (!muted) SB.audio.unlock();
+      const q = softXY(e);
+      if (!SB.body || !SB.body.grab(e.pointerId, q[0], q[1])) return;
+      SB.ptrs[e.pointerId] = e.timeStamp; SB.grabbed = true; held = true; touched = true; lastInput = performance.now();
+      try { stage.setPointerCapture(e.pointerId); } catch (err) {}
+      if (!upcoming) plan();
+      const h = stage.querySelector('.hint'); if (h) h.style.opacity = 0;
+      e.preventDefault(); return;
+    }
     held = true; ptr = start = toLocal(e); touched = true; lastInput = performance.now();
     stage.setPointerCapture(e.pointerId);
     tsx = 1.16; tsy = .8; wob = Math.max(wob, .5);
@@ -174,8 +245,21 @@
     if (!upcoming) plan();
     const h = stage.querySelector('.hint'); if (h) h.style.opacity = 0;
   });
-  stage.addEventListener('pointermove', e => { if (held) ptr = toLocal(e); });
-  const release = () => {
+  stage.addEventListener('touchstart', e => { if (SB && SB.grabbed) e.preventDefault(); SB && (SB.grabbed = false); }, { passive: false });
+  stage.addEventListener('touchmove', e => { if (SB && Object.keys(SB.ptrs).length) e.preventDefault(); }, { passive: false });
+  stage.addEventListener('pointermove', e => {
+    if (SB) { const t0 = SB.ptrs[e.pointerId]; if (t0 == null || !SB.body) return; const q = softXY(e); SB.body.move(e.pointerId, q[0], q[1], (e.timeStamp - t0) / 1000); SB.ptrs[e.pointerId] = e.timeStamp; return; }
+    if (held) ptr = toLocal(e);
+  });
+  const release = e => {
+    if (SB) {
+      if (!e || SB.ptrs[e.pointerId] == null) return; delete SB.ptrs[e.pointerId];
+      const b = SB.body; if (!b) return;
+      const deep = b.metric.D > .05; b.release(e.pointerId);
+      if (b.held()) return;
+      if (deep && (SB.feel === 'mochi' || SB.feel === 'gel')) SB.audio.pop(Math.min(.3, b.metric.D * 1.6), softPan());
+      held = false; lastInput = performance.now(); nextIdle = lastInput + 4500; letGo(); return;
+    }
     if (!held) return; held = false; ptr = start = null; lastInput = performance.now(); nextIdle = lastInput + 4500;
     letGo();
   };
@@ -183,7 +267,14 @@
   stage.addEventListener('pointercancel', release);
   stage.addEventListener('keydown', e => {
     if (e.key !== 'Enter' && e.key !== ' ') return;
-    e.preventDefault(); touched = true; lastInput = nextIdle = performance.now(); nextIdle += 4500; if (!upcoming) plan(); window.ssSound('squish'); letGo();
+    e.preventDefault(); touched = true; lastInput = nextIdle = performance.now(); nextIdle += 4500; if (!upcoming) plan();
+    if (SB && SB.body) { // keyboard: a quick press on the top of the toy
+      if (!muted) SB.audio.unlock();
+      const b = SB.body, c = b.centre(), bb = b.bounds();
+      if (b.grab('key', c[0], bb.y0 + b.S * .06)) setTimeout(() => { b.release('key'); letGo(); }, 260); else letGo();
+      return;
+    }
+    window.ssSound('squish'); letGo();
   });
 
   // loop
@@ -191,7 +282,7 @@
     const dt = Math.min(33, now - last) / 16.67; last = now;
     if (!visible) return requestAnimationFrame(frame);
 
-    if (swapAt && now >= swapAt) { swapAt = 0; tsx = 1; tsy = 1; popNext(); }
+    if (swapAt && now >= swapAt && !(SB && SB.body && SB.body.held())) { swapAt = 0; tsx = 1; tsy = 1; popNext(); }
 
     // drag: stretch toward the pointer, squash across it
     let tst = 0;
@@ -204,7 +295,13 @@
     // idle show: when nobody is squeezing, it hops, wiggles, squishes itself and turns into someone new
     if (!held && !swapAt && !reduce && visible && now > nextIdle && now - lastInput > 4000) {
       const n = idleCount++ % 6;
-      if (n === 0) { vhy = 7.5 + Math.random() * 2; tsx = 1.12; tsy = .86; setTimeout(() => { tsx = 1; tsy = 1; }, 120); } // hop
+      if (SB) {
+        if (n === 0) softKick(-2.1, 0); // hop
+        else if (n === 2) { softKick(0, .9); setTimeout(() => softKick(0, -1.6), 260); setTimeout(() => softKick(0, .9), 520); } // wiggle
+        else if (n % 2 === 1) idlePop();
+        else softKick(-1.1, 0); // little bounce
+      }
+      else if (n === 0) { vhy = 7.5 + Math.random() * 2; tsx = 1.12; tsy = .86; setTimeout(() => { tsx = 1; tsy = 1; }, 120); } // hop
       else if (n === 2) { vlean += .09; setTimeout(() => (vlean -= .16), 260); setTimeout(() => (vlean += .1), 520); wob = Math.max(wob, .4); } // wiggle
       else if (n % 2 === 1) idlePop(); // squish into someone new
       else { vsy -= .12; vsx += .07; wob = Math.max(wob, .5); } // jiggle
@@ -216,6 +313,14 @@
       if (hy <= 0) { hy = 0; if (vhy < -2) { vsx += .09; vsy -= .16; wob = Math.max(wob, .45); } vhy = 0; }
     }
 
+    if (SB && SB.body) {
+      const b = SB.body, dts = Math.min(.05, dt * 16.67 / 1000);
+      SB.acc += dts; let n = 0; while (SB.acc >= 1 / 120 && n < 8) { b.step(1 / 120, SB.world); SB.acc -= 1 / 120; n++; } if (n === 8) SB.acc = 0;
+      SB.audio.update(dts, b.metric, SB.feel, softPan());
+      SB.glr.clear(); SB.glr.draw(b, 1);
+      const bb = b.bounds(), fl = SB.world.floor, lift = Math.max(0, fl - bb.y1), sw = (bb.x1 - bb.x0) * Math.max(.5, 1.05 - lift / (b.S * 2)), sh = SB.shade.style;
+      sh.width = sw + 'px'; sh.height = sw * .16 + 'px'; sh.left = ((bb.x0 + bb.x1) / 2 - sw / 2) + 'px'; sh.top = (fl - sw * .08) + 'px'; sh.opacity = Math.max(.25, 1 - lift / (b.S * 1.2));
+    }
     const breathe = reduce ? 0 : Math.sin(now / 700) * .014;
     vsx += ((tsx - breathe) - sx) * .16 * dt; vsy += ((tsy + breathe) - sy) * .16 * dt;
     vsx *= pow(.8, dt); vsy *= pow(.8, dt); sx += vsx * dt; sy += vsy * dt;
@@ -251,6 +356,10 @@
       if (q.life <= 0) { q.node.remove(); parts.splice(i, 1); }
     }
     requestAnimationFrame(frame);
+  }
+  if (softTry) {
+    softLayout(softTry); softSpawn(current, false);
+    let rt = 0; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { const o = SB || softTry, s0 = o.S; softLayout(o); if (Math.abs(o.S - s0) > s0 * .05) softSpawn(current, false); }, 150); });
   }
   new IntersectionObserver(es => { visible = es[0].isIntersecting; }).observe(stage);
   const who = stage.querySelector('.who'); if (who) who.textContent = names[current] || '';

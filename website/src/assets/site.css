@@ -246,3 +246,11 @@ details.faq summary::-webkit-details-marker{display:none}
 @keyframes rpop{0%{opacity:0;transform:translate(-50%,10px) scale(.3) rotate(-8deg)}12%{opacity:1;transform:translate(-50%,0) scale(1.12) rotate(3deg)}22%{transform:translate(-50%,0) scale(1) rotate(-2deg)}80%{opacity:1;transform:translate(-50%,0) scale(1) rotate(0)}100%{opacity:0;transform:translate(-50%,-14px) scale(.9)}}
 @media (prefers-reduced-motion:reduce){.stage .rarity-pop.show{animation:rfade 2.2s forwards}@keyframes rfade{0%,80%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,0) scale(1)}}}
 .stage .rarity-pop.secret{background:linear-gradient(90deg,#F5B83D,#FFE9A8,#F5B83D);color:#3B2A4A}
+
+/* soft-body hero (WebGL): canvas over the rays, particles over the canvas */
+.stage canvas.soft{position:absolute;inset:0;width:100%;height:100%;z-index:1;touch-action:none}
+.stage svg.fxl{position:absolute;inset:0;z-index:2;pointer-events:none}
+.stage .shade{position:absolute;border-radius:50%;background:radial-gradient(closest-side,rgba(59,42,74,.16),transparent);pointer-events:none;z-index:0}
+.stage .who,.stage .hint,.stage .snd{z-index:3}
+.stage .rarity-pop{z-index:4}
+.stage.softon,.stage.softon canvas.soft{touch-action:pan-y}
