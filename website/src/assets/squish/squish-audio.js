@@ -92,7 +92,7 @@
         if (gps > 0.5) this._emit('ck', gps, dt, function () { me._grain(me.white, rise > 0 ? rnd(3800, 8200) : rnd(2200, 6000), rnd(3, 9), rnd(0.003, 0.010), rnd(0.16, 0.42) * (rise > 0 ? 0.55 : 1), pan); });
         air = clamp(compress * 0.55, 0, 0.5) + clamp(rise * 0.8, 0, 0.16); airF = rise > compress ? 760 : 1300 + 2200 * D;
       } else if (mat === 'jelly') {
-        sq = clamp(a * 0.24, 0, 0.3); sqF = 300 + 2300 * D; hum = clamp(m.speed * 0.08, 0, 0.1); humF = 84 + 70 * D;
+        sq = clamp(a * 0.17, 0, 0.22); sqF = 300 + 2300 * D; hum = clamp(m.speed * 0.08, 0, 0.1); humF = 84 + 70 * D;
         if (compress > 0.05) this._emit('jb', clamp(compress * 16, 0, 12), dt, function () { me.bubble(rnd(0.03, 0.08), pan); });
       } else if (mat === 'gel') {
         if (a > 0.02) this._emit('gb', clamp(a * 60, 0, 44), dt, function () { me.bubble(rnd(0.05, 0.14), pan + rnd(-0.3, 0.3)); });

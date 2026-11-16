@@ -57,7 +57,7 @@
     try {
       const canvas = document.createElement('canvas'); canvas.className = 'soft'; canvas.setAttribute('aria-hidden', 'true');
       const glr = new Squish.SquishGL(canvas);
-      softTry = { canvas, glr, audio: new SquishAudio(), tex: {}, world: { floor: 0, left: 0, right: 0, top: 0 }, S: 0, scale: 1, ox: 0, w: 0, body: null, feel: 'foam', acc: 0, ptrs: {}, pend: 0 };
+      softTry = { canvas, glr, audio: new SquishAudio(), tex: {}, world: { floor: 0, left: 0, right: 0, top: 0 }, S: 0, scale: 1, ox: 0, w: 0, body: null, feel: 'foam', acc: 0, ptrs: {}, size0: {}, pend: 0 };
     } catch (e) { softTry = null; }
   }
   function softLayout(o) {
@@ -76,7 +76,10 @@
       const d = mx.getImageData(0, 0, 64, 64).data; let foot = 0;
       for (let y = 63; y >= 0 && !foot; y--) for (let x = 0; x < 64; x++) if (d[(y * 64 + x) * 4 + 3] > 60) { foot = (y + 1) / 64; break; }
       const inside = (u, v) => { const px = Math.min(63, Math.max(0, Math.round(u * 63))), py = Math.min(63, Math.max(0, Math.round(v * 63))); return d[(py * 64 + px) * 4 + 3] > 60; };
-      done(o.tex[id] = { tex: o.glr.texture(c), footV: foot || 1, inside });
+      // v2 engine: a height field from the art's alpha gives the toy depth (light, shade, dents)
+      const hN = 128, hc = document.createElement('canvas'); hc.width = hc.height = hN; const hx = hc.getContext('2d'); hx.drawImage(c, 0, 0, hN, hN);
+      const hd = hx.getImageData(0, 0, hN, hN).data, al = new Uint8Array(hN * hN); for (let i = 0; i < hN * hN; i++) al[i] = hd[i * 4 + 3];
+      done(o.tex[id] = { tex: o.glr.texture(c), htex: o.glr.dataTexture(Squish.heightField(al, hN), hN), hsize: hN, footV: foot || 1, inside });
     };
     img.onerror = () => {};
     img.src = ART(id);
@@ -88,7 +91,7 @@
       if (ticket !== o.pend) return; // a newer swap won
       const feel = feels[id] || 'foam', S = o.S;
       const b = new Squish.SquishBody({ size: S, n: 12, inside: t.inside, footV: t.footV, material: feel, x: o.w / 2, y: o.world.floor - S / 2 - (drop ? S * .32 : 0) });
-      b.tex = t.tex; o.body = b; o.feel = feel; o.ptrs = {};
+      b.tex = t.tex; b.htex = t.htex; b.hsize = t.hsize; o.body = b; o.feel = feel; o.ptrs = {};
       if (!SB) { // first toy ready: switch the hero over from SVG to the soft body
         SB = o; stage.insertBefore(o.canvas, svg.nextSibling);
         o.shade = document.createElement('div'); o.shade.className = 'shade'; stage.insertBefore(o.shade, svg);
@@ -224,6 +227,7 @@
 
   // input
   const toLocal = e => { const r = svg.getBoundingClientRect(); return [(e.clientX - r.left) * (W / r.width), (e.clientY - r.top) * (H / r.height)]; };
+  const contact = e => e.pointerType === 'touch' ? Math.max(e.width || 0, e.height || 0) : 0;
   const softXY = e => { const r = stage.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
   stage.addEventListener('pointerdown', e => {
     if (e.target.closest('.snd')) return;
@@ -231,7 +235,7 @@
       if (!muted) SB.audio.unlock();
       const q = softXY(e);
       if (!SB.body || !SB.body.grab(e.pointerId, q[0], q[1])) return;
-      SB.ptrs[e.pointerId] = e.timeStamp; SB.grabbed = true; held = true; touched = true; lastInput = performance.now();
+      SB.ptrs[e.pointerId] = e.timeStamp; SB.size0[e.pointerId] = contact(e); SB.grabbed = true; held = true; touched = true; lastInput = performance.now();
       try { stage.setPointerCapture(e.pointerId); } catch (err) {}
       if (!upcoming) plan();
       const h = stage.querySelector('.hint'); if (h) h.style.opacity = 0;
@@ -248,7 +252,9 @@
   stage.addEventListener('touchstart', e => { if (SB && SB.grabbed) e.preventDefault(); SB && (SB.grabbed = false); }, { passive: false });
   stage.addEventListener('touchmove', e => { if (SB && Object.keys(SB.ptrs).length) e.preventDefault(); }, { passive: false });
   stage.addEventListener('pointermove', e => {
-    if (SB) { const t0 = SB.ptrs[e.pointerId]; if (t0 == null || !SB.body) return; const q = softXY(e); SB.body.move(e.pointerId, q[0], q[1], (e.timeStamp - t0) / 1000); SB.ptrs[e.pointerId] = e.timeStamp; return; }
+    if (SB) { const t0 = SB.ptrs[e.pointerId]; if (t0 == null || !SB.body) return; const q = softXY(e), c0 = SB.size0[e.pointerId], c1 = contact(e);
+      const force = c0 > 4 && c1 > 4 ? 1 + Math.max(0, Math.min(1.2, (c1 - c0) / Math.max(c0, 20))) * .5 : 1; // a firmer press = a bigger fingertip
+      SB.body.move(e.pointerId, q[0], q[1], (e.timeStamp - t0) / 1000, force); SB.ptrs[e.pointerId] = e.timeStamp; return; }
     if (held) ptr = toLocal(e);
   });
   const release = e => {
