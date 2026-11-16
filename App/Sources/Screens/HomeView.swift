@@ -520,6 +520,8 @@ struct BuddyPickerView: View {
     @State private var ref: String?
     @State private var name = ""
     @State private var badName = false
+    /// The name this sheet last put in the field itself. If the field still holds it, the player has not typed.
+    @State private var filled = ""
 
     private var made: Set<String> { Set(model.progress.made.map(\.ref)) }
     private var choices: [String] {
@@ -546,7 +548,11 @@ struct BuddyPickerView: View {
                             }
                             .onTapGesture {
                                 ref = item
-                                if name.isEmpty { name = model.displayName(for: item) }
+                                // Each squishy brings its own name, unless the player has typed one here.
+                                if name.isEmpty || name == filled {
+                                    name = String(model.displayName(for: item).prefix(NameFilter.maxLength))
+                                    filled = name
+                                }
                             }
                     }
                 }
@@ -577,6 +583,7 @@ struct BuddyPickerView: View {
         .onAppear {
             ref = model.progress.buddy.squishy
             name = model.progress.buddy.name
+            filled = name
         }
     }
 }
