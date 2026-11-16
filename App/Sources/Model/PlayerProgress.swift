@@ -67,6 +67,10 @@ struct PlayerProgress: Codable, Equatable {
     var ratingAsked = false
     /// Star jar prizes already given, by world: 0 to 3.
     var starJarPrizes: [String: Int] = [:]
+    /// Squishies whose card has been opened: the others wear a NEW badge on the Collection page.
+    var seenCards: Set<String> = []
+    /// Set goals already paid, as "world.goal".
+    var setGoalsClaimed: Set<String> = []
 
     init() {}
 
@@ -146,6 +150,9 @@ struct PlayerProgress: Codable, Equatable {
         seenExtras = v(.seenExtras, d.seenExtras)
         ratingAsked = v(.ratingAsked, d.ratingAsked)
         starJarPrizes = v(.starJarPrizes, d.starJarPrizes)
+        // A save from before the Collection page: what is already owned is not suddenly new.
+        seenCards = v(.seenCards, Set(collection.owned.keys))
+        setGoalsClaimed = v(.setGoalsClaimed, d.setGoalsClaimed)
     }
 
     static func today(_ date: Date = Date()) -> String {

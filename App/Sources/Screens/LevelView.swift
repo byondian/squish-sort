@@ -435,7 +435,7 @@ struct LevelView: View {
             }
             .padding(.horizontal, 12)
             if let joined = model.joinedBook {
-                JoinedBookSticker(squishy: joined, name: joined.name(in: model.language)) { model.joinedBook = nil }
+                NewFindSticker(squishy: joined) { model.joinedBook = nil }
                     .id(joined.id)
             }
             if model.trackingExplainer && controller.outcome == nil {
@@ -655,7 +655,7 @@ struct LevelView: View {
             && Stars.rating(moves: moves, par: controller.session.par, slack: controller.starSlack) < 3
     }
 
-    // Undo appears after level 2, Hint after 4, Extra jar after 7 (game design doc).
+    // Undo appears after level 2, Hint after 4, Shuffle after 7. The extra jar is offered only when stuck.
     private var helpers: some View {
         HStack(spacing: 8) {
             if pathNumber >= 2 {
@@ -663,18 +663,15 @@ struct LevelView: View {
                        badge: controller.session.undosLeft) { controller.undo() }
             }
             if pathNumber >= 7 {
-                helper(String(localized: "Extra jar"), "plus", Theme.mint, enabled: controller.canExtraJar) { controller.extraJar() }
-            }
-            if pathNumber >= 4 {
-                helper(String(localized: "Hint"), "lightbulb.fill", Theme.butter, enabled: controller.canHint) { controller.hint() }
-            }
-            if pathNumber >= 8 {
                 // One free shuffle a level, then coins. Too few coins: the price fades and a tap says what you have.
                 let paid = controller.shufflesUsed > 0
-                helper(String(localized: "Shuffle"), "shuffle", Theme.sky, enabled: !controller.shaking,
+                helper(String(localized: "Shuffle"), "shuffle", Theme.mint, enabled: !controller.shaking,
                        tag: paid ? "\(Coins.Item.shuffle.price)" : String(localized: "Free"),
                        tagFaded: paid && !model.progress.wallet.canAfford(.shuffle)) { controller.shuffle() }
                     .accessibilityIdentifier("helper-shuffle")
+            }
+            if pathNumber >= 4 {
+                helper(String(localized: "Hint"), "lightbulb.fill", Theme.butter, enabled: controller.canHint) { controller.hint() }
             }
             if starsSlipped {
                 // A nudge, never a loss: the level can still be finished as it is.
@@ -781,41 +778,6 @@ struct IconButton: View {
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier(system)
-    }
-}
-
-/// "<Name> joined your book!": the sticker pops up, then flies to the book corner.
-struct JoinedBookSticker: View {
-    let squishy: Collectible
-    let name: String
-    let done: () -> Void
-    @State private var phase = 0
-
-    var body: some View {
-        VStack {
-            HStack(spacing: 8) {
-                SquishyView(id: squishy.id, rarity: squishy.rarity).frame(width: 44, height: 44)
-                Text("\(name) joined your book!").font(Theme.body(15)).foregroundStyle(Theme.plum)
-            }
-            .padding(.horizontal, 14).padding(.vertical, 8)
-            .background(Capsule().fill(.white))
-            .overlay(Capsule().stroke(Theme.butter, lineWidth: 3))
-            .scaleEffect(phase == 0 ? 0.3 : (phase == 1 ? 1 : 0.2), anchor: phase == 2 ? .topTrailing : .center)
-            .opacity(phase == 1 ? 1 : 0)
-            .frame(maxWidth: .infinity, alignment: phase == 2 ? .trailing : .center)
-            .padding(.top, phase == 2 ? 8 : 92)
-            .padding(.horizontal, 12)
-            Spacer()
-        }
-        .allowsHitTesting(false)
-        .accessibilityElement(children: .combine)
-        .task {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { phase = 1 }
-            try? await Task.sleep(nanoseconds: 1_700_000_000)
-            withAnimation(.easeIn(duration: 0.35)) { phase = 2 }
-            try? await Task.sleep(nanoseconds: 400_000_000)
-            done()
-        }
     }
 }
 

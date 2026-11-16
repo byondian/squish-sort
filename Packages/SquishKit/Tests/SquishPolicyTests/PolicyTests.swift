@@ -284,6 +284,48 @@ final class CapsuleTests: XCTestCase {
         roster = try Roster.decode(Data(contentsOf: url))
     }
 
+    func testTheSecretComesOnlyWhenEveryOtherSquishyOfItsWorldIsFound() {
+        var state = CollectionState()
+        let others = roster.collectibles.filter { $0.world == "toyshop" && $0.rarity != .secret }
+        for c in others.dropLast() { state.owned[c.id] = 1 }
+        XCTAssertNil(state.awardSecret(world: "toyshop", roster: roster))
+        XCTAssertFalse(SetGoal.world.isDone(world: "toyshop", roster: roster, state: state))
+        state.owned[others.last!.id] = 1
+        XCTAssertTrue(SetGoal.world.isDone(world: "toyshop", roster: roster, state: state))
+        let secret = state.awardSecret(world: "toyshop", roster: roster)
+        XCTAssertEqual(secret?.rarity, .secret)
+        XCTAssertEqual(state.source(of: secret?.id ?? ""), "set")
+        XCTAssertNil(state.awardSecret(world: "toyshop", roster: roster), "given once")
+        XCTAssertNil(state.awardSecret(world: "sweetfactory", roster: roster))
+    }
+
+    func testSetGoalsCountTheirOwnRarityAndPayCoinsOnly() {
+        var state = CollectionState()
+        for c in roster.world("toyshop", .common) { state.owned[c.id] = 1 }
+        XCTAssertTrue(SetGoal.commons.isDone(world: "toyshop", roster: roster, state: state))
+        XCTAssertFalse(SetGoal.rares.isDone(world: "toyshop", roster: roster, state: state))
+        XCTAssertEqual(SetGoal.rares.progress(world: "toyshop", roster: roster, state: state).found, 0)
+        XCTAssertEqual(SetGoal.allCases.map(\.coins), [500, 750, 0])
+        XCTAssertEqual(SetGoal.commons.key(world: "toyshop"), "toyshop.commons")
+    }
+
+    func testEverySquishyHasABioInEveryLanguage() throws {
+        let data = try content("squishy-bios.json")
+        let file = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        let bios = file?["bios"] as? [String: [String: String]] ?? [:]
+        let riddles = file?["riddles"] as? [String: [String: String]] ?? [:]
+        let stats = file?["stats"] as? [String: [String: Int]] ?? [:]
+        for c in roster.collectibles {
+            for stat in ["squish", "bounce", "stretch", "charm"] {
+                XCTAssertTrue((1...99).contains(stats[c.id]?[stat] ?? 0), "\(c.id) \(stat)")
+            }
+            for lang in ["en", "ja", "ko", "zh-Hant"] {
+                XCTAssertFalse((bios[c.id]?[lang] ?? "").isEmpty, "\(c.id) bio \(lang)")
+                if c.rarity == .secret { XCTAssertFalse((riddles[c.id]?[lang] ?? "").isEmpty, "\(c.id) riddle \(lang)") }
+            }
+        }
+    }
+
     func testRosterShape() {
         XCTAssertEqual(roster.collectibles.count, 64)
         XCTAssertEqual(Set(roster.collectibles.map(\.id)).count, 64, "ids are unique")

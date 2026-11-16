@@ -23,6 +23,13 @@ final class AppModel: ObservableObject {
         case shop
     }
 
+    /// One-line bios and the secrets' riddles, by squishy id then language.
+    private let bios: [String: [String: String]]
+    private let riddles: [String: [String: String]]
+    /// Display-only stats, 1 to 99: squish, bounce, stretch, charm. Nothing in the game reads them yet.
+    private let stats: [String: [String: Int]]
+    /// A duplicate just came out of a capsule or a swap: the spares it made, for "+1 spare".
+    @Published private(set) var capsuleSpares: Int?
     @Published var screen: Screen = .level(0)
     @Published private(set) var progress: PlayerProgress
     @Published var capsule: Collectible?
@@ -116,6 +123,10 @@ final class AppModel: ObservableObject {
         }
         progress = loaded
         roster = AppModel.loadRoster()
+        let words = AppModel.loadBios()
+        bios = words.bios
+        riddles = words.riddles
+        stats = words.stats
         config = RemoteConfig.cached()
         buddyScript = AppModel.loadBuddyScript()
         purchases = PurchaseService(cachedOwnership: loaded.ownsRemoveAds)
@@ -151,6 +162,45 @@ final class AppModel: ObservableObject {
         guard let root = Bundle.main.url(forResource: "Levels", withExtension: nil),
               let levels = try? LevelCatalog.load(root: root) else { return [] }
         return levels
+    }
+
+    private static func loadBios() -> (bios: [String: [String: String]], riddles: [String: [String: String]],
+                                       stats: [String: [String: Int]]) {
+        guard let url = Bundle.main.url(forResource: "squishy-bios", withExtension: "json", subdirectory: "Content"),
+              let data = try? Data(contentsOf: url),
+              let file = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return ([:], [:], [:]) }
+        return (file["bios"] as? [String: [String: String]] ?? [:], file["riddles"] as? [String: [String: String]] ?? [:],
+                file["stats"] as? [String: [String: Int]] ?? [:])
+    }
+
+    /// The four stats of a squishy in card order, or nil when it has none yet.
+    func stats(for id: String) -> [Int]? {
+        guard let s = stats[id] else { return nil }
+        return ["squish", "bounce", "stretch", "charm"].map { min(99, max(1, s[$0] ?? 1)) }
+    }
+
+    /// A world's name as plain text, for tags and counts.
+    func worldTitle(_ world: String) -> String {
+        switch world {
+        case "toyshop": return String(localized: "Toy Shop")
+        case "sweetfactory": return String(localized: "Sweet Factory")
+        case "starlight": return String(localized: "Starlight Stage")
+        default:
+            return ["US", "CA"].contains(Locale.current.region?.identifier ?? "")
+                ? String(localized: "Santa's Workshop") : String(localized: "Santa's Grotto")
+        }
+    }
+
+    /// The squishy's one-line bio in the player's language, or nil when it has none yet.
+    func bio(for id: String) -> String? {
+        guard let lines = bios[id] else { return nil }
+        return lines[language] ?? lines["en"]
+    }
+
+    /// The riddle that says how a secret squishy is found.
+    func riddle(for id: String) -> String? {
+        guard let lines = riddles[id] else { return nil }
+        return lines[language] ?? lines["en"]
     }
 
     private static func loadRoster() -> Roster {
@@ -874,7 +924,71 @@ final class AppModel: ObservableObject {
         guard let squishy = roster.collectible(kind) else { return }
         var added = false
         update { added = $0.collection.addSorted(squishy) }
-        if added { joinedBook = squishy }
+        if added {
+            joinedBook = squishy
+            queueSecretIfWon(world: squishy.world)
+        }
+    }
+
+    // MARK: - Collection
+
+    static let secretMark = "#secret"
+
+    /// Finding the last other squishy of a world brings its secret out: it is shown like a capsule
+    /// find, straight after whatever is on screen now.
+    private func queueSecretIfWon(world: String) {
+        var state = progress.collection
+        let mark = world + AppModel.secretMark
+        guard !progress.pendingCapsules.contains(mark), state.awardSecret(world: world, roster: roster) != nil else { return }
+        update { $0.pendingCapsules.insert(mark, at: 0) }
+    }
+
+    /// Owned squishies whose card has not been opened yet.
+    var newSquishies: Int {
+        roster.collectibles.filter { progress.collection.owns($0.id) && !progress.seenCards.contains($0.id) }.count
+    }
+
+    func cardSeen(_ id: String) {
+        guard !progress.seenCards.contains(id) else { return }
+        update { $0.seenCards.insert(id) }
+    }
+
+    func setGoalDone(_ goal: SetGoal, world: String) -> Bool {
+        goal.isDone(world: world, roster: roster, state: progress.collection)
+    }
+
+    func setGoalClaimed(_ goal: SetGoal, world: String) -> Bool {
+        progress.setGoalsClaimed.contains(goal.key(world: world))
+    }
+
+    /// Pays a finished set goal once. The whole-world goal pays nothing here: its prize is the secret squishy.
+    @discardableResult
+    func claimSetGoal(_ goal: SetGoal, world: String) -> Bool {
+        guard goal.coins > 0, setGoalDone(goal, world: world), !setGoalClaimed(goal, world: world) else { return false }
+        update {
+            $0.setGoalsClaimed.insert(goal.key(world: world))
+            $0.wallet.earn(goal.coins)
+        }
+        sounds.play("coin_shower")
+        haptics.win()
+        return true
+    }
+
+    /// Any set goal finished and not yet claimed, for the badge on the Collection button.
+    var setGoalWaiting: Bool {
+        for world in LevelCatalog.worlds + [ChristmasWorld.id] {
+            for goal in SetGoal.allCases where goal.coins > 0 {
+                if setGoalDone(goal, world: world) && !setGoalClaimed(goal, world: world) { return true }
+            }
+        }
+        return false
+    }
+
+    /// "4 of 6" for the squishy's own set: commons with commons, rares with rares, the rest with the world.
+    func setProgress(for squishy: Collectible) -> (goal: SetGoal, found: Int, of: Int) {
+        let goal: SetGoal = squishy.rarity == .common ? .commons : (squishy.rarity == .rare ? .rares : .world)
+        let p = goal.progress(world: squishy.world, roster: roster, state: progress.collection)
+        return (goal, p.found, p.of)
     }
 
     /// Levels still to win before the next capsule level, counting from the level after `index`.
@@ -910,15 +1024,29 @@ final class AppModel: ObservableObject {
     // MARK: - Capsules
 
     private func openCapsule(world waiting: String) {
+        if waiting.hasSuffix(AppModel.secretMark) {
+            // A secret is not in a capsule: it comes out of hiding when the rest of its world is found.
+            let world = String(waiting.dropLast(AppModel.secretMark.count))
+            var state = progress.collection
+            if let secret = state.awardSecret(world: world, roster: roster) {
+                update { $0.collection = state }
+                capsuleIsNew = true
+                capsuleSpares = nil
+                capsule = secret
+            }
+            return
+        }
         let golden = waiting.hasSuffix(AppModel.goldenMark)
         let world = golden ? String(waiting.dropLast(AppModel.goldenMark.count)) : waiting
         var state = progress.collection
         if let got = CapsuleDrops.open(world: world, roster: roster, state: &state, rng: &rng, odds: config.capsuleOdds,
                                        force: golden ? .ultra : nil) {
             capsuleIsNew = !progress.collection.owns(got.id)
+            capsuleSpares = capsuleIsNew ? nil : state.spareCount
             let roomWasOpen = isExtraUnlocked(.squishRoom)
             update { $0.collection = state }
             capsule = got
+            queueSecretIfWon(world: world)
             // The first capsule opens the Squish Room: its card is told at the next "Next".
             if !roomWasOpen, isExtraUnlocked(.squishRoom), !news.contains(.unlocked(.squishRoom)) {
                 news.append(.unlocked(.squishRoom))
@@ -974,7 +1102,14 @@ final class AppModel: ObservableObject {
     func rerollSpares(world: String) -> Collectible? {
         var state = progress.collection
         let got = CapsuleDrops.rerollSpares(world: world, roster: roster, state: &state, rng: &rng, odds: config.capsuleOdds)
-        if got != nil { update { $0.collection = state } }
+        if let got {
+            update { $0.collection = state }
+            // The swap's squishy arrives in a capsule, like any other rare find.
+            capsuleIsNew = true
+            capsuleSpares = nil
+            capsule = got
+            queueSecretIfWon(world: world)
+        }
         return got
     }
 

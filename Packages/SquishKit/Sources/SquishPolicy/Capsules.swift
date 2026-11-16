@@ -123,6 +123,63 @@ public struct CollectionState: Codable, Equatable, Sendable {
         earnedLog.append(.init(id: squishy.id, source: "sorted"))
         return true
     }
+
+    /// A world's secret squishy is the prize for finding every other squishy of that world.
+    /// Returns it the one time it is given. It never comes from a capsule, an ad or a purchase.
+    public mutating func awardSecret(world: String, roster: Roster) -> Collectible? {
+        let all = roster.collectibles.filter { $0.world == world }
+        guard let secret = all.first(where: { $0.rarity == .secret }), !owns(secret.id) else { return nil }
+        for other in all where other.rarity != .secret {
+            if !owns(other.id) { return nil }
+        }
+        owned[secret.id] = 1
+        earnedLog.append(.init(id: secret.id, source: "set"))
+        return secret
+    }
+
+    /// Where a squishy first came from: "sorted", "capsule", "reroll" or "set".
+    public func source(of id: String) -> String? { earnedLog.first { $0.id == id }?.source }
+}
+
+/// Set goals on the Collection page: three per world. Progress only, nothing here can be bought.
+public enum SetGoal: String, CaseIterable, Codable, Sendable {
+    /// Every common of the world: coins.
+    case commons
+    /// Every rare of the world: coins.
+    case rares
+    /// Every squishy of the world but the secret: the secret comes out of hiding.
+    case world
+
+    public var coins: Int {
+        switch self {
+        case .commons: return 500
+        case .rares: return 750
+        case .world: return 0
+        }
+    }
+
+    public func key(world: String) -> String { world + "." + rawValue }
+
+    public func members(world: String, roster: Roster) -> [Collectible] {
+        roster.collectibles.filter { c in
+            guard c.world == world else { return false }
+            switch self {
+            case .commons: return c.rarity == .common
+            case .rares: return c.rarity == .rare
+            case .world: return c.rarity != .secret
+            }
+        }
+    }
+
+    public func progress(world: String, roster: Roster, state: CollectionState) -> (found: Int, of: Int) {
+        let all = members(world: world, roster: roster)
+        return (all.filter { state.owns($0.id) }.count, all.count)
+    }
+
+    public func isDone(world: String, roster: Roster, state: CollectionState) -> Bool {
+        let p = progress(world: world, roster: roster, state: state)
+        return p.of > 0 && p.found == p.of
+    }
 }
 
 /// Capsule odds, out of rare + ultra. Remote config can change the numbers.

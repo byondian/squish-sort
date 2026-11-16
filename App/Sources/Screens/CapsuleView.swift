@@ -22,35 +22,34 @@ struct CapsuleView: View {
     @State private var confetti = false
 
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 14) {
             Spacer()
             if opened {
-                SoftSquishy(toy: collectible.id, look: collectible.id, feel: model.feel(for: collectible.id)) {
-                    SquishyView(id: collectible.id, rarity: collectible.rarity)
-                }
-                .frame(width: 240, height: 240)
-                .transition(.scale(scale: 0.2).combined(with: .opacity))
-                .accessibilityElement()
-                .accessibilityLabel(Text(verbatim: collectible.name(in: model.language)))
-                .accessibilityIdentifier("capsule-squishy")
-                Text(verbatim: collectible.name(in: model.language)).font(Theme.title(30)).foregroundStyle(Theme.plum)
-                if banner, collectible.rarity != .common {
-                    Text(collectible.rarity == .rare ? LocalizedStringKey("RARE!") : LocalizedStringKey("ULTRA!"))
-                        .font(Theme.title(26)).foregroundStyle(collectible.rarity == .rare ? Theme.plum : .white)
-                        .padding(.horizontal, 18).padding(.vertical, 5)
-                        .background(Capsule().fill(collectible.rarity == .rare ? Theme.sky : Theme.grape))
-                        .overlay(Capsule().stroke(Theme.butter, lineWidth: collectible.rarity == .rare ? 0 : 3))
-                        .rotationEffect(.degrees(4))
+                if banner {
+                    Text(verbatim: shout)
+                        .font(Theme.title(34)).foregroundStyle(.white)
+                        .padding(.horizontal, 20).padding(.vertical, 6)
+                        .background(Capsule().fill(RarityLook.color(collectible.rarity)))
+                        .overlay(Capsule().stroke(.white, lineWidth: 3))
+                        .rotationEffect(.degrees(-3))
                         .transition(.scale(scale: 2.8).combined(with: .opacity))
                 }
-                if model.capsuleIsNew {
-                    Text("NEW!").font(Theme.title(20)).foregroundStyle(.white)
-                        .padding(.horizontal, 14).padding(.vertical, 5)
-                        .background(Capsule().fill(Theme.bubblegum))
-                        .rotationEffect(.degrees(-6))
-                        .transition(.scale(scale: 2.5).combined(with: .opacity))
+                ZStack {
+                    Rays(color: RarityLook.color(collectible.rarity)).frame(width: 340, height: 250)
+                    SoftSquishy(toy: collectible.id, look: collectible.id, feel: model.feel(for: collectible.id)) {
+                        SquishyView(id: collectible.id, rarity: collectible.rarity)
+                    }
+                    .frame(width: 200, height: 200)
+                    .accessibilityElement()
+                    .accessibilityLabel(Text(verbatim: collectible.name(in: model.language)))
+                    .accessibilityIdentifier("capsule-squishy")
                 }
-                Text(verbatim: bookCount).font(Theme.body(15)).foregroundStyle(Theme.plum.opacity(0.7))
+                .frame(height: 210)
+                .transition(.scale(scale: 0.2).combined(with: .opacity))
+                FindCard(squishy: collectible).padding(.horizontal, 20)
+                if let spares = model.capsuleSpares {
+                    spareLine(spares)
+                }
                 if asksToBeBuddy {
                     SpeechBubble(text: String(localized: "Can I be your Buddy?"))
                 } else {
@@ -70,12 +69,12 @@ struct CapsuleView: View {
                     if model.offersSqueezeFromCapsule {
                         // Opens the Squish Room with the new squishy in hand.
                         Button { model.squeezeFromCapsule(collectible.id) } label: {
-                            Label("Squeeze me!", systemImage: "hand.point.up.left.fill")
+                            Label("Squish it!", systemImage: "hand.point.up.left.fill")
                         }
                         .buttonStyle(SquishButtonStyle(fill: Theme.grape))
                         .accessibilityIdentifier("capsule-squeeze")
                     }
-                    Button("Next", action: done).buttonStyle(SquishButtonStyle())
+                    Button("Add to shelf", action: done).buttonStyle(SquishButtonStyle())
                         .accessibilityIdentifier("capsule-next")
                 }
             } else {
@@ -106,6 +105,8 @@ struct CapsuleView: View {
         }
         .overlay { if confetti { Confetti(colors: worldColors, count: 60, seconds: 3).ignoresSafeArea() } }
         .onAppear {
+            // A secret is not in a capsule: it steps straight out.
+            if collectible.rarity == .secret { reveal(); return }
             model.sounds.play("capsule_roll")
             // UI tests tap it straight away, so it is simply there.
             if AppModel.isUITesting { rolledIn = true; return }
@@ -223,6 +224,44 @@ struct CapsuleView: View {
         }
         angle += abs(delta)
         if angle > 300, !opening { open() }
+    }
+
+    /// "NEW!" for a first find, the rarity's shout for a rare and up, "+1 spare" for one already owned.
+    private var shout: String {
+        if model.capsuleSpares != nil { return String(localized: "+1 spare") }
+        return RarityLook.shout(collectible.rarity)
+    }
+
+    /// A duplicate fills the spares bar: three swap for a new squishy on the Collection page.
+    private func spareLine(_ spares: Int) -> some View {
+        let need = CapsuleDrops.sparesPerReroll
+        return VStack(spacing: 5) {
+            ProgressBar(fraction: Double(min(spares, need)) / Double(need), fill: spares >= need ? Theme.butter : Theme.grape)
+                .frame(height: 12)
+            if spares >= need {
+                Text("3 spares! Swap them in your Collection.").font(Theme.body(14)).foregroundStyle(Theme.plum)
+            } else {
+                Text("Spares \(spares)/\(need)").font(Theme.body(14)).foregroundStyle(Theme.plum.opacity(0.75))
+            }
+        }
+        .padding(.horizontal, 36)
+    }
+
+    /// A secret's arrival: no capsule, a gold flash, then the find.
+    private func reveal() {
+        opening = true
+        model.sounds.play("reveal_ultra")
+        model.haptics.win()
+        confetti = true
+        if AppModel.isUITesting { opened = true; banner = true; return }
+        withAnimation(.easeOut(duration: 0.12)) { flash = true }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            withAnimation(.easeIn(duration: 0.4)) { flash = false }
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.45)) { opened = true }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { banner = true }
+        }
     }
 
     private func open() {

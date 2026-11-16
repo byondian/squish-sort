@@ -155,6 +155,18 @@ struct HomeView: View {
             .frame(maxWidth: .infinity).frame(height: height)
         }
         .buttonStyle(JellyButtonStyle(colors: [Color(hex: 0xA9DCFF), Color(hex: 0x63B6F5), Color(hex: 0x4C9FE6)], rim: Color(hex: 0x2F7FC4), radius: 26))
+        .overlay(alignment: .topTrailing) {
+            // Something new to look at, or a set prize waiting.
+            if model.newSquishies > 0 || model.setGoalWaiting {
+                Text("NEW").font(Theme.body(11)).foregroundStyle(.white)
+                    .padding(.horizontal, 7).padding(.vertical, 3)
+                    .background(Capsule().fill(Theme.bubblegum))
+                    .overlay(Capsule().stroke(.white, lineWidth: 2))
+                    .rotationEffect(.degrees(8))
+                    .offset(x: 4, y: -6)
+                    .allowsHitTesting(false)
+            }
+        }
         .accessibilityIdentifier("home-collection")
     }
 
