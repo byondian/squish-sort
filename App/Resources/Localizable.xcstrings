@@ -466,6 +466,28 @@
         }
       }
     },
+    "%lld to the boss!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ボスまであと%lld！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "보스까지 %lld판!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "距離魔王還有%lld關！"
+          }
+        }
+      }
+    },
     "%lld treats for your Buddy!": {
       "localizations": {
         "ja": {
@@ -893,24 +915,68 @@
         }
       }
     },
-    "BOSS 👑": {
+    "BOSS": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "ボス 👑"
+            "value": "ボス"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "보스 👑"
+            "value": "보스"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "魔王關 👑"
+            "value": "魔王"
+          }
+        }
+      }
+    },
+    "BOSS LEVEL!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ボスレベル！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "보스 레벨!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "魔王關卡！"
+          }
+        }
+      }
+    },
+    "BOSS!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ボス！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "보스!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "魔王！"
           }
         }
       }
@@ -4567,6 +4633,28 @@
         }
       }
     },
+    "So close! Rematch?": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "おしい！もういちど？"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "아깝다! 다시 한 판?"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "差一點！再來一次？"
+          }
+        }
+      }
+    },
     "Sorted in a jar": {
       "localizations": {
         "ja": {
@@ -5971,6 +6059,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "世界完成！"
+          }
+        }
+      }
+    },
+    "World finale": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ワールドのフィナーレ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "월드 피날레"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "世界最終關"
           }
         }
       }

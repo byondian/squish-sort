@@ -71,6 +71,8 @@ struct PlayerProgress: Codable, Equatable {
     var seenCards: Set<String> = []
     /// Set goals already paid, as "world.goal".
     var setGoalsClaimed: Set<String> = []
+    /// The long boss splash has been seen once: after that a tap skips it.
+    var bossSplashSeen = false
 
     init() {}
 
@@ -153,6 +155,7 @@ struct PlayerProgress: Codable, Equatable {
         // A save from before the Collection page: what is already owned is not suddenly new.
         seenCards = v(.seenCards, Set(collection.owned.keys))
         setGoalsClaimed = v(.setGoalsClaimed, d.setGoalsClaimed)
+        bossSplashSeen = v(.bossSplashSeen, d.bossSplashSeen)
     }
 
     static func today(_ date: Date = Date()) -> String {

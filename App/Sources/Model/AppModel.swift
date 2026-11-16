@@ -135,6 +135,7 @@ final class AppModel: ObservableObject {
         sounds.level = Float(loaded.soundLevel)
         sounds.squishOn = loaded.squishSoundsOn
         sounds.buddyVoice = loaded.buddyVoiceOn
+        sounds.musicLevel = loaded.musicOn ? Float(loaded.musicLevel) : 0
         // New players land straight on Level 1; the home screen arrives with the first capsule.
         screen = loaded.highestUnlocked >= 3 ? .home : .level(min(loaded.highestUnlocked, max(0, levels.count - 1)))
         // A save that already holds every other squishy of a world is owed that world's secret.
@@ -932,6 +933,34 @@ final class AppModel: ObservableObject {
         }
     }
 
+    // MARK: - Boss levels
+
+    /// The giant that guards a world's last level: the world's shape-shifter.
+    func bossID(world: String) -> String {
+        roster.collectibles.first { $0.world == world && $0.shapeshifter }?.id ?? "morphy"
+    }
+
+    /// The last level of a world: its finale.
+    func isFinale(_ index: Int) -> Bool {
+        guard levels.indices.contains(index) else { return false }
+        let world = levels[index].file.world
+        return levels.lastIndex { $0.file.world == world } == index
+    }
+
+    /// Levels still to win before the world's finale, counting from the level to play next: 3, 2 or 1.
+    /// Nil when the finale is further off, is next, or is already won.
+    func levelsToFinale(world: String) -> Int? {
+        let own = levels.indices.filter { levels[$0].file.world == world }
+        guard let last = own.last, progress.stars[levels[last].id] == nil,
+              let next = own.first(where: { progress.stars[levels[$0].id] == nil }), isUnlocked(next) else { return nil }
+        let left = last - next
+        return (1...3).contains(left) ? left : nil
+    }
+
+    func bossSplashShown() {
+        if !progress.bossSplashSeen { update { $0.bossSplashSeen = true } }
+    }
+
     // MARK: - Collection
 
     static let secretMark = "#secret"
@@ -1343,6 +1372,7 @@ final class AppModel: ObservableObject {
     func setMusicLevel(_ level: Double) {
         let level = min(1, max(0, level))
         update { $0.musicLevel = level; $0.musicOn = level > 0 }
+        sounds.musicLevel = Float(level)
     }
 
     func setSquishSounds(_ on: Bool) {

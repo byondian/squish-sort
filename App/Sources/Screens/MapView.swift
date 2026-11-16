@@ -30,7 +30,16 @@ struct MapView: View {
                         VStack(alignment: .leading, spacing: 10) {
                             HStack(alignment: .firstTextBaseline) {
                                 Text(world.name).font(Theme.title(22)).foregroundStyle(Theme.plum)
-                                if model.starJarPrizes(world.id) >= 3 { Text(verbatim: "👑").font(.system(size: 20)) }
+                                // A gold crown stamps a finished world.
+                                if model.isWorldComplete(world.id) {
+                                    Image("boss-crown").resizable().scaledToFit().frame(height: 22)
+                                        .accessibilityIdentifier("world-crown-\(world.id)")
+                                }
+                                if let left = model.levelsToFinale(world: world.id) {
+                                    Text("\(left) to the boss!").font(Theme.body(12)).foregroundStyle(Theme.plum)
+                                        .padding(.horizontal, 8).padding(.vertical, 3)
+                                        .background(Capsule().fill(Theme.butter))
+                                }
                                 Spacer()
                                 starJar(world.id)
                             }
@@ -95,6 +104,8 @@ struct MapView: View {
         let stars = model.progress.stars[model.levels[i].id] ?? 0
         let current = isCurrent(i)
         let boss = model.levels[i].file.beat == .boss
+        let finale = boss && model.isFinale(i)
+        let world = model.levels[i].file.world
         return Button {
             if unlocked { model.screen = .level(i) }
         } label: {
@@ -111,9 +122,26 @@ struct MapView: View {
             .frame(width: 58, height: 58)
             // Only the level you are on is filled with colour. A boss wears a crown instead.
             .background(Circle().fill(current ? Theme.bubblegum : (unlocked ? Color.white : Color.white.opacity(0.4))))
-            .overlay(Circle().stroke(current ? Theme.plum : .clear, lineWidth: 3))
+            .overlay(Circle().stroke(finale ? RarityLook.gold : (current ? Theme.plum : .clear), lineWidth: finale ? 4 : 3))
             .overlay(alignment: .top) {
-                if boss { Text(verbatim: "👑").font(.system(size: 14)).offset(y: -9) }
+                if finale {
+                    // The world's finale: a crown and a BOSS ribbon.
+                    VStack(spacing: 0) {
+                        Image("boss-crown").resizable().scaledToFit().frame(height: 18)
+                        Text("BOSS").font(.system(size: 9, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                            .padding(.horizontal, 5).padding(.vertical, 1)
+                            .background(Capsule().fill(Theme.grape))
+                    }
+                    .offset(y: -22)
+                } else if boss {
+                    Text(verbatim: "👑").font(.system(size: 14)).offset(y: -9)
+                }
+            }
+            .overlay(alignment: .bottomLeading) {
+                // The giant waits beside its level until it is beaten.
+                if finale && stars == 0 {
+                    BossGiant(world: world).frame(width: 34, height: 34).offset(x: -12, y: 10).allowsHitTesting(false)
+                }
             }
             // The Buddy (or the favourite squishy) sits on the level to play next.
             .overlay(alignment: .topTrailing) {
@@ -123,8 +151,9 @@ struct MapView: View {
                         .allowsHitTesting(false)
                 }
             }
-            .scaleEffect(current ? 1.08 : 1)
+            .scaleEffect(finale ? 1.18 : (current ? 1.08 : 1))
         }
+        .zIndex(finale ? 1 : 0)
         .buttonStyle(.plain)
         .disabled(!unlocked)
         .id(i)

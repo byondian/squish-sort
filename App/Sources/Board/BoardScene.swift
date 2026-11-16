@@ -34,6 +34,8 @@ final class BoardScene: SKScene {
     var luckyKind: UInt8?
     /// The level's world: it picks the lid and the word for a finished jar.
     var world = ""
+    /// Boss levels: gold rims on the jars.
+    var goldRims = false
     /// On a dark background the jars glow instead of having a plum outline.
     var darkBackground = false { didSet { if oldValue != darkBackground, size.width > 0, view != nil { rebuild() } } }
     /// The lid twists shut (a click and a tick).
@@ -195,7 +197,7 @@ final class BoardScene: SKScene {
         jarNodes = []
         pieces = []
         for j in 0..<board.jarCount {
-            let jar = JarNode(size: geometry.jarSize, world: world, dark: darkBackground)
+            let jar = JarNode(size: geometry.jarSize, world: world, dark: darkBackground, gold: goldRims)
             jar.position = geometry.centers[j]
             addChild(jar)
             jarNodes.append(jar)

@@ -132,7 +132,7 @@ struct BookView: View {
                 if gold { Text(verbatim: "👑").font(.system(size: 13)) }
                 Text(verbatim: model.worldTitle(id)).font(Theme.body(14)).lineLimit(1)
                 if model.isWorldComplete(id) {
-                    Image(systemName: "rosette").font(.system(size: 13, weight: .bold)).foregroundStyle(RarityLook.gold)
+                    Image("boss-crown").resizable().scaledToFit().frame(height: 14)
                         .accessibilityIdentifier("world-badge-\(id)")
                 }
             }

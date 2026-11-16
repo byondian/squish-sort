@@ -295,7 +295,7 @@ final class JarNode: SKNode {
     /// - Parameters:
     ///   - world: picks the lid.
     ///   - dark: on a dark background the outline becomes a soft glow so the jar still reads.
-    init(size: CGSize, world: String = "", dark: Bool = false) {
+    init(size: CGSize, world: String = "", dark: Bool = false, gold: Bool = false) {
         self.size = size
         self.world = world
         self.dark = dark
@@ -326,8 +326,9 @@ final class JarNode: SKNode {
         // A slightly wider rim on top.
         let rim = SKShapeNode(rectOf: CGSize(width: size.width * 1.06, height: max(5, size.width * 0.09)),
                               cornerRadius: max(2.5, size.width * 0.045))
-        rim.fillColor = UIColor.white.withAlphaComponent(dark ? 0.55 : 0.95)
-        rim.strokeColor = UIColor(hex: 0x965A78).withAlphaComponent(0.28)
+        // A boss level's jars have gold rims.
+        rim.fillColor = gold ? UIColor(hex: 0xFFC93C) : UIColor.white.withAlphaComponent(dark ? 0.55 : 0.95)
+        rim.strokeColor = gold ? UIColor(hex: 0xC78A12) : UIColor(hex: 0x965A78).withAlphaComponent(0.28)
         rim.lineWidth = 1.5
         rim.position = CGPoint(x: 0, y: size.height / 2)
         rim.zPosition = 1
