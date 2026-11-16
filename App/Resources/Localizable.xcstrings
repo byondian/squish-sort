@@ -1663,6 +1663,28 @@
         }
       }
     },
+    "Need one more jar?": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "びんがもう1つほしい？"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "병이 하나 더 필요해?"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要多一個罐子嗎？"
+          }
+        }
+      }
+    },
     "New": {
       "localizations": {
         "ja": {
@@ -1835,6 +1857,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "這樣走不通喔，退回幾步試試。"
+          }
+        }
+      }
+    },
+    "Not now": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あとで"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "나중에"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "先不要"
           }
         }
       }
@@ -3001,6 +3045,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "使用 %lld 金幣"
+          }
+        }
+      }
+    },
+    "Want a hint?": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ヒントがほしい？"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "힌트가 필요해?"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "想要提示嗎？"
           }
         }
       }

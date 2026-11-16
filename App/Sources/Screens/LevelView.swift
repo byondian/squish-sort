@@ -256,6 +256,10 @@ struct LevelView: View {
                 .background(RoundedRectangle(cornerRadius: 28).fill(Theme.marshmallow))
                 .padding(30)
             }
+            if let item = controller.choosing, controller.outcome == nil {
+                Color.black.opacity(0.15).ignoresSafeArea().onTapGesture { controller.choosing = nil }
+                helperBubble(item)
+            }
             if (controller.noWayThrough || controller.hintGaveUp) && controller.outcome == nil {
                 VStack {
                     Text(controller.noWayThrough ? LocalizedStringKey("No way through from here. Undo a few moves.")
@@ -305,29 +309,50 @@ struct LevelView: View {
         .background(LinearGradient(colors: model.boardTheme.colors, startPoint: .top, endPoint: .bottom).ignoresSafeArea())
         .animation(.spring(response: 0.35, dampingFraction: 0.7), value: controller.outcome)
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: model.trackingExplainer)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: controller.choosing)
         .onAppear { model.levelStarted(number: pathNumber) }
         .onDisappear { model.joinedBook = nil }
-        .confirmationDialog(Text(controller.choosing == .hint ? "Hint" : "Extra jar"),
-                            isPresented: Binding(get: { controller.choosing != nil }, set: { if !$0 { controller.choosing = nil } }),
-                            titleVisibility: .visible) {
-            if let item = controller.choosing {
-                if model.canOptIn(item == .hint ? .hint : .extraJar) {
-                    // Remove Ads owners get it with one tap and no ad.
-                    Button(model.ownsRemoveAds ? LocalizedStringKey("Free") : LocalizedStringKey("Watch an ad")) {
-                        controller.pay(for: item, withAd: true)
-                    }
+    }
+
+    /// Paying for a hint or an extra jar: the game's own bubble, not a system sheet.
+    private func helperBubble(_ item: Coins.Item) -> some View {
+        VStack(spacing: 12) {
+            HStack(alignment: .bottom, spacing: 8) {
+                if let ref = model.progress.buddy.squishy, model.buddyActive {
+                    SquishRefView(ref: ref).frame(width: 56, height: 56)
                 }
-                if model.progress.wallet.canAfford(item) {
-                    Button("Use \(item.price) coins") { controller.pay(for: item, withAd: false) }
-                }
-                // Under-13s never get a shop pop-up from the board.
-                if !model.isGentleMode && !model.progress.wallet.canAfford(item) {
-                    Button("Get coins") { controller.choosing = nil; model.screen = .shop }
-                }
+                SpeechBubble(text: item == .hint ? String(localized: "Want a hint?") : String(localized: "Need one more jar?"))
             }
-        } message: {
-            Text("You have \(model.progress.wallet.balance) coins")
+            if model.canOptIn(item == .hint ? .hint : .extraJar) {
+                // Remove Ads owners get it with one tap and no ad.
+                Button { controller.pay(for: item, withAd: true) } label: {
+                    Label(model.ownsRemoveAds ? LocalizedStringKey("Free") : LocalizedStringKey("Watch an ad"),
+                          systemImage: model.ownsRemoveAds ? "sparkles" : "play.rectangle.fill")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(SquishButtonStyle(fill: Theme.grape))
+            }
+            if model.progress.wallet.canAfford(item) {
+                Button { controller.pay(for: item, withAd: false) } label: {
+                    Label("Use \(item.price) coins", systemImage: "circle.hexagongrid.fill").frame(maxWidth: .infinity)
+                }
+                .buttonStyle(SquishButtonStyle(fill: Theme.butter, text: Theme.plum))
+            } else if !model.isGentleMode {
+                // Under-13s never get a shop offer from the board.
+                Button { controller.choosing = nil; model.screen = .shop } label: {
+                    Label("Get coins", systemImage: "cart.fill").frame(maxWidth: .infinity)
+                }
+                .buttonStyle(SquishButtonStyle(fill: .white, text: Theme.plum))
+            }
+            Text("You have \(model.progress.wallet.balance) coins").font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.7))
+            Button("Not now") { controller.choosing = nil }
+                .font(Theme.body(15)).foregroundStyle(Theme.plum.opacity(0.7))
+                .accessibilityIdentifier("helper-close")
         }
+        .padding(22)
+        .background(RoundedRectangle(cornerRadius: 28).fill(Theme.marshmallow))
+        .padding(30)
+        .transition(.scale(scale: 0.8).combined(with: .opacity))
     }
 
     private var header: some View {
