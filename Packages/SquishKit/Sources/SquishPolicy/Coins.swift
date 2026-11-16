@@ -191,6 +191,7 @@ public struct LevelPot: Equatable, Sendable {
 /// Squishy streak (fix list B3): a chain of moves that each land on a matching squishy
 /// within a few seconds of the last. A move into an empty jar keeps the chain alive but
 /// adds nothing. Undo, a hint or a long pause ends it, and nothing is ever shown when it ends.
+/// In gentle mode there is no time limit at all.
 public struct SortChain: Equatable, Sendable {
     public enum Word: Int, CaseIterable, Sendable {
         case nice = 1, streak, onARoll, unstoppable
@@ -212,12 +213,16 @@ public struct SortChain: Equatable, Sendable {
     public static let seconds = 4.0
     public private(set) var count = 0
     private var lastAt: Double?
+    /// Nil for under-13s: speed is never rewarded there, so a chain is just matching moves in a row.
+    private let window: Double?
 
-    public init() {}
+    public init(timed: Bool = true) {
+        window = timed ? SortChain.seconds : nil
+    }
 
     /// A move landed `seconds` into the attempt. Returns the word it earned, if it reached one.
     public mutating func move(ontoMatch: Bool, at seconds: Double) -> Word? {
-        if let last = lastAt, seconds - last > SortChain.seconds { count = 0 }
+        if let window, let last = lastAt, seconds - last > window { count = 0 }
         lastAt = seconds
         guard ontoMatch else { return nil }
         count += 1

@@ -876,6 +876,12 @@ final class ExtrasTests: XCTestCase {
         XCTAssertNil(chain.move(ontoMatch: true, at: 6.5))
         XCTAssertEqual(chain.count, 1)
 
+        // Gentle mode: no time limit, so taking your time never costs anything.
+        var gentle = SortChain(timed: false)
+        _ = gentle.move(ontoMatch: true, at: 1)
+        _ = gentle.move(ontoMatch: true, at: 60)
+        XCTAssertEqual(gentle.move(ontoMatch: true, at: 600), .nice)
+
         // Undo or a hint ends it.
         chain.end()
         XCTAssertEqual(chain.count, 0)

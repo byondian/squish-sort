@@ -24,7 +24,7 @@ final class LevelController: ObservableObject {
     @Published private(set) var pot: LevelPot
     private var jarsDone = 0
     /// Squishy streak: moves that land on a match, one soon after another.
-    private var chain = SortChain()
+    private var chain: SortChain
     private var landsOnMatch = false
     /// Bonus levels are Coin Rush: every finished jar throws double on a first clear.
     private var jarMultiplier: Int { level.file.beat == .bonus ? 2 : 1 }
@@ -46,6 +46,7 @@ final class LevelController: ObservableObject {
         level = model.levels[index]
         session = GameSession(board: level.board, par: level.par, undoLimit: model.undoLimit)
         scene = BoardScene(board: level.board, kinds: level.kinds)
+        chain = SortChain(timed: !model.isGentleMode)
         let lucky = model.luckyKind(index: index)
         pot = LevelPot(firstClear: model.progress.stars[level.id] == nil, jars: level.kinds.count,
                        luckyKind: lucky, jarMultiplier: level.file.beat == .bonus ? 2 : 1, rules: model.config.coins)
@@ -140,7 +141,7 @@ final class LevelController: ObservableObject {
         pot = LevelPot(firstClear: model.progress.stars[level.id] == nil, jars: level.kinds.count,
                        luckyKind: model.luckyKind(index: index), jarMultiplier: jarMultiplier, rules: model.config.coins)
         jarsDone = 0
-        chain = SortChain()
+        chain = SortChain(timed: !model.isGentleMode)
     }
 
     private func checkOutcome() {
@@ -330,7 +331,8 @@ struct LevelView: View {
                             summary: model.lastWin,
                             perfect: controller.session.moveCount <= controller.level.par,
                             threeStarMoves: Stars.moveLimit(forStars: 3, par: controller.level.par),
-                            retry: controller.index < 2 ? nil : { controller.retry() },
+                            // Not while good news is waiting behind the win card: that is told first.
+                            retry: controller.index < 2 || !model.news.isEmpty ? nil : { controller.retry() },
                             toCapsule: model.levelsToNextCapsule(after: controller.index),
                             // The first two levels roll straight on after the celebration.
                             autoAdvance: controller.index < 2,
