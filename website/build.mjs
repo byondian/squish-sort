@@ -304,3 +304,42 @@ write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="htt
 write('robots.txt', `User-agent: *\nAllow: /\nSitemap: ${SITE.origin}/sitemap.xml\n`);
 write('.well-known/apple-app-site-association', JSON.stringify({ applinks: { details: [{ appIDs: [`${SITE.teamId}.${SITE.bundleId}`], components: [{ '/': '/open/*', comment: 'Reserved for future deep links' }] }] } }, null, 2));
 console.log(`Built ${urls.length} pages into dist/`);
+
+// ---------- Vercel Build Output API ----------
+// The Vercel project builds from the repo root (so game branches without
+// website/ changes are skipped cleanly) and reads .vercel/output from there.
+if (process.env.VERCEL || process.argv.includes('--vercel')) {
+  const VO = path.join(process.cwd(), '.vercel', 'output');
+  fs.rmSync(VO, { recursive: true, force: true });
+  fs.cpSync(OUT, path.join(VO, 'static'), { recursive: true });
+  const overrides = {};
+  const walk = d => { for (const f of fs.readdirSync(path.join(OUT, d), { withFileTypes: true })) { const r = path.posix.join(d, f.name); if (f.isDirectory()) walk(r); else if (f.name === 'index.html' && d) overrides[r] = { path: d }; } };
+  walk('');
+  overrides['config.json'] = { contentType: 'application/json' };
+  overrides['.well-known/apple-app-site-association'] = { contentType: 'application/json' };
+  overrides['app-ads.txt'] = { contentType: 'text/plain; charset=utf-8' };
+  for (const fn of ['contact', 'go']) {
+    const dir = path.join(VO, 'functions', 'api', fn + '.func');
+    fs.mkdirSync(dir, { recursive: true });
+    fs.copyFileSync(path.join(ROOT, 'api', fn + '.js'), path.join(dir, 'index.mjs'));
+    fs.writeFileSync(path.join(dir, '.vc-config.json'), JSON.stringify({ runtime: 'nodejs22.x', handler: 'index.mjs', launcherType: 'Nodejs', shouldAddHelpers: true }));
+  }
+  const sec = {
+    'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+    'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
+    'Content-Security-Policy': "default-src 'self'; img-src 'self' data: https://tools.applemarketingtools.com; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+  };
+  const routes = [
+    { src: '^/(.+)/$', headers: { Location: '/$1' }, status: 308 },
+    { src: '^/go/app-store$', dest: '/api/go' },
+    { src: '^/(.*)$', headers: sec, continue: true },
+    { src: '^/config\\.json$', headers: { 'Cache-Control': 'public, max-age=300, s-maxage=300', 'Access-Control-Allow-Origin': '*' }, continue: true },
+    { src: '^/app-ads\\.txt$', headers: { 'Cache-Control': 'public, max-age=3600' }, continue: true },
+    { src: '^/assets/(.*)$', headers: { 'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800' }, continue: true },
+    { handle: 'filesystem' },
+    { src: '^/.*$', dest: '/404.html', status: 404 },
+  ];
+  fs.writeFileSync(path.join(VO, 'config.json'), JSON.stringify({ version: 3, routes, overrides }, null, 1));
+  console.log('Wrote Vercel build output to', VO);
+}
