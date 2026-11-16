@@ -1619,6 +1619,28 @@
         }
       }
     },
+    "Get treats": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "おやつをもらう"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "간식 받기"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取得點心"
+          }
+        }
+      }
+    },
     "Gift": {
       "localizations": {
         "ja": {
@@ -4655,24 +4677,24 @@
         }
       }
     },
-    "Win a level for a treat": {
+    "Win a level and I get a treat!": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "レベルをクリアするとおやつがもらえるよ"
+            "value": "レベルをクリアすると、おやつがもらえるよ！"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "레벨을 깨면 간식을 받아"
+            "value": "레벨을 깨면 내가 간식을 받아!"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "過關就能拿到點心"
+            "value": "過一關，我就有點心吃！"
           }
         }
       }

@@ -553,8 +553,11 @@ struct BuddyHomeView: View {
                         .accessibilityIdentifier("buy-treat")
                     } else {
                         // No treats and no coins: say where treats come from.
-                        Label("Win a level for a treat", systemImage: "birthday.cake.fill")
-                            .font(Theme.body(14)).foregroundStyle(Theme.plum.opacity(0.6))
+                        Button {
+                            withAnimation { model.buddySays = String(localized: "Win a level and I get a treat!") }
+                        } label: { Label("Get treats", systemImage: "birthday.cake.fill") }
+                        .buttonStyle(SquishButtonStyle(fill: Theme.butter, text: Theme.plum))
+                        .accessibilityIdentifier("get-treats")
                     }
                     Button { picking = true } label: {
                         Label("Change Buddy", systemImage: "arrow.left.arrow.right").font(Theme.body(14))
