@@ -60,6 +60,9 @@ targets:
       path: App/Info.plist
       properties:
         CFBundleDisplayName: Squish Sort
+        # Taken from the build settings, so the TestFlight workflow's build number reaches the app.
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleLocalizations: [en, ja, ko, zh-Hant]
         ITSAppUsesNonExemptEncryption: false
         LSRequiresIPhoneOS: true
