@@ -145,6 +145,7 @@ function landing(code) {
   const heroTiers = ['common', 'rare', 'ultra', 'secret'].reduce((o, r) => (o[r] = roster.collectibles.filter(c => c.rarity === r).map(c => c.id), o), {});
   const names = Object.fromEntries([...roster.collectibles, ...roster.squishRoomToys].map(c => [c.id, nm(c)]));
   const feels = Object.fromEntries([...roster.collectibles, ...roster.squishRoomToys].filter(c => c.feel && c.feel !== 'foam').map(c => [c.id, c.feel]));
+  Object.assign(feels, { strawbie: 'jelly', 'peach-bun': 'jelly' }); // match the feel Ian is testing in the Squish Room page
   const all = roster.collectibles.filter(c => c.rarity !== 'secret');
   const half = Math.ceil(all.length / 2);
   const sq = c => `<button class="sq" type="button" aria-label="${esc(nm(c))}"><img src="/assets/sq/${c.id}.webp" alt="" width="118" height="118" loading="lazy"><span class="nm">${esc(nm(c))}</span></button>`;

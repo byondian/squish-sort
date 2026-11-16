@@ -1,4 +1,4 @@
-/* Squish Sort soft-body squish, v2 with depth (16 Nov 2026). Game design thread.
+/* Squish Sort soft-body squish, v3 (16 Nov 2026): depth, and no more folding flat. Game design thread.
    One squishy = a small lattice of points pulled towards a best-fit copy of its rest shape
    ("shape matching", Mueller et al. 2005, quadratic variant). Fingers grab a soft patch of points.
    No dependencies. Works in a browser (window.Squish) and in Node (module.exports) for tests.
@@ -26,6 +26,8 @@
      land  how much a landing squashes (0 none, 1 splat);  grip how much the base sticks to the floor when pulled
      press how deep a press goes, as a share of the distance to the base
      grabR radius of the firm patch under a finger;  halo strength of the wide soft patch around it
+     firm  the thinnest a finger can squash the toy against a surface, as a share of its thickness there
+     keep  how much of its own shape the painted face keeps when the outline is squashed (drawer, default 0.5)
      Depth:
      poke  how deep a finger dents the surface (1 = about the toy's own puffiness);  pokeR radius of the dent, in toy sizes
      zk    spring that fills a dent back in, 1/s^2;  zd its damping, 1/s (high = slow fill, low = ripples)
@@ -35,13 +37,14 @@
      Look (used by the drawer): kd strength of light and shade;  gloss and shin size and tightness of the wet highlight;
      ao how dark the inside of a dent gets */
   const MATERIALS = {
-    foam: { label: 'Slow-rise foam', k: 300, beta: 0.68, c: 62, quad: 0.55, vp: 0.9, smin: 0.40, smax: 1.7, grav: 9, fric: 0.9, rest: 0.05, press: 0.46, grabR: 0.20, halo: 0.35, land: 0.6, grip: 0.5,
+    foam: { label: 'Slow-rise foam', k: 300, beta: 0.68, c: 62, quad: 0.55, vp: 0.9, smin: 0.40, smax: 1.7, grav: 9, fric: 0.9, rest: 0.05, press: 0.46, grabR: 0.20, halo: 0.35, land: 0.6, grip: 0.5, firm: 0.44,
       poke: 0.95, pokeR: 0.13, zk: 77, zd: 60, zc: 0.25, zland: 0, puff: 0.2, tk: 60, td: 14, look: 0.07, kd: 0.6, gloss: 0, shin: 20, ao: 0.42 },
-    jelly: { label: 'Jelly', k: 820, beta: 0.7, c: 7.5, quad: 0.6, vp: 1, smin: 0.45, smax: 1.9, grav: 9, fric: 0.55, rest: 0.22, press: 0.44, grabR: 0.20, halo: 0.35, land: 0.75, grip: 0.3,
-      poke: 0.8, pokeR: 0.12, zk: 420, zd: 4.5, zc: 0.7, zland: 0.5, puff: 0.15, tk: 180, td: 5, look: 0.08, kd: 0.5, gloss: 0.55, shin: 26, ao: 0.3 },
-    gel: { label: 'Gel ball', k: 300, beta: 0.8, c: 12, quad: 0.7, vp: 1, smin: 0.42, smax: 2.1, grav: 11, fric: 0.6, rest: 0.04, press: 0.5, grabR: 0.22, halo: 0.5, land: 1.0, grip: 0.35,
+    // Jelly is Ian's pick (16 Nov): seven parts the firm jelly, three parts the gel ball
+    jelly: { label: 'Jelly', k: 660, beta: 0.73, c: 8.8, quad: 0.63, vp: 1, smin: 0.44, smax: 1.95, grav: 9.6, fric: 0.56, rest: 0.17, press: 0.46, grabR: 0.21, halo: 0.4, land: 0.82, grip: 0.31, firm: 0.48,
+      poke: 0.9, pokeR: 0.13, zk: 320, zd: 5.5, zc: 0.62, zland: 0.6, puff: 0.18, tk: 140, td: 4.7, look: 0.083, kd: 0.5, gloss: 0.64, shin: 31, ao: 0.29 },
+    gel: { label: 'Gel ball', k: 300, beta: 0.8, c: 12, quad: 0.7, vp: 1, smin: 0.42, smax: 2.1, grav: 11, fric: 0.6, rest: 0.04, press: 0.5, grabR: 0.22, halo: 0.5, land: 1.0, grip: 0.35, firm: 0.42,
       poke: 1.15, pokeR: 0.16, zk: 90, zd: 8, zc: 0.45, zland: 0.8, puff: 0.25, tk: 50, td: 4, look: 0.09, kd: 0.5, gloss: 0.85, shin: 44, ao: 0.26 },
-    mochi: { label: 'Mochi', k: 380, beta: 0.74, c: 12, quad: 0.5, vp: 1, smin: 0.40, smax: 2.6, grav: 9, fric: 1, rest: 0, press: 0.46, grabR: 0.19, halo: 0.3, land: 0.65, grip: 0.9,
+    mochi: { label: 'Mochi', k: 380, beta: 0.74, c: 12, quad: 0.5, vp: 1, smin: 0.40, smax: 2.6, grav: 9, fric: 1, rest: 0, press: 0.46, grabR: 0.19, halo: 0.3, land: 0.65, grip: 0.9, firm: 0.44,
       poke: 0.95, pokeR: 0.13, zk: 250, zd: 16, zc: 0.3, zland: 0.2, puff: 0.3, tk: 80, td: 10, look: 0.07, kd: 0.6, gloss: 0.15, shin: 14, ao: 0.4 }
   };
 
@@ -89,7 +92,7 @@
     cx /= m; cy /= m; this.m = m; this.c0 = [cx, cy];
     // the art's true lowest pixel may sit below the lowest lattice point: o.footV says where (0..1)
     this.footPad = Math.max(0, ((o.footV != null ? o.footV : foot) - foot)) * this.S;
-    this.baseV = foot - cy; this.halfW = (right - left) / 2;
+    this.baseV = foot - cy; this.halfW = (right - left) / 2; this.box = { l: left, r: right, t: top, b: Math.max(foot, o.footV != null ? o.footV : foot) };
     const mean = [0, 0, 0];
     for (let k = 0; k < cnt; k++) { const x = this.uv[k * 2] - cx, y = this.uv[k * 2 + 1] - cy; this.u[k * 2] = x; this.u[k * 2 + 1] = y; if (this.sim[k]) { mean[0] += x * x; mean[1] += y * y; mean[2] += x * y; } }
     mean[0] /= m; mean[1] /= m; mean[2] /= m;
@@ -144,13 +147,15 @@
     }
     const c = this.centre(), b = this.bounds();
     // a press pushes towards the base when resting, or towards the middle when held in the air
-    const tx = c[0], ty = this.metric.air ? c[1] : b.y1;
+    const tx = this.metric.air ? c[0] : x + 0.35 * (c[0] - x), ty = this.metric.air ? c[1] : b.y1; // mostly straight down, so an off-centre press does not fold the toy over
     const ax = x - tx, ay = y - ty, al = ax * ax + ay * ay || 1; // 0 at the base, 1 at the finger: how much of the press each point takes
     for (let k = 0; k < this.count; k++) sc[k] = clamp(((this.p[k * 2] - tx) * ax + (this.p[k * 2 + 1] - ty) * ay) / al, 0, 1.15);
     // where the finger is on the toy's own picture (0..1), for the dent
     let fu = 0, fv = 0, fw = 0; const r2 = (S * 0.09) * (S * 0.09);
     for (let k = 0; k < this.count; k++) { const dx = this.p[k * 2] - x, dy = this.p[k * 2 + 1] - y, ww = Math.exp(-(dx * dx + dy * dy) / r2) + 1e-9; fu += ww * this.uv[k * 2]; fv += ww * this.uv[k * 2 + 1]; fw += ww; }
-    this.pointers[id] = { x, y, sx: x, sy: y, vx: 0, vy: 0, w, off, sc, press: 0, px: (tx - x) * this.mat.press, py: (ty - y) * this.mat.press, t: 0, drag: 0, fu: fu / fw, fv: fv / fw, force: 1 };
+    const fu0 = fu / fw, fv0 = fv / fw;
+    this.pointers[id] = { x, y, sx: x, sy: y, vx: 0, vy: 0, w, off, sc, press: 0, px: (tx - x) * this.mat.press, py: (ty - y) * this.mat.press, t: 0, drag: 0, fu: fu0, fv: fv0, force: 1,
+      rb: Math.max(b.y1 - y, (this.box.b - fv0) * S), rt: Math.max(y - b.y0, (fv0 - this.box.t) * S), rl: Math.max(x - b.x0, (fu0 - this.box.l) * S), rr: Math.max(b.x1 - x, (this.box.r - fu0) * S) }; // how much toy lies between the finger and each side
     return true;
   };
   /* force (optional): 1 = normal press, up to about 1.6 = pressing hard. Use the touch's contact size where the
@@ -202,11 +207,20 @@
     let om = I > 0 ? L / I : 0; om /= (1 + 6 * h);
     const grav = M.grav * S, damp = 1 / (1 + M.c * h);
     let D = 0, sp2 = 0;
+    // The goal shape knows about the floor and walls. Without this, a toy pushed down aims half of itself
+    // below the floor, and that half collapses flat onto it: the "folded drawing" look.
+    let gdn = 0, gup = 0, glf = 0, grt = 0; const wfl = world ? world.floor - this.footPad : 0;
     for (let k = 0; k < n; k++) {
       const ux = u[k * 2], uy = u[k * 2 + 1];
       const gx = cx + g00 * ux + g01 * uy + Q[0] * f[k * 5 + 2] + Q[1] * f[k * 5 + 3] + Q[2] * f[k * 5 + 4];
       const gy = cy + g10 * ux + g11 * uy + Q[3] * f[k * 5 + 2] + Q[4] * f[k * 5 + 3] + Q[5] * f[k * 5 + 4];
       g[k * 2] = gx; g[k * 2 + 1] = gy;
+      if (world && this.core[k]) { if (gy - wfl > gdn) gdn = gy - wfl; if (world.top != null && world.top - gy > gup) gup = world.top - gy; if (world.left - gx > glf) glf = world.left - gx; if (gx - world.right > grt) grt = gx - world.right; }
+    }
+    const gsx = glf > 0 ? glf : -grt, gsy = gdn > 0 ? -gdn : gup;
+    for (let k = 0; k < n; k++) {
+      const ux = u[k * 2], uy = u[k * 2 + 1];
+      const gx = (g[k * 2] += gsx), gy = (g[k * 2 + 1] += gsy);
       if (!this.sim[k]) continue;
       const rx = p[k * 2] - cx, ry = p[k * 2 + 1] - cy;
       const rvx = vx - om * ry, rvy = vy + om * rx; // rigid part of the motion is not damped
@@ -219,17 +233,40 @@
       D += ex * ex + ey * ey; sp2 += dvx * dvx + dvy * dvy;
     }
     // fingers hold a soft patch
-    let held = 0; const flr = world ? world.floor - this.footPad : 1e9;
+    let held = 0; const flr = world ? world.floor - this.footPad : 1e9, firm = M.firm == null ? 0.5 : M.firm;
+    { // where each finger effectively is: it cannot pull a patch too far from the body, and two fingers cannot
+      // pinch the toy between them thinner than its limit
+      const ids = Object.keys(this.pointers);
+      for (const id of ids) { const q = this.pointers[id]; let fx = q.x, fy = q.y; const dx = fx - cx, dy = fy - cy, d = Math.hypot(dx, dy), mx = S * 1.15; if (d > mx) { fx = cx + dx / d * mx; fy = cy + dy / d * mx; } q.ex = fx; q.ey = fy; }
+      for (let a = 0; a < ids.length; a++) for (let b = a + 1; b < ids.length; b++) { const A = this.pointers[ids[a]], B = this.pointers[ids[b]];
+        const d0 = Math.hypot(A.fu - B.fu, A.fv - B.fv) * S * firm, dx = B.ex - A.ex, dy = B.ey - A.ey, d = Math.hypot(dx, dy);
+        if (d < d0 && d0 > 1) { const nx = d > 0.5 ? dx / d : 1, ny = d > 0.5 ? dy / d : 0, add = (d0 - d) / 2; A.ex -= nx * add; A.ey -= ny * add; B.ex += nx * add; B.ey += ny * add; } }
+    }
     for (const id in this.pointers) {
       const q = this.pointers[id]; held++; q.t += h; q.press += (1 - q.press) * (1 - Math.exp(-h / 0.11));
       const fade = 1 - smooth(S * 0.07, S * 0.45, q.drag), ox = q.px * q.press * fade, oy = q.py * q.press * fade;
-      let fx = q.x, fy = q.y; { const dx = fx - cx, dy = fy - cy, d = Math.hypot(dx, dy), mx = S * 1.15; if (d > mx) { fx = cx + dx / d * mx; fy = cy + dy / d * mx; } } // a patch can only be pulled so far from the body
+      let fx = q.ex, fy = q.ey;
+      if (world) { // The toy has a core. A finger can squash the part between it and a surface to a share (firm) of its
+        // thickness and no further: past that the finger just sinks into the toy and the dent takes over.
+        let ex = fx + ox, ey = fy + oy; const ex0 = ex, ey0 = ey;
+        if (ey > flr - firm * q.rb) ey = flr - firm * q.rb; if (world.top != null && ey < world.top + firm * q.rt) ey = world.top + firm * q.rt;
+        if (ex < world.left + firm * q.rl) ex = world.left + firm * q.rl; if (ex > world.right - firm * q.rr) ex = world.right - firm * q.rr;
+        fx += ex - ex0; fy += ey - ey0; }
+      // The patch is not a rigid plate. The part of it between the finger and a surface is squeezed in proportion,
+      // so the far edge of the toy lands on the surface instead of the whole lower half piling up flat on it.
+      let rd = 1, ru = 1, rl = 1, rr = 1;
+      if (world) { rd = clamp((flr - fy) / q.rb, 0.05, 1); if (world.top != null) ru = clamp((fy - world.top) / q.rt, 0.05, 1); rl = clamp((fx - world.left) / q.rl, 0.05, 1); rr = clamp((world.right - fx) / q.rr, 0.05, 1); }
       for (let k = 0; k < n; k++) { const w = q.w[k]; if (w < 0.01) continue; const s = w * 0.5;
-        let tx = fx + q.off[k * 2] + ox * q.sc[k], ty = fy + q.off[k * 2 + 1] + oy * q.sc[k];
+        const ofx = q.off[k * 2], ofy = q.off[k * 2 + 1];
+        let tx = fx + ofx * (ofx < 0 ? rl : rr) + ox * q.sc[k], ty = fy + ofy * (ofy > 0 ? rd : ru) + oy * q.sc[k];
         if (world) { if (ty > flr) ty = flr; if (world.top != null && ty < world.top) ty = world.top; if (tx < world.left) tx = world.left; if (tx > world.right) tx = world.right; } // a finger cannot push the toy through the floor or a wall
         p[k * 2] += s * (tx - p[k * 2]); p[k * 2 + 1] += s * (ty - p[k * 2 + 1]);
         v[k * 2] += s * (q.vx - v[k * 2]); v[k * 2 + 1] += s * (q.vy - v[k * 2 + 1]); }
     }
+    // A soft toy cannot be squashed paper thin. Past its limit (firm) it pushes back hard, in any direction,
+    // so fully squished it is a fat pancake and the finger simply sinks into it.
+    { const lo = Math.min(raw1, raw2);
+      if (lo < firm) { const gm = smooth(firm, firm * 0.62, lo) * 0.55; for (let k = 0; k < n; k++) if (this.sim[k]) { p[k * 2] += (g[k * 2] - p[k * 2]) * gm; p[k * 2 + 1] += (g[k * 2 + 1] - p[k * 2 + 1]) * gm; } } }
     // Floor, walls, ceiling. The whole body is pushed out together (so it never sags under its own weight),
     // and a landing adds a squash on purpose: the far side keeps moving for a moment.
     let impact = 0, contacts = 0;
@@ -310,7 +347,7 @@
     me.rate += 0.25 * (((Dn - me.D) / h) - me.rate); me.D = Dn;
     me.stretch = Math.max(raw1, raw2) - 1; me.squash = 1 - Math.min(raw1, raw2);
     me.impact = Math.max(me.impact, impact / S); me.speed = Math.sqrt(sp2 / this.m) / S; me.held = held; me.air = contacts === 0;
-    me.cx = cx; me.cy = cy; this.theta = th;
+    me.cx = cx; me.cy = cy; this.theta = th; this.U = [raw1, raw2, ph];
   };
 
   /* Packs the surface for a shader, once per drawn frame. Returns body.bytes: body.zres x body.zres RGBA
@@ -375,7 +412,7 @@
        m = (kd, gloss, shin, relief), m2 = (pinch, ao, dent relief, depth on/off), e = (1/hm size, zres-1, 1/zres) */
     const fs = [
       'precision highp float;varying vec2 q;uniform sampler2D s;uniform sampler2D hm;uniform sampler2D zm;uniform float o;',
-      'uniform vec3 L;uniform vec2 tilt;uniform vec4 m;uniform vec4 m2;uniform vec3 e;',
+      'uniform vec3 L;uniform vec2 tilt;uniform vec4 m;uniform vec4 m2;uniform vec3 e;uniform vec3 u;uniform vec2 c0;',
       'float H(vec2 p){vec4 t=texture2D(hm,p);return (t.r*65280.+t.g*255.)/65535.;}',
       'vec2 zu(vec2 p){return (p*e.y+.5)*e.z;}',
       'float Z(vec2 p){vec4 t=texture2D(zm,zu(p));return (t.r*65280.+t.g*255.)/65535.*4.-2.;}',
@@ -385,7 +422,7 @@
       ' vec2 gh=vec2(H(q+vec2(d1,0.))-H(q-vec2(d1,0.)),H(q+vec2(0.,d1))-H(q-vec2(0.,d1)))/(2.*d1);',
       ' vec2 gz=vec2(Z(q+vec2(d2,0.))-Z(q-vec2(d2,0.)),Z(q+vec2(0.,d2))-Z(q-vec2(0.,d2)))/(2.*d2);',
       ' float z=Z(q);vec4 hh=texture2D(hm,q);float th=texture2D(zm,zu(q)).b*2.;',
-      ' vec2 p=q-tilt*hh.b-m2.x*gz*hh.b;',
+      ' vec2 dq=q-c0;vec2 p=q+hh.b*vec2(u.x*dq.x+u.y*dq.y,u.y*dq.x+u.z*dq.y)-tilt*hh.b-m2.x*gz*hh.b;',
       ' vec4 a=texture2D(s,p);',
       ' vec2 g=gh*th*m.w-gz*m2.z;',
       ' vec3 N=normalize(vec3(-g,1.));',
@@ -403,7 +440,7 @@
     const pr = this.prog = gl.createProgram(); gl.attachShader(pr, mk(gl.VERTEX_SHADER, vs)); gl.attachShader(pr, mk(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(pr);
     gl.useProgram(pr);
     this.aPos = gl.getAttribLocation(pr, 'a'); this.aUv = gl.getAttribLocation(pr, 't'); this.U = {};
-    ['r', 'o', 's', 'hm', 'zm', 'L', 'tilt', 'm', 'm2', 'e'].forEach((k) => { this.U[k] = gl.getUniformLocation(pr, k); });
+    ['r', 'o', 's', 'hm', 'zm', 'L', 'tilt', 'm', 'm2', 'e', 'u', 'c0'].forEach((k) => { this.U[k] = gl.getUniformLocation(pr, k); });
     this.bPos = gl.createBuffer(); this.bUv = gl.createBuffer(); this.bIdx = gl.createBuffer(); this.idxN = 0; this.idxCount = 0;
     this.ztex = gl.createTexture(); this.flat = null;
     gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
@@ -452,6 +489,10 @@
       gl.uniform4f(U.m, M.kd == null ? 0.5 : M.kd, M.gloss || 0, M.shin || 30, M.relief == null ? 0.2 : M.relief);
       gl.uniform4f(U.m2, M.pinch == null ? 0.004 : M.pinch, M.ao == null ? 0.15 : M.ao, M.zrelief == null ? 0.3 : M.zrelief, 1);
       gl.uniform3f(U.e, 1 / (body.hsize || 128), body.zres - 1, 1 / body.zres);
+      // The painted face keeps more of its own shape than the outline does: on a real toy the front bulges
+      // towards you when it is squashed, it does not flatten like a drawing. keep = how much (0 none, 1 all).
+      { const R = body.U || [1, 1, 0], keep = M.keep == null ? 0.5 : M.keep, a1 = clamp(Math.pow(clamp(R[0], 0.3, 2.4), keep), 0.62, 1.3) - 1, a2 = clamp(Math.pow(clamp(R[1], 0.3, 2.4), keep), 0.62, 1.3) - 1, cp = Math.cos(R[2]), sp = Math.sin(R[2]);
+        gl.uniform3f(U.u, cp * cp * a1 + sp * sp * a2, cp * sp * (a1 - a2), sp * sp * a1 + cp * cp * a2); gl.uniform2f(U.c0, body.c0[0], body.c0[1]); }
     } else gl.uniform4f(U.m2, 0, 0, 0, 0);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.bPos); gl.bufferData(gl.ARRAY_BUFFER, body.p, gl.DYNAMIC_DRAW); gl.enableVertexAttribArray(this.aPos); gl.vertexAttribPointer(this.aPos, 2, gl.FLOAT, false, 0, 0);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.bUv); gl.bufferData(gl.ARRAY_BUFFER, body.uv, gl.STATIC_DRAW); gl.enableVertexAttribArray(this.aUv); gl.vertexAttribPointer(this.aUv, 2, gl.FLOAT, false, 0, 0);
