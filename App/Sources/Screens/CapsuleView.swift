@@ -32,6 +32,7 @@ struct CapsuleView: View {
                     .buttonStyle(SquishButtonStyle(fill: Theme.grape))
                 }
                 Button("Next", action: done).buttonStyle(SquishButtonStyle())
+                    .accessibilityIdentifier("capsule-next")
             } else {
                 capsule
                     .rotationEffect(.degrees(angle))

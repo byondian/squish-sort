@@ -30,8 +30,8 @@ final class GoldenPathTests: XCTestCase {
         Thread.sleep(forTimeInterval: 0.2)
     }
 
-    private func next() {
-        let next = app.buttons["Next"]
+    private func next(_ id: String = "win-next") {
+        let next = app.buttons[id]
         if !next.waitForExistence(timeout: 8) {
             let state = app.staticTexts["scene-state"]
             print("GOLDEN-PATH scene-state: \(state.exists ? state.label : "missing")")
@@ -55,7 +55,7 @@ final class GoldenPathTests: XCTestCase {
         XCTAssertTrue(open.waitForExistence(timeout: 8), "capsule after level 3")
         open.tap()
         XCTAssertTrue(app.staticTexts["Peach Bun"].waitForExistence(timeout: 5))
-        next()
+        next("capsule-next")
     }
 
     func testSkippingTheBirthdayQuestionMeansGentleMode() {

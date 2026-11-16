@@ -315,6 +315,7 @@ struct WinCard: View {
                     .buttonStyle(SquishButtonStyle(fill: Theme.grape))
             }
             Button("Next", action: next).buttonStyle(SquishButtonStyle()).font(Theme.title(22))
+                .accessibilityIdentifier("win-next")
         }
         .padding(28)
         .background(RoundedRectangle(cornerRadius: 32).fill(Theme.marshmallow))
