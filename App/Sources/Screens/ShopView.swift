@@ -21,6 +21,8 @@ struct ShopView: View {
                     .foregroundStyle(Theme.plum)
 
                     Text("Coins").font(Theme.title(20)).foregroundStyle(Theme.plum)
+                    Text("Coins are saved on this iPhone only.")
+                        .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.6))
                     ForEach(purchases.coinProducts, id: \.id) { product in
                         Button {
                             if model.isGentleMode { gateProduct = product } else { buy(product) }

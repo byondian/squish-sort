@@ -4,6 +4,7 @@ import Foundation
 /// dates; every feature it can switch on is already in the reviewed build.
 public struct GameConfig: Codable, Equatable, Sendable {
     public var adCadence = AdCadenceConfig()
+    /// Fixed in the build: remote config can't change the odds.
     public var capsuleOdds = CapsuleOdds()
     public var coins = CoinRules()
     /// Opt-in ads a day, across every placement.
@@ -29,7 +30,9 @@ public struct GameConfig: Codable, Equatable, Sendable {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         let d = GameConfig()
         adCadence = try c.decodeIfPresent(AdCadenceConfig.self, forKey: .adCadence) ?? d.adCadence
-        capsuleOdds = try c.decodeIfPresent(CapsuleOdds.self, forKey: .capsuleOdds) ?? d.capsuleOdds
+        // Capsule odds are published (in the app and on the website), so they
+        // are fixed in the build and never read from remote config.
+        capsuleOdds = d.capsuleOdds
         coins = try c.decodeIfPresent(CoinRules.self, forKey: .coins) ?? d.coins
         optInAdsPerDay = max(0, try c.decodeIfPresent(Int.self, forKey: .optInAdsPerDay) ?? d.optInAdsPerDay)
         christmasOpenFrom = try c.decodeIfPresent(String.self, forKey: .christmasOpenFrom) ?? d.christmasOpenFrom

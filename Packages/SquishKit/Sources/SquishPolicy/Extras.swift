@@ -182,11 +182,15 @@ public struct MysteryState: Codable, Equatable, Sendable {
     /// One guess a day. Returns true when this guess fills the bar and earns a capsule.
     public mutating func recordGuess(correct: Bool, today: String) -> Bool {
         guard canPlay(today: today) else { return false }
+        // The extra guess comes from an opt-in ad (or Remove Ads), so it never
+        // moves the capsule bar: nothing paid or watched ever leads to a capsule.
+        let extraGuess = extraGuessDay == today
         lastPlayedDay = today
         guard correct else {
             wrongDay = today
             return false
         }
+        guard !extraGuess else { return false }
         steps += 1
         if steps >= MysteryBag.stepsPerCapsule {
             steps = 0
@@ -479,9 +483,11 @@ public struct ParentalGateState: Equatable, Sendable {
     /// Seconds since 1970 until which answers are refused.
     public private(set) var lockedUntil: Double = 0
 
-    public init<R: RandomNumberGenerator>(using rng: inout R) {
+    /// `lockedUntil` carries a cooldown over from a gate that was closed and reopened.
+    public init<R: RandomNumberGenerator>(using rng: inout R, lockedUntil: Double = 0) {
         a = Int.random(in: 6...9, using: &rng)
         b = Int.random(in: 12...19, using: &rng)
+        self.lockedUntil = lockedUntil
     }
 
     public func isLocked(now: Double) -> Bool { now < lockedUntil }

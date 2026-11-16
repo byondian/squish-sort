@@ -60,6 +60,13 @@ final class AdsService: NSObject, ObservableObject, FullScreenContentDelegate {
         self.policy = policy
         apply(policy)
         // UI tests can't drive Google's consent form, so they start the SDK without it.
+        if (policy.tagForChildDirectedTreatment || policy.tagForUnderAgeOfConsent) && !AppModel.isUITesting {
+            // Children and teens under the consent age: tell Google's consent
+            // platform so, which means no form and no consent-based ads. Ads don't wait on it.
+            let underAge = RequestParameters()
+            underAge.isTaggedForUnderAgeOfConsent = true
+            try? await ConsentInformation.shared.requestConsentInfoUpdate(with: underAge)
+        }
         if policy.showConsentForm && !AppModel.isUITesting {
             await gatherConsent()
             guard ConsentInformation.shared.canRequestAds else { return }

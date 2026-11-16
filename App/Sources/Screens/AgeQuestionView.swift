@@ -16,7 +16,7 @@ struct AgeQuestionView: View {
         VStack(spacing: 20) {
             Spacer()
             // The Buddy asks (Peach Bun, unless the player has swapped already).
-            SpeechBubble(text: String(localized: "To set up your collection book, what year were you born?"))
+            SpeechBubble(text: String(localized: "What year were you born? This helps us show the right ads and settings."))
             SquishRefView(ref: model.progress.buddy.squishy ?? "peach-bun").frame(width: 120, height: 120)
             Picker("Year", selection: $year) {
                 Text("—").tag(Int?.none)

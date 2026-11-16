@@ -7,9 +7,11 @@ import SquishPolicy
 struct ParentalGate: View {
     var onPass: () -> Void
     var onCancel: () -> Void
+    /// The pause after a wrong answer outlasts closing and reopening the gate.
+    private static var lockedUntil: Double = 0
     @State private var gate: ParentalGateState = {
         var rng = SystemRandomNumberGenerator()
-        return ParentalGateState(using: &rng)
+        return ParentalGateState(using: &rng, lockedUntil: ParentalGate.lockedUntil)
     }()
     @State private var answer = ""
     @State private var wrong = false
@@ -59,6 +61,7 @@ struct ParentalGate: View {
         } else {
             wrong = true
             answer = ""
+            ParentalGate.lockedUntil = gate.lockedUntil
         }
     }
 }

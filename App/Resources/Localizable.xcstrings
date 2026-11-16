@@ -189,6 +189,28 @@
         }
       }
     },
+    "An extra guess wins coins. It doesn't fill the capsule bar.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "追加のこたえでもらえるのはコインだけ。カプセルバーは進みません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "추가로 맞히면 코인만 받아요. 캡슐 바는 채워지지 않아요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "額外猜測只能獲得金幣，不會增加扭蛋進度。"
+          }
+        }
+      }
+    },
     "An extra jar gives you room to keep going.": {
       "localizations": {
         "ja": {
@@ -581,6 +603,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "金幣"
+          }
+        }
+      }
+    },
+    "Coins are saved on this iPhone only.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コインはこのiPhoneにだけ保存されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "코인은 이 iPhone에만 저장돼요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "金幣只會儲存在這支 iPhone 上。"
           }
         }
       }
@@ -2851,28 +2895,6 @@
         }
       }
     },
-    "To set up your collection book, what year were you born?": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "コレクションブックを準備するよ。何年生まれ？"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "컬렉션 북을 준비할게요. 몇 년에 태어났나요?"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "為了準備你的收藏冊，你是哪一年出生的？"
-          }
-        }
-      }
-    },
     "Toy Shop": {
       "localizations": {
         "ja": {
@@ -3177,6 +3199,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld × %lld 等於多少？"
+          }
+        }
+      }
+    },
+    "What year were you born? This helps us show the right ads and settings.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "何年生まれですか？あなたに合った広告と設定にするために使います。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "몇 년에 태어났나요? 알맞은 광고와 설정을 보여 주는 데 사용해요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你是哪一年出生的？這能幫助我們顯示合適的廣告與設定。"
           }
         }
       }

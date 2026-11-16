@@ -414,6 +414,8 @@ final class ConfigTests: XCTestCase {
         XCTAssertEqual(c.coins.winBase, 50, "numbers that aren't sent keep their defaults")
         XCTAssertEqual(c.optInAdsPerDay, 6)
         XCTAssertEqual(c.capsuleOdds, CapsuleOdds())
+        let odds = GameConfig.decodeOrDefault(Data(#"{"capsuleOdds": {"rare": 1, "ultra": 99}}"#.utf8))
+        XCTAssertEqual(odds.capsuleOdds, CapsuleOdds(), "published odds can't be changed remotely")
         XCTAssertTrue(c.adsEnabled)
     }
 
@@ -681,6 +683,9 @@ final class ExtrasTests: XCTestCase {
         XCTAssertTrue(s.canOfferExtraGuess(today: "2026-12-01"))
         s.grantExtraGuess(today: "2026-12-01")
         XCTAssertTrue(s.canPlay(today: "2026-12-01"))
+        var lucky = s
+        XCTAssertFalse(lucky.recordGuess(correct: true, today: "2026-12-01"))
+        XCTAssertEqual(lucky.steps, 0, "a guess that came from an ad never moves the capsule bar")
         _ = s.recordGuess(correct: false, today: "2026-12-01")
         XCTAssertFalse(s.canOfferExtraGuess(today: "2026-12-01"), "once a day")
         XCTAssertFalse(s.canPlay(today: "2026-12-01"))

@@ -148,6 +148,9 @@ struct MysteryBagView: View {
                     Label("One more guess", systemImage: model.ownsRemoveAds ? "sparkles" : "play.rectangle.fill")
                 }
                 .buttonStyle(SquishButtonStyle(fill: Theme.grape))
+                // Nothing watched or bought ever leads to a capsule.
+                Text("An extra guess wins coins. It doesn't fill the capsule bar.")
+                    .font(Theme.body(12)).foregroundStyle(Theme.plum.opacity(0.6)).multilineTextAlignment(.center)
             } else {
                 Text("It was \(bag.answer.name(in: model.language)).").font(Theme.body(18)).foregroundStyle(Theme.plum)
             }
