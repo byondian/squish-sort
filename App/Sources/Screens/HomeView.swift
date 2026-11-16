@@ -273,6 +273,7 @@ struct BuddyHomeView: View {
     @EnvironmentObject var model: AppModel
     @State private var picking = false
     @State private var pokes = 0
+    @State private var confirmTreat = false
 
     private let moods: [(id: String, face: String, label: LocalizedStringKey)] = [
         ("happy", "😊", "Happy"), ("okay", "🙂", "Okay"), ("sleepy", "😴", "Sleepy"), ("grumpy", "😠", "Grumpy"),
@@ -330,14 +331,24 @@ struct BuddyHomeView: View {
                         .buttonStyle(SquishButtonStyle(fill: Theme.butter, text: Theme.plum))
                     } else if model.progress.wallet.canAfford(.treat) {
                         // Out of free treats: one more for coins, given straight away.
-                        Button { withAnimation { model.buyForBuddy(.treat) }; squish() } label: {
+                        // Two taps, so a poke meant for the Buddy never spends coins.
+                        Button {
+                            if confirmTreat {
+                                confirmTreat = false
+                                withAnimation { model.buyForBuddy(.treat) }
+                                squish()
+                            } else {
+                                withAnimation { confirmTreat = true }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { withAnimation { confirmTreat = false } }
+                            }
+                        } label: {
                             HStack(spacing: 6) {
                                 Image(systemName: "birthday.cake.fill")
-                                Text("Treat")
+                                Text(confirmTreat ? LocalizedStringKey("Tap again") : LocalizedStringKey("Treat"))
                                 Label("\(Coins.Item.treat.price)", systemImage: "circle.hexagongrid.fill").font(Theme.body(14))
                             }
                         }
-                        .buttonStyle(SquishButtonStyle(fill: Theme.butter, text: Theme.plum))
+                        .buttonStyle(SquishButtonStyle(fill: confirmTreat ? Theme.mint : Theme.butter, text: Theme.plum))
                         .accessibilityIdentifier("buy-treat")
                     } else {
                         // No treats and no coins: say where treats come from.

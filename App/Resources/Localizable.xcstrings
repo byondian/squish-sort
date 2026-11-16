@@ -2983,6 +2983,28 @@
         }
       }
     },
+    "Tap again": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "もう一度タップ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "한 번 더 탭"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再點一次"
+          }
+        }
+      }
+    },
     "Thanks! No ad breaks for a while.": {
       "localizations": {
         "ja": {
