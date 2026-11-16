@@ -3093,6 +3093,28 @@
         }
       }
     },
+    "RARE!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "レア！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "레어!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "稀有！"
+          }
+        }
+      }
+    },
     "Rate Squish Sort": {
       "localizations": {
         "ja": {
@@ -4255,6 +4277,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "轉一轉打開！"
+          }
+        }
+      }
+    },
+    "ULTRA!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ウルトラ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "울트라!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "超稀有！"
           }
         }
       }
