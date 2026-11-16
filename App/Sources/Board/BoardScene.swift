@@ -27,6 +27,8 @@ final class BoardScene: SKScene {
     private var pieces: [[PieceNode]] = []
     private var lifted: Int?
     private var busy = false
+    /// First-ever board: this move's squishy starts lifted with a hand on the target jar.
+    var tutorialMove: Move?
 
     init(board: Board, kinds: [String]) {
         self.board = board
@@ -97,6 +99,8 @@ final class BoardScene: SKScene {
 
     private func rebuild() {
         removeAllChildren()
+        // Everything is drawn at rest, so nothing is lifted any more.
+        lifted = nil
         guard size.width > 0 else { return }
         geometry = computeGeometry()
         jarNodes = []
@@ -118,6 +122,49 @@ final class BoardScene: SKScene {
             pieces.append(nodes)
             if board.isComplete(j) { jar.putLid(animated: false) }
         }
+        showTutorialIfNeeded()
+    }
+
+    private func showTutorialIfNeeded() {
+        guard let move = tutorialMove, lifted == nil, board.isLegal(move),
+              move.from < board.jarCount, move.to < board.jarCount else { return }
+        lift(move.from)
+        let hand = SKLabelNode(text: "👆")
+        hand.name = "tutorial-hand"
+        hand.fontSize = geometry.piece * 0.9
+        hand.verticalAlignmentMode = .center
+        hand.position = CGPoint(x: geometry.centers[move.to].x + geometry.piece * 0.25,
+                                y: geometry.centers[move.to].y - geometry.jarSize.height * 0.1)
+        hand.zPosition = 40
+        addChild(hand)
+        let pulse = SKAction.sequence([
+            .group([.scale(to: 1.25, duration: 0.45), .moveBy(x: 0, y: geometry.piece * 0.18, duration: 0.45)]),
+            .group([.scale(to: 1, duration: 0.45), .moveBy(x: 0, y: -geometry.piece * 0.18, duration: 0.45)]),
+        ])
+        hand.run(.repeatForever(pulse))
+    }
+
+    private func endTutorial() {
+        tutorialMove = nil
+        enumerateChildNodes(withName: "tutorial-hand") { node, _ in node.removeFromParent() }
+    }
+
+    /// "x3!" pops up where a run of three or more lands.
+    private func showCombo(_ count: Int, at jar: Int) {
+        guard count >= 3 else { return }
+        let label = SKLabelNode(text: "x\(count)!")
+        label.fontName = "AvenirNext-Heavy"
+        label.fontSize = geometry.piece * 0.7
+        label.fontColor = UIColor(hex: 0xFF7EB6)
+        label.position = CGPoint(x: geometry.centers[jar].x, y: geometry.centers[jar].y + geometry.jarSize.height * 0.55)
+        label.zPosition = 35
+        label.setScale(0.3)
+        addChild(label)
+        label.run(.sequence([
+            .scale(to: 1.25, duration: 0.12), .scale(to: 1, duration: 0.08),
+            .group([.moveBy(x: 0, y: geometry.piece * 0.8, duration: 0.5), .fadeOut(withDuration: 0.5)]),
+            .removeFromParent(),
+        ]))
     }
 
     // MARK: - Input
@@ -143,6 +190,7 @@ final class BoardScene: SKScene {
 
     private func tap(_ j: Int) {
         guard !busy else { return }
+        endTutorial()
         if let from = lifted {
             if from == j {
                 putBack(from)
@@ -273,7 +321,10 @@ final class BoardScene: SKScene {
         pieces[to].append(contentsOf: moving)
         run(.sequence([
             .wait(forDuration: hop + spread),
-            .run { [weak self] in self?.onLand?(result) },
+            .run { [weak self] in
+                self?.onLand?(result)
+                self?.showCombo(result.count, at: result.move.to)
+            },
             .wait(forDuration: 0.25),
             .run { [weak self] in self?.finish(result, newBoard: newBoard) },
         ]))

@@ -59,7 +59,8 @@ final class AdsService: NSObject, ObservableObject, FullScreenContentDelegate {
         guard !started else { return }
         self.policy = policy
         apply(policy)
-        if policy.showConsentForm {
+        // UI tests can't drive Google's consent form, so they start the SDK without it.
+        if policy.showConsentForm && !AppModel.isUITesting {
             await gatherConsent()
             guard ConsentInformation.shared.canRequestAds else { return }
         }
@@ -80,6 +81,21 @@ final class AdsService: NSObject, ObservableObject, FullScreenContentDelegate {
         } catch {
             // No form means no consent: ads stay off until next launch.
         }
+    }
+
+    func setMuted(_ muted: Bool) {
+        guard started else { return }
+        MobileAds.shared.isApplicationMuted = muted
+    }
+
+    /// Google needs a way back to the consent form where it applies (UK, EEA, Switzerland).
+    var privacyOptionsRequired: Bool {
+        ConsentInformation.shared.privacyOptionsRequirementStatus == .required
+    }
+
+    func showPrivacyOptions() async {
+        guard let vc = Self.topViewController() else { return }
+        try? await ConsentForm.presentPrivacyOptionsForm(from: vc)
     }
 
     private func request() -> Request {

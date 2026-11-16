@@ -45,6 +45,11 @@ final class LevelController: ObservableObject {
             if result.completedJar != nil { model?.haptics.complete() } else { model?.haptics.land() }
         }
         scene.onMoveFinished = { [weak self] _ in self?.checkOutcome() }
+        // The very first board opens mid-move: one squishy already lifted and a
+        // hand on the jar it belongs in, so the first tap finishes a jar.
+        if index == 0, model.progress.stars.isEmpty, let first = level.solution.first {
+            scene.tutorialMove = first
+        }
     }
 
     private func play(_ move: Move) -> (MoveResult, Board)? {
@@ -209,6 +214,10 @@ struct LevelView: View {
                 case .won(let stars):
                     WinCard(stars: stars, showpiece: controller.level.file.beat == .showpiece,
                             coins: controller.earnedCoins,
+                            toCapsule: model.levelsToNextCapsule(after: controller.index),
+                            // The first two levels roll straight on after the celebration.
+                            autoAdvance: controller.index < 2,
+                            haptics: model.haptics,
                             gift: model.giftOffered ? { model.openGift() } : nil) {
                         model.continueAfterWin(index: controller.index, attempts: controller.attempts)
                     }
@@ -254,7 +263,19 @@ struct LevelView: View {
                 } else if controller.level.file.beat == .showpiece {
                     Text("HARD").font(Theme.body(13)).foregroundStyle(Theme.bubblegum)
                 }
-                Text("Moves \(controller.session.moveCount) · Par \(controller.level.par)").font(Theme.body(14)).opacity(0.7)
+                // Three stars that dim as the move count passes each limit.
+                HStack(spacing: 4) {
+                    let lit = Stars.rating(moves: controller.session.moveCount, par: controller.level.par)
+                    ForEach(0..<3, id: \.self) { i in
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundStyle(i < lit ? Theme.butter : Theme.plum.opacity(0.18))
+                            .scaleEffect(i < lit ? 1 : 0.8)
+                    }
+                    Text("\(controller.session.moveCount)").font(Theme.body(14)).opacity(0.7)
+                        .accessibilityIdentifier("move-count")
+                }
+                .animation(.spring(response: 0.3, dampingFraction: 0.5), value: controller.session.moveCount)
             }
             .foregroundStyle(Theme.plum)
             Spacer()
@@ -342,10 +363,16 @@ struct WinCard: View {
     let stars: Int
     let showpiece: Bool
     var coins = 0
+    /// Levels still to win before the next capsule (0 = the next level has one).
+    var toCapsule: Int?
+    var autoAdvance = false
+    var haptics: Haptics?
     /// Opt-in bonus gift box (rewarded ad). Nil when not offered.
     var gift: (() -> Void)?
     let next: () -> Void
     @State private var shown = 0
+    @State private var coinsShown = 0
+    @State private var left = false
 
     var body: some View {
         VStack(spacing: 16) {
@@ -356,27 +383,58 @@ struct WinCard: View {
                         .font(.system(size: 40, weight: .bold))
                         .foregroundStyle(i < shown ? Theme.butter : Theme.plum.opacity(0.25))
                         .scaleEffect(i < shown ? 1 : 0.7)
+                        .rotationEffect(.degrees(i < shown ? 0 : -25))
                 }
             }
             if coins > 0 {
-                Label("+\(coins)", systemImage: "circle.hexagongrid.fill").font(Theme.body(18)).foregroundStyle(Theme.plum)
+                Label("+\(coinsShown)", systemImage: "circle.hexagongrid.fill").font(Theme.title(20)).foregroundStyle(Theme.plum)
+                    .contentTransition(.numericText())
+            }
+            if let toCapsule {
+                Label {
+                    if toCapsule == 0 { Text("Capsule next level!") } else { Text("Next capsule: \(toCapsule + 1) more") }
+                } icon: {
+                    Image(systemName: "gift.fill")
+                }
+                .font(Theme.body(14)).foregroundStyle(Theme.grape)
             }
             if let gift {
                 Button(action: gift) { Label("Bonus gift", systemImage: "gift.fill") }
                     .buttonStyle(SquishButtonStyle(fill: Theme.grape))
             }
-            Button("Next", action: next).buttonStyle(SquishButtonStyle()).font(Theme.title(22))
+            Button("Next") { go() }.buttonStyle(SquishButtonStyle()).font(Theme.title(22))
                 .accessibilityIdentifier("win-next")
         }
         .padding(28)
         .background(RoundedRectangle(cornerRadius: 32).fill(Theme.marshmallow))
         .padding(30)
         .task {
-            for i in 1...stars {
-                try? await Task.sleep(nanoseconds: 350_000_000)
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { shown = i }
+            // Stars slam in one by one, each with a tap you can feel.
+            for i in 1...max(1, stars) {
+                try? await Task.sleep(nanoseconds: 300_000_000)
+                withAnimation(.spring(response: 0.25, dampingFraction: 0.4)) { shown = i }
+                haptics?.land()
+            }
+            // Coins count up.
+            if coins > 0 {
+                for n in 1...coins {
+                    try? await Task.sleep(nanoseconds: 45_000_000)
+                    withAnimation(.easeOut(duration: 0.05)) { coinsShown = n }
+                }
+                haptics?.complete()
+            }
+            if autoAdvance {
+                try? await Task.sleep(nanoseconds: 700_000_000)
+                if !Task.isCancelled { go() }
             }
         }
+    }
+
+    /// Next runs once, whether tapped or reached by the automatic roll-on.
+    private func go() {
+        guard !left else { return }
+        left = true
+        next()
     }
 }
 

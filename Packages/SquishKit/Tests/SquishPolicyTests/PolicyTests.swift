@@ -202,8 +202,31 @@ final class CadenceTests: XCTestCase {
         XCTAssertFalse(AdCadence.shouldShowInterstitial(after: win(20, session: 30), state: played(9999, levels: 9, shown: 1), group: .adult, ownsRemoveAds: false))
     }
 
-    func testNotAfterABossThatTookSeveralTries() {
-        XCTAssertFalse(AdCadence.shouldShowInterstitial(after: win(10, attempts: 2, boss: true), state: played(9999, levels: 9, shown: 1), group: .adult, ownsRemoveAds: false))
+    func testNeverStraightAfterABossWinACapsuleOrAnUnlock() {
+        let ready = played(9999, levels: 9, shown: 1)
+        XCTAssertTrue(AdCadence.shouldShowInterstitial(after: win(11), state: ready, group: .adult, ownsRemoveAds: false))
+        XCTAssertFalse(AdCadence.shouldShowInterstitial(after: win(10, attempts: 2, boss: true), state: ready, group: .adult, ownsRemoveAds: false))
+        XCTAssertFalse(AdCadence.shouldShowInterstitial(after: win(10, boss: true), state: ready, group: .adult, ownsRemoveAds: false))
+        let capsule = LevelWin(level: 12, attempts: 1, isBoss: false, secondsIntoSession: 600, hadReward: true)
+        XCTAssertFalse(AdCadence.shouldShowInterstitial(after: capsule, state: ready, group: .adult, ownsRemoveAds: false))
+    }
+
+    func testARewardedAdRestartsTheWaitForAForcedAd() {
+        var s = played(9999, levels: 9, shown: 2)
+        AdCadence.recordRewardedWatched(&s)
+        XCTAssertEqual(s.levelsSinceAd, 0)
+        XCTAssertEqual(s.playSecondsSinceAd, 0)
+        XCTAssertEqual(s.interstitialsShown, 2)
+        XCTAssertFalse(AdCadence.shouldShowInterstitial(after: win(20), state: s, group: .adult, ownsRemoveAds: false))
+    }
+
+    func testRatingPromptOnlyAfterAFirstTryBossWinFromLevelTen() {
+        XCTAssertTrue(RatingPrompt.shouldAsk(after: win(10, boss: true), group: .adult, alreadyAsked: false))
+        XCTAssertTrue(RatingPrompt.shouldAsk(after: win(20, boss: true), group: .teen, alreadyAsked: false))
+        XCTAssertFalse(RatingPrompt.shouldAsk(after: win(10, boss: true), group: .child, alreadyAsked: false), "never in gentle mode")
+        XCTAssertFalse(RatingPrompt.shouldAsk(after: win(10, attempts: 2, boss: true), group: .adult, alreadyAsked: false), "never after a fail")
+        XCTAssertFalse(RatingPrompt.shouldAsk(after: win(10, boss: true), group: .adult, alreadyAsked: true))
+        XCTAssertFalse(RatingPrompt.shouldAsk(after: win(9), group: .adult, alreadyAsked: false))
     }
 
     func testTiersRampUp() {

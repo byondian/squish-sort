@@ -25,7 +25,7 @@ struct SettingsView: View {
             TopBar(title: "Settings")
             Form {
                 Section {
-                    Toggle("Sound", isOn: binding(\.soundOn))
+                    Toggle("Sound", isOn: Binding(get: { model.progress.soundOn }, set: { model.setSound($0) }))
                     Toggle("Music", isOn: binding(\.musicOn))
                     Toggle("Haptics", isOn: Binding(get: { model.progress.hapticsOn }, set: { model.setHaptics($0) }))
                 }
@@ -72,6 +72,9 @@ struct SettingsView: View {
                     Text("Gentle mode: fewer, child-safe ads, purchases behind a grown-up check, no countdowns.")
                 }
                 Section {
+                    if model.showsPrivacyChoices {
+                        Button("Privacy choices") { model.showPrivacyChoices() }
+                    }
                     Link("Privacy policy", destination: URL(string: "https://squishsort.app/privacy")!)
                     Link("Support", destination: URL(string: "https://squishsort.app/support")!)
                 }

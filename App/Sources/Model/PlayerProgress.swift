@@ -41,6 +41,8 @@ struct PlayerProgress: Codable, Equatable {
     var made: [MadeSquishy] = []
     /// Extras whose "new!" badge has been tapped away.
     var seenExtras: Set<String> = []
+    /// Apple's rating prompt has been requested (it's asked for once).
+    var ratingAsked = false
 
     init() {}
 
@@ -75,6 +77,7 @@ struct PlayerProgress: Codable, Equatable {
         mystery = v(.mystery, d.mystery)
         made = v(.made, d.made)
         seenExtras = v(.seenExtras, d.seenExtras)
+        ratingAsked = v(.ratingAsked, d.ratingAsked)
     }
 
     static func today(_ date: Date = Date()) -> String {

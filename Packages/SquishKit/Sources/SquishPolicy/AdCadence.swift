@@ -58,12 +58,15 @@ public struct LevelWin: Sendable {
     public var attempts: Int
     public var isBoss: Bool
     public var secondsIntoSession: Double
+    /// This win opened a capsule or unlocked an extra. Those moments stay ad-free.
+    public var hadReward: Bool
 
-    public init(level: Int, attempts: Int, isBoss: Bool, secondsIntoSession: Double) {
+    public init(level: Int, attempts: Int, isBoss: Bool, secondsIntoSession: Double, hadReward: Bool = false) {
         self.level = level
         self.attempts = attempts
         self.isBoss = isBoss
         self.secondsIntoSession = secondsIntoSession
+        self.hadReward = hadReward
     }
 }
 
@@ -78,7 +81,8 @@ public enum AdCadence {
         let firstLevel = child ? max(config.childFirstLevel, firstTier.fromLevel) : firstTier.fromLevel
         guard win.level >= firstLevel else { return false }
         guard win.secondsIntoSession >= config.sessionGraceSeconds else { return false }
-        if win.isBoss && win.attempts > 1 { return false }
+        // Never straight after a boss win, a capsule or an extra unlocking: the big moments stay clean.
+        if win.isBoss || win.hadReward { return false }
         let tier = config.tiers.last { $0.fromLevel <= win.level } ?? firstTier
         let multiplier = child ? max(1, config.childGapMultiplier) : 1
         let secondsOK = state.playSecondsSinceAd >= tier.everySeconds * Double(multiplier)
@@ -95,9 +99,26 @@ public enum AdCadence {
         state.playSecondsSinceAd += max(0, seconds)
     }
 
+    /// An opt-in rewarded ad counts as the ad break: the wait for the next forced ad starts again.
+    public static func recordRewardedWatched(_ state: inout AdCadenceState) {
+        state.levelsSinceAd = 0
+        state.playSecondsSinceAd = 0
+    }
+
     public static func recordInterstitialShown(_ state: inout AdCadenceState) {
         state.levelsSinceAd = 0
         state.playSecondsSinceAd = 0
         state.interstitialsShown += 1
+    }
+}
+
+/// Apple's rating prompt: once, at a happy moment. After a boss win on the
+/// first try from level 10 on, never in gentle mode. Boss wins never show a
+/// forced ad, so it never follows an ad or a fail.
+public enum RatingPrompt {
+    public static let fromLevel = 10
+
+    public static func shouldAsk(after win: LevelWin, group: AgeGroup, alreadyAsked: Bool) -> Bool {
+        !alreadyAsked && group != .child && win.isBoss && win.attempts == 1 && win.level >= fromLevel
     }
 }

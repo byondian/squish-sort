@@ -47,6 +47,10 @@ final class AppModel: ObservableObject {
     private var rng = SystemRandomNumberGenerator()
     private var sessionStart = Date()
     private var greetedThisSession = false
+    /// The last win opened a capsule or unlocked an extra, so no forced ad follows it.
+    private var lastWinHadReward = false
+    /// Whether the capsule on screen is a squishy the player didn't have yet.
+    @Published private(set) var capsuleIsNew = false
 
     /// UI tests start from a fresh install every time.
     static let isUITesting = ProcessInfo.processInfo.arguments.contains("-uiTesting")
@@ -318,6 +322,7 @@ final class AppModel: ObservableObject {
         // three-star difference once) but never another capsule or more coins.
         let previousBest = progress.stars[level.id]
         let firstClear = previousBest == nil
+        let extrasBefore = Extra.allCases.filter { isExtraUnlocked($0) }
         update { p in
             p.wallet.earn(Coins.earned(forWinWithStars: stars, previousBest: previousBest))
             if firstClear {
@@ -334,9 +339,17 @@ final class AppModel: ObservableObject {
         // and never on the win card in gentle mode (no pop-up offers for under-13s).
         giftOffered = firstClear && !isGentleMode && !level.file.capsule && progress.winsSinceGift >= 4 && canWatchRewarded
         levelCheer = buddyLine(stars >= 3 ? "win_3star" : "win")
+        lastWinHadReward = (firstClear && level.file.capsule) || Extra.allCases.filter { isExtraUnlocked($0) } != extrasBefore
         if firstClear && level.file.capsule {
             openCapsule(world: level.file.world)
         }
+    }
+
+    /// Levels still to win before the next capsule level, counting from the level after `index`.
+    /// 0 means the next level is a capsule level. Nil when there is none left.
+    func levelsToNextCapsule(after index: Int) -> Int? {
+        guard index + 1 < levels.count else { return nil }
+        return levels[(index + 1)...].firstIndex { $0.file.capsule }.map { $0 - index - 1 }
     }
 
     /// Coins a win on this level would pay now (0 on a replay that doesn't improve).
@@ -360,6 +373,7 @@ final class AppModel: ObservableObject {
     private func openCapsule(world: String) {
         var state = progress.collection
         if let got = CapsuleDrops.open(world: world, roster: roster, state: &state, rng: &rng) {
+            capsuleIsNew = !progress.collection.owns(got.id)
             update { $0.collection = state }
             capsule = got
         }
@@ -418,7 +432,11 @@ final class AppModel: ObservableObject {
         guard let age = progress.age, config.adsEnabled else { return }
         _ = age
         let policy = currentAdPolicy
-        Task { await ads.start(policy: policy) }
+        let muted = !progress.soundOn
+        Task {
+            await ads.start(policy: policy)
+            ads.setMuted(muted)
+        }
         // The first-open counter joins here with the backend; children send counts only.
     }
 
@@ -429,6 +447,16 @@ final class AppModel: ObservableObject {
     var currentAdPolicy: AdRequestPolicy {
         AdPolicy.requestPolicy(profile: progress.age, storefront: storefront, consent: ads.consentStatus,
                                trackingAllowed: trackingAllowed)
+    }
+
+    /// Settings > Privacy choices: reopens Google's consent form, then applies the new answer.
+    var showsPrivacyChoices: Bool { progress.age != nil && ads.privacyOptionsRequired }
+
+    func showPrivacyChoices() {
+        Task {
+            await ads.showPrivacyOptions()
+            ads.update(policy: currentAdPolicy)
+        }
     }
 
     /// Apple's tracking prompt, once, for eligible players only (never gentle mode).
@@ -494,7 +522,11 @@ final class AppModel: ObservableObject {
     private func showInterstitialThenNext(index: Int, attempts: Int) {
         let level = levels[index]
         let win = LevelWin(level: index + 1, attempts: attempts, isBoss: level.file.beat == .boss,
-                           secondsIntoSession: Date().timeIntervalSince(sessionStart))
+                           secondsIntoSession: Date().timeIntervalSince(sessionStart), hadReward: lastWinHadReward)
+        if RatingPrompt.shouldAsk(after: win, group: ageGroup, alreadyAsked: progress.ratingAsked) {
+            update { $0.ratingAsked = true }
+            askForRating()
+        }
         let show = progress.age != nil && config.adsEnabled
             && AdCadence.shouldShowInterstitial(after: win, state: progress.cadence, group: ageGroup,
                                                 ownsRemoveAds: ownsRemoveAds, config: config.adCadence)
@@ -509,7 +541,18 @@ final class AppModel: ObservableObject {
     var canWatchRewarded: Bool { progress.age != nil && config.adsEnabled && ads.rewardedReady }
 
     func watchRewarded(_ granted: @escaping () -> Void) {
-        ads.showRewarded { earned in if earned { granted() } }
+        ads.showRewarded { [weak self] earned in
+            guard earned else { return }
+            // A watched rewarded ad counts as the ad break.
+            self?.update { AdCadence.recordRewardedWatched(&$0.cadence) }
+            granted()
+        }
+    }
+
+    private func askForRating() {
+        guard !AppModel.isUITesting,
+              let scene = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first else { return }
+        AppStore.requestReview(in: scene)
     }
 
     // MARK: - Helpers
@@ -538,6 +581,12 @@ final class AppModel: ObservableObject {
             if p.hintDay != today { p.hintDay = today; p.hintsUsedToday = 0 }
             p.hintsUsedToday += 1
         }
+    }
+
+    /// Ads are told when the game's sound is off, so they start muted too.
+    func setSound(_ on: Bool) {
+        update { $0.soundOn = on }
+        ads.setMuted(!on)
     }
 
     func setHaptics(_ on: Bool) {

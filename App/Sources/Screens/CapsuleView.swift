@@ -10,6 +10,7 @@ struct CapsuleView: View {
     @State private var lastDrag: CGPoint?
     @State private var opened = false
     @State private var squeeze: CGFloat = 0
+    @State private var shake: CGFloat = 0
 
     var body: some View {
         VStack(spacing: 24) {
@@ -22,6 +23,14 @@ struct CapsuleView: View {
                         .onChanged { _ in withAnimation(.easeOut(duration: 0.6)) { squeeze = 1 } }
                         .onEnded { _ in withAnimation(.spring(response: 1.2, dampingFraction: 0.6)) { squeeze = 0 } })
                 Text(verbatim: collectible.name(in: model.language)).font(Theme.title(30)).foregroundStyle(Theme.plum)
+                if model.capsuleIsNew {
+                    Text("NEW!").font(Theme.title(20)).foregroundStyle(.white)
+                        .padding(.horizontal, 14).padding(.vertical, 5)
+                        .background(Capsule().fill(Theme.bubblegum))
+                        .rotationEffect(.degrees(-6))
+                        .transition(.scale(scale: 2.5).combined(with: .opacity))
+                }
+                Text(verbatim: bookCount).font(Theme.body(15)).foregroundStyle(Theme.plum.opacity(0.7))
                 Text("Squeeze me!").font(Theme.body(18)).foregroundStyle(Theme.plum.opacity(0.7))
                 // Double capsule: opt-in ad, same odds. Gentle mode gets it only in the book.
                 if !model.isGentleMode && model.bonusCapsuleWorld != nil && model.canWatchRewarded {
@@ -36,6 +45,7 @@ struct CapsuleView: View {
             } else {
                 capsule
                     .rotationEffect(.degrees(angle))
+                    .offset(x: shake)
                     .gesture(DragGesture()
                         .onChanged { value in twist(value) }
                         .onEnded { _ in lastDrag = nil })
@@ -50,6 +60,12 @@ struct CapsuleView: View {
         }
         .frame(maxWidth: .infinity)
         .background(Theme.marshmallow.ignoresSafeArea())
+    }
+
+    /// "5/17" for the squishy's world shelf.
+    private var bookCount: String {
+        let shelf = model.roster.collectibles.filter { $0.world == collectible.world }
+        return "\(shelf.filter { model.progress.collection.owns($0.id) }.count)/\(shelf.count)"
     }
 
     private var capsule: some View {
@@ -79,6 +95,11 @@ struct CapsuleView: View {
     private func open() {
         guard !opened else { return }
         model.haptics.complete()
+        // A quick shake before the pop.
+        withAnimation(.easeInOut(duration: 0.06).repeatCount(5, autoreverses: true)) { shake = 9 }
         withAnimation(.spring(response: 0.5, dampingFraction: 0.55).delay(0.35)) { opened = true }
+        if model.capsuleIsNew {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) { model.haptics.win() }
+        }
     }
 }

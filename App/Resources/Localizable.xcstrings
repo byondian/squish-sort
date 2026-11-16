@@ -299,6 +299,28 @@
         }
       }
     },
+    "Capsule next level!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "つぎのレベルでカプセル！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다음 레벨에 캡슐!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下一關有扭蛋！"
+          }
+        }
+      }
+    },
     "Change Buddy": {
       "localizations": {
         "ja": {
@@ -1333,6 +1355,28 @@
         }
       }
     },
+    "NEW!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NEW!"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NEW!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新！"
+          }
+        }
+      }
+    },
     "Name": {
       "localizations": {
         "ja": {
@@ -1417,6 +1461,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "下一關"
+          }
+        }
+      }
+    },
+    "Next capsule: %lld more": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "つぎのカプセルまで あと%lld"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다음 캡슐까지 %lld레벨"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再 %lld 關就有扭蛋"
           }
         }
       }
@@ -1703,6 +1769,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "戳戳袋子，猜猜裡面是誰！"
+          }
+        }
+      }
+    },
+    "Privacy choices": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "プライバシーの選択"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "개인정보 선택"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隱私選項"
           }
         }
       }

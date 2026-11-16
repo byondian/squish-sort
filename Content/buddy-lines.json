@@ -1,5 +1,5 @@
 {
- "version": 2,
+ "version": 3,
  "note": "Squishy Buddy line bank. Pre-written only; no AI, no player free text. Jokes in ja/ko/zh-Hant are local jokes, not translations. Language QA done 16 Nov (automated checks, native-style review, back-translation, fresh proofread; stopped when proofreads found only mechanical fixes). A line with 'locales' shows only in those locales. reply_grumpy-04 must stay in every locale.",
  "rules": {
   "maxUnpromptedPerHomeVisit": 1,
@@ -166,10 +166,10 @@
    "id": "greet_night-01",
    "trigger": "greet_night",
    "text": {
-    "en": "It's late! Just one level, then sweet dreams?",
-    "ja": "もうおそいよ！1レベルだけやって、おやすみしよ？",
-    "ko": "늦었네! 딱 한 판만 하고 자자, 응?",
-    "zh-Hant": "很晚囉！玩一關就去睡好不好？"
+    "en": "It's late! Time for sweet dreams soon.",
+    "ja": "もうおそいよ！そろそろおやすみの時間だね。",
+    "ko": "늦었어! 이제 곧 잘 시간이야.",
+    "zh-Hant": "很晚囉！差不多該睡覺囉。"
    }
   },
   {
@@ -196,10 +196,10 @@
    "id": "greet_back-01",
    "trigger": "greet_back",
    "text": {
-    "en": "You're back! I counted every second. Well, most of them.",
-    "ja": "おかえり！1秒1秒かぞえてたよ。ほぼね。",
-    "ko": "돌아왔구나! 1초도 안 빼고 셌어. 거의!",
-    "zh-Hant": "你回來了！我每一秒都在數，差不多啦。"
+    "en": "You're back! What a lovely surprise.",
+    "ja": "おかえり！会えてうれしいな。",
+    "ko": "돌아왔구나! 만나서 정말 반가워.",
+    "zh-Hant": "你回來了！看到你好開心。"
    }
   },
   {

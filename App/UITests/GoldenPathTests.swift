@@ -33,22 +33,45 @@ final class GoldenPathTests: XCTestCase {
     private func next(_ id: String = "win-next") {
         let next = app.buttons[id]
         if !next.waitForExistence(timeout: 8) {
-            let state = app.staticTexts["scene-state"]
-            print("GOLDEN-PATH scene-state: \(state.exists ? state.label : "missing")")
-            print("GOLDEN-PATH screen:\n\(app.debugDescription)")
-            XCTFail("Next missing; scene-state: \(state.exists ? state.label : "missing")")
+            dump("\(id) missing")
+            XCTFail("\(id) missing")
         }
+        // A cover that is still sliding away can swallow the tap: wait until the button can be hit.
+        let deadline = Date().addingTimeInterval(6)
+        while !next.isHittable && Date() < deadline { Thread.sleep(forTimeInterval: 0.2) }
         next.tap()
+    }
+
+    /// Taps Next on the win card and waits for the level title. Next runs once in
+    /// the app, so a second tap is safe if the first one landed on a closing cover.
+    private func nextLevel(_ title: String) {
+        next()
+        let label = app.staticTexts[title]
+        if label.waitForExistence(timeout: 3) { return }
+        let again = app.buttons["win-next"]
+        if again.exists && again.isHittable { again.tap() }
+        if !label.waitForExistence(timeout: 6) {
+            dump("\(title) missing after Next")
+            XCTFail("\(title) missing after Next")
+        }
+    }
+
+    private func dump(_ what: String) {
+        let state = app.staticTexts["scene-state"]
+        print("GOLDEN-PATH \(what); scene-state: \(state.exists ? state.label : "missing")")
+        print("GOLDEN-PATH screen:\n\(app.debugDescription)")
     }
 
     private func playFirstThreeAndOpenCapsule() {
         XCTAssertTrue(app.staticTexts["Level 1"].waitForExistence(timeout: 10), "Level 1 is the first screen")
-        play([(1, 0), (1, 2)])
-        next()
-        XCTAssertTrue(app.staticTexts["Level 2"].waitForExistence(timeout: 5))
+        // Level 1 opens with the first squishy already lifted: one tap finishes a jar.
+        tapJar(0)
+        Thread.sleep(forTimeInterval: 1.0)
+        play([(1, 2)])
+        // The first two levels roll on by themselves after the celebration.
+        XCTAssertTrue(app.staticTexts["Level 2"].waitForExistence(timeout: 10), "level 1 rolls on to level 2")
         play([(0, 2), (1, 0), (1, 2)])
-        next()
-        XCTAssertTrue(app.staticTexts["Level 3"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Level 3"].waitForExistence(timeout: 10), "level 2 rolls on to level 3")
         play([(0, 3), (2, 0), (1, 2), (1, 3), (0, 1), (2, 0), (2, 3)])
         // First capsule is always Peach Bun.
         let open = app.buttons["open-capsule"]
@@ -68,8 +91,7 @@ final class GoldenPathTests: XCTestCase {
         let skip = app.buttons["Skip"]
         XCTAssertTrue(skip.waitForExistence(timeout: 8), "birthday question after the first capsule")
         skip.tap()
-        next()
-        XCTAssertTrue(app.staticTexts["Level 4"].waitForExistence(timeout: 5))
+        nextLevel("Level 4")
         app.buttons["gearshape.fill"].firstMatch.tap()
         XCTAssertTrue(app.staticTexts["Gentle mode is on"].waitForExistence(timeout: 5))
     }
@@ -80,8 +102,7 @@ final class GoldenPathTests: XCTestCase {
         let skip = app.buttons["Skip"]
         XCTAssertTrue(skip.waitForExistence(timeout: 8))
         skip.tap()
-        next()
-        XCTAssertTrue(app.staticTexts["Level 4"].waitForExistence(timeout: 5))
+        nextLevel("Level 4")
         app.buttons["gearshape.fill"].firstMatch.tap()
         let off = app.buttons["Turn off gentle mode"]
         XCTAssertTrue(off.waitForExistence(timeout: 5))
@@ -103,8 +124,7 @@ final class GoldenPathTests: XCTestCase {
         XCTAssertTrue(picker.waitForExistence(timeout: 8))
         picker.adjust(toPickerWheelValue: "1990")
         app.buttons["Continue"].tap()
-        next()
-        XCTAssertTrue(app.staticTexts["Level 4"].waitForExistence(timeout: 5))
+        nextLevel("Level 4")
         app.buttons["gearshape.fill"].firstMatch.tap()
         XCTAssertTrue(app.buttons["Set up for a child"].waitForExistence(timeout: 5))
     }

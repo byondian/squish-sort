@@ -169,6 +169,18 @@ final class SessionTests: XCTestCase {
         XCTAssertEqual(s.board.jarCount, 4)
     }
 
+    func testStarLimitsMatchTheRating() {
+        for par in 2...40 {
+            let three = Stars.moveLimit(forStars: 3, par: par)!
+            let two = Stars.moveLimit(forStars: 2, par: par)!
+            XCTAssertEqual(Stars.rating(moves: three, par: par), 3)
+            XCTAssertEqual(Stars.rating(moves: two, par: par), two == three ? 3 : 2)
+            XCTAssertLessThan(Stars.rating(moves: two + 1, par: par), 3)
+            XCTAssertEqual(Stars.rating(moves: two + 1, par: par), 1)
+        }
+        XCTAssertNil(Stars.moveLimit(forStars: 1, par: 10))
+    }
+
     func testStarsAgainstPar() {
         XCTAssertEqual(Stars.rating(moves: 10, par: 10), 3)
         XCTAssertEqual(Stars.rating(moves: 13, par: 10), 2)
