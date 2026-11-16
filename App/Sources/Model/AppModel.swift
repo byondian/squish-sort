@@ -110,6 +110,9 @@ final class AppModel: ObservableObject {
         purchases = PurchaseService(cachedOwnership: loaded.ownsRemoveAds)
         haptics.enabled = loaded.hapticsOn
         sounds.enabled = loaded.soundOn
+        sounds.level = Float(loaded.soundLevel)
+        sounds.squishOn = loaded.squishSoundsOn
+        sounds.buddyVoice = loaded.buddyVoiceOn
         // New players land straight on Level 1; the home screen arrives with the first capsule.
         screen = loaded.highestUnlocked >= 3 ? .home : .level(min(loaded.highestUnlocked, max(0, levels.count - 1)))
         purchases.onChange = { [weak self] owns in self?.update { $0.ownsRemoveAds = owns } }
@@ -1101,6 +1104,30 @@ final class AppModel: ObservableObject {
         update { $0.soundOn = on }
         sounds.enabled = on
         ads.setMuted(!on)
+    }
+
+    /// The Sounds slider. All the way down is the same as off, so ads start muted too.
+    func setSoundLevel(_ level: Double) {
+        let level = min(1, max(0, level))
+        update { $0.soundLevel = level; $0.soundOn = level > 0 }
+        sounds.level = Float(level)
+        sounds.enabled = level > 0
+        ads.setMuted(level <= 0)
+    }
+
+    func setMusicLevel(_ level: Double) {
+        let level = min(1, max(0, level))
+        update { $0.musicLevel = level; $0.musicOn = level > 0 }
+    }
+
+    func setSquishSounds(_ on: Bool) {
+        update { $0.squishSoundsOn = on }
+        sounds.squishOn = on
+    }
+
+    func setBuddyVoice(_ on: Bool) {
+        update { $0.buddyVoiceOn = on }
+        sounds.buddyVoice = on
     }
 
     func setHaptics(_ on: Bool) {

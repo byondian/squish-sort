@@ -36,8 +36,13 @@ struct SettingsView: View {
             TopBar(title: "Settings")
             Form {
                 Section {
-                    Toggle("Sound", isOn: Binding(get: { model.progress.soundOn }, set: { model.setSound($0) }))
-                    Toggle("Music", isOn: binding(\.musicOn))
+                    level("Sounds", "speaker.wave.2.fill",
+                          Binding(get: { model.progress.soundOn ? model.progress.soundLevel : 0 }, set: { model.setSoundLevel($0) }))
+                        .accessibilityIdentifier("settings-sounds")
+                    level("Music", "music.note",
+                          Binding(get: { model.progress.musicOn ? model.progress.musicLevel : 0 }, set: { model.setMusicLevel($0) }))
+                    Toggle("Squish sounds", isOn: Binding(get: { model.progress.squishSoundsOn }, set: { model.setSquishSounds($0) }))
+                    Toggle("Buddy voice", isOn: Binding(get: { model.progress.buddyVoiceOn }, set: { model.setBuddyVoice($0) }))
                     Toggle("Haptics", isOn: Binding(get: { model.progress.hapticsOn }, set: { model.setHaptics($0) }))
                 }
                 Section {
@@ -146,6 +151,16 @@ struct SettingsView: View {
 
     private func buy() {
         Task { thanks = await purchases.buy() }
+    }
+
+    /// A slider row: name, then the slider with a quiet and a loud mark.
+    private func level(_ title: LocalizedStringKey, _ icon: String, _ value: Binding<Double>) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Label(title, systemImage: icon)
+            Slider(value: value, in: 0...1) { Text(title) }
+                .tint(Theme.bubblegum)
+        }
+        .padding(.vertical, 2)
     }
 
     private func binding(_ key: WritableKeyPath<PlayerProgress, Bool>) -> Binding<Bool> {

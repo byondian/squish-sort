@@ -468,7 +468,8 @@ struct LevelView: View {
     private var helpers: some View {
         HStack(spacing: 8) {
             if pathNumber >= 2 {
-                helper(undoLabel, "arrow.uturn.backward", .white, enabled: controller.session.canUndo) { controller.undo() }
+                helper(String(localized: "Undo"), "arrow.uturn.backward", .white, enabled: controller.session.canUndo,
+                       badge: controller.session.undosLeft) { controller.undo() }
             }
             if pathNumber >= 7 {
                 helper(String(localized: "Extra jar"), "plus", Theme.mint, enabled: controller.canExtraJar) { controller.extraJar() }
@@ -491,7 +492,8 @@ struct LevelView: View {
     }
 
     /// Every helper is the same size, with its picture over its name, so the row lines up in any language.
-    private func helper(_ title: String, _ icon: String, _ fill: Color, enabled: Bool, action: @escaping () -> Void) -> some View {
+    private func helper(_ title: String, _ icon: String, _ fill: Color, enabled: Bool, badge: Int? = nil,
+                        action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(spacing: 3) {
                 Image(systemName: icon).font(.system(size: 18, weight: .bold))
@@ -503,10 +505,19 @@ struct LevelView: View {
             .background(RoundedRectangle(cornerRadius: 18).fill(fill))
             .overlay(RoundedRectangle(cornerRadius: 18).stroke(Theme.plum.opacity(0.15), lineWidth: 2))
             .opacity(enabled ? 1 : 0.45)
+            .overlay(alignment: .topTrailing) {
+                // How many are left, as a badge on the corner rather than in the name.
+                if let badge {
+                    Text(verbatim: "\(badge)").font(Theme.body(12)).monospacedDigit().foregroundStyle(.white)
+                        .frame(minWidth: 20, minHeight: 20)
+                        .background(Capsule().fill(badge > 0 ? Theme.grape : Theme.plum.opacity(0.4)))
+                        .offset(x: 4, y: -6)
+                }
+            }
         }
         .buttonStyle(PressSquish())
         .disabled(!enabled)
-        .accessibilityLabel(Text(verbatim: title))
+        .accessibilityLabel(Text(verbatim: badge.map { "\(title) \($0)" } ?? title))
     }
 
     /// Invisible-ish jar buttons so UI tests can play without pixel maths.
@@ -528,11 +539,6 @@ struct LevelView: View {
                     .accessibilityIdentifier("scene-state")
             }
         }
-    }
-
-    private var undoLabel: String {
-        if let left = controller.session.undosLeft { return String(localized: "Undo \(left)") }
-        return String(localized: "Undo")
     }
 }
 

@@ -6,6 +6,12 @@ import AVFoundation
 @MainActor
 final class SoundService {
     var enabled = true { didSet { if !enabled { squish.rest() } } }
+    /// The Sounds slider, 0 to 1.
+    var level: Float = 1 { didSet { squish.level = level } }
+    /// The close squish sounds of a soft squishy.
+    var squishOn = true { didSet { if !squishOn { squish.rest() } } }
+    /// The Buddy's hello, giggle and munch.
+    var buddyVoice = true
     /// The sounds that follow a soft squishy.
     let squish = SquishSound()
     private var pools: [String: [AVAudioPlayer]] = [:]
@@ -19,7 +25,8 @@ final class SoundService {
     }
 
     func play(_ name: String, volume: Float = 1) {
-        guard enabled else { return }
+        guard enabled, level > 0 else { return }
+        if !buddyVoice, name.hasPrefix("buddy_") { return }
         var pool = pools[name] ?? []
         let player: AVAudioPlayer
         if let free = pool.first(where: { !$0.isPlaying }) {
@@ -32,7 +39,7 @@ final class SoundService {
             pools[name] = pool
             player = made
         }
-        player.volume = volume
+        player.volume = volume * level
         player.currentTime = 0
         player.play()
     }

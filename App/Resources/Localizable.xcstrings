@@ -673,6 +673,28 @@
         }
       }
     },
+    "Buddy voice": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バディの声"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "버디 목소리"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "夥伴的聲音"
+          }
+        }
+      }
+    },
     "Can I be your Buddy?": {
       "localizations": {
         "ja": {
@@ -3467,18 +3489,18 @@
         }
       }
     },
-    "Sound": {
+    "Sounds": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "サウンド"
+            "value": "効果音"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "소리"
+            "value": "효과음"
           }
         },
         "zh-Hant": {
@@ -3617,6 +3639,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "軟軟房間"
+          }
+        }
+      }
+    },
+    "Squish sounds": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スクイーズ音"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스퀴시 소리"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "捏捏聲"
           }
         }
       }
@@ -4211,28 +4255,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "復原"
-          }
-        }
-      }
-    },
-    "Undo %lld": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "もどす %lld"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "되돌리기 %lld"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "復原 %lld"
           }
         }
       }

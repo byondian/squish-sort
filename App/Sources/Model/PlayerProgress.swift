@@ -17,6 +17,12 @@ struct PlayerProgress: Codable, Equatable {
     var soundOn = true
     var musicOn = true
     var hapticsOn = true
+    /// Sliders in Settings, 0 to 1. Zero counts as off (ads start muted).
+    var soundLevel = 1.0
+    var musicLevel = 1.0
+    /// The close squish sounds of a soft squishy, and the Buddy's own noises.
+    var squishSoundsOn = true
+    var buddyVoiceOn = true
     /// Last verified Remove Ads state, for offline launches.
     var ownsRemoveAds = false
     /// yyyy-MM-dd of the last free daily extra jar.
@@ -75,6 +81,10 @@ struct PlayerProgress: Codable, Equatable {
         soundOn = v(.soundOn, d.soundOn)
         musicOn = v(.musicOn, d.musicOn)
         hapticsOn = v(.hapticsOn, d.hapticsOn)
+        soundLevel = min(1, max(0, v(.soundLevel, d.soundLevel)))
+        musicLevel = min(1, max(0, v(.musicLevel, d.musicLevel)))
+        squishSoundsOn = v(.squishSoundsOn, d.squishSoundsOn)
+        buddyVoiceOn = v(.buddyVoiceOn, d.buddyVoiceOn)
         ownsRemoveAds = v(.ownsRemoveAds, d.ownsRemoveAds)
         freeExtraJarDay = (try? c.decodeIfPresent(String.self, forKey: .freeExtraJarDay)) ?? nil
         hintDay = (try? c.decodeIfPresent(String.self, forKey: .hintDay)) ?? nil
