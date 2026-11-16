@@ -346,8 +346,9 @@ struct BuddyHomeView: View {
                 .rotationEffect(.degrees(spin))
                 .rotation3DEffect(.degrees(flip), axis: (x: 1, y: 0, z: 0))
                 .offset(x: sway)
-                .scaleEffect(1 + model.progress.buddy.growth, anchor: .bottom)
-                .padding(.top, 60 * model.progress.buddy.growth)
+                .scaleEffect(1 + buddySize, anchor: .bottom)
+                .padding(.top, 60 * buddySize)
+                .animation(.spring(response: 0.5, dampingFraction: 0.5), value: model.progress.buddy.lastTreatAt)
                 .overlay {
                     // A treat flies up to the Buddy, and a heart floats off it.
                     if feeding {
@@ -471,6 +472,11 @@ struct BuddyHomeView: View {
 
     private func squish() {
         pokes += 1
+    }
+
+    /// Growth earned for good, plus the puff from a recent treat.
+    private var buddySize: Double {
+        model.progress.buddy.growth + model.progress.buddy.puff(at: Date().timeIntervalSince1970)
     }
 
     /// The treat flies in, the Buddy chomps twice, then a heart floats up.

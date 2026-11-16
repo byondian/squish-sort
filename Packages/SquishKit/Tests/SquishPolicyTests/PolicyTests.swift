@@ -925,5 +925,13 @@ final class ExtrasTests: XCTestCase {
         XCTAssertEqual(b.trickProgress, 1)
         b.hearts = 500
         XCTAssertEqual(b.growth, 0.25, accuracy: 1e-9, "growth stops at a quarter bigger")
+        // A treat's puff eases back over a day, and the earned growth stays.
+        XCTAssertEqual(b.puff(at: 1000), 0)
+        b.lastTreatAt = 1000
+        XCTAssertEqual(b.puff(at: 1000), 0.10, accuracy: 1e-9)
+        XCTAssertEqual(b.puff(at: 1000 + 43_200), 0.05, accuracy: 1e-9)
+        XCTAssertEqual(b.puff(at: 1000 + 200_000), 0)
+        XCTAssertEqual(b.puff(at: 500), 0, "a clock set back gives no puff")
+        XCTAssertEqual(b.growth, 0.25, accuracy: 1e-9)
     }
 }

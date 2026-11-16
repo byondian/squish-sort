@@ -524,7 +524,7 @@ final class AppModel: ObservableObject {
     func feedBuddy() {
         guard buddyActive, progress.buddy.treats > 0 else { return }
         let before = progress.buddy.hearts
-        update { _ = $0.buddy.feedStoredTreat() }
+        update { _ = $0.buddy.feedStoredTreat(); $0.buddy.lastTreatAt = Date().timeIntervalSince1970 }
         haptics.complete()
         sounds.play("buddy_yum", or: "buddy_munch")
         heartsChanged(from: before)
@@ -549,7 +549,7 @@ final class AppModel: ObservableObject {
     func buyForBuddy(_ item: Coins.Item) {
         guard buddyActive, item == .treat || item == .gift, spend(item) else { return }
         let before = progress.buddy.hearts
-        update { $0.buddy.give(item) }
+        update { $0.buddy.give(item); if item == .treat { $0.buddy.lastTreatAt = Date().timeIntervalSince1970 } }
         haptics.complete()
         if item == .gift { sounds.play("heart") } else { sounds.play("buddy_yum", or: "buddy_munch") }
         heartsChanged(from: before)
