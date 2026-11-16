@@ -140,6 +140,7 @@ final class AppModel: ObservableObject {
         screen = loaded.highestUnlocked >= 3 ? .home : .level(min(loaded.highestUnlocked, max(0, levels.count - 1)))
         // A save that already holds every other squishy of a world is owed that world's secret.
         for world in LevelCatalog.worlds + [ChristmasWorld.id] { queueSecretIfWon(world: world) }
+        repairBuddyName()
         purchases.onChange = { [weak self] owns in self?.update { $0.ownsRemoveAds = owns } }
         purchases.onCoins = { [weak self] pack, transactionID in
             self?.update { $0.wallet.credit(pack: pack, transactionID: transactionID) }
@@ -621,12 +622,28 @@ final class AppModel: ObservableObject {
         open(.squishRoom)
     }
 
+    /// True when `name` is the roster name (in any language) of a squishy other than `ref`.
+    private func isAnotherSquishysName(_ name: String, than ref: String) -> Bool {
+        roster.collectibles.contains { c in
+            c.id != ref && (c.name == name || c.names.values.contains(name))
+        }
+    }
+
+    /// Build 3 could leave the Buddy wearing the name of the squishy it used to be.
+    private func repairBuddyName() {
+        guard let ref = progress.buddy.squishy, isAnotherSquishysName(progress.buddy.name, than: ref),
+              let own = NameFilter.clean(displayName(for: ref)) else { return }
+        update { $0.buddy.name = own }
+    }
+
     var offersFirstBuddy: Bool { isExtraUnlocked(.buddy) && progress.buddy.squishy == nil }
 
     /// False when the name is empty or rude.
     func setBuddy(ref: String, name: String) -> Bool {
         guard isExtraUnlocked(.buddy), squeezables.contains(ref), let clean = NameFilter.clean(name) else { return false }
-        update { $0.buddy.squishy = ref; $0.buddy.name = clean; $0.seenExtras.insert(Extra.buddy.rawValue) }
+        // A name that is really another squishy's own name does not follow the Buddy to a new squishy.
+        let kept = isAnotherSquishysName(clean, than: ref) ? (NameFilter.clean(displayName(for: ref)) ?? clean) : clean
+        update { $0.buddy.squishy = ref; $0.buddy.name = kept; $0.seenExtras.insert(Extra.buddy.rawValue) }
         say("greet_back")
         return true
     }

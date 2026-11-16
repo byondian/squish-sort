@@ -982,6 +982,6 @@ final class ExtrasTests: XCTestCase {
         // Gentle mode: gone within a minute, so there is nothing to come back for.
         XCTAssertEqual(b.puff(at: 1030, lasting: BuddyState.puffSecondsGentle), 0.075, accuracy: 1e-9)
         XCTAssertEqual(b.puff(at: 1061, lasting: BuddyState.puffSecondsGentle), 0)
-        XCTAssertEqual(b.growth, 0.25, accuracy: 1e-9)
+        XCTAssertEqual(b.growth, BuddyState.maxGrowth, accuracy: 1e-9)
     }
 }
