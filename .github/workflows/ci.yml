@@ -26,7 +26,7 @@ jobs:
         run: swift run -c release --package-path Packages/SquishKit squish-levels check Levels
       - name: Squishy pictures sit evenly in a jar
         run: |
-          python3 -m pip install --quiet --user --break-system-packages pillow
+          python3 -m pip install --quiet --user --break-system-packages pillow==10.4.0
           python3 scripts/check_seating.py
 
   golden-path:

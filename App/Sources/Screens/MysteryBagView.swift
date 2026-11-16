@@ -13,6 +13,11 @@ struct MysteryBagView: View {
     @State private var jiggle = false
     /// A wrong guess from earlier in this visit, greyed out for the extra guess.
     @State private var ruledOut: String?
+    /// Shape clue: the bag pulls tight round the toy for two seconds.
+    @State private var tight = false
+    /// Goes up by one for every squeak, so the sound rings play again.
+    @State private var squeaks = 0
+    @State private var lastTouch = Date.distantPast
 
     var body: some View {
         VStack(spacing: 0) {
@@ -80,9 +85,7 @@ struct MysteryBagView: View {
     private func play(_ bag: MysteryBag) -> some View {
         VStack(spacing: 16) {
             // The bag itself can be poked: each poke gives the next clue.
-            Button { if let next = (0..<3).first(where: { !poked.contains($0) }) { poke(next) } else { poke(nil) } } label: { bagShape }
-                .buttonStyle(PressSquish())
-                .accessibilityIdentifier("mystery-bag")
+            softBag(bag)
             Text("Poke the bag, then guess who's inside!").font(Theme.body(17)).foregroundStyle(Theme.plum)
             HStack(spacing: 10) {
                 pokeButton(0, "Shape", "hand.point.up.left.fill")
@@ -97,12 +100,15 @@ struct MysteryBagView: View {
                 }
                 if poked.contains(1) {
                     clue("Squeak") {
-                        VStack(spacing: 2) {
-                            Image(systemName: "speaker.wave.2.fill").font(.system(size: 26))
-                            Text(squeakText(bag.squeak)).font(Theme.body(12))
-                                .multilineTextAlignment(.center).lineLimit(3).minimumScaleFactor(0.7)
+                        // Heard, not read: tap it to hear the squeak again.
+                        Button { poke(1) } label: {
+                            VStack(spacing: 4) {
+                                Image(systemName: "speaker.wave.2.fill").font(.system(size: 26))
+                                Text("Squeak!").font(Theme.body(13))
+                            }
+                            .foregroundStyle(Theme.plum).frame(width: 84, height: 84)
                         }
-                        .foregroundStyle(Theme.plum).frame(width: 96, height: 84)
+                        .buttonStyle(PressSquish())
                     }
                 }
                 if poked.contains(2) {
@@ -162,6 +168,56 @@ struct MysteryBagView: View {
         }
     }
 
+    private var bagLook: String { tight ? "tight" : (poked.contains(2) ? "peek" : "loose") }
+
+    /// The bag is a soft body: poke it, squeeze it, and it gives like mochi.
+    private func softBag(_ bag: MysteryBag) -> some View {
+        SoftSquishy(toy: "mystery-bag-\(bag.answer.id)", look: bagLook, feel: SquishFeel(named: "mochi"),
+                    onTouch: { touchedBag() }) {
+            bagArt(bag)
+        }
+        .frame(width: 230, height: 230)
+        .overlay {
+            if squeaks > 0 { SqueakRings(squeak: bag.squeak).id(squeaks).allowsHitTesting(false) }
+        }
+        .accessibilityElement()
+        .accessibilityAddTraits(.isButton)
+        .accessibilityLabel(Text("Mystery Bag"))
+        .accessibilityAction { touchedBag() }
+        .accessibilityIdentifier("mystery-bag")
+    }
+
+    /// What the bag looks like: loose, pulled tight round the toy, or with a slit that shows one colour.
+    @ViewBuilder private func bagArt(_ bag: MysteryBag) -> some View {
+        ZStack {
+            if tight {
+                Theme.grape.mask(SquishyView(id: bag.answer.id, silhouette: true).frame(width: 250, height: 250))
+                    .frame(width: 250, height: 250)
+            } else {
+                RoundedRectangle(cornerRadius: 56).fill(Theme.grape).frame(width: 240, height: 250)
+                RoundedRectangle(cornerRadius: 56).stroke(Theme.plum, lineWidth: 6).frame(width: 240, height: 250)
+                Text(verbatim: "?").font(Theme.title(96)).foregroundStyle(.white.opacity(poked.contains(2) ? 0.35 : 1))
+            }
+            Capsule().fill(Theme.butter).frame(width: 130, height: 22).offset(y: -104)
+            if poked.contains(2), !tight {
+                // The slit: one colour of the toy shows through.
+                SquishyView(id: bag.answer.id).frame(width: 330, height: 330)
+                    .mask(Capsule().frame(width: 96, height: 26))
+                    .frame(width: 100, height: 30)
+                    .background(Capsule().fill(Theme.plum).frame(width: 104, height: 34))
+                    .offset(y: 30)
+            }
+        }
+        .frame(width: 300, height: 300)
+    }
+
+    /// A touch on the bag itself always squishes and sounds, and gives the next clue if one is left.
+    private func touchedBag() {
+        guard Date().timeIntervalSince(lastTouch) > 0.7 else { return }
+        lastTouch = Date()
+        poke((0..<3).first { !poked.contains($0) })
+    }
+
     private func pokeButton(_ index: Int, _ title: LocalizedStringKey, _ icon: String) -> some View {
         Button { poke(index) } label: {
             Label(title, systemImage: icon).font(Theme.body(14))
@@ -184,6 +240,12 @@ struct MysteryBagView: View {
         } else {
             model.sounds.play("mystery_poke")
         }
+        if index == 1 { squeaks += 1 }
+        if index == 0 {
+            // The bag pulls tight round the toy, then lets go.
+            tight = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { tight = false }
+        }
         if let index {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { _ = poked.insert(index) }
         }
@@ -201,19 +263,46 @@ struct MysteryBagView: View {
         .transition(.scale(scale: 0.5).combined(with: .opacity))
     }
 
-    private func squeakText(_ squeak: MysteryBag.Squeak) -> LocalizedStringKey {
-        switch squeak {
-        // Rarer squishies squeak lower, so the clue says what that means.
-        case .high: return "Squeaky! A common one"
-        case .middle: return "Not high, not low. A rare one"
-        case .low: return "A deep squeak. A very rare one!"
-        }
-    }
-
     private func guess(_ choice: Collectible) {
         guard guessedRight == nil else { return }
         let right = model.guessMystery(choice.id)
         if right { model.haptics.win() } else { model.haptics.reject(); ruledOut = choice.id }
         withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) { guessedRight = right }
+    }
+}
+
+/// Sound you can see: rings come off the bag when it squeaks. Small and quick for a high squeak,
+/// big and slow for a low one, so the clue works with the sound off.
+private struct SqueakRings: View {
+    let squeak: MysteryBag.Squeak
+    @State private var out = false
+
+    private var reach: CGFloat {
+        switch squeak {
+        case .high: return 1.15
+        case .middle: return 1.45
+        case .low: return 1.8
+        }
+    }
+
+    private var seconds: Double {
+        switch squeak {
+        case .high: return 0.35
+        case .middle: return 0.6
+        case .low: return 0.95
+        }
+    }
+
+    var body: some View {
+        ZStack {
+            ForEach(0..<3, id: \.self) { i in
+                Circle().stroke(Theme.bubblegum, lineWidth: 4)
+                    .frame(width: 150, height: 150)
+                    .scaleEffect(out ? reach : 0.7)
+                    .opacity(out ? 0 : 0.9)
+                    .animation(.easeOut(duration: seconds).delay(Double(i) * seconds * 0.35), value: out)
+            }
+        }
+        .onAppear { out = true }
     }
 }

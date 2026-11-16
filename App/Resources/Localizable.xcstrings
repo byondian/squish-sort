@@ -409,28 +409,6 @@
         }
       }
     },
-    "A deep squeak. A very rare one!": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "低い音。とてもレアな子！"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "낮은 소리. 아주 희귀한 친구!"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "低沉的聲音。超稀有款！"
-          }
-        }
-      }
-    },
     "Ads removed. Thank you!": {
       "localizations": {
         "ja": {
@@ -2851,28 +2829,6 @@
         }
       }
     },
-    "Not high, not low. A rare one": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "高くも低くもない。レアな子"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "높지도 낮지도 않아. 레어 친구"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "不高不低。稀有款"
-          }
-        }
-      }
-    },
     "Not now": {
       "localizations": {
         "ja": {
@@ -3731,24 +3687,24 @@
         }
       }
     },
-    "Squeaky! A common one": {
+    "Squeak!": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "高い音！ふつうの子"
+            "value": "キュッ！"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "높은 소리! 흔한 친구"
+            "value": "삑!"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "吱吱高音！普通款"
+            "value": "吱！"
           }
         }
       }
@@ -4145,6 +4101,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "謝謝！接下來一陣子不會有廣告休息。"
+          }
+        }
+      }
+    },
+    "The golden capsule for filling a world's star jar always holds an ultra-rare.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ワールドのスタージャーをいっぱいにするともらえるゴールドカプセルには、かならずウルトラレアが入っています。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "월드의 별 병을 가득 채우면 받는 황금 캡슐에는 항상 울트라 레어가 들어 있어요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "集滿一個世界的星星罐所得到的黃金扭蛋，一定會開出超稀有。"
           }
         }
       }
