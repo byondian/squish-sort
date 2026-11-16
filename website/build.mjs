@@ -15,6 +15,11 @@ const roster = JSON.parse(fs.readFileSync(path.join(SRC, 'roster.json'), 'utf8')
 const V = (() => { const h = crypto.createHash('sha1'); for (const f of fs.readdirSync(path.join(SRC, 'assets'), { recursive: true }).sort()) { const fp = path.join(SRC, 'assets', f); if (/\.(js|css)$/.test(f)) h.update(fs.readFileSync(fp)); } return h.digest('hex').slice(0, 8); })();
 const T = {};
 // every language falls back to English for any string it does not have yet
+
+// The Jelly pop logo as live text (Fredoka Bold). Outline and fill are two
+// stacked spans, never ::before, so iPhone draws the outline behind the fill.
+const LOGO = [[['S', -8], ['q', 4], ['u', -3], ['i', 6], ['s', -5], ['h', 5]], [['S', 6], ['o', -4], ['r', 5], ['t', -7]]];
+const logo = (cls) => `<span class="logo ${cls}" aria-hidden="true">${LOGO.map((line, li) => `<span class="ln">${line.map(([c, r], i) => `<span class="L ${li ? 'li' : 'pk'}" style="--r:${r}deg;--d:${(li ? .5 + i * .08 : i * .08).toFixed(2)}s"><span class="b">${c}</span><span class="f">${c}</span></span>`).join('')}</span>`).join('')}</span>`;
 const merge = (base, over) => { if (over == null) return base; if (typeof base !== 'object' || base === null) return over; const o = Array.isArray(base) ? base.slice() : { ...base }; for (const k of Object.keys(over)) o[k] = merge(base[k], over[k]); return o; };
 for (const l of SITE.langs) { const own = (await import(`./src/i18n/${l.code}.mjs`)).default; T[l.code] = l.code === 'en' ? own : merge(T.en, own); }
 const enName = new Intl.DisplayNames(['en'], { type: 'language' });
@@ -68,7 +73,7 @@ function bar(code, slug = '') {
   const sorted = [...SITE.langs].sort((a, b) => enName.of(a.html).localeCompare(enName.of(b.html), 'en'));
   const langs = sorted.map(l => { const n = enName.of(l.html); return `<li data-s="${esc((l.label + ' ' + n + ' ' + l.html).toLowerCase())}"><a href="${href(l.code, slug)}" hreflang="${l.html}" lang="${l.html}"${l.code === code ? ' aria-current="true"' : ''}>${l.label}${n !== l.label ? ` <small lang="en">${esc(n)}</small>` : ''}</a></li>`; }).join('');
   return `<a class="skip" href="#main">${esc(t.skip)}</a>
-<header class="bar"><a class="brand" href="${href(code)}"><img src="/assets/img/icon-180.png" alt="" width="36" height="36">Squish Sort</a>
+<header class="bar"><a class="brand" href="${href(code)}" aria-label="Squish Sort"><img src="/assets/img/icon-180.png" alt="" width="36" height="36">${logo('mini')}</a>
 <nav aria-label="Main"><a class="hide-s" href="${href(code)}#play">${esc(t.nav.demo)}</a><a class="hide-s" href="${href(code, 'parents')}">${esc(t.nav.parents)}</a><a href="${href(code, 'support')}">${esc(t.nav.support)}</a>
 <details class="lang"><summary aria-label="${esc(t.nav.language)}">🌐 ${L(code).label}</summary><div class="lang-pop"><input type="search" class="lang-q" placeholder="${esc(t.nav.findLanguage)}" aria-label="${esc(t.nav.findLanguage)}" autocomplete="off" hidden><ul>${langs}</ul></div></details></nav></header>`;
 }
@@ -108,7 +113,7 @@ function landing(code) {
   <div class="bg-blob" style="width:360px;height:360px;background:#CDEBFF;right:-80px;top:260px;animation-delay:-5s"></div>
   <div class="bg-blob" style="width:300px;height:300px;background:#FFF0B8;left:40%;bottom:-60px;animation-delay:-9s"></div>
   <div>
-    <h1><span class="s">${esc(t.hero.words[0])}</span> <span class="s">${esc(t.hero.words[1])}</span></h1>
+    <h1 aria-label="Squish Sort">${logo('big')}</h1>
     <p class="tag">${esc(t.hero.tag)}</p>
     <div class="cta-row">${storeCta(code, 'hero')}<a class="btn soft" href="#play">▶ ${esc(t.cta.demo)}</a></div>
     <p class="sub">${esc(t.hero.sub)}</p>
