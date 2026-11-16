@@ -25,7 +25,7 @@ Prices are shown in the App Store in your local currency. We do not show prices 
 |---|---|
 | Hint | 250 |
 | Extra jar | 400 |
-| Board theme | 3,000 |
+| Board theme | 1,500 |
 | Squishy Buddy treat | 100 |
 | Squishy Buddy gift | 600 |
 | Extras (things a squishy wears, such as a bow, glasses or wings) | 300, 500 or 800 each. The crown and unicorn horn can only be earned by playing |
