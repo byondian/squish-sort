@@ -11,7 +11,7 @@ export const SITE = {
   operator: {
     name: 'Ian Atkinson',
     postal: 'Unit 174986, PO Box 7169, Poole BH15 9EL, United Kingdom',
-    phone: '', // TODO(Ian): add once the UK number works
+    phone: '+44 7746 971820',
     country: 'Luxembourg',
   },
   email: { support: 'support@squishsort.app', privacy: 'privacy@squishsort.app' },
