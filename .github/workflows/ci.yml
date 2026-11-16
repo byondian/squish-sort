@@ -64,6 +64,7 @@ jobs:
           retention-days: 7
       - name: Print small copies of the squishy pictures in the log
         if: always()
+        continue-on-error: true
         run: |
           # The log is the one place every reader of this run can reach, so the pictures go there too, small.
           python3 - <<'PY'
