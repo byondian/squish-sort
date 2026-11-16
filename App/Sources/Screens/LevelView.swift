@@ -259,6 +259,7 @@ final class LevelController: ObservableObject {
 struct LevelView: View {
     @EnvironmentObject var model: AppModel
     @StateObject private var controller: LevelController
+    @State private var nudge = false
 
     init(index: Int, model: AppModel) {
         _controller = StateObject(wrappedValue: LevelController(index: index, model: model))
@@ -330,6 +331,7 @@ struct LevelView: View {
                     Confetti(count: stars >= 3 ? 80 : 45, seconds: 3).ignoresSafeArea()
                     WinCard(stars: stars, showpiece: controller.level.file.beat == .showpiece,
                             summary: model.lastWin,
+                            moves: controller.session.moveCount,
                             perfect: controller.session.moveCount <= controller.level.par,
                             threeStarMoves: Stars.moveLimit(forStars: 3, par: controller.level.par),
                             // Not while good news is waiting behind the win card: that is told first.
@@ -433,25 +435,8 @@ struct LevelView: View {
                     Text("HARD").font(Theme.body(13)).foregroundStyle(Theme.bubblegum)
                 }
                 // The stars still to be won, and the moves left before the next one goes.
-                // Empty outlines before the first move, so nothing looks won already.
-                HStack(spacing: 4) {
-                    let moves = controller.session.moveCount
-                    let lit = Stars.rating(moves: moves, par: controller.level.par)
-                    ForEach(0..<3, id: \.self) { i in
-                        Image(systemName: i < lit && moves > 0 ? "star.fill" : "star")
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundStyle(i < lit ? Theme.butter : Theme.plum.opacity(0.18))
-                            .scaleEffect(i < lit ? 1 : 0.8)
-                    }
-                    if let limit = Stars.moveLimit(forStars: lit, par: controller.level.par) {
-                        Text(verbatim: "\(moves)/\(limit)").font(Theme.body(14)).opacity(0.7)
-                            .accessibilityIdentifier("move-count")
-                    } else {
-                        Text(verbatim: "\(moves)").font(Theme.body(14)).opacity(0.7)
-                            .accessibilityIdentifier("move-count")
-                    }
-                }
-                .animation(.spring(response: 0.3, dampingFraction: 0.5), value: controller.session.moveCount)
+                StarMeter(moves: controller.session.moveCount, par: controller.level.par,
+                          haptics: model.haptics, sounds: model.sounds)
                 // The level pot: coins thrown by finished jars, banked on the win.
                 if controller.pot.paysCoins {
                     // Says what it is until the first jar pays, then just the number.
@@ -471,6 +456,14 @@ struct LevelView: View {
         .padding(.top, 8)
     }
 
+    /// Three stars are out of reach on this try. Players of 13 and over get a nudge to start again;
+    /// gentle mode is never pushed.
+    private var starsSlipped: Bool {
+        let moves = controller.session.moveCount
+        return moves > 0 && !model.isGentleMode && controller.index >= 2
+            && Stars.rating(moves: moves, par: controller.level.par) < 3
+    }
+
     // Undo appears after level 2, Hint after 4, Extra jar after 7 (game design doc).
     private var helpers: some View {
         HStack(spacing: 8) {
@@ -483,7 +476,16 @@ struct LevelView: View {
             if pathNumber >= 4 {
                 helper(String(localized: "Hint"), "lightbulb.fill", Theme.butter, enabled: controller.canHint) { controller.hint() }
             }
-            helper(String(localized: "Restart"), "arrow.clockwise", .white, enabled: true) { controller.retry() }
+            if starsSlipped {
+                // A nudge, never a loss: the level can still be finished as it is.
+                helper(String(localized: "Go for 3 stars"), "star.fill", Theme.butter, enabled: true) { controller.retry() }
+                    .scaleEffect(nudge ? 1.06 : 1)
+                    .animation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true), value: nudge)
+                    .onAppear { nudge = true }
+                    .onDisappear { nudge = false }
+            } else {
+                helper(String(localized: "Restart"), "arrow.clockwise", .white, enabled: true) { controller.retry() }
+            }
         }
         .padding(.bottom, 8)
     }
@@ -586,11 +588,76 @@ struct JoinedBookSticker: View {
     }
 }
 
+/// The move counter in the level header: the moves made, the most that still keep the stars shown,
+/// and the stars themselves. As the limit gets near the counter turns pink and throbs; when it is
+/// passed a star drops off, so the player can see a better run was possible.
+struct StarMeter: View {
+    let moves: Int
+    let par: Int
+    var haptics: Haptics?
+    var sounds: SoundService?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var falling: Int?
+    @State private var fell = false
+
+    var body: some View {
+        let lit = Stars.rating(moves: moves, par: par)
+        let limit = Stars.moveLimit(forStars: lit, par: par)
+        let near = moves > 0 && (limit.map { $0 - moves <= 2 } ?? false)
+        HStack(spacing: 6) {
+            HStack(spacing: 4) {
+                Text("Moves").font(Theme.body(13)).opacity(0.7)
+                Group {
+                    if let limit { Text(verbatim: "\(moves)/\(limit)") } else { Text(verbatim: "\(moves)") }
+                }
+                .font(Theme.title(15)).monospacedDigit()
+                .accessibilityIdentifier("move-count")
+            }
+            .foregroundStyle(near ? Color.white : Theme.plum)
+            .padding(.horizontal, 9).padding(.vertical, 2)
+            .background(Capsule().fill(near ? Theme.bubblegum : Color.white.opacity(0.7)))
+            .scaleEffect(near && !reduceMotion ? 1.08 : 1)
+            HStack(spacing: 2) {
+                ForEach(0..<3, id: \.self) { i in
+                    Image(systemName: i < lit ? "star.fill" : "star")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(i < lit ? Theme.butter : Theme.plum.opacity(0.18))
+                        .shadow(color: Theme.plum.opacity(i < lit ? 0.35 : 0), radius: 0.5)
+                        .scaleEffect(i < lit ? 1 : 0.8)
+                        .overlay {
+                            if falling == i {
+                                Image(systemName: "star.fill")
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundStyle(Theme.butter)
+                                    .rotationEffect(.degrees(fell ? 140 : 0))
+                                    .offset(x: fell ? 10 : 0, y: fell ? 46 : 0)
+                                    .opacity(fell ? 0 : 1)
+                                    .allowsHitTesting(false)
+                            }
+                        }
+                }
+            }
+        }
+        .animation(.spring(response: 0.3, dampingFraction: 0.5), value: moves)
+        .onChange(of: lit) { old, new in
+            guard new < old, moves > 0 else { return }
+            sounds?.play("star_lost", or: "lift")
+            haptics?.star()
+            guard !reduceMotion else { return }
+            fell = false
+            falling = new
+            withAnimation(.easeIn(duration: 0.6)) { fell = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) { if falling == new { falling = nil } }
+        }
+    }
+}
+
 struct WinCard: View {
     let stars: Int
     let showpiece: Bool
     let summary: AppModel.WinSummary
     /// Levels still to win before the next capsule (0 = the next level has one).
+    var moves: Int?
     /// Won in the fewest moves possible.
     var perfect = false
     /// The most moves that still earn three stars, for the line under a win with fewer.
@@ -632,7 +699,10 @@ struct WinCard: View {
                     .transition(.scale(scale: 2.2).combined(with: .opacity))
                     .accessibilityIdentifier("win-perfect")
             } else if stars < 3, let threeStarMoves {
-                Text("3 stars: \(threeStarMoves) moves or fewer").font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.7))
+                VStack(spacing: 2) {
+                    if let moves { Text("Your moves: \(moves)").font(Theme.body(15)).foregroundStyle(Theme.plum) }
+                    Text("3 stars: \(threeStarMoves) moves or fewer").font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.7))
+                }
             }
             if summary.total > 0 {
                 HStack(spacing: 10) {

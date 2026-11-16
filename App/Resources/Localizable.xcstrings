@@ -2125,6 +2125,28 @@
         }
       }
     },
+    "Moves": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手数"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이동"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "步數"
+          }
+        }
+      }
+    },
     "Moves %lld · Par %lld": {
       "localizations": {
         "ja": {
@@ -4783,6 +4805,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "每天第一次過關可蓋一個印章。"
+          }
+        }
+      }
+    },
+    "Your moves: %lld": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あなたの手数：%lld"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "내 이동 횟수: %lld"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你的步數：%lld"
           }
         }
       }
