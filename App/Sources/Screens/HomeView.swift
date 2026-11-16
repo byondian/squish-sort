@@ -39,7 +39,7 @@ struct HomeView: View {
                 tile("Levels", "map.fill") { model.screen = .map }
                 // The festive door: Santa's Grotto, a side world. No countdown anywhere.
                 if model.showsFestiveDoor {
-                    tile("Santa's Grotto", "snowflake") { model.openFestiveDoor() }
+                    tile(AppModel.christmasWorldName, "snowflake") { model.openFestiveDoor() }
                 }
                 tile("Book", "book.fill") { model.screen = .book }
                 if model.isExtraUnlocked(.squishRoom) {

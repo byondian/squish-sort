@@ -7,10 +7,10 @@ struct BookView: View {
     @State private var pressed: String?
     @State private var newOne: Collectible?
 
-    private let worlds: [(id: String, name: LocalizedStringKey)] = [
+    private var worlds: [(id: String, name: LocalizedStringKey)] { [
         ("toyshop", "Toy Shop"), ("sweetfactory", "Sweet Factory"),
-        ("starlight", "Starlight Stage"), ("christmas", "Santa's Grotto"),
-    ]
+        ("starlight", "Starlight Stage"), ("christmas", AppModel.christmasWorldName),
+    ] }
 
     var body: some View {
         VStack(spacing: 0) {

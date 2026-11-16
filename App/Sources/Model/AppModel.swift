@@ -140,6 +140,11 @@ final class AppModel: ObservableObject {
 
     // MARK: - Santa's Grotto and the advent shelf
 
+    /// "Santa's Workshop" in the US and Canada, "Santa's Grotto" everywhere else (Ian, 16 Nov).
+    nonisolated static var christmasWorldName: LocalizedStringKey {
+        ["US", "CA"].contains(Locale.current.region?.identifier ?? "") ? "Santa's Workshop" : "Santa's Grotto"
+    }
+
     var christmasLevels: [Int] { levels.indices.filter { levels[$0].file.world == ChristmasWorld.id } }
 
     /// The festive door on the home screen. Once opened, the world stays for good.

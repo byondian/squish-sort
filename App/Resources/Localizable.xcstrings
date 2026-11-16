@@ -2147,6 +2147,28 @@
         }
       }
     },
+    "Santa's Workshop": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "サンタのおうち"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "산타의 집"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "聖誕老人小屋"
+          }
+        }
+      }
+    },
     "Save": {
       "localizations": {
         "ja": {

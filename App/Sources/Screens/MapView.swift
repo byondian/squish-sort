@@ -4,10 +4,10 @@ import SwiftUI
 struct MapView: View {
     @EnvironmentObject var model: AppModel
 
-    private let worlds: [(id: String, name: LocalizedStringKey)] = [
+    private var worlds: [(id: String, name: LocalizedStringKey)] { [
         ("toyshop", "Toy Shop"), ("sweetfactory", "Sweet Factory"),
-        ("starlight", "Starlight Stage"), ("christmas", "Santa's Grotto"),
-    ]
+        ("starlight", "Starlight Stage"), ("christmas", AppModel.christmasWorldName),
+    ] }
 
     var body: some View {
         VStack(spacing: 0) {
