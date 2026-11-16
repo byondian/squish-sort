@@ -80,14 +80,27 @@ final class AdPolicyTests: XCTestCase {
     }
 
     func testPersonalisationAges() {
-        XCTAssertEqual(AgePolicy.personalisationAge(storefront: "USA"), 13)
+        for storefront in ["USA", "CAN", "AUS", "usa"] {
+            XCTAssertEqual(AgePolicy.personalisationAge(storefront: storefront), 18, storefront)
+        }
+        XCTAssertEqual(AgePolicy.personalisationAge(storefront: "JPN"), 13)
+        XCTAssertEqual(AgePolicy.personalisationAge(storefront: "TWN"), 13)
         XCTAssertEqual(AgePolicy.personalisationAge(storefront: "KOR"), 14)
         XCTAssertEqual(AgePolicy.personalisationAge(storefront: "GBR"), 18, "UK teens stay non-personalised")
         XCTAssertEqual(AgePolicy.personalisationAge(storefront: "DEU"), 16)
         XCTAssertEqual(AgePolicy.personalisationAge(storefront: ""), 18, "an unknown storefront might be the UK")
-        let teen13 = AgeProfile(group: .teen, source: .birthYear, storefront: "USA", lowerBound: 13)
-        XCTAssertFalse(AgePolicy.mayPersonaliseAds(profile: nil, storefront: "USA"), "unknown age never personalises")
-        XCTAssertTrue(AgePolicy.mayPersonaliseAds(profile: teen13, storefront: "USA"))
+        let teen13 = AgeProfile(group: .teen, source: .birthYear, storefront: "JPN", lowerBound: 13)
+        XCTAssertFalse(AgePolicy.mayPersonaliseAds(profile: nil, storefront: "JPN"), "unknown age never personalises")
+        XCTAssertTrue(AgePolicy.mayPersonaliseAds(profile: teen13, storefront: "JPN"))
+        let teen17 = AgeProfile(group: .teen, source: .birthYear, storefront: "USA", lowerBound: 17)
+        let adult = AgeProfile(group: .adult, source: .birthYear, storefront: "USA", lowerBound: 18)
+        for storefront in ["USA", "CAN", "AUS"] {
+            XCTAssertFalse(AgePolicy.mayPersonaliseAds(profile: teen17, storefront: storefront), storefront)
+            XCTAssertFalse(AdPolicy.shouldAskTracking(profile: teen17, storefront: storefront, levelStarting: 7, alreadyAsked: false), storefront)
+            XCTAssertFalse(AdPolicy.requestPolicy(profile: teen17, storefront: storefront, consent: .notRequired, trackingAllowed: true).allowPersonalisedAds, storefront)
+            XCTAssertTrue(AgePolicy.mayPersonaliseAds(profile: adult, storefront: storefront), storefront)
+            XCTAssertTrue(AdPolicy.shouldAskTracking(profile: adult, storefront: storefront, levelStarting: 7, alreadyAsked: false), storefront)
+        }
         XCTAssertFalse(AgePolicy.mayPersonaliseAds(profile: teen13, storefront: "GBR"))
         XCTAssertFalse(AgePolicy.mayPersonaliseAds(profile: teen13, storefront: "DEU"))
     }
@@ -113,9 +126,10 @@ final class AdPolicyTests: XCTestCase {
     }
 
     func testAStorefrontChangeIsReDerivedNotFrozen() {
-        // A US 15-year-old was eligible at the age step, then the storefront becomes the UK.
-        let teen = AgeProfile(group: .teen, source: .birthYear, storefront: "USA", lowerBound: 15)
-        XCTAssertTrue(AgePolicy.mayPersonaliseAds(profile: teen, storefront: "USA"))
+        // A Japanese 15-year-old was eligible at the age step, then the storefront becomes the UK.
+        let teen = AgeProfile(group: .teen, source: .birthYear, storefront: "JPN", lowerBound: 15)
+        XCTAssertTrue(AgePolicy.mayPersonaliseAds(profile: teen, storefront: "JPN"))
+        XCTAssertFalse(AgePolicy.mayPersonaliseAds(profile: teen, storefront: "USA"))
         XCTAssertFalse(AgePolicy.mayPersonaliseAds(profile: teen, storefront: "GBR"))
         XCTAssertFalse(AdPolicy.shouldAskTracking(profile: teen, storefront: "GBR", levelStarting: 9, alreadyAsked: false))
         let uk = AdPolicy.requestPolicy(profile: teen, storefront: "GBR", consent: .obtained, trackingAllowed: true)
@@ -141,14 +155,14 @@ final class AdPolicyTests: XCTestCase {
     }
 
     func testTrackingPromptOnlyForEligiblePlayersAfterLevelFive() {
-        let teen = AgeProfile(group: .teen, source: .birthYear, storefront: "USA", lowerBound: 15)
-        let child = AgeProfile(group: .child, source: .skipped, storefront: "USA", lowerBound: 15)
-        XCTAssertFalse(AgePolicy.mayPersonaliseAds(profile: child, storefront: "USA"), "children can never be marked for personalisation")
-        XCTAssertFalse(AdPolicy.shouldAskTracking(profile: teen, storefront: "USA", levelStarting: 6, alreadyAsked: false))
-        XCTAssertTrue(AdPolicy.shouldAskTracking(profile: teen, storefront: "USA", levelStarting: 7, alreadyAsked: false))
-        XCTAssertFalse(AdPolicy.shouldAskTracking(profile: teen, storefront: "USA", levelStarting: 9, alreadyAsked: true))
-        XCTAssertFalse(AdPolicy.shouldAskTracking(profile: child, storefront: "USA", levelStarting: 9, alreadyAsked: false))
-        XCTAssertFalse(AdPolicy.shouldAskTracking(profile: nil, storefront: "USA", levelStarting: 9, alreadyAsked: false))
+        let teen = AgeProfile(group: .teen, source: .birthYear, storefront: "JPN", lowerBound: 15)
+        let child = AgeProfile(group: .child, source: .skipped, storefront: "JPN", lowerBound: 15)
+        XCTAssertFalse(AgePolicy.mayPersonaliseAds(profile: child, storefront: "JPN"), "children can never be marked for personalisation")
+        XCTAssertFalse(AdPolicy.shouldAskTracking(profile: teen, storefront: "JPN", levelStarting: 6, alreadyAsked: false))
+        XCTAssertTrue(AdPolicy.shouldAskTracking(profile: teen, storefront: "JPN", levelStarting: 7, alreadyAsked: false))
+        XCTAssertFalse(AdPolicy.shouldAskTracking(profile: teen, storefront: "JPN", levelStarting: 9, alreadyAsked: true))
+        XCTAssertFalse(AdPolicy.shouldAskTracking(profile: child, storefront: "JPN", levelStarting: 9, alreadyAsked: false))
+        XCTAssertFalse(AdPolicy.shouldAskTracking(profile: nil, storefront: "JPN", levelStarting: 9, alreadyAsked: false))
     }
 
     func testDeclaredAgeGatesSpanAtLeastTwoYears() {

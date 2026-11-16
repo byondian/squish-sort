@@ -131,13 +131,17 @@ public enum AgePolicy {
         "ISL": 13, "LIE": 16, "NOR": 13, "GBR": 13, "KOR": 14,
     ]
 
-    /// Youngest age that may be offered personalised ads (Ian, 16 Nov 2026: the
-    /// local consent age). The UK stays at 18 because the Children's Code expects
-    /// profiling off for all under-18s.
-    /// An unknown storefront ("") also means 18: it might be the UK.
+    /// Storefronts where personalised ads start at 18 (Ian, 16 Nov 2026): the UK,
+    /// because the Children's Code expects profiling off for all under-18s, and
+    /// the US, Canada and Australia.
+    public static let adultOnlyPersonalisation: Set<String> = ["GBR", "USA", "CAN", "AUS"]
+
+    /// Youngest age that may be offered personalised ads: 18 on the storefronts
+    /// above, the local consent age elsewhere (Korea 14, Japan 13, Germany 16).
+    /// An unknown storefront ("") also means 18, the strictest answer.
     public static func personalisationAge(storefront: String) -> Int {
         let code = storefront.uppercased()
-        return code == "GBR" || code.isEmpty ? adultAge : consentAge(storefront: code)
+        return code.isEmpty || adultOnlyPersonalisation.contains(code) ? adultAge : consentAge(storefront: code)
     }
 
     /// Whether this player may be offered personalised ads on the storefront they

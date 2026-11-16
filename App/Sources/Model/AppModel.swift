@@ -291,7 +291,8 @@ final class AppModel: ObservableObject {
         sounds.play(correct ? "mystery_right" : "mystery_close")
         if earned {
             let world = mysteryCapsuleWorld
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) { [weak self] in self?.openCapsule(world: world) }
+            update { $0.pendingCapsules.append(world) }
+            openPendingCapsule(after: 1.6)
         }
         return correct
     }
@@ -386,6 +387,7 @@ final class AppModel: ObservableObject {
     /// At most one unprompted line per home visit: a greeting on the first visit
     /// of a session, then now and then a joke, a fact or "How are you today?".
     func homeAppeared() {
+        openPendingCapsule(after: 0.4)
         buddyAsksMood = false
         guard buddyActive else { buddySays = nil; return }
         let now = Date()
@@ -548,16 +550,29 @@ final class AppModel: ObservableObject {
         lastWinHadReward = (firstClear && level.file.capsule) || unlockedExtra || barFull
         if unlockedExtra { sounds.play("unlock_new") }
         // A full capsule bar opens its capsule after the level's own, never on top of it.
-        if barFull { pendingCapsules.append(mysteryCapsuleWorld) }
+        if barFull {
+            let world = mysteryCapsuleWorld
+            update { $0.pendingCapsules.append(world) }
+        }
         if firstClear && level.file.capsule {
             openCapsule(world: level.file.world)
-        } else if !pendingCapsules.isEmpty {
-            openCapsule(world: pendingCapsules.removeFirst())
+        } else {
+            openPendingCapsule()
         }
     }
 
-    /// Capsules waiting for the one on screen to close.
-    private var pendingCapsules: [String] = []
+    /// Opens the next earned capsule that is still waiting, if nothing else is
+    /// on screen. The queue is saved, and the capsule leaves it in the same save
+    /// that adds its squishy to the book.
+    private func openPendingCapsule() {
+        guard capsule == nil, !askAge, progress.age != nil, let world = progress.pendingCapsules.first else { return }
+        update { $0.pendingCapsules.removeFirst() }
+        openCapsule(world: world)
+    }
+
+    private func openPendingCapsule(after delay: TimeInterval) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in self?.openPendingCapsule() }
+    }
 
     /// The stamp card's seven rewards, for its full-size view.
     func stampReward(_ number: Int) -> StampCard.Reward { StampCard.reward(stamp: number, rules: config.coins) }
@@ -644,8 +659,8 @@ final class AppModel: ObservableObject {
     func capsuleDismissed() {
         if progress.age == nil {
             askAge = true
-        } else if !pendingCapsules.isEmpty {
-            openCapsule(world: pendingCapsules.removeFirst())
+        } else {
+            openPendingCapsule()
         }
     }
 
@@ -665,6 +680,8 @@ final class AppModel: ObservableObject {
         ads.update(policy: currentAdPolicy)
         askAge = false
         startServicesAfterAgeStep()
+        // The age sheet has to finish closing before a waiting capsule can show.
+        openPendingCapsule(after: 0.8)
     }
 
     /// A parent can switch to gentle mode at any time, no gate needed. Ad flags

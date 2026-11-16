@@ -45,6 +45,9 @@ struct PlayerProgress: Codable, Equatable {
     var dailyGiftDay: String?
     var optInAds = OptInAdState()
     var stampCard = StampCard()
+    /// Worlds of capsules already earned but not opened yet. Saved, so a capsule
+    /// is never lost if the app closes before its turn on screen.
+    var pendingCapsules: [String] = []
     /// The one soft Remove Ads line on the win card has been shown.
     var removeAdsOfferShown = false
     var buddy = BuddyState()
@@ -91,6 +94,7 @@ struct PlayerProgress: Codable, Equatable {
         dailyGiftDay = (try? c.decodeIfPresent(String.self, forKey: .dailyGiftDay)) ?? nil
         optInAds = v(.optInAds, d.optInAds)
         stampCard = v(.stampCard, d.stampCard)
+        pendingCapsules = v(.pendingCapsules, d.pendingCapsules)
         removeAdsOfferShown = v(.removeAdsOfferShown, d.removeAdsOfferShown)
         buddy = v(.buddy, d.buddy)
         mystery = v(.mystery, d.mystery)
