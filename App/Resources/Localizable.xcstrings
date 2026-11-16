@@ -1,6 +1,28 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%@ is your Buddy": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@はきみのバディ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@은(는) 네 버디야"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 是你的夥伴"
+          }
+        }
+      }
+    },
     "%@ joined your book!": {
       "localizations": {
         "ja": {
@@ -1465,6 +1487,28 @@
         }
       }
     },
+    "Keep making": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "つづけて作る"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "계속 만들기"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "繼續製作"
+          }
+        }
+      }
+    },
     "Keep playing": {
       "localizations": {
         "ja": {
@@ -1597,6 +1641,50 @@
         }
       }
     },
+    "Make %@ my Buddy": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@をバディにする"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@을(를) 내 버디로"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "讓 %@ 當我的夥伴"
+          }
+        }
+      }
+    },
+    "Make your own squishy. It can be your Buddy and lives in your Squish Room.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "じぶんだけのスクイーズを作ろう。バディにもなれて、スクイーズルームにすむよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "나만의 스퀴시를 만들어 봐. 버디가 될 수도 있고 스퀴시 룸에서 살아."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "做一個自己的捏捏樂。它可以當你的夥伴，也住在你的軟軟房間裡。"
+          }
+        }
+      }
+    },
     "Maker": {
       "localizations": {
         "ja": {
@@ -1615,6 +1703,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "製作所"
+          }
+        }
+      }
+    },
+    "Meet %@!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@、はじめまして！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@을(를) 만나 봐!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "來認識 %@！"
           }
         }
       }
@@ -2913,6 +3023,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "吱吱高音！普通款"
+          }
+        }
+      }
+    },
+    "Squeeze": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ぷにぷにする"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "말랑말랑하기"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "捏一捏"
           }
         }
       }

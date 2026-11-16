@@ -88,6 +88,7 @@ struct BookView: View {
 
 struct TopBar: View {
     @EnvironmentObject var model: AppModel
+    @State private var picking = false
     let title: LocalizedStringKey
 
     var body: some View {
@@ -98,7 +99,19 @@ struct TopBar: View {
             Spacer()
             // The player's avatar is their Buddy.
             if model.buddyActive, let ref = model.progress.buddy.squishy {
-                SquishRefView(ref: ref).frame(width: 44, height: 44).background(Circle().fill(.white))
+                // A tap squashes it and opens the Buddy picker.
+                Button {
+                    model.haptics.land()
+                    picking = true
+                } label: {
+                    SquishRefView(ref: ref).frame(width: 44, height: 44).background(Circle().fill(.white))
+                }
+                .buttonStyle(PressSquish())
+                .accessibilityLabel(Text("Change Buddy"))
+                .accessibilityIdentifier("top-buddy")
+                .sheet(isPresented: $picking) {
+                    BuddyPickerView { picking = false }.environmentObject(model)
+                }
             } else {
                 Color.clear.frame(width: 44, height: 44)
             }

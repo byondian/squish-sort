@@ -355,9 +355,10 @@ struct BuddyHomeView: View {
                         Label("Win a level for a treat", systemImage: "birthday.cake.fill")
                             .font(Theme.body(14)).foregroundStyle(Theme.plum.opacity(0.6))
                     }
-                    Button { picking = true } label: { Image(systemName: "pencil") }
-                        .buttonStyle(SquishButtonStyle(fill: .white, text: Theme.plum))
-                        .accessibilityLabel(Text("Change Buddy"))
+                    Button { picking = true } label: {
+                        Label("Change Buddy", systemImage: "arrow.left.arrow.right").font(Theme.body(14))
+                    }
+                    .buttonStyle(SquishButtonStyle(fill: .white, text: Theme.plum))
                 }
             } else {
                 Text(verbatim: "Squish Sort").font(Theme.title(40)).foregroundStyle(Theme.plum)
@@ -391,15 +392,29 @@ struct BuddyPickerView: View {
     @State private var name = ""
     @State private var badName = false
 
+    private var made: Set<String> { Set(model.progress.made.map(\.ref)) }
+    private var choices: [String] {
+        let all = model.squeezables
+        return all.filter { made.contains($0) } + all.filter { !made.contains($0) }
+    }
+
     var body: some View {
         VStack(spacing: 14) {
             Text("Choose your Buddy").font(Theme.title(24)).foregroundStyle(Theme.plum).padding(.top, 20)
             ScrollView {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 4), spacing: 10) {
-                    ForEach(model.squeezables, id: \.self) { item in
+                    ForEach(choices, id: \.self) { item in
                         SquishRefView(ref: item)
                             .frame(width: 68, height: 68)
                             .background(RoundedRectangle(cornerRadius: 16).fill(item == ref ? Theme.butter : Color.white))
+                            .overlay(alignment: .topTrailing) {
+                                // The ones you made yourself come first, with a paintbrush.
+                                if made.contains(item) {
+                                    Image(systemName: "paintbrush.fill").font(.system(size: 10, weight: .bold))
+                                        .foregroundStyle(.white).padding(4)
+                                        .background(Circle().fill(Theme.mint)).offset(x: 4, y: -4)
+                                }
+                            }
                             .onTapGesture {
                                 ref = item
                                 if name.isEmpty { name = model.displayName(for: item) }

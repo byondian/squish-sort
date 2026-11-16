@@ -407,6 +407,16 @@ final class AppModel: ObservableObject {
         }
     }
 
+    /// The squishy the Squish Room should open with (set by "Squeeze me" buttons, used once).
+    var roomStart: String?
+
+    /// Opens the Squish Room with this squishy in hand.
+    func squeeze(_ ref: String) {
+        guard isExtraUnlocked(.squishRoom), squeezables.contains(ref) else { return }
+        roomStart = ref
+        open(.squishRoom)
+    }
+
     var offersFirstBuddy: Bool { isExtraUnlocked(.buddy) && progress.buddy.squishy == nil }
 
     /// False when the name is empty or rude.

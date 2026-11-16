@@ -7,6 +7,8 @@ struct MakerView: View {
     @EnvironmentObject var model: AppModel
     @State private var draft = MadeSquishy(id: UUID().uuidString)
     @State private var problem = false
+    /// A squishy that has just been saved for the first time, for its "Meet ...!" moment.
+    @State private var meet: MadeSquishy?
 
     private var worlds: Int { model.worldsCompleted }
     private var isSaved: Bool { model.progress.made.contains { $0.id == draft.id } }
@@ -15,10 +17,14 @@ struct MakerView: View {
     var body: some View {
         VStack(spacing: 0) {
             TopBar(title: "Squishy Maker")
+            Text("Make your own squishy. It can be your Buddy and lives in your Squish Room.")
+                .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.7))
+                .multilineTextAlignment(.center).padding(.horizontal, 20)
             SoftSquishy(toy: "\(draft.shape)-\(draft.ears)-\(draft.accessory)", look: String(describing: draft), feel: .jelly) {
                 MadeSquishyView(made: draft)
             }
             .frame(width: 200, height: 200)
+            if isSaved, let saved = model.progress.made.first(where: { $0.id == draft.id }) { uses(of: saved) }
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
                     TextField("Name", text: $draft.name)
@@ -82,6 +88,50 @@ struct MakerView: View {
             }
         }
         .background(Theme.marshmallow.ignoresSafeArea())
+        .overlay {
+            if let made = meet {
+                ZStack {
+                    Color.black.opacity(0.25).ignoresSafeArea().onTapGesture { meet = nil }
+                    VStack(spacing: 14) {
+                        MadeSquishyView(made: made).frame(width: 150, height: 150)
+                        Text("Meet \(made.name)!").font(Theme.title(28)).foregroundStyle(Theme.plum)
+                        uses(of: made)
+                        Button("Keep making") { meet = nil }
+                            .font(Theme.body(15)).foregroundStyle(Theme.plum.opacity(0.7))
+                    }
+                    .padding(24)
+                    .background(RoundedRectangle(cornerRadius: 30).fill(Theme.marshmallow))
+                    .padding(30)
+                    .transition(.scale(scale: 0.7).combined(with: .opacity))
+                }
+            }
+        }
+        .animation(.spring(response: 0.35, dampingFraction: 0.6), value: meet)
+    }
+
+    /// What a saved squishy can do: be the Buddy, and be squeezed in the Squish Room.
+    private func uses(of made: MadeSquishy) -> some View {
+        HStack(spacing: 8) {
+            if model.progress.buddy.squishy == made.ref {
+                Label("\(made.name) is your Buddy", systemImage: "heart.fill")
+                    .font(Theme.body(14)).foregroundStyle(Theme.bubblegum)
+            } else {
+                Button {
+                    if model.setBuddy(ref: made.ref, name: made.name) { model.haptics.complete() }
+                } label: {
+                    Label("Make \(made.name) my Buddy", systemImage: "heart.fill").font(Theme.body(14))
+                        .lineLimit(1).minimumScaleFactor(0.7)
+                }
+                .buttonStyle(SquishButtonStyle(fill: Theme.grape))
+                .accessibilityIdentifier("maker-buddy")
+            }
+            Button { meet = nil; model.squeeze(made.ref) } label: {
+                Label("Squeeze", systemImage: "hand.tap.fill").font(Theme.body(14))
+            }
+            .buttonStyle(SquishButtonStyle(fill: Theme.bubblegum))
+            .accessibilityIdentifier("maker-squeeze")
+        }
+        .padding(.horizontal, 12)
     }
 
     /// One row of options, each drawn as the squishy would look with it. Locked ones show a padlock.
@@ -119,11 +169,18 @@ struct MakerView: View {
     }
 
     private func save() {
+        let first = !isSaved
         if model.saveMade(draft) {
             problem = false
             model.haptics.complete()
             // Keep the cleaned-up name in the editor.
-            if let saved = model.progress.made.first(where: { $0.id == draft.id }) { draft = saved }
+            if let saved = model.progress.made.first(where: { $0.id == draft.id }) {
+                draft = saved
+                if first {
+                    model.sounds.play("unlock_new")
+                    meet = saved
+                }
+            }
         } else {
             problem = true
         }
