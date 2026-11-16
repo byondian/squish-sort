@@ -48,7 +48,7 @@ struct ShopView: View {
                             buddyItem(.treat, "Treat", "birthday.cake.fill")
                             buddyItem(.gift, "Gift", "gift.fill")
                         }
-                        Text("Every level you win gives your Buddy a free treat. Treats and gifts are just for fun.")
+                        Text("Hearts teach your Buddy tricks and help it grow. Every level you win gives a free treat. Just for fun.")
                             .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.6))
                     }
                     Text("Coins buy hints, extra jars and themes. Squishies are earned by playing and are never for sale.")
@@ -73,6 +73,9 @@ struct ShopView: View {
         Button { model.buyForBuddy(item) } label: {
             VStack(spacing: 4) {
                 Label(title, systemImage: icon)
+                // Says what it gives: hearts fill the ring towards the Buddy's next trick.
+                Label("+\(item == .gift ? BuddyState.heartsPerGift : BuddyState.heartsPerTreat)", systemImage: "heart.fill")
+                    .font(Theme.body(14)).foregroundStyle(Theme.bubblegum)
                 Text("\(item.price) coins").font(Theme.body(13)).opacity(0.7)
             }
             .frame(maxWidth: .infinity)

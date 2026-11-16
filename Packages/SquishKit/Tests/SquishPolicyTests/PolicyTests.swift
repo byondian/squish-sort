@@ -793,9 +793,9 @@ final class ExtrasTests: XCTestCase {
         XCTAssertEqual(b.treats, 2)
         XCTAssertEqual(b.hearts, 1)
         b.give(.gift)
-        XCTAssertEqual(b.hearts, 6)
+        XCTAssertEqual(b.hearts, 9)
         b.give(.hint)
-        XCTAssertEqual(b.hearts, 6)
+        XCTAssertEqual(b.hearts, 9)
         b.hearts = 1000
         XCTAssertEqual(b.tricksUnlocked, BuddyState.tricks)
         XCTAssertEqual(Coins.Item.treat.price, 100)

@@ -354,7 +354,8 @@ public struct BuddyState: Codable, Equatable, Sendable {
 
     public static let maxStoredTreats = 3
     public static let heartsPerTreat = 1
-    public static let heartsPerGift = 5
+    /// A gift is better value than six treats, and nearly a whole trick.
+    public static let heartsPerGift = 8
 
     public init() {}
 

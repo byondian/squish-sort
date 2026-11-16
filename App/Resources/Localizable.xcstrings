@@ -1509,6 +1509,28 @@
         }
       }
     },
+    "Hearts teach your Buddy tricks and help it grow. Every level you win gives a free treat. Just for fun.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ハートがたまると、バディがトリックをおぼえて大きくなるよ。レベルをクリアするたびにおやつが1つもらえる。おたのしみ用だよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "하트가 모이면 버디가 묘기를 배우고 자라요. 레벨을 이길 때마다 간식을 하나 받아요. 재미로만 즐겨요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "愛心能讓夥伴學會把戲並長大。每贏一關就送一份免費點心。純屬好玩。"
+          }
+        }
+      }
+    },
     "Here's a new question.": {
       "localizations": {
         "ja": {
