@@ -44,7 +44,7 @@ struct AgeQuestionView: View {
         .task {
             guard !triedSystem else { return }
             triedSystem = true
-            if let range = await DeclaredAge.request() {
+            if let range = await DeclaredAge.request(storefront: model.storefront) {
                 model.setAge(range: range, source: .declaredAgeRange)
             }
         }

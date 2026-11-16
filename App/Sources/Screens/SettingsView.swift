@@ -5,11 +5,19 @@ struct SettingsView: View {
     @EnvironmentObject var model: AppModel
     @EnvironmentObject var purchases: PurchaseService
     @State private var gateFor: GateAction?
+    /// What the gate allowed; runs once the gate sheet has finished closing.
+    @State private var passed: GateAction?
     @State private var thanks = false
 
     enum GateAction: Identifiable {
-        case buy, leaveGentleMode
-        var id: Int { self == .buy ? 0 : 1 }
+        case buy, leaveGentleMode, squishyShop
+        var id: Int {
+            switch self {
+            case .buy: return 0
+            case .leaveGentleMode: return 1
+            case .squishyShop: return 2
+            }
+        }
     }
 
     var body: some View {
@@ -24,6 +32,15 @@ struct SettingsView: View {
                 Section {
                     Button { model.screen = .shop } label: {
                         Label("Shop: coins and board themes", systemImage: "bag.fill")
+                    }
+                }
+                if model.showsSquishyShop {
+                    Section {
+                        Button { gateFor = .squishyShop } label: {
+                            Label("Real squishies (website)", systemImage: "safari.fill")
+                        }
+                    } footer: {
+                        Text("Opens squishsort.app in Safari. These are affiliate links: we may earn a little if you buy. Ask a grown-up first.")
                     }
                 }
                 Section {
@@ -64,14 +81,23 @@ struct SettingsView: View {
         .background(Theme.marshmallow.ignoresSafeArea())
         .tint(Theme.bubblegum)
         .foregroundStyle(Theme.plum)
-        .sheet(item: $gateFor) { action in
+        .sheet(item: $gateFor, onDismiss: afterGate) { action in
             ParentalGate(onPass: {
+                passed = action
                 gateFor = nil
-                switch action {
-                case .buy: buy()
-                case .leaveGentleMode: model.askAge = true
-                }
             }, onCancel: { gateFor = nil })
+        }
+    }
+
+    /// Nothing can be presented while the gate sheet is still closing, so the
+    /// follow-up waits for its onDismiss.
+    private func afterGate() {
+        guard let action = passed else { return }
+        passed = nil
+        switch action {
+        case .buy: buy()
+        case .leaveGentleMode: model.askAge = true
+        case .squishyShop: model.openSquishyShop()
         }
     }
 

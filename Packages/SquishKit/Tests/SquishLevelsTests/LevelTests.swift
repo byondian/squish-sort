@@ -89,6 +89,13 @@ final class SolverTests: XCTestCase {
         XCTAssertNil(Solver.solve(b))
     }
 
+    func testNoHintFromADeadEnd() {
+        // Not stuck yet (moves exist) but unwinnable: the hint must be nil so nothing is charged.
+        let b = Board(capacity: 4, jars: [[Piece(kind: 0), Piece(kind: 1), Piece(kind: 0), Piece(kind: 1)],
+                                          [Piece(kind: 1), Piece(kind: 0), Piece(kind: 1), Piece(kind: 0)]])
+        XCTAssertNil(Solver.hint(b))
+    }
+
     func testHintIsALegalMove() throws {
         let file = try LevelCatalog.loadFiles(root: levelsRoot).first { $0.id == "toyshop-08" }!
         let level = try Level(file: file)

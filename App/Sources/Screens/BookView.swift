@@ -38,7 +38,7 @@ struct BookView: View {
         .sheet(item: $newOne) { c in
             VStack(spacing: 12) {
                 SquishyView(id: c.id, rarity: c.rarity).frame(width: 180, height: 180)
-                Text(c.name).font(Theme.title(26))
+                Text(verbatim: c.name(in: model.language)).font(Theme.title(26))
                 Text("New!").font(Theme.body(18))
             }
             .foregroundStyle(Theme.plum)
@@ -64,7 +64,7 @@ struct BookView: View {
                             SquishyView(id: c.id, rarity: c.rarity, silhouette: !has, squash: pressed == c.id ? 1 : 0)
                                 .frame(width: 72, height: 72)
                                 .overlay { if !has && c.rarity == .secret { Text("?").font(Theme.title(28)).foregroundStyle(Theme.plum.opacity(0.5)) } }
-                            Text(has ? c.name : "???").font(Theme.body(11)).lineLimit(1).foregroundStyle(Theme.plum)
+                            Text(verbatim: has ? c.name(in: model.language) : "???").font(Theme.body(11)).lineLimit(1).foregroundStyle(Theme.plum)
                         }
                         .frame(width: 80)
                         .onLongPressGesture(minimumDuration: 5, pressing: { down in
@@ -93,11 +93,16 @@ struct TopBar: View {
 
     var body: some View {
         HStack {
-            IconButton(system: "chevron.left") { model.screen = .level(model.progress.highestUnlocked) }
+            IconButton(system: "chevron.left") { model.screen = model.homeScreen }
             Spacer()
             Text(title).font(Theme.title(22)).foregroundStyle(Theme.plum)
             Spacer()
-            Color.clear.frame(width: 44, height: 44)
+            // The player's avatar is their Buddy.
+            if model.buddyActive, let ref = model.progress.buddy.squishy {
+                SquishRefView(ref: ref).frame(width: 44, height: 44).background(Circle().fill(.white))
+            } else {
+                Color.clear.frame(width: 44, height: 44)
+            }
         }
         .padding(.horizontal, 12)
         .padding(.top, 8)

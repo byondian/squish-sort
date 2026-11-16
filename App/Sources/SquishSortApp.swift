@@ -25,8 +25,14 @@ struct RootView: View {
                 LevelView(index: i, model: model).id(i)
             case .level:
                 Text("Levels missing from the bundle").font(Theme.body())
+            case .home:
+                HomeView()
             case .map:
                 MapView()
+            case .mystery:
+                MysteryBagView()
+            case .maker:
+                MakerView()
             case .book:
                 BookView()
             case .room:
@@ -37,7 +43,7 @@ struct RootView: View {
                 ShopView()
             }
         }
-        .fullScreenCover(item: $model.capsule) { c in
+        .fullScreenCover(item: $model.capsule, onDismiss: { model.capsuleDismissed() }) { c in
             CapsuleView(collectible: c) { model.capsuleClosed() }
                 .environmentObject(model)
         }

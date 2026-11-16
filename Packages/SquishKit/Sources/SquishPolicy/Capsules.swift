@@ -13,6 +13,10 @@ public struct Collectible: Codable, Hashable, Identifiable, Sendable {
     public var rarity: Rarity
     /// Morph Squad: turns into another squishy from its world when squeezed.
     public var shapeshifter: Bool
+    /// Translated names by language code (ja, ko, zh-Hant). `name` is English.
+    public var names: [String: String]
+
+    public func name(in language: String) -> String { names[language] ?? name }
 
     public init(id: String, name: String, world: String, rarity: Rarity, shapeshifter: Bool = false) {
         self.id = id
@@ -20,6 +24,7 @@ public struct Collectible: Codable, Hashable, Identifiable, Sendable {
         self.world = world
         self.rarity = rarity
         self.shapeshifter = shapeshifter
+        self.names = [:]
     }
 
     public init(from decoder: Decoder) throws {
@@ -29,6 +34,7 @@ public struct Collectible: Codable, Hashable, Identifiable, Sendable {
         world = try c.decode(String.self, forKey: .world)
         rarity = try c.decode(Rarity.self, forKey: .rarity)
         shapeshifter = try c.decodeIfPresent(Bool.self, forKey: .shapeshifter) ?? false
+        names = try c.decodeIfPresent([String: String].self, forKey: .names) ?? [:]
     }
 }
 
@@ -36,6 +42,9 @@ public struct Collectible: Codable, Hashable, Identifiable, Sendable {
 public struct RoomToy: Codable, Hashable, Identifiable, Sendable {
     public var id: String
     public var name: String
+    public var names: [String: String]?
+
+    public func name(in language: String) -> String { names?[language] ?? name }
 }
 
 public struct Roster: Codable, Sendable {
@@ -90,6 +99,16 @@ public struct CollectionState: Codable, Equatable, Sendable {
     }
 
     public init() {}
+
+    /// Missing fields fall back to defaults, so new fields never lose a collection.
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        owned = try c.decodeIfPresent([String: Int].self, forKey: .owned) ?? [:]
+        capsulesOpened = try c.decodeIfPresent([String: Int].self, forKey: .capsulesOpened) ?? [:]
+        rareOrBetterOpened = try c.decodeIfPresent([String: Int].self, forKey: .rareOrBetterOpened) ?? [:]
+        totalCapsules = try c.decodeIfPresent(Int.self, forKey: .totalCapsules) ?? 0
+        earnedLog = try c.decodeIfPresent([Earned].self, forKey: .earnedLog) ?? []
+    }
 
     public func owns(_ id: String) -> Bool { (owned[id] ?? 0) > 0 }
     public var spareCount: Int { owned.values.reduce(0) { $0 + max(0, $1 - 1) } }

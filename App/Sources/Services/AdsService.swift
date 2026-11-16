@@ -5,7 +5,7 @@ import UserMessagingPlatform
 import SquishPolicy
 
 /// AdMob behind one small surface. Started only after the age step, with the
-/// flags for the player's age group (tech design, ads stack). No ATT prompt ever.
+/// flags for the player's age group (tech design, ads stack).
 @MainActor
 final class AdsService: NSObject, ObservableObject, FullScreenContentDelegate {
     /// Google's public test units until the AdMob account is verified.
@@ -31,10 +31,24 @@ final class AdsService: NSObject, ObservableObject, FullScreenContentDelegate {
         }
     }
 
-    /// New flags after the age step or the tracking prompt. Applies to the next ad request.
+    /// New flags after the age step, the tracking prompt, a storefront change or a
+    /// switch to gentle mode. Ads already loaded were requested under the old
+    /// flags, so they're thrown away and loaded again under the new ones.
     func update(policy: AdRequestPolicy) {
+        let changed = policy != self.policy
         self.policy = policy
-        guard started else { return }
+        guard started, changed else { return }
+        apply(policy)
+        interstitial = nil
+        rewarded = nil
+        rewardedReady = false
+        Task {
+            await loadInterstitial()
+            await loadRewarded()
+        }
+    }
+
+    private func apply(_ policy: AdRequestPolicy) {
         let config = MobileAds.shared.requestConfiguration
         config.tagForChildDirectedTreatment = NSNumber(value: policy.tagForChildDirectedTreatment)
         config.tagForUnderAgeOfConsent = NSNumber(value: policy.tagForUnderAgeOfConsent)
@@ -44,16 +58,15 @@ final class AdsService: NSObject, ObservableObject, FullScreenContentDelegate {
     func start(policy: AdRequestPolicy) async {
         guard !started else { return }
         self.policy = policy
-        let config = MobileAds.shared.requestConfiguration
-        config.tagForChildDirectedTreatment = NSNumber(value: policy.tagForChildDirectedTreatment)
-        config.tagForUnderAgeOfConsent = NSNumber(value: policy.tagForUnderAgeOfConsent)
-        config.maxAdContentRating = policy.maxAdContentRating == .g ? .general : .parentalGuidance
+        apply(policy)
         if policy.showConsentForm {
             await gatherConsent()
             guard ConsentInformation.shared.canRequestAds else { return }
         }
         _ = await MobileAds.shared.start()
         started = true
+        // The policy may have changed while the SDK was starting (gentle mode, storefront).
+        if let latest = self.policy { apply(latest) }
         await loadInterstitial()
         await loadRewarded()
     }
@@ -79,13 +92,20 @@ final class AdsService: NSObject, ObservableObject, FullScreenContentDelegate {
         return r
     }
 
+    /// An ad that finishes loading after the policy changed is dropped, never shown.
     private func loadInterstitial() async {
-        interstitial = try? await InterstitialAd.load(with: AdUnits.interstitial, request: request())
+        let requestedUnder = policy
+        let ad = try? await InterstitialAd.load(with: AdUnits.interstitial, request: request())
+        guard requestedUnder == policy else { return }
+        interstitial = ad
         interstitial?.fullScreenContentDelegate = self
     }
 
     private func loadRewarded() async {
-        rewarded = try? await RewardedAd.load(with: AdUnits.rewarded, request: request())
+        let requestedUnder = policy
+        let ad = try? await RewardedAd.load(with: AdUnits.rewarded, request: request())
+        guard requestedUnder == policy else { return }
+        rewarded = ad
         rewarded?.fullScreenContentDelegate = self
         rewardedReady = rewarded != nil
     }

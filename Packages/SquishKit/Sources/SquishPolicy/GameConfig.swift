@@ -15,6 +15,8 @@ public struct GameConfig: Codable, Equatable, Sendable {
     public var mysteryBagEnabled = true
     public var makerEnabled = true
     public var buddyEnabled = true
+    /// The link to the website's Squishy Shop (affiliate listings of real toys).
+    public var squishyShopEnabled = true
 
     public init() {}
 
@@ -30,6 +32,7 @@ public struct GameConfig: Codable, Equatable, Sendable {
         mysteryBagEnabled = try c.decodeIfPresent(Bool.self, forKey: .mysteryBagEnabled) ?? d.mysteryBagEnabled
         makerEnabled = try c.decodeIfPresent(Bool.self, forKey: .makerEnabled) ?? d.makerEnabled
         buddyEnabled = try c.decodeIfPresent(Bool.self, forKey: .buddyEnabled) ?? d.buddyEnabled
+        squishyShopEnabled = try c.decodeIfPresent(Bool.self, forKey: .squishyShopEnabled) ?? d.squishyShopEnabled
     }
 
     /// Unknown or broken remote JSON falls back to the bundled defaults.

@@ -24,6 +24,17 @@ public enum Extras {
     }
 }
 
+/// The website's Squishy Shop: affiliate listings of real squishy toys.
+/// The app only links to it. Nothing is sold in the app, and the link is for
+/// players of 13 and over (14 in Korea) with a known age: never gentle mode.
+public enum SquishyShop {
+    public static let url = "https://squishsort.app/shop"
+
+    public static func isVisible(profile: AgeProfile?, storefront: String, config: GameConfig = GameConfig()) -> Bool {
+        config.squishyShopEnabled && AgePolicy.group(of: profile, storefront: storefront) != .child
+    }
+}
+
 // MARK: - Mystery Bag
 
 /// Daily guessing game: three clues, pick 1 of 4. No purchase and no ad anywhere.
@@ -183,15 +194,12 @@ public enum NameFilter {
     }
 
     private static func isRudeNormalised(_ text: String) -> Bool {
-        var letters = ""
         var words: [String] = []
         var word = ""
         for ch in text {
             if let swap = leet[ch] {
-                letters.append(swap)
                 word.append(swap)
             } else if ch.isLetter {
-                letters.append(ch)
                 word.append(ch)
             } else if !word.isEmpty {
                 words.append(word)
@@ -199,22 +207,31 @@ public enum NameFilter {
             }
         }
         if !word.isEmpty { words.append(word) }
-        if anywhere.contains(where: { letters.contains($0) }) { return true }
-        // Short words only count as a whole word, so "Grass" and "Cocoa" are fine.
+        // Strong words count anywhere inside a word ("Sh1tface").
+        if words.contains(where: { w in insideAWord.contains(where: { w.contains($0) }) }) { return true }
+        // Spelt out with gaps ("s h i t"): only when every piece is a single letter,
+        // so "Super Ape" and "Bass Hole" are left alone.
+        if words.count > 1, words.allSatisfy({ $0.count == 1 }) {
+            let joined = words.joined()
+            if insideAWord.contains(where: { joined.contains($0) }) || wholeWord.contains(joined) { return true }
+        }
+        // The rest only count as a whole word, so "Grapey", "Skittle" and "Cocoa" are fine.
         return words.contains(where: { wholeWord.contains($0) })
     }
 
     private static let leet: [Character: Character] = ["0": "o", "1": "i", "3": "e", "4": "a", "5": "s", "7": "t", "@": "a", "$": "s", "!": "i"]
 
-    private static let anywhere: [String] = [
-        "fuck", "shit", "bitch", "cunt", "nigg", "fag", "whore", "slut", "dick", "penis", "vagina", "pussy",
-        "bastard", "wank", "twat", "rape", "nazi", "hitler", "porn", "boob", "asshole", "arsehole", "retard",
-        "kill", "suicide",
-        // ja / ko / zh-Hant basics; a native check is still due before submission.
+    private static let insideAWord: [String] = [
+        "fuck", "shit", "bitch", "cunt", "nigg", "whore", "slut", "penis", "vagina", "pussy",
+        "bastard", "hitler", "asshole", "arsehole", "retard", "suicide",
+        // ja / ko / zh-Hant basics.
         "くそ", "ばか", "しね", "死ね", "ちんこ", "まんこ", "씨발", "시발", "병신", "개새끼", "좆", "幹你", "操你", "他媽", "白癡", "去死",
     ]
 
-    private static let wholeWord: Set<String> = ["ass", "arse", "cock", "cum", "sex", "tit", "tits", "piss", "poo", "crap", "damn", "hell", "die", "sexy", "anal", "anus"]
+    private static let wholeWord: Set<String> = [
+        "ass", "arse", "cock", "cum", "sex", "tit", "tits", "piss", "poo", "crap", "damn", "hell", "die", "sexy", "anal", "anus",
+        "rape", "kill", "wank", "wanker", "dick", "fag", "twat", "porn", "boob", "boobs", "nazi",
+    ]
 }
 
 // MARK: - Squishy Buddy
@@ -281,6 +298,8 @@ public struct BuddyLine: Codable, Equatable, Sendable {
     public var id: String
     public var trigger: String
     public var text: [String: String]
+    /// When set, the line is only used in these languages.
+    public var locales: [String]?
 }
 
 /// The pre-written, translated line bank. No AI and no player text.
@@ -317,7 +336,8 @@ public struct BuddyScript: Codable, Sendable {
 
     /// A random line for the trigger in the player's language, falling back to English.
     public func line<R: RandomNumberGenerator>(_ trigger: String, language: String, using rng: inout R) -> String? {
-        guard let line = lines.filter({ $0.trigger == trigger }).randomElement(using: &rng) else { return nil }
+        let usable = lines.filter { $0.trigger == trigger && ($0.locales?.contains(language) ?? true) }
+        guard let line = usable.randomElement(using: &rng) else { return nil }
         return line.text[language] ?? line.text["en"]
     }
 
@@ -348,5 +368,41 @@ public struct BuddyScript: Codable, Sendable {
         if roll < chance { return .say(trigger: roll < chance / 2 ? "joke" : "fact") }
         if !moodAskedToday && rules.askMoodMaxPerDay > 0 && roll < chance * 2 { return .askMood }
         return .quiet
+    }
+}
+
+// MARK: - Parental gate
+
+/// "Ask a grown-up": a typed answer to a multiplication, one try per question,
+/// and a pause after a wrong answer so it can't be passed by guessing.
+public struct ParentalGateState: Equatable, Sendable {
+    public static let cooldown: Double = 10
+
+    public private(set) var a: Int
+    public private(set) var b: Int
+    /// Seconds since 1970 until which answers are refused.
+    public private(set) var lockedUntil: Double = 0
+
+    public init<R: RandomNumberGenerator>(using rng: inout R) {
+        a = Int.random(in: 6...9, using: &rng)
+        b = Int.random(in: 12...19, using: &rng)
+    }
+
+    public func isLocked(now: Double) -> Bool { now < lockedUntil }
+
+    public func secondsLeft(now: Double) -> Int { max(0, Int((lockedUntil - now).rounded(.up))) }
+
+    /// True only for the right answer outside a cooldown. A wrong answer starts
+    /// the cooldown and swaps in a new question.
+    public mutating func submit<R: RandomNumberGenerator>(_ answer: String, now: Double, using rng: inout R) -> Bool {
+        guard !isLocked(now: now) else { return false }
+        if Int(answer.trimmingCharacters(in: .whitespaces)) == a * b { return true }
+        lockedUntil = now + ParentalGateState.cooldown
+        let old = (a, b)
+        repeat {
+            a = Int.random(in: 6...9, using: &rng)
+            b = Int.random(in: 12...19, using: &rng)
+        } while (a, b) == old
+        return false
     }
 }

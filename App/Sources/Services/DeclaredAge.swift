@@ -10,11 +10,12 @@ import DeclaredAgeRange
 /// neutral birth-year question.
 enum DeclaredAge {
     @MainActor
-    static func request() async -> AgeRange? {
+    static func request(storefront: String) async -> AgeRange? {
         #if canImport(DeclaredAgeRange)
         if #available(iOS 26.0, *) {
             guard let vc = topViewController() else { return nil }
-            let gates = AgePolicy.declaredAgeThresholds
+            // Each range must span at least two years, so the gates depend on the storefront.
+            let gates = AgePolicy.declaredAgeGates(storefront: storefront)
             do {
                 let response = try await AgeRangeService.shared.requestAgeRange(ageGates: gates[0], gates[1], gates[2], in: vc)
                 switch response {
@@ -26,6 +27,9 @@ enum DeclaredAge {
                     return nil
                 }
             } catch {
+                #if DEBUG
+                print("DeclaredAgeRange request failed: \(error)")
+                #endif
                 return nil
             }
         }

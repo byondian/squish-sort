@@ -70,7 +70,7 @@ final class PurchaseService: ObservableObject {
     func buyCoins(_ product: Product) async -> Bool {
         do {
             if case .success(let verification) = try await product.purchase(),
-               case .verified(let t) = verification {
+               case .verified(let t) = verification, onCoins != nil {
                 credit(t)
                 await t.finish()
                 return true
@@ -79,6 +79,9 @@ final class PurchaseService: ObservableObject {
         return false
     }
 
+    /// Credits a coin pack once (the wallet ignores a transaction id it has seen).
+    /// A refunded pack isn't taken back out of the balance: the coins may already
+    /// be spent, and a negative balance would punish the player for Apple's refund.
     private func credit(_ t: Transaction) {
         if let pack = Coins.pack(for: t.productID), t.revocationDate == nil {
             onCoins?(pack, t.id)
@@ -92,7 +95,13 @@ final class PurchaseService: ObservableObject {
 
     private func handle(_ result: VerificationResult<Transaction>) async {
         guard case .verified(let t) = result else { return }
-        if t.productID == Self.removeAdsID { set(t.revocationDate == nil) } else { credit(t) }
+        if t.productID == Self.removeAdsID {
+            set(t.revocationDate == nil)
+        } else {
+            // Never finish a coin purchase nobody could credit: StoreKit will deliver it again.
+            guard onCoins != nil else { return }
+            credit(t)
+        }
         await t.finish()
     }
 

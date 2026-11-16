@@ -20,6 +20,14 @@ final class LevelController: ObservableObject {
     @Published private(set) var extraJarUsed = false
     /// Paid-for helper choice sheet: watch an ad or spend coins.
     @Published var choosing: Coins.Item?
+    /// Coins the last win paid (0 on a replay), for the win card.
+    @Published private(set) var earnedCoins = 0
+    /// The hint search is running.
+    @Published private(set) var thinking = false
+    /// The hint search found no way to win from here. Nothing is charged for that.
+    @Published var noWayThrough = false
+    /// A hint found for the current board, waiting to be paid for or shown.
+    private var foundHint: (board: Board, move: Move)?
     private(set) var attempts = 1
     private var started = Date()
     private weak var model: AppModel?
@@ -41,6 +49,7 @@ final class LevelController: ObservableObject {
 
     private func play(_ move: Move) -> (MoveResult, Board)? {
         guard let result = session.play(move) else { return nil }
+        noWayThrough = false
         return (result, session.board)
     }
 
@@ -50,6 +59,7 @@ final class LevelController: ObservableObject {
         switch session.status {
         case .won(let stars):
             outcome = .won(stars: stars)
+            earnedCoins = model.coinsForWin(index: index, stars: stars)
             scene.celebrate()
             model.haptics.win()
             model.won(index: index, moves: session.moveCount, stars: stars, attempts: attempts, playSeconds: seconds)
@@ -64,12 +74,13 @@ final class LevelController: ObservableObject {
 
     func undo() {
         guard session.undo() else { return }
+        noWayThrough = false
         outcome = nil
         scene.reload(session.board)
     }
 
     var canExtraJar: Bool { !extraJarUsed }
-    var canHint: Bool { true }
+    var canHint: Bool { !thinking }
 
     func extraJar() {
         guard let model, !extraJarUsed else { return }
@@ -89,7 +100,7 @@ final class LevelController: ObservableObject {
             switch item {
             case .hint: self?.showHint()
             case .extraJar: self?.addJar()
-            case .theme: break
+            case .theme, .treat, .gift: break
             }
         }
         if withAd {
@@ -106,27 +117,44 @@ final class LevelController: ObservableObject {
         scene.reload(session.board)
     }
 
+    /// The hint is worked out first, off the main thread, and only charged for
+    /// (free hint, coins or an ad) when there is a move to show.
     func hint() {
-        guard let model else { return }
-        if model.hintsAvailable {
-            model.useHint()
-            showHint()
-        } else {
-            choosing = .hint
+        guard !thinking, outcome == nil else { return }
+        thinking = true
+        let board = session.board
+        Task {
+            let move = await Task.detached(priority: .userInitiated) { Solver.hint(board) }.value
+            thinking = false
+            guard let model, board == session.board, outcome == nil else { return }
+            guard let move else {
+                noWayThrough = true
+                return
+            }
+            foundHint = (board, move)
+            if model.hintsAvailable {
+                model.useHint()
+                showHint()
+            } else {
+                choosing = .hint
+            }
         }
     }
 
     private func showHint() {
-        if let move = Solver.hint(session.board) { scene.showHint(move) }
+        guard let found = foundHint, found.board == session.board else { return }
+        scene.showHint(found.move)
     }
 
     func retry() {
+        model?.levelCheer = nil
         attempts += 1
         started = Date()
         session = GameSession(board: level.board, par: level.par, undoLimit: model?.undoLimit ?? 5)
         // Real walls soften: one extra jar after enough fails.
         if let soften = level.file.softenAfterFails, attempts > soften { session.addExtraJar() }
         extraJarUsed = false
+        noWayThrough = false
         outcome = nil
         scene.reload(session.board)
     }
@@ -152,12 +180,35 @@ struct LevelView: View {
                 helpers
             }
             .padding(.horizontal, 12)
+            if controller.noWayThrough && controller.outcome == nil {
+                VStack {
+                    Text("No way through from here. Undo a few moves.")
+                        .font(Theme.body(15)).foregroundStyle(Theme.plum)
+                        .padding(.horizontal, 16).padding(.vertical, 10)
+                        .background(Capsule().fill(.white))
+                        .padding(.top, 96)
+                    Spacer()
+                }
+                .transition(.opacity)
+            }
             if let outcome = controller.outcome {
                 Color.black.opacity(0.15).ignoresSafeArea()
+                // The Buddy only speaks once the level is over.
+                if let cheer = model.levelCheer, let ref = model.progress.buddy.squishy {
+                    VStack {
+                        HStack(alignment: .bottom, spacing: 6) {
+                            SquishRefView(ref: ref).frame(width: 64, height: 64)
+                            SpeechBubble(text: cheer)
+                        }
+                        .padding(.top, 70)
+                        .padding(.horizontal, 20)
+                        Spacer()
+                    }
+                }
                 switch outcome {
                 case .won(let stars):
                     WinCard(stars: stars, showpiece: controller.level.file.beat == .showpiece,
-                            coins: Coins.earned(forWinWithStars: stars),
+                            coins: controller.earnedCoins,
                             gift: model.giftOffered ? { model.openGift() } : nil) {
                         model.continueAfterWin(index: controller.index, attempts: controller.attempts)
                     }
@@ -193,7 +244,7 @@ struct LevelView: View {
     private var header: some View {
         HStack {
             if model.showsCornerButtons {
-                IconButton(system: "map.fill") { model.screen = .map }
+                IconButton(system: "house.fill") { model.screen = .home }
             }
             Spacer()
             VStack(spacing: 2) {

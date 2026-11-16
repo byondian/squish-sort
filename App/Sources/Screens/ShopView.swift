@@ -7,6 +7,7 @@ struct ShopView: View {
     @EnvironmentObject var model: AppModel
     @EnvironmentObject var purchases: PurchaseService
     @State private var gateProduct: Product?
+    @State private var passedProduct: Product?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -39,6 +40,15 @@ struct ShopView: View {
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                         ForEach(BoardTheme.allCases) { theme in themeCard(theme) }
                     }
+                    if model.buddyActive {
+                        Text("For your Buddy").font(Theme.title(20)).foregroundStyle(Theme.plum)
+                        HStack(spacing: 12) {
+                            buddyItem(.treat, "Treat", "birthday.cake.fill")
+                            buddyItem(.gift, "Gift", "gift.fill")
+                        }
+                        Text("Every level you win gives your Buddy a free treat. Treats and gifts are just for fun.")
+                            .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.6))
+                    }
                     Text("Coins buy hints, extra jars and themes. Squishies are earned by playing and are never for sale.")
                         .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.6))
                 }
@@ -46,9 +56,27 @@ struct ShopView: View {
             }
         }
         .background(Theme.marshmallow.ignoresSafeArea())
-        .sheet(item: $gateProduct) { product in
-            ParentalGate(onPass: { gateProduct = nil; buy(product) }, onCancel: { gateProduct = nil })
+        .sheet(item: $gateProduct, onDismiss: {
+            // The purchase sheet waits until the gate has finished closing.
+            if let product = passedProduct {
+                passedProduct = nil
+                buy(product)
+            }
+        }) { product in
+            ParentalGate(onPass: { passedProduct = product; gateProduct = nil }, onCancel: { gateProduct = nil })
         }
+    }
+
+    private func buddyItem(_ item: Coins.Item, _ title: LocalizedStringKey, _ icon: String) -> some View {
+        Button { model.buyForBuddy(item) } label: {
+            VStack(spacing: 4) {
+                Label(title, systemImage: icon)
+                Text("\(item.price) coins").font(Theme.body(13)).opacity(0.7)
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(SquishButtonStyle(fill: .white, text: Theme.plum))
+        .disabled(!model.progress.wallet.canAfford(item))
     }
 
     private func themeCard(_ theme: BoardTheme) -> some View {

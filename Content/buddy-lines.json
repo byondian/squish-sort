@@ -1,6 +1,6 @@
 {
- "version": 1,
- "note": "Squishy Buddy line bank. Pre-written only; no AI, no player free text. ja/ko/zh-Hant are first drafts: jokes/puns need native review and may be swapped for local jokes. reply_grumpy-04 must stay in every locale.",
+ "version": 2,
+ "note": "Squishy Buddy line bank. Pre-written only; no AI, no player free text. Jokes in ja/ko/zh-Hant are local jokes, not translations. Language QA done 16 Nov (automated checks, native-style review, back-translation, fresh proofread; stopped when proofreads found only mechanical fixes). A line with 'locales' shows only in those locales. reply_grumpy-04 must stay in every locale.",
  "rules": {
   "maxUnpromptedPerHomeVisit": 1,
   "neverDuringLevel": true,
@@ -28,7 +28,7 @@
    "text": {
     "en": "Good morning! I saved you a sunny spot.",
     "ja": "おはよう！ひなたの席、とっておいたよ。",
-    "ko": "좋은 아침! 햇살 자리 맡아뒀어.",
+    "ko": "좋은 아침! 햇살 드는 자리 맡아놨어.",
     "zh-Hant": "早安！我幫你留了曬太陽的位子。"
    }
   },
@@ -38,7 +38,7 @@
    "text": {
     "en": "Morning! I've been practising my bounce.",
     "ja": "おはよう！ジャンプの練習してたんだ。",
-    "ko": "안녕! 통통 튀기 연습하고 있었어.",
+    "ko": "좋은 아침! 통통 튀는 연습 하고 있었어.",
     "zh-Hant": "早！我一直在練習彈跳喔。"
    }
   },
@@ -49,7 +49,7 @@
     "en": "Rise and squish!",
     "ja": "おはよう、むにっといこう！",
     "ko": "일어나서 말랑말랑!",
-    "zh-Hant": "起床囉，一起軟綿綿！"
+    "zh-Hant": "起床囉！先捏捏軟軟吧！"
    }
   },
   {
@@ -77,7 +77,7 @@
    "trigger": "greet_afternoon",
    "text": {
     "en": "Hi! I was just thinking about you.",
-    "ja": "やあ！ちょうど君のこと考えてたよ。",
+    "ja": "やあ！ちょうどきみのこと考えてたよ。",
     "ko": "안녕! 방금 네 생각 하고 있었어.",
     "zh-Hant": "嗨！我剛剛正在想你呢。"
    }
@@ -87,7 +87,7 @@
    "trigger": "greet_afternoon",
    "text": {
     "en": "Hello again! The jars missed you.",
-    "ja": "また会えたね！びんたちも寂しがってたよ。",
+    "ja": "また会えたね！びんたちもさみしがってたよ。",
     "ko": "또 만났네! 병들이 너 보고 싶어 했어.",
     "zh-Hant": "又見面了！罐子們都很想你。"
    }
@@ -107,7 +107,7 @@
    "trigger": "greet_afternoon",
    "text": {
     "en": "Yay, it's you!",
-    "ja": "わーい、君だ！",
+    "ja": "わーい、きみだ！",
     "ko": "야호, 너구나!",
     "zh-Hant": "耶，是你！"
    }
@@ -117,9 +117,9 @@
    "trigger": "greet_afternoon",
    "text": {
     "en": "Perfect timing. I just finished my nap.",
-    "ja": "ちょうどいいタイミング。お昼寝が終わったところ。",
-    "ko": "딱 좋은 타이밍이야. 막 낮잠 깼어.",
-    "zh-Hant": "時間剛好，我剛睡完午覺。"
+    "ja": "ちょうどいいとこ！お昼寝おわったばかりだよ。",
+    "ko": "타이밍 딱 좋아! 방금 낮잠에서 깼어.",
+    "zh-Hant": "來得正好！我剛睡完午覺。"
    }
   },
   {
@@ -129,7 +129,7 @@
     "en": "Good evening! Cosy sorting time.",
     "ja": "こんばんは！ほっこり仕分けタイムだね。",
     "ko": "좋은 저녁! 포근한 정리 시간이야.",
-    "zh-Hant": "晚安！溫馨的分類時間到了。"
+    "zh-Hant": "嗨！舒舒服服的分類時間到囉。"
    }
   },
   {
@@ -139,7 +139,7 @@
     "en": "Evening! I put my slippers on.",
     "ja": "こんばんは！スリッパはいたよ。",
     "ko": "저녁이다! 나 슬리퍼 신었어.",
-    "zh-Hant": "晚上好！我換上拖鞋了。"
+    "zh-Hant": "晚上囉！我換上拖鞋了。"
    }
   },
   {
@@ -158,7 +158,7 @@
    "text": {
     "en": "There you are! The stars are coming out.",
     "ja": "来たね！お星さまが出てきたよ。",
-    "ko": "왔구나! 별들이 나오고 있어.",
+    "ko": "왔구나! 별이 하나둘 뜨고 있어.",
     "zh-Hant": "你來了！星星都出來囉。"
    }
   },
@@ -167,8 +167,8 @@
    "trigger": "greet_night",
    "text": {
     "en": "It's late! Just one level, then sweet dreams?",
-    "ja": "もう遅いよ！1レベルだけして、おやすみね？",
-    "ko": "늦었어! 한 판만 하고 잘 자기?",
+    "ja": "もうおそいよ！1レベルだけやって、おやすみしよ？",
+    "ko": "늦었네! 딱 한 판만 하고 자자, 응?",
     "zh-Hant": "很晚囉！玩一關就去睡好不好？"
    }
   },
@@ -177,7 +177,7 @@
    "trigger": "greet_night",
    "text": {
     "en": "Shh, the other squishies are asleep.",
-    "ja": "しーっ、ほかのみんなは寝てるよ。",
+    "ja": "しーっ、ほかのみんなはねてるよ。",
     "ko": "쉿, 다른 말랑이들은 자고 있어.",
     "zh-Hant": "噓，其他軟軟都睡著了。"
    }
@@ -197,8 +197,8 @@
    "trigger": "greet_back",
    "text": {
     "en": "You're back! I counted every second. Well, most of them.",
-    "ja": "おかえり！1秒ずつ数えてたよ。だいたいね。",
-    "ko": "돌아왔구나! 1초씩 다 셌어. 거의.",
+    "ja": "おかえり！1秒1秒かぞえてたよ。ほぼね。",
+    "ko": "돌아왔구나! 1초도 안 빼고 셌어. 거의!",
     "zh-Hant": "你回來了！我每一秒都在數，差不多啦。"
    }
   },
@@ -217,7 +217,7 @@
    "trigger": "greet_back",
    "text": {
     "en": "Hooray, you came back!",
-    "ja": "やったー、戻ってきてくれた！",
+    "ja": "やったー、もどってきてくれた！",
     "ko": "만세, 돌아왔다!",
     "zh-Hant": "萬歲，你回來了！"
    }
@@ -228,8 +228,8 @@
    "text": {
     "en": "I made you a jelly. I ate it. Sorry.",
     "ja": "ゼリー作ったよ。食べちゃった。ごめん。",
-    "ko": "젤리 만들었어. 내가 먹었어. 미안.",
-    "zh-Hant": "我做了果凍給你。被我吃掉了，抱歉。"
+    "ko": "젤리 만들었는데... 내가 먹었어. 미안!",
+    "zh-Hant": "我幫你做了果凍…結果被我吃掉了，抱歉！"
    }
   },
   {
@@ -238,8 +238,8 @@
    "text": {
     "en": "Long time no squish!",
     "ja": "ひさしぶりのむにむに！",
-    "ko": "오랜만에 말랑!",
-    "zh-Hant": "好久不見，軟綿綿！"
+    "ko": "오랜만이야! 말랑말랑 반가워!",
+    "zh-Hant": "好久不見！軟軟好想你！"
    }
   },
   {
@@ -248,7 +248,7 @@
    "text": {
     "en": "You did it! I'm doing a happy wobble.",
     "ja": "やったね！うれしくてぷるぷるしてる。",
-    "ko": "해냈어! 신나서 흔들흔들.",
+    "ko": "해냈구나! 신나서 몸이 흔들흔들~",
     "zh-Hant": "你成功了！我開心得抖來抖去。"
    }
   },
@@ -257,7 +257,7 @@
    "trigger": "win",
    "text": {
     "en": "Woohoo! Every jar is tidy!",
-    "ja": "わーい！びんがぜんぶピカピカ！",
+    "ja": "わーい！びんがぜんぶそろったよ！",
     "ko": "우와! 병이 다 정리됐어!",
     "zh-Hant": "哇呼！每個罐子都整齊了！"
    }
@@ -278,8 +278,8 @@
    "text": {
     "en": "High squish!",
     "ja": "ハイむにっ！",
-    "ko": "하이 말랑!",
-    "zh-Hant": "軟綿綿擊掌！"
+    "ko": "말랑 하이파이브!",
+    "zh-Hant": "來個軟軟擊掌！"
    }
   },
   {
@@ -287,9 +287,9 @@
    "trigger": "win",
    "text": {
     "en": "You make it look easy.",
-    "ja": "かんたんそうに見えちゃう。",
-    "ko": "너무 쉬워 보여.",
-    "zh-Hant": "你讓它看起來好簡單。"
+    "ja": "きみがやると、かんたんそうに見えちゃう！",
+    "ko": "어쩜 이렇게 쉽게 해?",
+    "zh-Hant": "你玩得好輕鬆喔！"
    }
   },
   {
@@ -307,7 +307,7 @@
    "trigger": "win",
    "text": {
     "en": "I knew you could do it.",
-    "ja": "できるって知ってたよ。",
+    "ja": "きみならできるって思ってた！",
     "ko": "할 수 있을 줄 알았어.",
     "zh-Hant": "我就知道你可以。"
    }
@@ -319,7 +319,7 @@
     "en": "Squishtastic!",
     "ja": "むにむにサイコー！",
     "ko": "말랑 최고!",
-    "zh-Hant": "軟綿綿超棒！"
+    "zh-Hant": "超級無敵棒！"
    }
   },
   {
@@ -328,7 +328,7 @@
    "text": {
     "en": "Three stars! I need to sit down.",
     "ja": "星3つ！すごすぎて座りこんじゃう。",
-    "ko": "별 세 개! 나 좀 앉아야겠어.",
+    "ko": "별 세 개! 놀라서 주저앉을 뻔했어!",
     "zh-Hant": "三顆星！我得坐下來冷靜一下。"
    }
   },
@@ -338,7 +338,7 @@
    "text": {
     "en": "Perfect! Not one wasted move.",
     "ja": "パーフェクト！ムダな手ゼロ！",
-    "ko": "완벽해! 헛수고가 하나도 없어.",
+    "ko": "완벽해! 딱 필요한 만큼만 움직였어!",
     "zh-Hant": "完美！一步都沒浪費！"
    }
   },
@@ -348,7 +348,7 @@
    "text": {
     "en": "Three stars! You're a sorting genius.",
     "ja": "星3つ！仕分けの天才だね。",
-    "ko": "별 세 개! 정리 천재야.",
+    "ko": "별 세 개! 너 정리 천재구나!",
     "zh-Hant": "三顆星！你是分類天才。"
    }
   },
@@ -358,7 +358,7 @@
    "text": {
     "en": "Wow, wow, WOW!",
     "ja": "わあ、わあ、わあ！",
-    "ko": "와, 와, 와!",
+    "ko": "와, 와, 우와아!",
     "zh-Hant": "哇、哇、哇！"
    }
   },
@@ -377,7 +377,7 @@
    "trigger": "fail",
    "text": {
     "en": "No worries, even I get stuck sometimes.",
-    "ja": "だいじょうぶ、ぼくもたまに詰まるよ。",
+    "ja": "だいじょうぶ、ぼくもたまにつまっちゃう。",
     "ko": "괜찮아, 나도 가끔 막혀.",
     "zh-Hant": "沒關係，我有時候也會卡住。"
    }
@@ -397,8 +397,8 @@
    "trigger": "fail",
    "text": {
     "en": "Deep breath. Squish me if it helps.",
-    "ja": "深呼吸。ぼくをむにっとしてもいいよ。",
-    "ko": "심호흡해. 도움이 되면 나를 꾹 눌러.",
+    "ja": "しんこきゅうしよ。ぼくをむにってしてもいいよ。",
+    "ko": "숨 크게 쉬어 봐. 나를 꾹 눌러도 돼.",
     "zh-Hant": "深呼吸。捏捏我會好一點喔。"
    }
   },
@@ -407,9 +407,9 @@
    "trigger": "fail",
    "text": {
     "en": "That level is sneaky. We'll get it.",
-    "ja": "あのレベル、ずるいね。いっしょにクリアしよう。",
-    "ko": "그 판 얄밉다. 우리가 꼭 깨자.",
-    "zh-Hant": "那關好狡猾，我們一定能過。"
+    "ja": "このレベル、いじわるだね。いっしょにクリアしよう！",
+    "ko": "이 판 진짜 얄밉다. 우리 꼭 깨자!",
+    "zh-Hant": "這關好狡猾，我們一定能過。"
    }
   },
   {
@@ -448,7 +448,7 @@
    "text": {
     "en": "Hey! I was napping.",
     "ja": "ちょっと！お昼寝してたのに。",
-    "ko": "야! 나 낮잠 자고 있었는데.",
+    "ko": "앗! 나 낮잠 자고 있었는데~",
     "zh-Hant": "喂！我在睡午覺耶。"
    }
   },
@@ -497,7 +497,7 @@
    "trigger": "treat",
    "text": {
     "en": "Is this for me? You're the best.",
-    "ja": "これぼくに？君って最高。",
+    "ja": "これぼくに？きみって最高。",
     "ko": "이거 나 주는 거야? 네가 최고야.",
     "zh-Hant": "這是給我的？你最好了。"
    }
@@ -527,9 +527,9 @@
    "trigger": "treat",
    "text": {
     "en": "I feel extra bouncy now!",
-    "ja": "すっごく弾みたい気分！",
+    "ja": "すっごくはずみたい気分！",
     "ko": "완전 통통 튀는 기분이야!",
-    "zh-Hant": "我現在超有彈性！"
+    "zh-Hant": "我現在彈力滿滿！"
    }
   },
   {
@@ -568,7 +568,7 @@
    "text": {
     "en": "Yay! Happy is the best flavour.",
     "ja": "やった！ハッピーがいちばんの味だね。",
-    "ko": "야호! 행복이 최고의 맛이야.",
+    "ko": "야호! 행복이 제일 맛있는 맛이야.",
     "zh-Hant": "耶！開心是最棒的口味。"
    }
   },
@@ -577,8 +577,8 @@
    "trigger": "reply_happy",
    "text": {
     "en": "That makes me want to bounce!",
-    "ja": "それ聞いたら弾みたくなっちゃう！",
-    "ko": "그 말 들으니까 튀어오르고 싶어!",
+    "ja": "それ聞いたら、はずみたくなっちゃう！",
+    "ko": "그 말 들으니까 나도 통통 뛰고 싶어!",
     "zh-Hant": "聽到這個我好想跳！"
    }
   },
@@ -608,7 +608,7 @@
    "text": {
     "en": "Maybe a squish will make it better?",
     "ja": "むにっとしたら、ちょっと良くなるかも？",
-    "ko": "꾹 누르면 좀 나아질지도?",
+    "ko": "나를 꾹 누르면 좀 나아질지도?",
     "zh-Hant": "捏一捏也許會好一點？"
    }
   },
@@ -628,7 +628,7 @@
    "text": {
     "en": "Me too. Let's do a gentle one.",
     "ja": "ぼくも。やさしいのにしよう。",
-    "ko": "나도. 쉬운 걸로 하자.",
+    "ko": "나도 졸려. 살살 한 판 하자.",
     "zh-Hant": "我也是。來玩輕鬆的吧。"
    }
   },
@@ -638,7 +638,7 @@
    "text": {
     "en": "Yawn... it's catching!",
     "ja": "ふぁ〜…うつっちゃった！",
-    "ko": "하암... 옮았다!",
+    "ko": "하암... 하품 옮았다!",
     "zh-Hant": "哈欠…被傳染了！"
    }
   },
@@ -648,7 +648,7 @@
    "text": {
     "en": "Remember to rest. The jars will wait.",
     "ja": "ちゃんと休んでね。びんは待ってるよ。",
-    "ko": "꼭 쉬어. 병들은 기다려줄 거야.",
+    "ko": "쉬는 것도 잊지 마. 병들은 기다려 줄 거야.",
     "zh-Hant": "記得休息，罐子會等你。"
    }
   },
@@ -678,7 +678,7 @@
    "text": {
     "en": "Here's a tiny hug.",
     "ja": "小さなハグをどうぞ。",
-    "ko": "작은 포옹을 줄게.",
+    "ko": "작게 꼬옥 안아 줄게.",
     "zh-Hant": "給你一個小小的抱抱。"
    }
   },
@@ -687,8 +687,8 @@
    "trigger": "reply_grumpy",
    "text": {
     "en": "Talking to someone you trust can help too.",
-    "ja": "信頼できる人に話すのもいいよ。",
-    "ko": "믿는 사람에게 이야기하는 것도 도움이 돼.",
+    "ja": "信じられる人に話してみるのも、いいよ。",
+    "ko": "믿을 수 있는 사람한테 말해 보는 것도 도움이 돼.",
     "zh-Hant": "跟你信任的人聊聊也會有幫助。"
    }
   },
@@ -697,9 +697,9 @@
    "trigger": "joke",
    "text": {
     "en": "Why did the jelly blush? It saw the salad dressing!",
-    "ja": "ゼリーはどうして赤くなったの？サラダがドレッシングしてるのを見たから！",
-    "ko": "젤리가 왜 빨개졌게? 샐러드가 드레싱하는 걸 봤거든!",
-    "zh-Hant": "果凍為什麼臉紅？因為它看到沙拉在穿衣服（淋醬）！"
+    "ja": "パンはパンでも食べられないパンは？フライパン！",
+    "ko": "물고기의 반대말은 뭐게? 불고기!",
+    "zh-Hant": "果凍為什麼不敢上台？因為它一緊張就發抖！"
    }
   },
   {
@@ -707,9 +707,9 @@
    "trigger": "joke",
    "text": {
     "en": "What do you call a sleepy squishy? A snooze-y!",
-    "ja": "眠たいスクイーズはなんて呼ぶ？すやすクイーズ！",
+    "ja": "ネコがねころんだ〜。ぼくもいっしょにごろん。",
     "ko": "졸린 말랑이는 뭐라고 부를까? 쿨쿨랑이!",
-    "zh-Hant": "愛睡覺的軟軟叫什麼？睡軟軟！"
+    "zh-Hant": "什麼布不能做衣服？布丁！"
    }
   },
   {
@@ -717,9 +717,9 @@
    "trigger": "joke",
    "text": {
     "en": "I tried to tell a joke about jars. It didn't open up.",
-    "ja": "びんのジョークを言おうとしたけど、ふたが開かなかった。",
-    "ko": "병 농담을 하려 했는데, 뚜껑이 안 열렸어.",
-    "zh-Hant": "我想講罐子的笑話，結果打不開。"
+    "ja": "見て！びんのふたが、ふたつもあるよ！",
+    "ko": "병 속에 사는 새는 뭐게? 병아리!",
+    "zh-Hant": "罐子最怕什麼？被人開玩笑！"
    }
   },
   {
@@ -727,7 +727,7 @@
    "trigger": "joke",
    "text": {
     "en": "Why are squishies good at hugs? They're all heart and no bones!",
-    "ja": "スクイーズはなんでハグがうまいの？骨がなくてハートだけだから！",
+    "ja": "ぼくらがハグ上手なのはなぜ？ほねがなくて、ハートだけだから！",
     "ko": "말랑이는 왜 포옹을 잘할까? 뼈는 없고 마음만 있거든!",
     "zh-Hant": "軟軟為什麼很會抱抱？因為沒有骨頭只有心！"
    }
@@ -737,9 +737,9 @@
    "trigger": "joke",
    "text": {
     "en": "What's a cupcake's favourite game? Hide and go sweet!",
-    "ja": "カップケーキの好きな遊びは？かくれんぼ…あまくれんぼ！",
-    "ko": "컵케이크가 좋아하는 놀이는? 숨바꼭달!",
-    "zh-Hant": "杯子蛋糕最愛玩什麼？躲貓貓…躲甜甜！"
+    "ja": "ぼく、アイスをあいす！…アイスだけにね。",
+    "ko": "세상에서 제일 뜨거운 과일은? 천도복숭아!",
+    "zh-Hant": "什麼蛋不能吃？搗蛋！"
    }
   },
   {
@@ -747,9 +747,9 @@
    "trigger": "joke",
    "text": {
     "en": "Knock knock. Who's there? Squish. Squish who? Squish you were here!",
-    "ja": "トントン。だれ？むにっ。むにっ…会いたかったよ！",
-    "ko": "똑똑. 누구세요? 말랑. 말랑 누구? 말랑말랑 보고 싶었어!",
-    "zh-Hant": "叩叩。誰？軟軟。哪個軟軟？軟軟好想你！"
+    "ja": "かんはかんでも食べられるかんは？みかん！",
+    "ko": "말 중에 제일 말랑한 말은? 바로 나, 말랑이!",
+    "zh-Hant": "蝸牛為什麼不怕迷路？因為牠隨身帶著家！"
    }
   },
   {
@@ -757,9 +757,9 @@
    "trigger": "joke",
    "text": {
     "en": "Why did the donut go to the dentist? It needed a filling!",
-    "ja": "ドーナツはなんで歯医者に行ったの？中身を詰めてもらうため！",
-    "ko": "도넛이 왜 치과에 갔게? 속을 채우러!",
-    "zh-Hant": "甜甜圈為什麼去看牙醫？因為它需要補（餡）！"
+    "ja": "ドーナツのあなって、どーなっつ…？",
+    "ko": "바나나가 웃으면? 바나나킥!",
+    "zh-Hant": "甜甜圈為什麼常嘆氣？因為它心裡空空的！"
    }
   },
   {
@@ -769,7 +769,7 @@
     "en": "What do frogs order at a café? A hot croak-olate!",
     "ja": "カエルがカフェで頼むのは？ホットケロコア！",
     "ko": "개구리가 카페에서 시키는 건? 개굴코아!",
-    "zh-Hant": "青蛙在咖啡廳點什麼？熱呱呱可可！"
+    "zh-Hant": "青蛙的成績怎麼樣？頂呱呱！"
    }
   },
   {
@@ -777,9 +777,9 @@
    "trigger": "joke",
    "text": {
     "en": "Why do dinos never forget? Because they're dino-sure!",
-    "ja": "恐竜はなんでぜったい忘れないの？きょうりゅう…きょうも覚えてるから！",
-    "ko": "공룡은 왜 안 잊어버릴까? 공룡하게 기억하니까!",
-    "zh-Hant": "恐龍為什麼不會忘記？因為牠「恐」怕忘記！"
+    "ja": "ラクダに乗ったら、らくだ〜！",
+    "ko": "세상에서 제일 빠른 닭은? 후다닭!",
+    "zh-Hant": "誰最容易跌倒？狐狸，因為牠很「腳滑」！"
    }
   },
   {
@@ -787,7 +787,7 @@
    "trigger": "joke",
    "text": {
     "en": "What's a unicorn's favourite snack? Rainbow sprinkles, obviously.",
-    "ja": "ユニコーンの好きなおやつは？もちろん虹色スプリンクル。",
+    "ja": "ユニコーンの好きなおやつは？もちろんにじ色スプリンクル。",
     "ko": "유니콘이 좋아하는 간식은? 당연히 무지개 스프링클.",
     "zh-Hant": "獨角獸最愛的零食？當然是彩虹糖粒。"
    }
@@ -797,9 +797,9 @@
    "trigger": "joke",
    "text": {
     "en": "Why did the squishy sit on the clock? To be on time!",
-    "ja": "スクイーズはなんで時計に座ったの？時間どおりにするため！",
-    "ko": "말랑이가 왜 시계 위에 앉았게? 제시간에 있으려고!",
-    "zh-Hant": "軟軟為什麼坐在時鐘上？為了準時！"
+    "ja": "ふとんがふっとんだ！ぼくもぽよーんってとんだ！",
+    "ko": "오리가 얼면 뭐게? 언덕!",
+    "zh-Hant": "軟軟為什麼從來不吵架？因為它超級心軟！"
    }
   },
   {
@@ -807,9 +807,9 @@
    "trigger": "joke",
    "text": {
     "en": "What do you call a bear with no teeth? A gummy bear!",
-    "ja": "歯のないクマはなんて呼ぶ？グミベア！",
-    "ko": "이빨 없는 곰은 뭐라고 부를까? 구미 베어!",
-    "zh-Hant": "沒有牙齒的熊叫什麼？軟糖熊！"
+    "ja": "クマさんが道にまよって…クマった〜！",
+    "ko": "병아리가 제일 좋아하는 약은? 삐약!",
+    "zh-Hant": "熊貓最大的願望是什麼？拍一張彩色照片！"
    }
   },
   {
@@ -817,9 +817,9 @@
    "trigger": "joke",
    "text": {
     "en": "Why was the jar so calm? It kept a lid on it.",
-    "ja": "びんはなんで落ち着いてるの？ふたをしてるから。",
-    "ko": "병은 왜 그렇게 침착할까? 뚜껑을 꼭 닫고 있거든.",
-    "zh-Hant": "罐子為什麼那麼冷靜？因為它蓋好了蓋子。"
+    "ja": "このイクラ、いくら？ぼくのおこづかいで買える？",
+    "ko": "병은 왜 화를 안 낼까? 뚜껑이 꼭 닫혀 있거든!",
+    "zh-Hant": "什麼魚不會游泳？魚丸！"
    }
   },
   {
@@ -827,9 +827,9 @@
    "trigger": "joke",
    "text": {
     "en": "What do penguins wear on their heads? Ice caps!",
-    "ja": "ペンギンが頭にかぶるのは？アイスキャップ！",
-    "ko": "펭귄이 머리에 쓰는 건? 아이스 캡!",
-    "zh-Hant": "企鵝頭上戴什麼？冰帽！"
+    "ja": "イルカはいるか？いるよ〜、ぷかぷか！",
+    "ko": "사과가 웃으면? 풋사과!",
+    "zh-Hant": "北極熊為何沒見過企鵝？企鵝不住北極啊！"
    }
   },
   {
@@ -837,9 +837,9 @@
    "trigger": "joke",
    "text": {
     "en": "Why did the cookie feel crummy? It was broken up about something.",
-    "ja": "クッキーはなんで元気ないの？割れちゃったから。",
-    "ko": "쿠키가 왜 우울해? 부서진 일이 있었거든.",
-    "zh-Hant": "餅乾為什麼心情不好？因為它碎了。"
+    "ja": "ソースを、そーっとかけてみた！",
+    "ko": "왕이 넘어지면? 킹콩!",
+    "zh-Hant": "餅乾為什麼心情不好？因為它心碎了！"
    }
   },
   {
@@ -848,7 +848,7 @@
    "text": {
     "en": "Fun fact: axolotls can regrow their legs!",
     "ja": "豆知識：ウーパールーパーは足を生やしなおせるんだよ！",
-    "ko": "재미있는 사실: 아홀로틀은 다리를 다시 자라게 할 수 있어!",
+    "ko": "그거 알아? 아홀로틀은 다리가 다시 자라!",
     "zh-Hant": "冷知識：六角恐龍的腳斷了可以再長回來！"
    }
   },
@@ -857,8 +857,8 @@
    "trigger": "fact",
    "text": {
     "en": "Fun fact: capybaras are the world's biggest rodents.",
-    "ja": "豆知識：カピバラは世界でいちばん大きなネズミの仲間。",
-    "ko": "재미있는 사실: 카피바라는 세상에서 제일 큰 설치류야.",
+    "ja": "豆知識：カピバラは世界一大きなネズミの仲間だよ！",
+    "ko": "그거 알아? 카피바라는 세상에서 제일 큰 설치류야.",
     "zh-Hant": "冷知識：水豚是世界上最大的囓齒動物。"
    }
   },
@@ -868,7 +868,7 @@
    "text": {
     "en": "Fun fact: octopuses have three hearts!",
     "ja": "豆知識：タコには心臓が3つあるんだ！",
-    "ko": "재미있는 사실: 문어는 심장이 세 개야!",
+    "ko": "그거 알아? 문어는 심장이 세 개야!",
     "zh-Hant": "冷知識：章魚有三顆心臟！"
    }
   },
@@ -876,10 +876,10 @@
    "id": "fact-04",
    "trigger": "fact",
    "text": {
-    "en": "Fun fact: a group of flamingos is called a flamboyance.",
-    "ja": "豆知識：フラミンゴの群れは英語で「フランボヤンス」っていうよ。",
-    "ko": "재미있는 사실: 홍학 무리를 영어로 '플랑보얀스'라고 해.",
-    "zh-Hant": "冷知識：一群紅鶴的英文叫做 flamboyance。"
+    "en": "Fun fact: sea otters hold hands while they sleep so they don't drift apart!",
+    "ja": "豆知識：ラッコはねるとき、はなれないように手をつなぐよ！",
+    "ko": "그거 알아? 해달은 손을 잡고 자!",
+    "zh-Hant": "冷知識：海獺睡覺會手牽手，才不會漂走！"
    }
   },
   {
@@ -888,7 +888,7 @@
    "text": {
     "en": "Fun fact: sloths can hold their breath longer than dolphins.",
     "ja": "豆知識：ナマケモノはイルカより長く息を止められるよ。",
-    "ko": "재미있는 사실: 나무늘보는 돌고래보다 숨을 오래 참아.",
+    "ko": "그거 알아? 나무늘보는 돌고래보다 숨을 오래 참아.",
     "zh-Hant": "冷知識：樹懶憋氣比海豚還久。"
    }
   },
@@ -896,30 +896,30 @@
    "id": "fact-06",
    "trigger": "fact",
    "text": {
-    "en": "Fun fact: honey never goes off. Ever!",
-    "ja": "豆知識：はちみつはくさらないんだって！",
-    "ko": "재미있는 사실: 꿀은 절대 상하지 않아!",
-    "zh-Hant": "冷知識：蜂蜜永遠不會壞！"
+    "en": "Fun fact: sealed honey can stay good for years and years!",
+    "ja": "豆知識：ふたをしたはちみつは何年ももつことがあるよ！",
+    "ko": "그거 알아? 꿀은 잘 닫아 두면 아주 오래 안 상해!",
+    "zh-Hant": "冷知識：蜂蜜密封好，可以放超級久！"
    }
   },
   {
    "id": "fact-07",
    "trigger": "fact",
    "text": {
-    "en": "Fun fact: penguins give pebbles as presents.",
-    "ja": "豆知識：ペンギンは小石をプレゼントするんだよ。",
-    "ko": "재미있는 사실: 펭귄은 조약돌을 선물해.",
-    "zh-Hant": "冷知識：企鵝會送小石頭當禮物。"
+    "en": "Fun fact: some penguins give pebbles as presents.",
+    "ja": "豆知識：小石をプレゼントするペンギンもいるよ。",
+    "ko": "그거 알아? 어떤 펭귄은 조약돌을 선물해!",
+    "zh-Hant": "冷知識：有些企鵝會送小石頭當禮物！"
    }
   },
   {
    "id": "fact-08",
    "trigger": "fact",
    "text": {
-    "en": "Fun fact: a bee visits about 100 flowers on one trip.",
-    "ja": "豆知識：ミツバチは1回の旅で約100個の花を回るよ。",
-    "ko": "재미있는 사실: 꿀벌은 한 번 나갈 때 꽃 약 100송이를 들러.",
-    "zh-Hant": "冷知識：蜜蜂出門一趟大約拜訪100朵花。"
+    "en": "Fun fact: a bee can visit up to 100 flowers on one trip.",
+    "ja": "豆知識：ミツバチは1回で、多いと100輪の花をまわるよ！",
+    "ko": "그거 알아? 꿀벌은 한 번에 꽃 100송이까지 들러!",
+    "zh-Hant": "冷知識：蜜蜂一趟最多能拜訪100朵花。"
    }
   },
   {
@@ -928,7 +928,7 @@
    "text": {
     "en": "Fun fact: narwhal tusks are actually a tooth!",
     "ja": "豆知識：イッカクの角は実は歯なんだ！",
-    "ko": "재미있는 사실: 일각고래의 뿔은 사실 이빨이야!",
+    "ko": "그거 알아? 일각고래의 긴 뿔은 사실 이빨이야!",
     "zh-Hant": "冷知識：獨角鯨的角其實是一顆牙齒！"
    }
   },
@@ -936,10 +936,10 @@
    "id": "fact-10",
    "trigger": "fact",
    "text": {
-    "en": "Fun fact: hedgehogs have about 5,000 spines.",
-    "ja": "豆知識：ハリネズミには約5,000本のトゲがあるよ。",
-    "ko": "재미있는 사실: 고슴도치는 가시가 약 5,000개야.",
-    "zh-Hant": "冷知識：刺蝟大約有5,000根刺。"
+    "en": "Fun fact: hedgehogs have more than 5,000 spines.",
+    "ja": "豆知識：ハリネズミには5,000本以上のトゲがあるよ。",
+    "ko": "그거 알아? 고슴도치는 가시가 5,000개도 넘어!",
+    "zh-Hant": "冷知識：刺蝟有超過5,000根刺。"
    }
   },
   {
@@ -948,7 +948,7 @@
    "text": {
     "en": "Fun fact: cows have best friends.",
     "ja": "豆知識：ウシには親友がいるんだって。",
-    "ko": "재미있는 사실: 소에게도 단짝 친구가 있대.",
+    "ko": "그거 알아? 소에게도 단짝 친구가 있대.",
     "zh-Hant": "冷知識：乳牛也有最好的朋友。"
    }
   },
@@ -958,7 +958,7 @@
    "text": {
     "en": "Fun fact: pandas spend about 12 hours a day eating.",
     "ja": "豆知識：パンダは1日に約12時間も食べてるよ。",
-    "ko": "재미있는 사실: 판다는 하루에 약 12시간을 먹어.",
+    "ko": "그거 알아? 판다는 하루에 12시간쯤 먹어.",
     "zh-Hant": "冷知識：熊貓一天大約花12小時吃東西。"
    }
   },
@@ -969,7 +969,7 @@
     "en": "Ooh, a capsule! Twist it, twist it!",
     "ja": "わあ、カプセル！回して、回して！",
     "ko": "우와, 캡슐이다! 돌려, 돌려!",
-    "zh-Hant": "哇，扭蛋！快轉、快轉！"
+    "zh-Hant": "哇，扭蛋！快扭、快扭！"
    }
   },
   {
@@ -998,7 +998,7 @@
    "text": {
     "en": "A whole world finished! Parade time!",
     "ja": "ワールドクリア！パレードだ！",
-    "ko": "월드 하나 완료! 퍼레이드 시간이야!",
+    "ko": "월드 하나를 다 깼어! 퍼레이드 하자!",
     "zh-Hant": "整個世界完成了！遊行時間！"
    }
   },
@@ -1017,7 +1017,7 @@
    "trigger": "milestone",
    "text": {
     "en": "Your collection is growing. I'm so proud.",
-    "ja": "コレクションが増えてる。ほこらしいな。",
+    "ja": "コレクションがふえてきたね。ぼく、うれしいな！",
     "ko": "컬렉션이 늘고 있어. 정말 자랑스러워.",
     "zh-Hant": "你的收藏越來越多了，我好驕傲。"
    }
@@ -1048,7 +1048,7 @@
    "text": {
     "en": "I'm practising my best smile. How's this?",
     "ja": "とびきりの笑顔、練習中。どう？",
-    "ko": "최고의 미소 연습 중이야. 어때?",
+    "ko": "제일 예쁜 미소 연습 중이야. 어때?",
     "zh-Hant": "我在練習最棒的笑容，怎麼樣？"
    }
   },
@@ -1088,7 +1088,7 @@
    "text": {
     "en": "See you soon! I'll be right here.",
     "ja": "またね！ここで待ってるよ。",
-    "ko": "곧 또 봐! 여기 있을게.",
+    "ko": "또 만나! 난 여기 있을게.",
     "zh-Hant": "待會見！我會在這裡等你。"
    }
   },
@@ -1119,7 +1119,7 @@
     "en": "Is that snow? I'm wearing my tiniest scarf!",
     "ja": "雪かな？いちばん小さいマフラー巻いたよ！",
     "ko": "눈이야? 제일 작은 목도리 둘렀어!",
-    "zh-Hant": "是雪嗎？我圍上最小的圍巾了！"
+    "zh-Hant": "下雪了嗎？我圍上最迷你的圍巾囉！"
    }
   },
   {
@@ -1137,7 +1137,7 @@
    "trigger": "seasonal_newyear",
    "text": {
     "en": "Happy New Year! Let's sort it out together.",
-    "ja": "あけましておめでとう！今年もいっしょに片づけよう。",
+    "ja": "あけましておめでとう！今年もいっしょにかたづけよう。",
     "ko": "새해 복 많이 받아! 올해도 같이 정리하자.",
     "zh-Hant": "新年快樂！今年也一起整理吧。"
    }
@@ -1147,10 +1147,15 @@
    "trigger": "seasonal_lunar",
    "text": {
     "en": "Happy Lunar New Year! Lucky squishes to you!",
-    "ja": "旧正月おめでとう！幸運のむにむにを！",
-    "ko": "설날 축하해! 행운의 말랑을 보낼게!",
-    "zh-Hant": "新年快樂！送你好運軟綿綿！"
-   }
+    "ja": "旧正月おめでとう！しあわせのむにむにをどうぞ！",
+    "ko": "즐거운 설날이야! 말랑말랑 복 많이 받아!",
+    "zh-Hant": "新春快樂！好運軟軟送給你！"
+   },
+   "locales": [
+    "en",
+    "ko",
+    "zh-Hant"
+   ]
   }
  ]
 }

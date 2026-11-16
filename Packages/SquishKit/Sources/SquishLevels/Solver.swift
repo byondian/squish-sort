@@ -65,7 +65,7 @@ public enum Solver {
 
     /// First move of a shortest solution from here, for the Hint helper.
     /// Kept small so it answers in well under 200 ms on a phone.
-    public static func hint(_ board: Board, maxStates: Int = 20_000) -> Move? {
+    public static func hint(_ board: Board, maxStates: Int = 150_000) -> Move? {
         solve(board, maxStates: maxStates)?.moves.first
     }
 

@@ -58,6 +58,11 @@ final class GoldenPathTests: XCTestCase {
         next("capsule-next")
     }
 
+    /// Also run by CI on an older iOS, to catch a launch crash from newer frameworks.
+    func testLaunchShowsLevelOne() {
+        XCTAssertTrue(app.staticTexts["Level 1"].waitForExistence(timeout: 30), "Level 1 is the first screen")
+    }
+
     func testSkippingTheBirthdayQuestionMeansGentleMode() {
         playFirstThreeAndOpenCapsule()
         let skip = app.buttons["Skip"]
@@ -67,6 +72,29 @@ final class GoldenPathTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Level 4"].waitForExistence(timeout: 5))
         app.buttons["gearshape.fill"].firstMatch.tap()
         XCTAssertTrue(app.staticTexts["Gentle mode is on"].waitForExistence(timeout: 5))
+    }
+
+    /// Leaving gentle mode needs the grown-up check, and then asks the birthday question again.
+    func testLeavingGentleModeNeedsAGrownUpAndAsksTheAgeAgain() {
+        playFirstThreeAndOpenCapsule()
+        let skip = app.buttons["Skip"]
+        XCTAssertTrue(skip.waitForExistence(timeout: 8))
+        skip.tap()
+        next()
+        XCTAssertTrue(app.staticTexts["Level 4"].waitForExistence(timeout: 5))
+        app.buttons["gearshape.fill"].firstMatch.tap()
+        let off = app.buttons["Turn off gentle mode"]
+        XCTAssertTrue(off.waitForExistence(timeout: 5))
+        off.tap()
+        let question = app.staticTexts["gate-question"]
+        XCTAssertTrue(question.waitForExistence(timeout: 5), "the grown-up check comes first")
+        let numbers = question.label.split(whereSeparator: { !$0.isNumber }).compactMap { Int($0) }
+        XCTAssertEqual(numbers.count, 2, question.label)
+        let field = app.textFields["gate-answer"]
+        field.tap()
+        field.typeText(String(numbers[0] * numbers[1]))
+        app.buttons["gate-ok"].tap()
+        XCTAssertTrue(app.buttons["Skip"].waitForExistence(timeout: 8), "the birthday question follows the gate")
     }
 
     func testChoosingAnAdultYearLeavesGentleModeOff() {

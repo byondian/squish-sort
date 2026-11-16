@@ -1,5 +1,6 @@
 /// Ad request settings per age group (tech design, ads stack table).
-/// No ATT prompt ever, so no IDFA in any group.
+/// Personalised ads need three things: old enough for the storefront, Allow on
+/// Apple's tracking prompt, and consent where the consent form applies.
 public enum AdContentRating: String, Codable, Sendable {
     case g = "G", pg = "PG", t = "T", ma = "MA"
 }
@@ -20,9 +21,17 @@ public struct AdRequestPolicy: Equatable, Sendable {
 public enum AdPolicy {
     /// Apple's tracking prompt: only for players who may get personalised ads,
     /// never in gentle mode, once, after the first win at level 5 or later.
-    public static func shouldAskTracking(profile: AgeProfile?, levelWon: Int, alreadyAsked: Bool) -> Bool {
-        guard let profile, profile.group != .child, profile.mayPersonaliseAds, !alreadyAsked else { return false }
+    public static func shouldAskTracking(profile: AgeProfile?, storefront: String, levelWon: Int, alreadyAsked: Bool) -> Bool {
+        guard AgePolicy.mayPersonaliseAds(profile: profile, storefront: storefront), !alreadyAsked else { return false }
         return levelWon >= 5
+    }
+
+    /// The request policy for this player right now, from their profile and the current storefront.
+    public static func requestPolicy(profile: AgeProfile?, storefront: String, consent: ConsentStatus,
+                                     trackingAllowed: Bool) -> AdRequestPolicy {
+        requestPolicy(group: AgePolicy.group(of: profile, storefront: storefront), storefront: storefront, consent: consent,
+                      mayPersonalise: AgePolicy.mayPersonaliseAds(profile: profile, storefront: storefront),
+                      trackingAllowed: trackingAllowed)
     }
 
     /// EEA plus UK and Switzerland, where the consent form applies.
@@ -32,8 +41,9 @@ public enum AdPolicy {
         "SVN", "ESP", "SWE", "ISL", "LIE", "NOR", "GBR", "CHE",
     ]
 
+    /// An unknown storefront ("") counts as inside the region, to be safe.
     public static func isConsentRegion(_ storefront: String) -> Bool {
-        consentRegion.contains(storefront.uppercased())
+        storefront.isEmpty || consentRegion.contains(storefront.uppercased())
     }
 
     /// - Parameters:
@@ -42,7 +52,9 @@ public enum AdPolicy {
     public static func requestPolicy(group: AgeGroup, storefront: String, consent: ConsentStatus,
                                      mayPersonalise: Bool = false, trackingAllowed: Bool = false) -> AdRequestPolicy {
         let region = isConsentRegion(storefront)
-        let personalised = group != .child && mayPersonalise && trackingAllowed && (region ? consent == .obtained : true)
+        // With an unknown storefront Google's own check decides whether a form is needed.
+        let consented = consent == .obtained || (storefront.isEmpty && consent == .notRequired)
+        let personalised = group != .child && mayPersonalise && trackingAllowed && (region ? consented : true)
         switch group {
         case .child:
             return AdRequestPolicy(tagForChildDirectedTreatment: true, tagForUnderAgeOfConsent: false,

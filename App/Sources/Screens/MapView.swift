@@ -15,8 +15,10 @@ struct MapView: View {
             ScrollView {
                 VStack(spacing: 24) {
                     HStack {
-                        Button { model.screen = .room } label: { Label("Squish Room", systemImage: "hand.tap.fill") }
-                            .buttonStyle(SquishButtonStyle(fill: Theme.grape))
+                        if model.isExtraUnlocked(.squishRoom) {
+                            Button { model.open(.squishRoom) } label: { Label("Squish Room", systemImage: "hand.tap.fill") }
+                                .buttonStyle(SquishButtonStyle(fill: Theme.grape))
+                        }
                         // Under-13s reach the shop only from Settings.
                         if !model.isGentleMode {
                             Button { model.screen = .shop } label: { Label("Shop", systemImage: "bag.fill") }

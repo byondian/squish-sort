@@ -35,6 +35,12 @@ struct PlayerProgress: Codable, Equatable {
     /// Worlds of capsule levels whose bonus capsule (opt-in ad) hasn't been taken.
     var bonusCapsules: [String] = []
     var winsSinceGift = 0
+    var buddy = BuddyState()
+    var mystery = MysteryState()
+    /// Squishies built in the Maker. They live in the Squish Room and as a Buddy only.
+    var made: [MadeSquishy] = []
+    /// Extras whose "new!" badge has been tapped away.
+    var seenExtras: Set<String> = []
 
     init() {}
 
@@ -65,6 +71,10 @@ struct PlayerProgress: Codable, Equatable {
         theme = v(.theme, d.theme)
         bonusCapsules = v(.bonusCapsules, d.bonusCapsules)
         winsSinceGift = v(.winsSinceGift, d.winsSinceGift)
+        buddy = v(.buddy, d.buddy)
+        mystery = v(.mystery, d.mystery)
+        made = v(.made, d.made)
+        seenExtras = v(.seenExtras, d.seenExtras)
     }
 
     static func today(_ date: Date = Date()) -> String {
@@ -113,9 +123,13 @@ final class ProgressStore {
     }
 
     func load() -> PlayerProgress {
-        guard let data = try? Data(contentsOf: url),
-              let p = try? JSONDecoder().decode(PlayerProgress.self, from: data) else { return PlayerProgress() }
-        return p
+        guard let data = try? Data(contentsOf: url) else { return PlayerProgress() }
+        if let p = try? JSONDecoder().decode(PlayerProgress.self, from: data) { return p }
+        // Unreadable save: keep it for support instead of letting the next save overwrite it.
+        let stamp = PlayerProgress.today() + "-" + String(Int(Date().timeIntervalSince1970))
+        let backup = url.deletingLastPathComponent().appendingPathComponent("progress.corrupt-\(stamp).json")
+        try? FileManager.default.moveItem(at: url, to: backup)
+        return PlayerProgress()
     }
 
     func save(_ progress: PlayerProgress) {
