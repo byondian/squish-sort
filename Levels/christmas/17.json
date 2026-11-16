@@ -7,11 +7,11 @@
   "capacity": 4,
   "jars": [
     ["waddles", "ginger", "reindeer", "reindeer"],
-    ["strawbie", "elfie", "strawbie", "elfie"],
+    ["jelly", "elfie", "jelly", "elfie"],
     ["ginger", "santa", "snowbo", "ginger"],
-    ["strawbie", "santa", "santa", "snowbo"],
+    ["jelly", "santa", "santa", "snowbo"],
     ["reindeer", "snowbo", "elfie", "snowbo"],
-    ["waddles", "waddles", "elfie", "strawbie"],
+    ["waddles", "waddles", "elfie", "jelly"],
     ["waddles", "santa", "reindeer", "ginger"],
     [],
     []

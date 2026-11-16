@@ -6,9 +6,9 @@
   "beat": "showpiece",
   "capacity": 4,
   "jars": [
-    ["strawbie", "ginger", "ginger", "ginger"],
+    ["jelly", "ginger", "ginger", "ginger"],
     [],
-    ["santa", "strawbie", "strawbie", "strawbie"],
+    ["santa", "jelly", "jelly", "jelly"],
     ["ginger", "waddles", "waddles", "waddles"],
     ["reindeer", "santa", "santa", "santa"],
     ["waddles", "elfie", "elfie", "elfie"],

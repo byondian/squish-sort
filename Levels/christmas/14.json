@@ -6,13 +6,13 @@
   "beat": "medium",
   "capacity": 4,
   "jars": [
-    ["strawbie", "snowbo", "elfie", "elfie"],
-    ["strawbie", "ginger", "reindeer", "elfie"],
+    ["jelly", "snowbo", "elfie", "elfie"],
+    ["jelly", "ginger", "reindeer", "elfie"],
     ["snowbo", "santa", "waddles", "waddles"],
-    ["reindeer", "strawbie", "waddles", "santa"],
+    ["reindeer", "jelly", "waddles", "santa"],
     ["elfie", "santa", "santa", "snowbo"],
     ["ginger", "waddles", "ginger", "reindeer"],
-    ["strawbie", "ginger", "snowbo", "reindeer"],
+    ["jelly", "ginger", "snowbo", "reindeer"],
     [],
     []
   ],

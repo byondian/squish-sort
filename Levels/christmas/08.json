@@ -8,11 +8,11 @@
   "jars": [
     ["ginger", "ginger", "santa", "elfie"],
     ["elfie", "waddles", "reindeer", "waddles"],
-    ["strawbie", "ginger", "reindeer", "waddles"],
-    ["strawbie", "strawbie", "reindeer", "ginger"],
+    ["jelly", "ginger", "reindeer", "waddles"],
+    ["jelly", "jelly", "reindeer", "ginger"],
     ["elfie", "waddles", "santa", "santa"],
     ["snowbo", "santa", "reindeer", "snowbo"],
-    ["snowbo", "snowbo", "elfie", "strawbie"],
+    ["snowbo", "snowbo", "elfie", "jelly"],
     [],
     []
   ],

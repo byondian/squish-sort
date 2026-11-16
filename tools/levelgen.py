@@ -39,12 +39,21 @@ def capsule_level(global_number):
     return global_number % 5 == 0 and global_number >= 25
 
 
+# Commons borrowed for 7- and 8-kind levels, picked so no two pieces on a
+# board share a colour.
+BORROW = {
+    "toyshop": ["macaron", "donut"],
+    "sweetfactory": ["strawbie", "tango"],
+    "starlight": ["strawbie", "tango"],
+    "christmas": ["jelly", "cupcake"],
+}
+
+
 def kinds_for(world_idx, n):
     own = WORLDS[world_idx][1]
     if n <= len(own):
         return own[:n]
-    borrow_from = WORLDS[1][1] if world_idx == 0 else WORLDS[0][1]
-    return own + borrow_from[: n - len(own)]
+    return own + BORROW[WORLDS[world_idx][0]][: n - len(own)]
 
 
 def mechanic_count(mech, pos):

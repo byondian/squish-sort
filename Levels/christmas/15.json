@@ -11,11 +11,11 @@
     ["elfie", "santa", "santa", "santa"],
     ["ginger"],
     [],
-    ["santa", "strawbie", "strawbie", "strawbie"],
+    ["santa", "jelly", "jelly", "jelly"],
     ["snowbo", "elfie", "elfie", "elfie"],
-    ["strawbie", "reindeer", "reindeer", "reindeer"],
-    ["tango", "ginger", "ginger", "ginger"],
-    ["waddles", "tango", "tango", "tango"]
+    ["jelly", "reindeer", "reindeer", "reindeer"],
+    ["cupcake", "ginger", "ginger", "ginger"],
+    ["waddles", "cupcake", "cupcake", "cupcake"]
   ],
   "mechanics": {"hidden": [], "sticky": [], "frozen": []},
   "par": 8,
