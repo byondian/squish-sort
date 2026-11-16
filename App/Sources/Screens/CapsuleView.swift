@@ -24,7 +24,6 @@ struct CapsuleView: View {
                 .accessibilityLabel(Text(verbatim: collectible.name(in: model.language)))
                 .accessibilityIdentifier("capsule-squishy")
                 Text(verbatim: collectible.name(in: model.language)).font(Theme.title(30)).foregroundStyle(Theme.plum)
-                    .accessibilityIdentifier("capsule-name")
                 if model.capsuleIsNew {
                     Text("NEW!").font(Theme.title(20)).foregroundStyle(.white)
                         .padding(.horizontal, 14).padding(.vertical, 5)
