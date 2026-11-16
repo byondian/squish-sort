@@ -248,7 +248,7 @@ final class AppModel: ObservableObject {
         return roster.squishRoomToys.first { $0.id == ref }?.name(in: language) ?? ""
     }
 
-    /// How a squeezable thing squishes. Made squishies are slow-rise foam.
+    /// How a squeezable thing squishes. Made squishies, like anything with no feel of its own, are jelly.
     func feel(for ref: String) -> SquishFeel {
         if let c = roster.collectible(ref) { return SquishFeel(named: c.feel) }
         return SquishFeel(named: roster.squishRoomToys.first { $0.id == ref }?.feel)
