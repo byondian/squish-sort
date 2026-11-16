@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "id": "toyshop-05",
+  "world": "toyshop",
+  "index": 5,
+  "beat": "showpiece",
+  "capacity": 4,
+  "jars": [
+    ["macaron"],
+    ["tango", "sunny", "sunny", "sunny"],
+    ["sunny", "strawbie", "strawbie", "strawbie"],
+    ["grapey", "minty", "minty", "minty"],
+    ["blu", "blu", "blu"],
+    [],
+    ["strawbie", "macaron", "macaron", "macaron"],
+    ["minty", "tango", "tango", "tango"],
+    ["blu", "grapey", "grapey", "grapey"]
+  ],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": []},
+  "par": 7,
+  "solution": [[6, 0], [2, 6], [1, 2], [7, 1], [3, 7], [8, 3], [4, 8]],
+  "capsule": false,
+  "softenAfterFails": null
+}

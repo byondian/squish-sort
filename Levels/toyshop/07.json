@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "id": "toyshop-07",
+  "world": "toyshop",
+  "index": 7,
+  "beat": "bonus",
+  "capacity": 4,
+  "jars": [
+    ["blu", "blu", "minty", "strawbie"],
+    ["minty", "minty", "tango", "tango"],
+    ["sunny", "strawbie", "strawbie", "blu"],
+    ["sunny", "sunny", "tango", "sunny"],
+    ["blu", "strawbie", "tango", "minty"],
+    [],
+    []
+  ],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": []},
+  "par": 12,
+  "solution": [[1, 5], [4, 1], [4, 5], [0, 4], [0, 1], [2, 0], [2, 6], [3, 2], [3, 5], [2, 3], [4, 6], [0, 4]],
+  "capsule": false,
+  "softenAfterFails": null
+}

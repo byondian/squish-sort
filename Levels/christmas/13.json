@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "id": "christmas-13",
+  "world": "christmas",
+  "index": 13,
+  "beat": "easy",
+  "capacity": 4,
+  "jars": [
+    ["ginger", "ginger", "elfie", "elfie"],
+    ["reindeer", "santa", "santa", "ginger"],
+    ["snowbo", "reindeer", "waddles", "reindeer"],
+    ["elfie", "reindeer", "ginger", "waddles"],
+    ["snowbo", "snowbo", "elfie", "waddles"],
+    ["waddles", "snowbo", "santa", "santa"],
+    [],
+    []
+  ],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": [[0, 0], [4, 3], [5, 2]]},
+  "par": 16,
+  "solution": [[3, 6], [1, 3], [1, 7], [2, 1], [2, 6], [2, 1], [5, 7], [5, 2], [4, 5], [5, 6], [0, 5], [3, 0], [3, 1], [3, 4], [4, 5], [2, 4]],
+  "capsule": false,
+  "softenAfterFails": null
+}
