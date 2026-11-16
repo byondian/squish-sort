@@ -55,6 +55,7 @@ final class GoldenPathTests: XCTestCase {
         let skip = app.buttons["Skip"]
         XCTAssertTrue(skip.waitForExistence(timeout: 8), "birthday question after the first capsule")
         skip.tap()
+        next()
         XCTAssertTrue(app.staticTexts["Level 4"].waitForExistence(timeout: 5))
         app.buttons["gearshape.fill"].firstMatch.tap()
         XCTAssertTrue(app.staticTexts["Gentle mode is on"].waitForExistence(timeout: 5))
@@ -66,6 +67,7 @@ final class GoldenPathTests: XCTestCase {
         XCTAssertTrue(picker.waitForExistence(timeout: 8))
         picker.adjust(toPickerWheelValue: "1990")
         app.buttons["Continue"].tap()
+        next()
         XCTAssertTrue(app.staticTexts["Level 4"].waitForExistence(timeout: 5))
         app.buttons["gearshape.fill"].firstMatch.tap()
         XCTAssertTrue(app.buttons["Set up for a child"].waitForExistence(timeout: 5))

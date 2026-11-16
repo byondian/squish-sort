@@ -240,6 +240,7 @@ struct IconButton: View {
                 .background(Circle().fill(.white))
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier(system)
     }
 }
 
