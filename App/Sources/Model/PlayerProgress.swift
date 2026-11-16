@@ -80,7 +80,11 @@ struct PlayerProgress: Codable, Equatable {
         guard !path.isEmpty else { return }
         let world = oldWorlds[min(max(0, highestUnlocked / oldLength), oldWorlds.count - 1)]
         let number = highestUnlocked % oldLength + 1
-        let id = world + "-" + (number < 10 ? "0" : "") + String(number)
+        func levelID(_ world: String, _ number: Int) -> String {
+            let digits: String = number < 10 ? "0\(number)" : "\(number)"
+            return "\(world)-\(digits)"
+        }
+        let id: String = levelID(world, number)
         if let same = path.firstIndex(of: id) {
             highestUnlocked = same
         } else if let w = oldWorlds.firstIndex(of: world), w + 1 < oldWorlds.count,
@@ -89,9 +93,12 @@ struct PlayerProgress: Codable, Equatable {
         } else {
             highestUnlocked = path.count - 1
         }
-        let gone = oldWorlds.flatMap { w in (1...oldLength).map { w + "-" + ($0 < 10 ? "0" : "") + String($0) } }
-            .filter { !path.contains($0) }
-        for id in gone { stars[id] = nil }
+        for old in oldWorlds {
+            for n in 1...oldLength {
+                let gone: String = levelID(old, n)
+                if !path.contains(gone) { stars[gone] = nil }
+            }
+        }
     }
 
     /// Every field is optional on disk, so adding fields never loses a player's progress.
