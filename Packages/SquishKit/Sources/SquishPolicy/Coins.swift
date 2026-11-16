@@ -106,7 +106,7 @@ public enum Coins {
             switch self {
             case .hint: return 250
             case .extraJar: return 400
-            case .theme: return 3000
+            case .theme: return 1500
             case .treat: return 100
             case .gift: return 600
             }

@@ -517,7 +517,7 @@ final class CoinTests: XCTestCase {
     }
 
     func testPricesAreTenTimesTheOldOnes() {
-        XCTAssertEqual(Coins.Item.allCases.map(\.price), [250, 400, 3000, 100, 600])
+        XCTAssertEqual(Coins.Item.allCases.map(\.price), [250, 400, 1500, 100, 600])
         XCTAssertEqual(CoinRules().dailyGift, 200)
     }
 
