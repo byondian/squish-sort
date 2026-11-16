@@ -196,6 +196,8 @@ final class AppModel: ObservableObject {
     func testerReset() {
         guard AppModel.isTesterBuild else { return }
         update { $0 = PlayerProgress() }
+        // A new player has no known age: the ads go back to the strictest flags.
+        ads.update(policy: currentAdPolicy)
         news = []
         showingNews = nil
         afterNews = nil
