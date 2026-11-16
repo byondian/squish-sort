@@ -23,7 +23,7 @@ The app is licensed to you under Apple's [Licensed Application End User License 
 ## Purchases
 
 - **Remove Ads** is a one-time purchase. It stops the ads that play by themselves (between levels) and gives the optional video rewards with one tap instead of a video, under the same daily limit. It also gives unlimited undo, one free extra jar per level and 3 free hints a day. Remove Ads is shared with your Family Sharing group.
-- **Coin packs** are consumable. Coins are spent in the game on hints, extra jars, board themes and Squishy Buddy treats and gifts.
+- **Coin packs** are consumable. Coins are spent in the game on hints, extra jars, Extras (things a squishy wears), Squishy Maker parts, board themes and Squishy Buddy treats and gifts.
 - **Squishies and capsules can never be bought**, directly or with coins. Paying never changes what you find in capsules. See [purchases and drop rates]({{h}}/purchases).
 - Coins and squishies are a licence to use game content. They have no cash value, can't be exchanged for money or transferred between people, and are not your property.
 - Prices are shown in the App Store in your currency, including any taxes Apple collects.

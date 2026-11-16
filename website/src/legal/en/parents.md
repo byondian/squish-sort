@@ -32,7 +32,7 @@ Gentle mode is on for players under 13 (under 14 in Korea) and for anyone who sk
 ## Purchases
 
 - Remove Ads stops the automatic ads and is shared with your Family Sharing group.
-- Coin packs buy hints, extra jars, themes and Buddy treats. Coins never buy squishies, and no purchase or ad ever gives a capsule.
+- Coins buy hints, extra jars, Extras (bows, hats and other things a squishy wears, which can be tried on for free first), Squishy Maker parts, themes and Buddy treats. Coins never buy squishies, and no purchase or ad ever gives a capsule.
 - Use Apple's **Ask to Buy** (Family Sharing) or **Screen Time > Content & Privacy Restrictions > iTunes & App Store Purchases** to stop in-app purchases completely.
 - Refunds are handled by Apple at [reportaproblem.apple.com](https://reportaproblem.apple.com).
 
