@@ -46,12 +46,15 @@ final class AppModel: ObservableObject {
         case worldComplete(world: String, next: String?)
         /// The Buddy learned its first, second or third trick.
         case trick(Int)
+        /// A world's star jar reached its first, second or third prize.
+        case starJar(world: String, prize: Int)
 
         var id: String {
             switch self {
             case .unlocked(let extra): return "extra-\(extra.rawValue)"
             case .worldComplete(let world, _): return "world-\(world)"
             case .trick(let number): return "trick-\(number)"
+            case .starJar(let world, let prize): return "starjar-\(world)-\(prize)"
             }
         }
     }
@@ -305,6 +308,45 @@ final class AppModel: ObservableObject {
     func stars(inWorld world: String) -> (earned: Int, possible: Int) {
         let ids = levels.filter { $0.file.world == world }.map(\.id)
         return (ids.reduce(0) { $0 + (progress.stars[$1] ?? 0) }, ids.count * 3)
+    }
+
+    // MARK: - Star jar
+
+    static let starJarCoins = 300
+    /// Marks a waiting capsule as golden (always an ultra).
+    private static let goldenMark = "#gold"
+
+    /// The stars a world's jar needs for its three prizes: a third, two thirds and all of them.
+    func starJarGoals(_ world: String) -> [Int] {
+        let possible = stars(inWorld: world).possible
+        return [possible / 3, possible * 2 / 3, possible]
+    }
+
+    /// Prizes given so far in a world, 0 to 3.
+    func starJarPrizes(_ world: String) -> Int { min(3, progress.starJarPrizes[world] ?? 0) }
+
+    /// Stars come only from playing, so these capsules keep the rule that no ad or purchase gives one.
+    /// Each prize is given once: coins, then a capsule from that world, then a golden capsule.
+    private func awardStarJars() {
+        for world in LevelCatalog.allWorlds {
+            let goals = starJarGoals(world)
+            let earned = stars(inWorld: world).earned
+            guard goals[2] > 0 else { continue }
+            var given = starJarPrizes(world)
+            while given < 3, earned >= goals[given] {
+                given += 1
+                let prize = given
+                update { p in
+                    p.starJarPrizes[world] = prize
+                    switch prize {
+                    case 1: p.wallet.earn(AppModel.starJarCoins)
+                    case 2: p.pendingCapsules.append(world)
+                    default: p.pendingCapsules.append(world + AppModel.goldenMark)
+                    }
+                }
+                news.append(.starJar(world: world, prize: prize))
+            }
+        }
     }
 
     var worldsCompleted: Int { LevelCatalog.allWorlds.filter { isWorldComplete($0) }.count }
@@ -742,6 +784,7 @@ final class AppModel: ObservableObject {
             news.append(.worldComplete(world: level.file.world, next: next))
             update { $0.wallet.earn(config.coins.worldComplete) }
         }
+        awardStarJars()
         // The Buddy is met in the first capsule itself ("Is this your Buddy?"), so it has no card.
         for extra in [Extra.mysteryBag, .maker] where isExtraUnlocked(extra) && !extrasBefore.contains(extra) {
             news.append(.unlocked(extra))
@@ -829,9 +872,12 @@ final class AppModel: ObservableObject {
 
     // MARK: - Capsules
 
-    private func openCapsule(world: String) {
+    private func openCapsule(world waiting: String) {
+        let golden = waiting.hasSuffix(AppModel.goldenMark)
+        let world = golden ? String(waiting.dropLast(AppModel.goldenMark.count)) : waiting
         var state = progress.collection
-        if let got = CapsuleDrops.open(world: world, roster: roster, state: &state, rng: &rng, odds: config.capsuleOdds) {
+        if let got = CapsuleDrops.open(world: world, roster: roster, state: &state, rng: &rng, odds: config.capsuleOdds,
+                                       force: golden ? .ultra : nil) {
             capsuleIsNew = !progress.collection.owns(got.id)
             let roomWasOpen = isExtraUnlocked(.squishRoom)
             update { $0.collection = state }

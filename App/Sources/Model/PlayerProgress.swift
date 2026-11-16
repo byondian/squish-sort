@@ -65,6 +65,8 @@ struct PlayerProgress: Codable, Equatable {
     var seenExtras: Set<String> = []
     /// Apple's rating prompt has been requested (it's asked for once).
     var ratingAsked = false
+    /// Star jar prizes already given, by world: 0 to 3.
+    var starJarPrizes: [String: Int] = [:]
 
     init() {}
 
@@ -136,6 +138,7 @@ struct PlayerProgress: Codable, Equatable {
         made = v(.made, d.made)
         seenExtras = v(.seenExtras, d.seenExtras)
         ratingAsked = v(.ratingAsked, d.ratingAsked)
+        starJarPrizes = v(.starJarPrizes, d.starJarPrizes)
     }
 
     static func today(_ date: Date = Date()) -> String {

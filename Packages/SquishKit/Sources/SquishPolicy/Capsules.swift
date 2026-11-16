@@ -157,12 +157,14 @@ public enum CapsuleDrops {
     public static let sparesPerReroll = 3
 
     public static func open<R: RandomNumberGenerator>(world: String, roster: Roster, state: inout CollectionState,
-                                                      rng: inout R, odds: CapsuleOdds = CapsuleOdds()) -> Collectible? {
+                                                      rng: inout R, odds: CapsuleOdds = CapsuleOdds(),
+                                                      force: Rarity? = nil) -> Collectible? {
         var pick: Collectible?
         if state.totalCapsules == 0, let first = roster.collectible(firstCapsuleID) {
             pick = first
         } else {
-            var tier = rollTier(&rng, odds: odds)
+            // A golden capsule (a full star jar) is always an ultra; the duplicate rule is the usual one.
+            var tier = force ?? rollTier(&rng, odds: odds)
             let opened = state.capsulesOpened[world] ?? 0
             let hasUltra = roster.world(world, .ultra).contains { state.owns($0.id) }
             if opened + 1 >= ultraPityCapsule && !hasUltra { tier = .ultra }

@@ -114,6 +114,72 @@
         }
       }
     },
+    "%lld more for a capsule": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あと%lldこでカプセル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "캡슐까지 %lld개"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再 %lld 顆可得扭蛋"
+          }
+        }
+      }
+    },
+    "%lld more for a golden capsule": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あと%lldこでゴールドカプセル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "황금 캡슐까지 %lld개"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再 %lld 顆可得黃金扭蛋"
+          }
+        }
+      }
+    },
+    "%lld more for coins": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あと%lldこでコイン"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "코인까지 %lld개"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再 %lld 顆可得金幣"
+          }
+        }
+      }
+    },
     "%lld more hearts to the next trick": {
       "localizations": {
         "ja": {
@@ -1263,6 +1329,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "每過一關，夥伴就能免費得到一份點心。點心和禮物純粹是為了好玩。"
+          }
+        }
+      }
+    },
+    "Every star in this world! You won a golden capsule.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このワールドのスターをぜんぶ集めたよ！ゴールドカプセルをゲット！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 월드의 별을 모두 모았어요! 황금 캡슐을 받았어요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "集滿這個世界的所有星星！你贏得了黃金扭蛋。"
           }
         }
       }
@@ -3797,6 +3885,28 @@
         }
       }
     },
+    "Star jar prize!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スタージャーのごほうび！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "별 병 선물!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "星星罐獎勵！"
+          }
+        }
+      }
+    },
     "Starlight Stage": {
       "localizations": {
         "ja": {
@@ -4849,6 +4959,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "你解鎖了捏捏樂製作所！"
+          }
+        }
+      }
+    },
+    "You won %lld coins for your stars.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "集めたスターで%lldコインをゲット！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모은 별로 코인 %lld개를 받았어요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你用星星贏得了 %lld 枚金幣。"
+          }
+        }
+      }
+    },
+    "You won a capsule for your stars.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "集めたスターでカプセルをゲット！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모은 별로 캡슐을 받았어요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你用星星贏得了一顆扭蛋。"
           }
         }
       }
