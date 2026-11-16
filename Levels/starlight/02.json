@@ -6,13 +6,13 @@
   "beat": "easy",
   "capacity": 4,
   "jars": [
-    ["lumi", "lumi", "lumi", "riff"],
-    ["riff", "riff", "riff", "lumi"],
+    ["lumi", "riff", "riff", "lumi"],
+    ["lumi", "lumi", "riff", "riff"],
     []
   ],
-  "mechanics": {"hidden": [], "sticky": [[0, 1], [1, 0]], "frozen": []},
-  "par": 3,
-  "solution": [[0, 2], [1, 0], [1, 2]],
+  "mechanics": {"hidden": [], "sticky": [[0, 2], [1, 1]], "frozen": []},
+  "par": 8,
+  "solution": [[1, 2], [0, 2], [0, 1], [2, 0], [1, 2], [1, 0], [0, 2], [0, 1]],
   "capsule": false,
   "softenAfterFails": null
 }

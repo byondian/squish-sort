@@ -952,6 +952,16 @@ final class ExtrasTests: XCTestCase {
         XCTAssertEqual(rush.coins, plain.coins * 2)
     }
 
+    func testAnEncorePaysOncePerDuetAndOnlyOnAFirstClear() {
+        var pot = LevelPot(firstClear: true, jars: 4)
+        XCTAssertEqual(pot.encore(duetsInLevel: 2), 20)
+        XCTAssertEqual(pot.encore(duetsInLevel: 2), 20)
+        XCTAssertEqual(pot.encore(duetsInLevel: 2), 0, "undo and let go again adds nothing")
+        XCTAssertEqual(pot.coins, 40)
+        var replay = LevelPot(firstClear: false, jars: 4)
+        XCTAssertEqual(replay.encore(duetsInLevel: 2), 0)
+    }
+
     func testBuddyHeartsOpenTricksAndGrowth() {
         var b = BuddyState()
         XCTAssertEqual(b.tricksUnlocked, 0)

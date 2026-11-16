@@ -41,6 +41,11 @@ public struct Board: Hashable, Sendable {
     public func runLength(at j: Int) -> Int {
         let jar = jars[j]
         guard let top = jar.last, !isComplete(j), !top.hidden, !top.isFrozen else { return 0 }
+        if Board.duetOnTop(jar) {
+            // A duet on top moves as a pair, and only as a pair.
+            let low = jar[jar.count - 2]
+            return low.hidden || low.isFrozen ? 0 : 2
+        }
         var n = 1
         var i = jar.count - 2
         while i >= 0 {
@@ -62,6 +67,13 @@ public struct Board: Hashable, Sendable {
         let dest = jars[t]
         let room = capacity - dest.count
         guard room > 0 else { return 0 }
+        if Board.duetOnTop(jars[f]) {
+            // A duet needs two spaces, and lands in an empty jar or on a squishy of its bottom member's kind.
+            let low = jars[f][jars[f].count - 2]
+            if room < 2 { return 0 }
+            if let destTop = dest.last, destTop.kind != low.kind { return 0 }
+            return 2
+        }
         if let destTop = dest.last, let srcTop = jars[f].last, destTop.kind != srcTop.kind { return 0 }
         var k = Swift.min(n, room)
         while k > 0 && Board.splitsDuet(jars[f], movingTop: k) { k -= 1 }
@@ -89,7 +101,10 @@ public struct Board: Hashable, Sendable {
         let k = piecesToMove(move)
         guard k > 0 else { return nil }
         let (f, t) = (move.from, move.to)
-        let moved = Array(jars[f].suffix(k))
+        var moved = Array(jars[f].suffix(k))
+        // A duet that lands on its bottom member's kind lets go: the two become ordinary pieces.
+        let letGo = k == 2 && moved[0].bondedAbove && !jars[t].isEmpty
+        if letGo { moved[0].bondedAbove = false }
         jars[f].removeLast(k)
         jars[t].append(contentsOf: moved)
         let revealed = revealTop(f)
@@ -113,7 +128,7 @@ public struct Board: Hashable, Sendable {
         let completed = isComplete(t)
         if completed { settle(t) }
         return MoveResult(move: move, count: k, revealedSourceTop: revealed,
-                          completedJar: completed ? t : nil, thawedJars: thawed)
+                          completedJar: completed ? t : nil, thawedJars: thawed, duetLetGo: letGo)
     }
 
     /// Adds one empty jar (the Extra jar helper, or softening after fails).
@@ -122,6 +137,11 @@ public struct Board: Hashable, Sendable {
     }
 
     // MARK: - Helpers
+
+    /// The top two pieces of the jar are a duet: two different squishies holding hands.
+    static func duetOnTop(_ jar: [Piece]) -> Bool {
+        jar.count >= 2 && jar[jar.count - 2].bondedAbove
+    }
 
     /// True if moving the top `k` pieces would leave half of a duet behind.
     static func splitsDuet(_ jar: [Piece], movingTop k: Int) -> Bool {

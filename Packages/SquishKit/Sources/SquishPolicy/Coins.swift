@@ -191,6 +191,18 @@ public struct LevelPot: Equatable, Sendable {
     }
 
     private var paidWords: Set<SortChain.Word> = []
+    private var encores = 0
+    public static let encoreCoins = 20
+
+    /// A duet let go: +20 on a first clear, at most once for each duet the level has, so undoing
+    /// and letting go again adds nothing.
+    @discardableResult
+    public mutating func encore(duetsInLevel: Int) -> Int {
+        guard paysCoins, encores < duetsInLevel else { return 0 }
+        encores += 1
+        coins += LevelPot.encoreCoins
+        return LevelPot.encoreCoins
+    }
 
     /// Squish Fever: a jar finished during it pays its coins a second time (first clears only).
     @discardableResult

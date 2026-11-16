@@ -85,7 +85,8 @@ def mechanic_count(mech, pos):
     if mech == "hidden":
         return min(2 + pos // 2, 10)
     if mech == "sticky":
-        return min(1 + pos // 5, 4)
+        # mixed duets: one a level at first, then up to two, up to three from level 15
+        return 1 if pos <= 5 else (2 if pos < 15 else 3)
     if mech == "frozen":
         return min(1 + pos // 8, 3)
     return 0
@@ -95,12 +96,13 @@ def random_board(rng, names, empties, mech, mcount, mix_hidden=0):
     """Returns (jars, mechanics) or None."""
     units = []
     if mech == "sticky":
-        # duets are placed as 2-piece units
-        pair_kinds = rng.sample(names, min(mcount, len(names)))
+        # a duet is two different kinds placed as one 2-piece unit (bottom, top)
         pool = [n for n in names for _ in range(CAP)]
-        for k in pair_kinds:
-            pool.remove(k); pool.remove(k)
-            units.append((k, k))
+        for _ in range(mcount):
+            a, b = rng.sample(names, 2)
+            if a in pool and b in pool:
+                pool.remove(a); pool.remove(b)
+                units.append((a, b))
         units += [(p,) for p in pool]
     else:
         units = [(n,) for n in names for _ in range(CAP)]
@@ -243,7 +245,17 @@ def make_level(world_idx, pos):
             mcount = 1 if pos == 1 or (world_idx == SIDE_WORLD and pos == 2) else 2
         mix_from, mix_mech = MIX.get(world, (99, None))
         mix_hidden = min(2 + (pos - mix_from) // 2, 6) if pos >= mix_from and mix_mech == "hidden" else 0
-        jars, mechanics = choose(rng, level, names, empties, mech, mcount, target, mix_hidden)
+        # Duets need room: if no board can be solved, ask for fewer duets, then for one more spare jar.
+        tries = [(mcount, empties)]
+        if mech == "sticky":
+            tries += [(m, empties) for m in range(mcount - 1, 0, -1)] + [(1, empties + 1)]
+        for n, (mc, em) in enumerate(tries):
+            try:
+                jars, mechanics = choose(rng, level, names, em, mech, mc, target, mix_hidden)
+                break
+            except SystemExit:
+                if n == len(tries) - 1:
+                    raise
     level["jars"] = jars
     level["mechanics"] = {"hidden": mechanics.get("hidden", []),
                           "sticky": mechanics.get("sticky", []),

@@ -67,23 +67,35 @@ final class BoardTests: XCTestCase {
         XCTAssertFalse(b.jars[0][1].hidden)
     }
 
-    func testDuetsMoveTogetherAndNeedTwoSpaces() {
-        // jar 0: B, A+A (duet at positions 1-2)
-        var b = board(["BA+A", "CCA", "DDD", ""])
+    func testADuetMovesTogetherAndNeedsTwoSpaces() {
+        // jar 0: C, then the duet A (bottom) holding B (top).
+        var b = board(["CA+B", "CCA", "DDD", ""])
         XCTAssertEqual(b.runLength(at: 0), 2)
         XCTAssertFalse(b.isLegal(Move(from: 0, to: 1)), "only one space, a duet needs two")
+        XCTAssertFalse(b.isLegal(Move(from: 0, to: 2)), "one space and the wrong kind")
         XCTAssertEqual(b.piecesToMove(Move(from: 0, to: 3)), 2)
-        b.apply(Move(from: 0, to: 3))
-        XCTAssertTrue(b.jars[3][0].bondedAbove)
+        let r = b.apply(Move(from: 0, to: 3))
+        XCTAssertEqual(r?.duetLetGo, false)
+        XCTAssertTrue(b.jars[3][0].bondedAbove, "in an empty jar the two stay together")
         XCTAssertEqual(b.jars[0].count, 1)
     }
 
-    func testCongaNeverSplitsADuet() {
-        // A, A+A, A on top: room 2 moves only the top A (taking 2 would split the duet).
-        let b = board(["CA+AA", "AA", "", "CCC"])
-        XCTAssertEqual(b.runLength(at: 0), 3)
+    func testADuetLetsGoOnItsBottomMembersKind() {
+        var b = board(["CA+B", "AA", "B", ""])
+        XCTAssertFalse(b.isLegal(Move(from: 0, to: 2)), "the top member's kind is not enough")
+        let r = b.apply(Move(from: 0, to: 1))
+        XCTAssertEqual(r?.duetLetGo, true)
+        XCTAssertFalse(b.jars[1].contains { $0.bondedAbove }, "they are ordinary pieces now")
+        XCTAssertEqual(b.jars[1].map(\.kind), [0, 0, 0, 1])
+        // The freed top member moves on by itself.
+        XCTAssertEqual(b.piecesToMove(Move(from: 1, to: 2)), 1)
+    }
+
+    func testARunAboveADuetStopsAtTheDuet() {
+        // C, the duet A+B, then a loose B on top: only the loose B moves.
+        let b = board(["CA+BB", "B", "", "CCC"])
+        XCTAssertEqual(b.runLength(at: 0), 1)
         XCTAssertEqual(b.piecesToMove(Move(from: 0, to: 1)), 1)
-        XCTAssertEqual(b.piecesToMove(Move(from: 0, to: 2)), 3)
     }
 
     func testFrozenPiecesThawAfterTwoNeighbourMoves() {

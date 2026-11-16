@@ -5,6 +5,8 @@ import SquishPolicy
 /// The twists a board can have. Each is shown once, on the first level that has it.
 enum BoardRule: String, CaseIterable {
     case wrapped, duet, frozen
+    /// Not a twist of one world: a run only moves as far as there is room. Taught early in Toy Shop.
+    case partial
 
     /// The rules on this board, in the order they are taught.
     static func rules(on board: Board) -> [BoardRule] {
@@ -22,8 +24,9 @@ enum BoardRule: String, CaseIterable {
     var line: String {
         switch self {
         case .wrapped: return String(localized: "Hidden! Move the one above to unwrap it.")
-        case .duet: return String(localized: "Duet! They move together and need 2 spaces.")
+        case .duet: return String(localized: "Duet! They move together. Land the bottom one on its own kind and they let go.")
         case .frozen: return String(localized: "Frozen! Moves next to it melt the ice.")
+        case .partial: return String(localized: "Only what fits moves!")
         }
     }
 }
@@ -100,6 +103,7 @@ struct RuleDemo: View {
         case .wrapped: wrappedStage
         case .duet: duetStage
         case .frozen: frozenStage
+        case .partial: partialStage
         }
     }
 
@@ -125,25 +129,29 @@ struct RuleDemo: View {
         }
     }
 
-    // Duet: the pair tries a jar with one space, is turned away, then hops together into an empty jar.
+    // Duet: two different squishies move as one. The wrong kind turns them away; on the bottom
+    // member's own kind they land and let go.
     private var duetStage: some View {
         let moved = step >= 4
         let trying = step == 2
         let x = moved ? RuleDemo.xs[2] : (trying ? (RuleDemo.xs[0] + RuleDemo.xs[1]) / 2 : RuleDemo.xs[0])
         let lift: CGFloat = trying ? -64 : 0
+        let low = moved ? RuleDemo.ys[1] : RuleDemo.ys[0] + lift
+        let high = moved ? RuleDemo.ys[2] : RuleDemo.ys[1] + lift
         return ZStack {
             blob(actors[1], x: RuleDemo.xs[1], y: RuleDemo.ys[0])
-            blob(actors[1], x: RuleDemo.xs[1], y: RuleDemo.ys[1])
+            blob(actors[0], x: RuleDemo.xs[2], y: RuleDemo.ys[0])
             if trying {
                 Text(verbatim: "✕").font(Theme.title(22)).foregroundStyle(Theme.bubblegum)
-                    .position(x: RuleDemo.xs[1], y: RuleDemo.ys[2])
+                    .position(x: RuleDemo.xs[1], y: RuleDemo.ys[1])
             }
-            // The pair shares one glow.
+            // The pair shares one glow until it lets go.
             Capsule().fill(Theme.grape.opacity(0.3))
                 .frame(width: 44, height: 72)
-                .position(x: x, y: (RuleDemo.ys[0] + RuleDemo.ys[1]) / 2 + lift)
-            blob(actors[0], x: x, y: RuleDemo.ys[0] + lift)
-            blob(actors[0], x: x, y: RuleDemo.ys[1] + lift)
+                .position(x: x, y: (low + high) / 2)
+                .opacity(moved ? 0 : 1)
+            blob(actors[0], x: x, y: low)
+            blob(actors[1], x: x, y: high)
         }
     }
 
@@ -166,6 +174,22 @@ struct RuleDemo: View {
         }
     }
 
+    // Only what fits: two of a kind on top, one space next door. One hops over, the other stays and wobbles.
+    private var partialStage: some View {
+        let moved = step >= 3
+        let stays = step >= 3 && step <= 4
+        return ZStack {
+            blob(actors[1], x: RuleDemo.xs[0], y: RuleDemo.ys[0])
+            blob(actors[0], x: RuleDemo.xs[0], y: RuleDemo.ys[1])
+                .offset(x: stays ? 4 : 0)
+                .animation(stays ? .easeInOut(duration: 0.1).repeatCount(5, autoreverses: true) : .default, value: step)
+            blob(actors[1], x: RuleDemo.xs[1], y: RuleDemo.ys[0])
+            blob(actors[0], x: RuleDemo.xs[1], y: RuleDemo.ys[1])
+            blob(actors[0], x: moved ? RuleDemo.xs[1] : RuleDemo.xs[0],
+                 y: step == 2 ? RuleDemo.ys[3] : RuleDemo.ys[2])
+        }
+    }
+
     /// The hand taps where the move starts, then where it ends.
     private var hand: some View {
         let spot: CGPoint
@@ -173,11 +197,13 @@ struct RuleDemo: View {
         case (.wrapped, 1), (.wrapped, 2): spot = CGPoint(x: RuleDemo.xs[0], y: RuleDemo.ys[1])
         case (.wrapped, 3): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])
         case (.duet, 1): spot = CGPoint(x: RuleDemo.xs[0], y: RuleDemo.ys[1])
-        case (.duet, 2): spot = CGPoint(x: RuleDemo.xs[1], y: RuleDemo.ys[2])
+        case (.duet, 2): spot = CGPoint(x: RuleDemo.xs[1], y: RuleDemo.ys[1])
         case (.duet, 3), (.duet, 4): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])
         case (.frozen, 1): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])
         case (.frozen, 2), (.frozen, 3): spot = CGPoint(x: RuleDemo.xs[1], y: RuleDemo.ys[1])
         case (.frozen, 4): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])
+        case (.partial, 1), (.partial, 2): spot = CGPoint(x: RuleDemo.xs[0], y: RuleDemo.ys[2])
+        case (.partial, 3): spot = CGPoint(x: RuleDemo.xs[1], y: RuleDemo.ys[2])
         default: spot = CGPoint(x: 130, y: 190)
         }
         let shown = step >= 1 && step <= 4

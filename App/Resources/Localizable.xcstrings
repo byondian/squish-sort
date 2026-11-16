@@ -1663,6 +1663,28 @@
         }
       }
     },
+    "DUET": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "デュエット"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "듀엣"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "二重唱"
+          }
+        }
+      }
+    },
     "Daily gift": {
       "localizations": {
         "ja": {
@@ -1795,24 +1817,24 @@
         }
       }
     },
-    "Duet! They move together and need 2 spaces.": {
+    "Duet! They move together. Land the bottom one on its own kind and they let go.": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "デュエット！ふたりいっしょに動くから、2つ空きがいるよ。"
+            "value": "デュエット！ふたりはいっしょに動くよ。下の子を同じなかまの上におくと、手をはなすよ。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "듀엣! 둘이 함께 움직이니 2칸이 필요해요."
+            "value": "듀엣! 둘은 함께 움직여요. 아래 친구를 같은 종류 위에 놓으면 손을 놓아요."
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "二重唱！它們一起移動，需要2個空位。"
+            "value": "二重唱！它們一起移動。把下面那個放到同類上，它們就會放手。"
           }
         }
       }
@@ -3837,6 +3859,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "離扭蛋又近一步！"
+          }
+        }
+      }
+    },
+    "Only what fits moves!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "入るぶんだけ動くよ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "들어갈 만큼만 움직여요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "放得下的才會移動！"
           }
         }
       }

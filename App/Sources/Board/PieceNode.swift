@@ -35,7 +35,7 @@ final class PieceNode: SKNode {
         body = SKShapeNode(path: style.bodyPath(diameter: d))
         question = SKLabelNode(text: "?")
         ice = SKShapeNode(path: style.bodyPath(diameter: d * 1.06))
-        duetMark = SKLabelNode(text: "♥")
+        duetMark = SKLabelNode(text: String(localized: "DUET"))
         super.init()
         content.position = CGPoint(x: 0, y: d / 2)
         soft.addChild(content)
@@ -100,12 +100,20 @@ final class PieceNode: SKNode {
         ice.addChild(flake)
         content.addChild(ice)
 
-        duetMark.fontSize = d * 0.3
+        duetMark.fontSize = d * 0.2
+        duetMark.fontName = "AvenirNext-Heavy"
         duetMark.fontColor = UIColor(hex: 0xFF7EB6)
         duetMark.verticalAlignmentMode = .center
         duetMark.position = CGPoint(x: 0, y: d * 0.5)
         duetMark.zPosition = 2
         duetMark.isHidden = true
+        // A white pill behind the word keeps it readable on any squishy.
+        let tag = SKShapeNode(rectOf: CGSize(width: d * 0.62, height: d * 0.26), cornerRadius: d * 0.13)
+        tag.fillColor = .white
+        tag.strokeColor = UIColor(hex: 0xFF7EB6)
+        tag.lineWidth = 1.5
+        tag.zPosition = -1
+        duetMark.addChild(tag)
         content.addChild(duetMark)
 
         glitter.fontSize = d * 0.42

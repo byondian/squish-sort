@@ -93,6 +93,7 @@ final class LevelController: ObservableObject {
             model?.sounds.move(run: result.count)
             self?.landed()
             if !result.thawedJars.isEmpty { model?.sounds.play("thaw") }
+            if result.duetLetGo { self?.duetLetGo(atJar: result.move.to) }
             if let jar = result.completedJar {
                 model?.haptics.complete()
                 self?.jarCompleted(jar)
@@ -109,6 +110,20 @@ final class LevelController: ObservableObject {
         // hand on the jar it belongs in, so the first tap finishes a jar.
         if index == 0, model.progress.stars.isEmpty, let first = level.solution.first {
             scene.tutorialMove = first
+        }
+    }
+
+    /// A duet landed on its own kind and let go: "Encore!" and a few coins the first time through.
+    private func duetLetGo(atJar jar: Int) {
+        guard let model else { return }
+        let duets = level.board.jars.joined().filter { $0.bondedAbove }.count
+        let coins = pot.encore(duetsInLevel: duets)
+        scene.popLabel(String(localized: "Encore!"), atJar: jar)
+        model.sounds.play("duet", or: "double_pop")
+        model.haptics.complete()
+        if coins > 0 {
+            scene.throwCoins(fromJar: jar, count: 3)
+            model.sounds.coin()
         }
     }
 
@@ -465,6 +480,11 @@ struct LevelView: View {
     /// The first rule on this board the player has not been shown yet.
     private func showNewRule() {
         guard !AppModel.isUITesting, ruleDemo == nil, controller.session.moveCount == 0 else { return }
+        // "Only what fits moves" is taught from the fourth level on, to old and new players alike.
+        if controller.index >= 3, !model.progress.rulesShown.contains(BoardRule.partial.rawValue) {
+            ruleDemo = .partial
+            return
+        }
         ruleDemo = rules.first { !model.progress.rulesShown.contains($0.rawValue) }
     }
 
@@ -686,7 +706,7 @@ struct LevelView: View {
                         .accessibilityLabel(Text("Levels"))
                 }
                 Spacer()
-                if let rule = rules.first, controller.outcome == nil {
+                if let rule = rules.first ?? (controller.index >= 3 ? BoardRule.partial : nil), controller.outcome == nil {
                     // Replays the demo of this board's twist.
                     IconButton(system: "questionmark") { ruleDemo = rule }
                         .accessibilityLabel(Text("How this works"))

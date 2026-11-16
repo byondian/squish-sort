@@ -42,7 +42,7 @@ public enum LevelValidator {
             for i in jar.indices where jar[i].bondedAbove {
                 if i + 1 >= jar.count { p.append("\(id): duet at the top of a jar has no partner"); continue }
                 let a = jar[i], b = jar[i + 1]
-                if a.kind != b.kind { p.append("\(id): duet pieces must be the same kind") }
+                if a.kind == b.kind { p.append("\(id): duet pieces must be different kinds") }
                 if a.hidden || b.hidden || a.isFrozen || b.isFrozen { p.append("\(id): duet pieces can't be hidden or frozen") }
                 if b.bondedAbove { p.append("\(id): a piece can only be in one duet") }
             }

@@ -45,6 +45,10 @@ class Board:
         top = jar[-1]
         if top[1] or top[2] > 0:
             return 0
+        if len(jar) >= 2 and jar[-2][3]:
+            # a duet on top moves as a pair, and only as a pair
+            low = jar[-2]
+            return 0 if (low[1] or low[2] > 0) else 2
         n = 1
         i = len(jar) - 2
         while i >= 0:
@@ -67,6 +71,12 @@ class Board:
         room = self.cap - len(dest)
         if room <= 0:
             return 0
+        src = self.jars[f]
+        if len(src) >= 2 and src[-2][3]:
+            # a duet needs two spaces, and lands in an empty jar or on its bottom member's kind
+            if room < 2 or (dest and dest[-1][0] != src[-2][0]):
+                return 0
+            return 2
         if dest and dest[-1][0] != self.jars[f][-1][0]:
             return 0
         k = min(n, room)
@@ -80,6 +90,10 @@ class Board:
         jars = list(self.jars)
         src = list(jars[f])
         moved = src[-k:]
+        if k == 2 and moved[0][3] and jars[t]:
+            # landing on its own kind, the duet lets go
+            p = moved[0]
+            moved = [(p[0], p[1], p[2], False), moved[1]]
         del src[-k:]
         if src and src[-1][1]:
             p = src[-1]
