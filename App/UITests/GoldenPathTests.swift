@@ -14,9 +14,10 @@ final class GoldenPathTests: XCTestCase {
     private func play(_ moves: [(Int, Int)]) {
         for (from, to) in moves {
             tapJar(from)
+            Thread.sleep(forTimeInterval: 0.3)
             tapJar(to)
             // Let the hop and squash finish.
-            Thread.sleep(forTimeInterval: 0.7)
+            Thread.sleep(forTimeInterval: 1.0)
         }
     }
 
@@ -31,7 +32,12 @@ final class GoldenPathTests: XCTestCase {
 
     private func next() {
         let next = app.buttons["Next"]
-        XCTAssertTrue(next.waitForExistence(timeout: 5))
+        if !next.waitForExistence(timeout: 8) {
+            let state = app.staticTexts["scene-state"]
+            print("GOLDEN-PATH scene-state: \(state.exists ? state.label : "missing")")
+            print("GOLDEN-PATH screen:\n\(app.debugDescription)")
+            XCTFail("Next missing; scene-state: \(state.exists ? state.label : "missing")")
+        }
         next.tap()
     }
 

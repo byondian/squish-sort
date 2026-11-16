@@ -168,9 +168,16 @@ final class BoardScene: SKScene {
 
     /// Same as a finger tap on jar `j` (used by UI tests and accessibility).
     func tapJar(_ j: Int) {
+        taps += 1
         guard j < board.jarCount else { return }
         clearHint()
         tap(j)
+    }
+
+    private var taps = 0
+    /// One line for UI test failure logs.
+    var debugState: String {
+        "taps=\(taps) lifted=\(lifted.map(String.init) ?? "-") busy=\(busy) paused=\(isPaused) view=\(view != nil)"
     }
 
     // MARK: - Motion

@@ -2,6 +2,7 @@ import SpriteKit
 import SwiftUI
 import SquishCore
 import SquishLevels
+import SquishPolicy
 
 /// One attempt at a level: owns the GameSession and the SpriteKit scene.
 @MainActor
@@ -244,13 +245,21 @@ struct LevelView: View {
 
     /// Invisible-ish jar buttons so UI tests can play without pixel maths.
     private var testTaps: some View {
-        HStack(spacing: 2) {
-            ForEach(0..<controller.scene.board.jarCount, id: \.self) { j in
-                Button("jar-\(j)") { controller.scene.tapJar(j) }
+        VStack(spacing: 2) {
+            HStack(spacing: 2) {
+                ForEach(0..<controller.scene.board.jarCount, id: \.self) { j in
+                    Button("jar-\(j)") { controller.scene.tapJar(j) }
+                        .font(.system(size: 6))
+                        .frame(width: 28, height: 14)
+                        .background(Color.white)
+                        .accessibilityIdentifier("jar-\(j)")
+                }
+            }
+            // What the scene thinks is going on, for failing UI tests.
+            TimelineView(.periodic(from: .now, by: 0.25)) { _ in
+                Text(controller.scene.debugState + " status=\(String(describing: controller.session.status))")
                     .font(.system(size: 6))
-                    .frame(width: 28, height: 14)
-                    .background(Color.white)
-                    .accessibilityIdentifier("jar-\(j)")
+                    .accessibilityIdentifier("scene-state")
             }
         }
     }

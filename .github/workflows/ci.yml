@@ -68,4 +68,9 @@ jobs:
           echo "Simulator $UDID"
           xcodebuild test -project SquishSort.xcodeproj -scheme SquishSort \
             -destination "id=$UDID" CODE_SIGNING_ALLOWED=NO | tee test.log | grep -E "Test Case|error:|TEST" || true
-          grep -q "TEST SUCCEEDED" test.log
+          if ! grep -q "TEST SUCCEEDED" test.log; then
+            echo "::group::UI test diagnostics"
+            grep -E "GOLDEN-PATH|scene-state|Button|StaticText|error" test.log | head -200 || true
+            echo "::endgroup::"
+            exit 1
+          fi
