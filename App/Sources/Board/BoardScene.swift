@@ -32,6 +32,12 @@ final class BoardScene: SKScene {
     var tutorialMove: Move?
     /// The kind that glitters on this level (the lucky squishy), if any.
     var luckyKind: UInt8?
+    /// The level's world: it picks the lid and the word for a finished jar.
+    var world = ""
+    /// On a dark background the jars glow instead of having a plum outline.
+    var darkBackground = false { didSet { if oldValue != darkBackground, size.width > 0, view != nil { rebuild() } } }
+    /// The lid twists shut (a click and a tick).
+    var onLidTwist: (() -> Void)?
 
     init(board: Board, kinds: [String]) {
         self.board = board
@@ -109,7 +115,7 @@ final class BoardScene: SKScene {
         jarNodes = []
         pieces = []
         for j in 0..<board.jarCount {
-            let jar = JarNode(size: geometry.jarSize)
+            let jar = JarNode(size: geometry.jarSize, world: world, dark: darkBackground)
             jar.position = geometry.centers[j]
             addChild(jar)
             jarNodes.append(jar)
@@ -124,7 +130,7 @@ final class BoardScene: SKScene {
                 nodes.append(node)
             }
             pieces.append(nodes)
-            if board.isComplete(j) { jar.putLid(animated: false) }
+            if board.isComplete(j) { jar.putLid(animated: false, tint: nodes.first.map { SquishyStyle.forID($0.kindID).color }) }
         }
         showTutorialIfNeeded()
     }
@@ -463,10 +469,29 @@ final class BoardScene: SKScene {
         }
         if let done = result.completedJar {
             // All four squash down together, let go at once, and the lid drops as they spring past their shape.
+            // Then the lid moment: drop, squash, twist, rays, the squishies hop in turn and the world's word pops.
             let jar = jarNodes[done]
-            jar.run(.sequence([.wait(forDuration: PieceSpring.completeSqueezeSeconds), .run { jar.putLid(animated: true) }]))
+            let calm = UIAccessibility.isReduceMotionEnabled
+            let tint = pieces[done].first.map { SquishyStyle.forID($0.kindID).color }
+            jar.putLid(animated: true, tint: tint, reduceMotion: calm, onLand: { [weak self] in
+                guard let self, done < self.pieces.count else { return }
+                for node in self.pieces[done] { node.squeezeAndRelease() }
+            }, onTwist: { [weak self] in self?.onLidTwist?() })
             sparkle(at: geometry.centers[done])
-            for node in pieces[done] { node.squeezeAndRelease() }
+            let word = JarNode.word(for: world)
+            run(.sequence([.wait(forDuration: 0.6), .run { [weak self] in
+                guard let self, done < self.pieces.count, done < self.geometry.centers.count else { return }
+                self.popLabel(word, atJar: done)
+                guard !calm else { return }
+                let hop = self.geometry.piece * 0.14
+                for (i, node) in self.pieces[done].enumerated() where node.action(forKey: "hop") == nil {
+                    let up = SKAction.moveBy(x: 0, y: hop, duration: 0.09)
+                    up.timingMode = .easeOut
+                    let down = SKAction.moveBy(x: 0, y: -hop, duration: 0.09)
+                    down.timingMode = .easeIn
+                    node.run(.sequence([.wait(forDuration: 0.05 * Double(i)), up, down]), withKey: "hop")
+                }
+            }]))
         }
         busy = false
         onMoveFinished?(result)

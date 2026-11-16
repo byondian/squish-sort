@@ -49,6 +49,7 @@ final class LevelController: ObservableObject {
         starSlack = model.starSlack(index: index)
         session = GameSession(board: level.board, par: level.par, undoLimit: model.undoLimit, starSlack: starSlack)
         scene = BoardScene(board: level.board, kinds: level.kinds)
+        scene.world = level.file.world
         chain = SortChain(timed: !model.isGentleMode)
         let lucky = model.luckyKind(index: index)
         pot = LevelPot(firstClear: model.progress.stars[level.id] == nil, jars: level.kinds.count,
@@ -58,6 +59,10 @@ final class LevelController: ObservableObject {
         scene.onLift = { [weak model] in
             model?.haptics.lift()
             model?.sounds.play("lift")
+        }
+        scene.onLidTwist = { [weak model] in
+            model?.sounds.play("capsule_click")
+            model?.haptics.land()
         }
         scene.onReject = { [weak model] in
             model?.haptics.reject()
@@ -355,7 +360,15 @@ struct LevelView: View {
                 }
             }
         }
-        .background(LinearGradient(colors: model.boardTheme.colors, startPoint: .top, endPoint: .bottom).ignoresSafeArea())
+        .background {
+            // The plain theme shows the world's own room; a bought theme paints over it.
+            if model.boardTheme == .cream {
+                WorldBackdrop(world: controller.level.file.world)
+            } else {
+                LinearGradient(colors: model.boardTheme.colors, startPoint: .top, endPoint: .bottom).ignoresSafeArea()
+            }
+        }
+        .onAppear { controller.scene.darkBackground = darkRoom }
         .animation(.spring(response: 0.35, dampingFraction: 0.7), value: controller.outcome)
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: model.trackingExplainer)
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: controller.choosing)
@@ -423,7 +436,18 @@ struct LevelView: View {
                 }
             }
             VStack(spacing: 2) {
-                Text("Level \(number)").font(Theme.title(22))
+                // A pink jelly pill with the level, and the world's name under it.
+                Text("Level \(number)").font(Theme.title(20)).foregroundStyle(.white)
+                    .padding(.horizontal, 18).padding(.vertical, 5)
+                    .background {
+                        ZStack(alignment: .top) {
+                            Capsule().fill(Color(hex: 0xE5609B)).offset(y: 3)
+                            Capsule().fill(LinearGradient(colors: [Color(hex: 0xFFA3CB), Color(hex: 0xFF7EB6)], startPoint: .top, endPoint: .bottom))
+                            Capsule().fill(Color.white.opacity(0.35)).frame(height: 8).padding(.horizontal, 10).padding(.top, 3)
+                        }
+                    }
+                Text(controller.level.file.world == "christmas" ? AppModel.christmasWorldName : AppModel.worldName(controller.level.file.world))
+                    .font(Theme.body(13)).foregroundStyle(darkRoom ? Color.white.opacity(0.9) : Theme.plum.opacity(0.75))
                 if controller.level.file.beat == .boss {
                     Text("BOSS 👑").font(Theme.body(13))
                 } else if controller.level.file.beat == .bonus {
@@ -457,6 +481,11 @@ struct LevelView: View {
             .allowsHitTesting(false)
         }
         .padding(.top, 8)
+    }
+
+    /// A night scene behind the jars: they glow, and loose words turn white.
+    private var darkRoom: Bool {
+        model.boardTheme == .night || (model.boardTheme == .cream && WorldBackdrop.isDark(controller.level.file.world))
     }
 
     /// Three stars are out of reach on this try. Players of 13 and over get a nudge to start again;
@@ -503,10 +532,8 @@ struct LevelView: View {
                 Text(verbatim: title).font(Theme.body(13)).lineLimit(1).minimumScaleFactor(0.6)
             }
             .foregroundStyle(Theme.plum)
-            .frame(maxWidth: .infinity, minHeight: 54)
+            .frame(maxWidth: .infinity, minHeight: 62)
             .padding(.horizontal, 4)
-            .background(RoundedRectangle(cornerRadius: 18).fill(fill))
-            .overlay(RoundedRectangle(cornerRadius: 18).stroke(Theme.plum.opacity(0.15), lineWidth: 2))
             .opacity(enabled ? 1 : 0.45)
             .overlay(alignment: .topTrailing) {
                 // How many are left, as a badge on the corner rather than in the name.
@@ -514,13 +541,22 @@ struct LevelView: View {
                     Text(verbatim: "\(badge)").font(Theme.body(12)).monospacedDigit().foregroundStyle(.white)
                         .frame(minWidth: 20, minHeight: 20)
                         .background(Capsule().fill(badge > 0 ? Theme.grape : Theme.plum.opacity(0.4)))
+                        .overlay(Capsule().stroke(.white, lineWidth: 2))
                         .offset(x: 4, y: -6)
                 }
             }
         }
-        .buttonStyle(PressSquish())
+        .buttonStyle(JellyButtonStyle(colors: [fill, fill], rim: jellyRim(fill), radius: 22))
+        .opacity(enabled ? 1 : 0.6)
         .disabled(!enabled)
         .accessibilityLabel(Text(verbatim: badge.map { "\(title) \($0)" } ?? title))
+    }
+
+    /// The darker lip under a jelly button of this colour.
+    private func jellyRim(_ fill: Color) -> Color {
+        if fill == Theme.mint { return Color(hex: 0x4FBF9F) }
+        if fill == Theme.butter { return Color(hex: 0xE0B13A) }
+        return Color(hex: 0xD9C9D6)
     }
 
     /// Invisible-ish jar buttons so UI tests can play without pixel maths.

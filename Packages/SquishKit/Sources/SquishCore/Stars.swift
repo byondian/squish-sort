@@ -9,7 +9,7 @@ public enum Stars {
     public static func moveLimit(forStars stars: Int, par: Int, slack: Int? = nil) -> Int? {
         switch stars {
         case 3...: return par + (slack.map { max(0, $0) } ?? max(2, par / 5))
-        case 2: return par + (slack.map { max(0, $0) + max(2, par / 6) } ?? max(4, par / 3))
+        case 2: return par + (slack.map { max(0, $0) + max(3, par / 4) } ?? max(4, par / 3))
         default: return nil
         }
     }

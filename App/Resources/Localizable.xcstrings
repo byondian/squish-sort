@@ -1311,6 +1311,28 @@
         }
       }
     },
+    "Encore!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アンコール！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앙코르!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安可！"
+          }
+        }
+      }
+    },
     "Every level you win gives your Buddy a free treat. Treats and gifts are just for fun.": {
       "localizations": {
         "ja": {
@@ -1791,6 +1813,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "提示"
+          }
+        }
+      }
+    },
+    "Ho ho!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ホーホー！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "호호!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "呵呵！"
           }
         }
       }

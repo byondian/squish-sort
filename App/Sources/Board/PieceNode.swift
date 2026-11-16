@@ -264,57 +264,261 @@ final class PieceNode: SKNode {
     }
 }
 
-/// A clear jelly jar.
+/// A clear glass jar. Every world has the same jar and its own lid (level screen spec).
 final class JarNode: SKNode {
     let size: CGSize
+    private let world: String
+    private let dark: Bool
     private let glass: SKShapeNode
-    private var lid: SKShapeNode?
+    private let outline: SKShapeNode
+    private var lid: SKNode?
 
-    init(size: CGSize) {
+    /// Rounded more at the bottom than at the top, like a jam jar.
+    private static func jarPath(_ size: CGSize, inset: CGFloat = 0) -> CGPath {
+        let w = size.width - inset * 2, h = size.height - inset * 2
+        let top = max(2, w * 0.24 - inset), bottom = max(2, min(w * 0.45, h / 2) - inset)
+        let x0 = -w / 2, x1 = w / 2, y0 = -h / 2, y1 = h / 2
+        let p = CGMutablePath()
+        p.move(to: CGPoint(x: x0 + bottom, y: y0))
+        p.addLine(to: CGPoint(x: x1 - bottom, y: y0))
+        p.addQuadCurve(to: CGPoint(x: x1, y: y0 + bottom), control: CGPoint(x: x1, y: y0))
+        p.addLine(to: CGPoint(x: x1, y: y1 - top))
+        p.addQuadCurve(to: CGPoint(x: x1 - top, y: y1), control: CGPoint(x: x1, y: y1))
+        p.addLine(to: CGPoint(x: x0 + top, y: y1))
+        p.addQuadCurve(to: CGPoint(x: x0, y: y1 - top), control: CGPoint(x: x0, y: y1))
+        p.addLine(to: CGPoint(x: x0, y: y0 + bottom))
+        p.addQuadCurve(to: CGPoint(x: x0 + bottom, y: y0), control: CGPoint(x: x0, y: y0))
+        p.closeSubpath()
+        return p
+    }
+
+    /// - Parameters:
+    ///   - world: picks the lid.
+    ///   - dark: on a dark background the outline becomes a soft glow so the jar still reads.
+    init(size: CGSize, world: String = "", dark: Bool = false) {
         self.size = size
-        glass = SKShapeNode(rectOf: size, cornerRadius: size.width * 0.3)
+        self.world = world
+        self.dark = dark
+        glass = SKShapeNode(path: JarNode.jarPath(size))
+        outline = SKShapeNode(path: JarNode.jarPath(size))
         super.init()
-        glass.fillColor = UIColor.white.withAlphaComponent(0.45)
-        glass.strokeColor = UIColor.plum.withAlphaComponent(0.55)
-        glass.lineWidth = 3
+        glass.fillColor = UIColor.white.withAlphaComponent(dark ? 0.16 : 0.42)
+        glass.strokeColor = .clear
         addChild(glass)
-        let rim = SKShapeNode(rectOf: CGSize(width: size.width * 0.12, height: size.height * 0.6),
-                              cornerRadius: size.width * 0.06)
-        rim.fillColor = UIColor.white.withAlphaComponent(0.6)
-        rim.strokeColor = .clear
-        rim.position = CGPoint(x: -size.width * 0.3, y: size.height * 0.05)
+        // A white inner edge, like thick glass.
+        let inner = SKShapeNode(path: JarNode.jarPath(size, inset: 2.5))
+        inner.fillColor = .clear
+        inner.strokeColor = UIColor.white.withAlphaComponent(dark ? 0.45 : 0.85)
+        inner.lineWidth = 3
+        addChild(inner)
+        outline.fillColor = .clear
+        outline.lineWidth = dark ? 2.5 : 2
+        outline.glowWidth = dark ? 3 : 0
+        addChild(outline)
+        setHighlighted(false)
+        // The shine stripe down the left.
+        let shine = SKShapeNode(rectOf: CGSize(width: size.width * 0.1, height: size.height * 0.62),
+                                cornerRadius: size.width * 0.05)
+        shine.fillColor = UIColor.white.withAlphaComponent(dark ? 0.3 : 0.65)
+        shine.strokeColor = .clear
+        shine.position = CGPoint(x: -size.width * 0.31, y: size.height * 0.04)
+        addChild(shine)
+        // A slightly wider rim on top.
+        let rim = SKShapeNode(rectOf: CGSize(width: size.width * 1.06, height: max(5, size.width * 0.09)),
+                              cornerRadius: max(2.5, size.width * 0.045))
+        rim.fillColor = UIColor.white.withAlphaComponent(dark ? 0.55 : 0.95)
+        rim.strokeColor = UIColor(hex: 0x965A78).withAlphaComponent(0.28)
+        rim.lineWidth = 1.5
+        rim.position = CGPoint(x: 0, y: size.height / 2)
+        rim.zPosition = 1
         addChild(rim)
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) is not used") }
 
-    func setHighlighted(_ on: Bool) {
-        glass.strokeColor = on ? UIColor(hex: 0xFF7EB6) : UIColor.plum.withAlphaComponent(0.55)
-        glass.lineWidth = on ? 5 : 3
+    private var restingStroke: UIColor {
+        dark ? UIColor(hex: lid == nil ? 0xA9D8FF : 0xFF9CCB).withAlphaComponent(0.9)
+             : UIColor(hex: 0x965A78).withAlphaComponent(0.28 + 0.2)
     }
 
-    /// Lid plops down and bounces; the jar glows mint.
-    func putLid(animated: Bool) {
+    func setHighlighted(_ on: Bool) {
+        outline.strokeColor = on ? UIColor(hex: 0xFF7EB6) : restingStroke
+        outline.lineWidth = on ? 5 : (dark ? 2.5 : 2)
+    }
+
+    /// The word that pops up when a jar is finished in this world.
+    static func word(for world: String) -> String {
+        switch world {
+        case "sweetfactory": return String(localized: "Yum!")
+        case "starlight": return String(localized: "Encore!")
+        case "christmas": return String(localized: "Ho ho!")
+        default: return String(localized: "Sorted!")
+        }
+    }
+
+    /// One lid per world, drawn about its bottom centre.
+    private func makeLid() -> SKNode {
+        let w = size.width * 1.1, h = size.width * 0.34
+        let node = SKNode()
+        func cap(_ fill: UIColor, height: CGFloat = h, radius: CGFloat? = nil) -> SKShapeNode {
+            let c = SKShapeNode(rect: CGRect(x: -w / 2, y: 0, width: w, height: height), cornerRadius: radius ?? height * 0.42)
+            c.fillColor = fill
+            c.strokeColor = .plum
+            c.lineWidth = 2.5
+            return c
+        }
+        switch world {
+        case "sweetfactory":
+            // A candy-striped screw cap with a round sweet on top.
+            let c = cap(.white)
+            node.addChild(c)
+            let stripes = SKCropNode()
+            let mask = SKShapeNode(rect: CGRect(x: -w / 2 + 2, y: 2, width: w - 4, height: h - 4), cornerRadius: h * 0.36)
+            mask.fillColor = .white
+            mask.strokeColor = .clear
+            stripes.maskNode = mask
+            for i in -4...4 {
+                let stripe = SKShapeNode(rectOf: CGSize(width: w * 0.09, height: h * 2))
+                stripe.fillColor = UIColor(hex: 0xFF8FBE)
+                stripe.strokeColor = .clear
+                stripe.zRotation = -0.45
+                stripe.position = CGPoint(x: CGFloat(i) * w * 0.18, y: h / 2)
+                stripes.addChild(stripe)
+            }
+            node.addChild(stripes)
+            let sweet = SKShapeNode(circleOfRadius: h * 0.34)
+            sweet.fillColor = UIColor(hex: 0x7FE0C4)
+            sweet.strokeColor = .plum
+            sweet.lineWidth = 2.5
+            sweet.position = CGPoint(x: 0, y: h + h * 0.26)
+            node.addChild(sweet)
+        case "starlight":
+            // A glowing lilac cap with a gold star on top.
+            let c = cap(UIColor(hex: 0xC9A8FF))
+            c.glowWidth = 2
+            node.addChild(c)
+            let star = SKLabelNode(text: "★")
+            star.fontSize = h * 1.25
+            star.fontColor = UIColor(hex: 0xFFD86B)
+            star.verticalAlignmentMode = .center
+            star.position = CGPoint(x: 0, y: h * 1.25)
+            node.addChild(star)
+        case "christmas":
+            // A red cap with a white snow rim and a small bow.
+            node.addChild(cap(UIColor(hex: 0xE5484D)))
+            let snow = SKShapeNode(rect: CGRect(x: -w * 0.53, y: -h * 0.08, width: w * 1.06, height: h * 0.42), cornerRadius: h * 0.2)
+            snow.fillColor = .white
+            snow.strokeColor = .plum
+            snow.lineWidth = 2
+            node.addChild(snow)
+            let bow = SKLabelNode(text: "🎀")
+            bow.fontSize = h * 0.8
+            bow.verticalAlignmentMode = .center
+            bow.position = CGPoint(x: 0, y: h * 1.2)
+            node.addChild(bow)
+        default:
+            // Toy Shop: a glossy pink capsule dome with a darker band and a shine spot.
+            let dome = CGMutablePath()
+            dome.move(to: CGPoint(x: -w / 2, y: 0))
+            dome.addLine(to: CGPoint(x: -w / 2, y: h * 0.35))
+            dome.addCurve(to: CGPoint(x: w / 2, y: h * 0.35), control1: CGPoint(x: -w / 2, y: h * 1.75),
+                          control2: CGPoint(x: w / 2, y: h * 1.75))
+            dome.addLine(to: CGPoint(x: w / 2, y: 0))
+            dome.closeSubpath()
+            let d = SKShapeNode(path: dome)
+            d.fillColor = UIColor(hex: 0xFF8FBE)
+            d.strokeColor = .plum
+            d.lineWidth = 2.5
+            node.addChild(d)
+            let band = SKShapeNode(rect: CGRect(x: -w / 2, y: 0, width: w, height: h * 0.34), cornerRadius: h * 0.1)
+            band.fillColor = UIColor(hex: 0xE5609B)
+            band.strokeColor = .plum
+            band.lineWidth = 2.5
+            node.addChild(band)
+            let spot = SKShapeNode(ellipseOf: CGSize(width: w * 0.2, height: h * 0.26))
+            spot.fillColor = UIColor.white.withAlphaComponent(0.75)
+            spot.strokeColor = .clear
+            spot.zRotation = 0.5
+            spot.position = CGPoint(x: -w * 0.22, y: h * 0.88)
+            node.addChild(spot)
+        }
+        return node
+    }
+
+    /// The lid moment, under a second: the lid drops, lands and squashes wide with the jar, wobbles
+    /// twice, twists shut with a click, and gold rays burst behind it. The glass takes a soft tint
+    /// of its squishy's colour. `onLand` and `onTwist` are for the sounds and haptics.
+    func putLid(animated: Bool, tint: UIColor? = nil, reduceMotion: Bool = false,
+                onLand: (() -> Void)? = nil, onTwist: (() -> Void)? = nil) {
         guard lid == nil else { return }
-        let l = SKShapeNode(rectOf: CGSize(width: size.width * 1.08, height: size.width * 0.28),
-                            cornerRadius: size.width * 0.12)
-        l.fillColor = UIColor(hex: 0x7FE0C4)
-        l.strokeColor = .plum
-        l.lineWidth = 3
+        let l = makeLid()
         l.zPosition = 20
         addChild(l)
         lid = l
-        glass.fillColor = UIColor(hex: 0x7FE0C4).withAlphaComponent(0.25)
-        let rest = CGPoint(x: 0, y: size.height / 2 + size.width * 0.1)
-        if animated {
-            l.position = CGPoint(x: 0, y: rest.y + size.height * 0.5)
-            l.run(.sequence([
-                .move(to: rest, duration: 0.18),
-                .moveBy(x: 0, y: size.width * 0.12, duration: 0.08),
-                .move(to: rest, duration: 0.1),
-            ]))
-        } else {
+        let warm = (tint ?? UIColor(hex: 0x7FE0C4)).withAlphaComponent(dark ? 0.3 : 0.28)
+        setHighlighted(false)
+        let rest = CGPoint(x: 0, y: size.height / 2 + max(2.5, size.width * 0.045))
+        guard animated else {
+            glass.fillColor = warm
             l.position = rest
+            return
+        }
+        glass.run(.customAction(withDuration: 0.25) { [weak glass] _, _ in glass?.fillColor = warm })
+        if reduceMotion {
+            l.position = rest
+            l.alpha = 0
+            l.run(.fadeIn(withDuration: 0.25))
+            onLand?()
+            return
+        }
+        l.position = CGPoint(x: 0, y: rest.y + size.height * 0.55)
+        let drop = SKAction.move(to: rest, duration: 0.18)
+        drop.timingMode = .easeIn
+        let squash = SKAction.sequence([
+            .scaleX(to: 1.16, y: 0.72, duration: 0.05),
+            .scaleX(to: 0.95, y: 1.08, duration: 0.05),
+            .scaleX(to: 1.04, y: 0.96, duration: 0.04),
+            .scaleX(to: 1, y: 1, duration: 0.04),
+        ])
+        // A quarter twist: the lid narrows and comes back, as if turning.
+        let twist = SKAction.sequence([
+            .scaleX(to: 0.8, duration: 0.07), .scaleX(to: 1, duration: 0.08),
+        ])
+        l.run(.sequence([
+            .wait(forDuration: 0.12), drop,
+            .run { onLand?() },
+            squash,
+            .run { onTwist?() },
+            twist,
+            .run { [weak self] in self?.rays() },
+        ]))
+        // The jar gives with the lid.
+        run(.sequence([
+            .wait(forDuration: 0.3),
+            .scaleX(to: 1.05, y: 0.96, duration: 0.05),
+            .scaleX(to: 1, y: 1, duration: 0.1),
+        ]))
+    }
+
+    /// Gold rays and sparkles behind the lid.
+    private func rays() {
+        let center = CGPoint(x: 0, y: size.height / 2 + size.width * 0.2)
+        for i in 0..<10 {
+            let ray = SKShapeNode(rectOf: CGSize(width: 3, height: size.width * 0.32), cornerRadius: 1.5)
+            ray.fillColor = UIColor(hex: i % 2 == 0 ? 0xFFD86B : 0xFFFFFF)
+            ray.strokeColor = .clear
+            // A fan over the top half.
+            let a = CGFloat.pi * (0.05 + 0.9 * CGFloat(i) / 9)
+            ray.zRotation = a - .pi / 2
+            ray.position = CGPoint(x: center.x + cos(a) * size.width * 0.35, y: center.y + sin(a) * size.width * 0.35)
+            ray.zPosition = 15
+            ray.alpha = 0.95
+            addChild(ray)
+            ray.run(.sequence([
+                .group([.moveBy(x: cos(a) * size.width * 0.5, y: sin(a) * size.width * 0.5, duration: 0.3),
+                        .fadeOut(withDuration: 0.3), .scaleY(to: 1.6, duration: 0.3)]),
+                .removeFromParent(),
+            ]))
         }
     }
 }
