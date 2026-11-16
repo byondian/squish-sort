@@ -135,8 +135,11 @@
     return { x0, x1, y0, y1: y1 + this.footPad };
   };
 
-  /* Fingers. Returns true if the finger landed on the squishy. */
-  SquishBody.prototype.grab = function (id, x, y) {
+  /* Fingers. Returns true if the finger landed on the squishy.
+     opt (optional): { dentX, dentY } puts the dent somewhere other than the patch. Press-only places (capsule
+     reveal, Buddy, Maker) use it: grab at the top of the toy above the touch, so the whole toy squashes, and
+     put the dent where the finger really is. */
+  SquishBody.prototype.grab = function (id, x, y, opt) {
     const S = this.S, R = this.mat.grabR * S; let best = 1e9;
     for (let k = 0; k < this.count; k++) if (this.core[k]) { const d = Math.hypot(this.p[k * 2] - x, this.p[k * 2 + 1] - y); if (d < best) best = d; }
     if (best > S * 0.16) return false;
@@ -151,8 +154,8 @@
     const ax = x - tx, ay = y - ty, al = ax * ax + ay * ay || 1; // 0 at the base, 1 at the finger: how much of the press each point takes
     for (let k = 0; k < this.count; k++) sc[k] = clamp(((this.p[k * 2] - tx) * ax + (this.p[k * 2 + 1] - ty) * ay) / al, 0, 1.15);
     // where the finger is on the toy's own picture (0..1), for the dent
-    let fu = 0, fv = 0, fw = 0; const r2 = (S * 0.09) * (S * 0.09);
-    for (let k = 0; k < this.count; k++) { const dx = this.p[k * 2] - x, dy = this.p[k * 2 + 1] - y, ww = Math.exp(-(dx * dx + dy * dy) / r2) + 1e-9; fu += ww * this.uv[k * 2]; fv += ww * this.uv[k * 2 + 1]; fw += ww; }
+    let fu = 0, fv = 0, fw = 0; const r2 = (S * 0.09) * (S * 0.09), zx = opt && opt.dentX != null ? opt.dentX : x, zy = opt && opt.dentY != null ? opt.dentY : y;
+    for (let k = 0; k < this.count; k++) { const dx = this.p[k * 2] - zx, dy = this.p[k * 2 + 1] - zy, ww = Math.exp(-(dx * dx + dy * dy) / r2) + 1e-9; fu += ww * this.uv[k * 2]; fv += ww * this.uv[k * 2 + 1]; fw += ww; }
     const fu0 = fu / fw, fv0 = fv / fw;
     this.pointers[id] = { x, y, sx: x, sy: y, vx: 0, vy: 0, w, off, sc, press: 0, px: (tx - x) * this.mat.press, py: (ty - y) * this.mat.press, t: 0, drag: 0, fu: fu0, fv: fv0, force: 1,
       rb: Math.max(b.y1 - y, (this.box.b - fv0) * S), rt: Math.max(y - b.y0, (fv0 - this.box.t) * S), rl: Math.max(x - b.x0, (fu0 - this.box.l) * S), rr: Math.max(b.x1 - x, (this.box.r - fu0) * S) }; // how much toy lies between the finger and each side
