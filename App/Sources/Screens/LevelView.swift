@@ -371,17 +371,24 @@ struct LevelView: View {
                 } else if controller.level.file.beat == .showpiece {
                     Text("HARD").font(Theme.body(13)).foregroundStyle(Theme.bubblegum)
                 }
-                // Three stars that dim as the move count passes each limit.
+                // The stars still to be won, and the moves left before the next one goes.
+                // Empty outlines before the first move, so nothing looks won already.
                 HStack(spacing: 4) {
-                    let lit = Stars.rating(moves: controller.session.moveCount, par: controller.level.par)
+                    let moves = controller.session.moveCount
+                    let lit = Stars.rating(moves: moves, par: controller.level.par)
                     ForEach(0..<3, id: \.self) { i in
-                        Image(systemName: "star.fill")
+                        Image(systemName: i < lit && moves > 0 ? "star.fill" : "star")
                             .font(.system(size: 15, weight: .bold))
                             .foregroundStyle(i < lit ? Theme.butter : Theme.plum.opacity(0.18))
                             .scaleEffect(i < lit ? 1 : 0.8)
                     }
-                    Text("\(controller.session.moveCount)").font(Theme.body(14)).opacity(0.7)
-                        .accessibilityIdentifier("move-count")
+                    if let limit = Stars.moveLimit(forStars: lit, par: controller.level.par) {
+                        Text(verbatim: "\(moves)/\(limit)").font(Theme.body(14)).opacity(0.7)
+                            .accessibilityIdentifier("move-count")
+                    } else {
+                        Text(verbatim: "\(moves)").font(Theme.body(14)).opacity(0.7)
+                            .accessibilityIdentifier("move-count")
+                    }
                 }
                 .animation(.spring(response: 0.3, dampingFraction: 0.5), value: controller.session.moveCount)
                 // The level pot: coins thrown by finished jars, banked on the win.
@@ -407,30 +414,38 @@ struct LevelView: View {
 
     // Undo appears after level 2, Hint after 4, Extra jar after 7 (game design doc).
     private var helpers: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 8) {
             if pathNumber >= 2 {
-                Button { controller.undo() } label: {
-                    Label(undoLabel, systemImage: "arrow.uturn.backward")
-                }
-                .buttonStyle(SquishButtonStyle(fill: .white, text: Theme.plum))
-                .disabled(!controller.session.canUndo)
+                helper(undoLabel, "arrow.uturn.backward", .white, enabled: controller.session.canUndo) { controller.undo() }
             }
             if pathNumber >= 7 {
-                Button { controller.extraJar() } label: { Label("Extra jar", systemImage: "plus") }
-                    .buttonStyle(SquishButtonStyle(fill: Theme.mint, text: Theme.plum))
-                    .disabled(!controller.canExtraJar)
+                helper(String(localized: "Extra jar"), "plus", Theme.mint, enabled: controller.canExtraJar) { controller.extraJar() }
             }
             if pathNumber >= 4 {
-                Button { controller.hint() } label: { Label("Hint", systemImage: "lightbulb.fill") }
-                    .buttonStyle(SquishButtonStyle(fill: Theme.butter, text: Theme.plum))
-                    .disabled(!controller.canHint)
+                helper(String(localized: "Hint"), "lightbulb.fill", Theme.butter, enabled: controller.canHint) { controller.hint() }
             }
-            Button { controller.retry() } label: { Image(systemName: "arrow.clockwise") }
-                .buttonStyle(SquishButtonStyle(fill: .white, text: Theme.plum))
+            helper(String(localized: "Restart"), "arrow.clockwise", .white, enabled: true) { controller.retry() }
         }
-        .labelStyle(.titleAndIcon)
-        .font(Theme.body(15))
         .padding(.bottom, 8)
+    }
+
+    /// Every helper is the same size, with its picture over its name, so the row lines up in any language.
+    private func helper(_ title: String, _ icon: String, _ fill: Color, enabled: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 3) {
+                Image(systemName: icon).font(.system(size: 18, weight: .bold))
+                Text(verbatim: title).font(Theme.body(13)).lineLimit(1).minimumScaleFactor(0.6)
+            }
+            .foregroundStyle(Theme.plum)
+            .frame(maxWidth: .infinity, minHeight: 54)
+            .padding(.horizontal, 4)
+            .background(RoundedRectangle(cornerRadius: 18).fill(fill))
+            .overlay(RoundedRectangle(cornerRadius: 18).stroke(Theme.plum.opacity(0.15), lineWidth: 2))
+            .opacity(enabled ? 1 : 0.45)
+        }
+        .buttonStyle(PressSquish())
+        .disabled(!enabled)
+        .accessibilityLabel(Text(verbatim: title))
     }
 
     /// Invisible-ish jar buttons so UI tests can play without pixel maths.

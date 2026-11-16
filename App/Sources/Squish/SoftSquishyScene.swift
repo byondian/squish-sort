@@ -28,6 +28,30 @@ struct SquishMask {
         return alpha
     }
 
+    private static var boxes: [String: CGRect] = [:]
+
+    /// The part of a toy's picture that is not see-through, as shares of the picture (top left origin).
+    /// Pictures come with different margins, so anything that stacks toys lines them up by this.
+    static func opaqueBox(named name: String) -> CGRect {
+        if let known = boxes[name] { return known }
+        var box = CGRect(x: 0, y: 0, width: 1, height: 1)
+        let n = SquishMask.n
+        if let cg = UIImage(named: name)?.cgImage, let alpha = SquishMask.alpha(of: cg, side: n) {
+            var x0 = n, x1 = -1, y0 = n, y1 = -1
+            for y in 0..<n {
+                for x in 0..<n where alpha[y * n + x] > 40 {
+                    x0 = min(x0, x); x1 = max(x1, x); y0 = min(y0, y); y1 = max(y1, y)
+                }
+            }
+            if x1 >= x0, y1 >= y0 {
+                box = CGRect(x: Double(x0) / Double(n), y: Double(y0) / Double(n),
+                             width: Double(x1 - x0 + 1) / Double(n), height: Double(y1 - y0 + 1) / Double(n))
+            }
+        }
+        boxes[name] = box
+        return box
+    }
+
     init?(image: UIImage) {
         let n = SquishMask.n
         guard let cg = image.cgImage, let alpha = SquishMask.alpha(of: cg, side: n),

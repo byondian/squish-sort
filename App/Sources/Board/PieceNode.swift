@@ -44,7 +44,12 @@ final class PieceNode: SKNode {
         if UIImage(named: "squishy-\(kindID)") != nil {
             // Launch art from the design thread.
             let sprite = SKSpriteNode(texture: SKTexture(imageNamed: "squishy-\(kindID)"))
-            sprite.size = CGSize(width: d * 1.12, height: d * 1.12)
+            // Pictures come with different margins. Each toy fills its place by the part that is
+            // not see-through and sits on the bottom of it, so a stack is evenly spaced.
+            let box = SquishMask.opaqueBox(named: "squishy-\(kindID)")
+            let side = min(d * 1.6, d * 0.96 / max(box.width, box.height, 0.4))
+            sprite.size = CGSize(width: side, height: side)
+            sprite.position = CGPoint(x: (0.5 - box.midX) * side, y: -d * 0.48 - (0.5 - box.maxY) * side)
             sprite.zPosition = 1
             content.addChild(sprite)
             art = sprite

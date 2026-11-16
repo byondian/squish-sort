@@ -12,6 +12,7 @@ struct MapView: View {
     var body: some View {
         VStack(spacing: 0) {
             TopBar(title: "Levels")
+            ScrollViewReader { proxy in
             ScrollView {
                 VStack(spacing: 24) {
                     HStack {
@@ -38,26 +39,54 @@ struct MapView: View {
                 }
                 .padding(16)
             }
+            .onAppear {
+                // Open on the level you are on, not on the top of the list.
+                if let here = model.levels.indices.first(where: { isCurrent($0) && !model.isSideLevel($0) }) {
+                    proxy.scrollTo(here, anchor: .center)
+                }
+            }
+            }
         }
         .background(Theme.marshmallow.ignoresSafeArea())
+    }
+
+    /// The level the player is on: the next one to win on its path.
+    private func isCurrent(_ i: Int) -> Bool {
+        let sameNext = model.levels.indices.contains(i + 1) && model.isSideLevel(i + 1) == model.isSideLevel(i)
+        return model.isUnlocked(i) && model.progress.stars[model.levels[i].id] == nil
+            && !(sameNext && model.isUnlocked(i + 1))
     }
 
     private func levelBubble(_ i: Int) -> some View {
         let unlocked = model.isUnlocked(i)
         let stars = model.progress.stars[model.levels[i].id] ?? 0
+        let current = isCurrent(i)
+        let boss = model.levels[i].file.beat == .boss
         return Button {
             if unlocked { model.screen = .level(i) }
         } label: {
             VStack(spacing: 2) {
                 Text("\(model.levelNumber(i))").font(Theme.title(18))
-                Text(String(repeating: "★", count: stars) + String(repeating: "☆", count: 3 - stars))
-                    .font(.system(size: 10))
+                if current {
+                    Image(systemName: "play.fill").font(.system(size: 10, weight: .bold))
+                } else {
+                    Text(String(repeating: "★", count: stars) + String(repeating: "☆", count: 3 - stars))
+                        .font(.system(size: 10))
+                }
             }
-            .foregroundStyle(unlocked ? Theme.plum : Theme.plum.opacity(0.3))
+            .foregroundStyle(current ? .white : (unlocked ? Theme.plum : Theme.plum.opacity(0.3)))
             .frame(width: 58, height: 58)
-            .background(Circle().fill(unlocked ? (model.levels[i].file.beat == .boss ? Theme.butter : Color.white) : Color.white.opacity(0.4)))
+            // Only the level you are on is filled with colour. A boss wears a crown instead.
+            .background(Circle().fill(current ? Theme.bubblegum : (unlocked ? Color.white : Color.white.opacity(0.4))))
+            .overlay(Circle().stroke(current ? Theme.plum : .clear, lineWidth: 3))
+            .overlay(alignment: .top) {
+                if boss { Text(verbatim: "👑").font(.system(size: 14)).offset(y: -9) }
+            }
+            .scaleEffect(current ? 1.08 : 1)
         }
         .buttonStyle(.plain)
         .disabled(!unlocked)
+        .id(i)
+        .accessibilityIdentifier(current ? "map-current" : "map-level-\(i)")
     }
 }
