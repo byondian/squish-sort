@@ -17,8 +17,8 @@ public struct CoinRules: Codable, Equatable, Sendable {
     public var streakCap = 50
     public var dailyGift = 200
     public var adventCoins = 100
-    /// Stamps 1 to 6 of the stamp card.
-    public var stampCoins = 50
+    /// Coins for stamps 1 to 6 of the stamp card (the 7th moves the capsule bar).
+    public var stampCoins = [50, 50, 100, 100, 150, 150]
 
     public init() {}
 
@@ -39,7 +39,7 @@ public struct CoinRules: Codable, Equatable, Sendable {
         streakCap = int(.streakCap, d.streakCap)
         dailyGift = int(.dailyGift, d.dailyGift)
         adventCoins = int(.adventCoins, d.adventCoins)
-        stampCoins = int(.stampCoins, d.stampCoins)
+        stampCoins = (((try? c.decodeIfPresent([Int].self, forKey: .stampCoins)) ?? nil) ?? d.stampCoins).map { max(0, $0) }
     }
 }
 
@@ -176,9 +176,10 @@ public struct LevelPot: Equatable, Sendable {
     }
 }
 
-/// Stamp card (Ian, 16 Nov 2026): the first win of a day earns one stamp.
-/// Stamps 1 to 6 give coins, stamp 7 moves the capsule bar one step, then a
-/// new card starts. A missed day just means no stamp: nothing is ever lost.
+/// Stamp card (Ian, 16 Nov 2026): the first win of a day earns one stamp, once
+/// level 3 has been won. Stamps 1 to 6 give coins, stamp 7 moves the capsule
+/// bar one step, then a new card starts. A missed day just means no stamp:
+/// nothing is ever lost, nothing expires, and it is never called a streak.
 public struct StampCard: Codable, Equatable, Sendable {
     public static let size = 7
 
@@ -193,18 +194,27 @@ public struct StampCard: Codable, Equatable, Sendable {
 
     public init() {}
 
-    public func canStamp(today: String) -> Bool { lastStampDay != today }
+    /// Only a later day than the last stamp counts, so winding the clock back gives nothing.
+    public func canStamp(today: String) -> Bool {
+        guard let last = lastStampDay else { return true }
+        return today > last
+    }
+
+    /// What stamp `number` (1 to 7) gives.
+    public static func reward(stamp number: Int, rules: CoinRules = CoinRules()) -> Reward {
+        guard number < size else { return .capsuleStep }
+        let coins = rules.stampCoins
+        return .coins(coins.isEmpty ? 0 : coins[min(max(0, number - 1), coins.count - 1)])
+    }
 
     /// One stamp a day. Nil when today's stamp is already on the card.
     public mutating func stamp(today: String, rules: CoinRules = CoinRules()) -> Reward? {
         guard canStamp(today: today) else { return nil }
         lastStampDay = today
         stamps += 1
-        if stamps >= StampCard.size {
-            stamps = 0
-            return .capsuleStep
-        }
-        return .coins(rules.stampCoins)
+        let reward = StampCard.reward(stamp: stamps, rules: rules)
+        if stamps >= StampCard.size { stamps = 0 }
+        return reward
     }
 }
 

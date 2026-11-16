@@ -513,7 +513,9 @@ final class AppModel: ObservableObject {
         // The first win of a day puts a stamp on the stamp card.
         var card = progress.stampCard
         var stampFillsBar = false
-        if let reward = card.stamp(today: today, rules: rules) {
+        // Not until level 3 has been won, so the first three win cards stay clean.
+        let stampsOpen = progress.highestUnlocked >= 3
+        if stampsOpen, let reward = card.stamp(today: today, rules: rules) {
             summary.stamped = true
             summary.stamps = card.stamps
             switch reward {
@@ -543,7 +545,7 @@ final class AppModel: ObservableObject {
         lastWin = summary
         levelCheer = buddyLine(stars >= 3 ? "win_3star" : "win")
         let unlockedExtra = Extra.allCases.filter { isExtraUnlocked($0) } != extrasBefore
-        lastWinHadReward = (firstClear && level.file.capsule) || unlockedExtra
+        lastWinHadReward = (firstClear && level.file.capsule) || unlockedExtra || barFull
         if unlockedExtra { sounds.play("unlock_new") }
         // A full capsule bar opens its capsule after the level's own, never on top of it.
         if barFull { pendingCapsules.append(mysteryCapsuleWorld) }
@@ -556,6 +558,9 @@ final class AppModel: ObservableObject {
 
     /// Capsules waiting for the one on screen to close.
     private var pendingCapsules: [String] = []
+
+    /// The stamp card's seven rewards, for its full-size view.
+    func stampReward(_ number: Int) -> StampCard.Reward { StampCard.reward(stamp: number, rules: config.coins) }
 
     /// "x2 coins" on the win card of a first clear: doubles the banked pot only.
     var offersDoubleCoins: Bool {

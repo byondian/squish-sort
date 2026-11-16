@@ -567,9 +567,9 @@ struct WinCard: View {
                             .foregroundStyle(i < filled ? Theme.bubblegum : Theme.plum.opacity(0.3))
                             .scaleEffect(i == filled - 1 && shown > 0 ? 1.35 : 1)
                     }
-                    Text(summary.stamps == 0 ? LocalizedStringKey("Card full! Capsule bar +1") : LocalizedStringKey("Today's stamp"))
-                        .font(Theme.body(12)).foregroundStyle(Theme.plum.opacity(0.7))
+                    if summary.stamps == 0 { Text("Card full!") } else { Text("Stamp \(summary.stamps) of 7!") }
                 }
+                .font(Theme.body(12)).foregroundStyle(Theme.plum.opacity(0.7))
                 .accessibilityElement(children: .combine)
             }
             if let toCapsule {
@@ -620,6 +620,10 @@ struct WinCard: View {
                 }
                 haptics?.complete()
                 if summary.streak >= 2 { sounds?.play("streak") }
+            }
+            if summary.stamped {
+                sounds?.play("new_stamp")
+                if summary.stamps == 0 { sounds?.play("unlock_new") }
             }
             if autoAdvance {
                 try? await Task.sleep(nanoseconds: 700_000_000)

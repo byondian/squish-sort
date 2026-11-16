@@ -548,11 +548,19 @@ final class CoinTests: XCTestCase {
         XCTAssertEqual(card.stamp(today: "2026-12-01"), .coins(50))
         XCTAssertNil(card.stamp(today: "2026-12-01"), "one stamp a day")
         // A missed week changes nothing: the card just carries on.
-        for day in 10...14 { XCTAssertEqual(card.stamp(today: "2026-12-\(day)"), .coins(50)) }
+        XCTAssertNil(card.stamp(today: "2026-11-30"), "winding the clock back gives nothing")
+        let later = (10...14).map { card.stamp(today: "2026-12-\($0)") }
+        XCTAssertEqual(later, [.coins(50), .coins(100), .coins(100), .coins(150), .coins(150)])
         XCTAssertEqual(card.stamps, 6)
         XCTAssertEqual(card.stamp(today: "2026-12-20"), .capsuleStep, "the 7th stamp moves the capsule bar")
         XCTAssertEqual(card.stamps, 0, "then a new card starts")
         XCTAssertEqual(card.stamp(today: "2026-12-21"), .coins(50))
+        let perCard = (1...6).map { n -> Int in
+            if case .coins(let c) = StampCard.reward(stamp: n) { return c }
+            return 0
+        }
+        XCTAssertEqual(perCard.reduce(0, +), 600)
+        XCTAssertEqual(StampCard.reward(stamp: 7), .capsuleStep)
     }
 
     func testOptInAdsAreCappedADayAndGentleModeGetsOnlyHintAndExtraJar() {

@@ -7,6 +7,7 @@ import SquishPolicy
 struct HomeView: View {
     @EnvironmentObject var model: AppModel
     @State private var wobble = false
+    @State private var showStamps = false
 
     var body: some View {
         VStack(spacing: 10) {
@@ -123,19 +124,50 @@ struct HomeView: View {
             }
             .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.75))
         }
-        // The stamp card: one stamp for the first win of each day. Nothing is lost on a missed day.
-        HStack(spacing: 5) {
-            ForEach(0..<StampCard.size, id: \.self) { i in
-                Image(systemName: i < model.progress.stampCard.stamps ? "seal.fill" : "circle.dotted")
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(i < model.progress.stampCard.stamps ? Theme.bubblegum : Theme.plum.opacity(0.3))
+        // The stamp card: one stamp for the first win of each day, once level 3 is won.
+        // Nothing is lost on a missed day. Tap to see the seven rewards.
+        Button { showStamps = true } label: {
+            HStack(spacing: 5) {
+                ForEach(0..<StampCard.size, id: \.self) { i in
+                    Image(systemName: i < model.progress.stampCard.stamps ? "seal.fill" : "circle.dotted")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(i < model.progress.stampCard.stamps ? Theme.bubblegum : Theme.plum.opacity(0.3))
+                }
+                Text("Stamp card").font(Theme.body(12)).foregroundStyle(Theme.plum.opacity(0.65))
             }
-            Text(model.progress.stampCard.canStamp(today: model.today) ? LocalizedStringKey("Win a level for today's stamp")
-                 : LocalizedStringKey("Stamped today!"))
-                .font(Theme.body(12)).foregroundStyle(Theme.plum.opacity(0.65))
         }
-        .accessibilityElement(children: .combine)
+        .buttonStyle(.plain)
         .accessibilityIdentifier("stamp-card")
+        .sheet(isPresented: $showStamps) {
+            VStack(spacing: 14) {
+                Text("Stamp card").font(Theme.title(26)).foregroundStyle(Theme.plum)
+                Text("Your first win each day earns a stamp.").font(Theme.body(15)).foregroundStyle(Theme.plum.opacity(0.7))
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 4), spacing: 10) {
+                    ForEach(1...StampCard.size, id: \.self) { n in
+                        let done = n <= model.progress.stampCard.stamps
+                        VStack(spacing: 4) {
+                            Image(systemName: done ? "seal.fill" : "circle.dotted")
+                                .font(.system(size: 30, weight: .bold))
+                                .foregroundStyle(done ? Theme.bubblegum : Theme.plum.opacity(0.3))
+                            switch model.stampReward(n) {
+                            case .coins(let amount):
+                                Label("\(amount)", systemImage: "circle.hexagongrid.fill").font(Theme.body(13))
+                            case .capsuleStep:
+                                Image(systemName: "gift.fill").font(.system(size: 14, weight: .bold))
+                            }
+                        }
+                        .foregroundStyle(Theme.plum)
+                        .frame(maxWidth: .infinity, minHeight: 74)
+                        .background(RoundedRectangle(cornerRadius: 16).fill(.white))
+                    }
+                }
+                .padding(.horizontal, 20)
+            }
+            .padding(.vertical, 24)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Theme.marshmallow.ignoresSafeArea())
+            .presentationDetents([.medium])
+        }
     }
 
     /// One object in the scene: a picture with its name under it, and a "new!" tag until first opened.
