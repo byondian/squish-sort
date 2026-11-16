@@ -6,7 +6,7 @@ public enum Rarity: String, Codable, CaseIterable, Sendable {
 
 /// A squishy. `id` is stable forever: the January accounts update migrates
 /// collections by these ids.
-public struct Collectible: Codable, Hashable, Sendable {
+public struct Collectible: Codable, Hashable, Identifiable, Sendable {
     public var id: String
     public var name: String
     public var world: String

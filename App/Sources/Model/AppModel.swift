@@ -27,6 +27,7 @@ final class AppModel: ObservableObject {
     let config: GameConfig
     let purchases: PurchaseService
     let haptics = Haptics()
+    let ads = AdsService()
     private let store = ProgressStore()
     private var rng = SystemRandomNumberGenerator()
     private var sessionStart = Date()
@@ -44,6 +45,7 @@ final class AppModel: ObservableObject {
         Task {
             storefront = await Storefront.current?.countryCode ?? ""
             await purchases.start()
+            startServicesAfterAgeStep()
         }
     }
 
@@ -149,8 +151,34 @@ final class AppModel: ObservableObject {
 
     /// Ads SDK and telemetry start only here, after the age step, with flags for the group.
     private func startServicesAfterAgeStep() {
-        guard progress.age != nil else { return }
-        // AdMob and the first-open counter plug in here (test ad ids until the account is verified).
+        guard let age = progress.age, config.adsEnabled else { return }
+        let policy = AdPolicy.requestPolicy(group: age.group, storefront: policyStorefront, consent: .unknown)
+        Task { await ads.start(policy: policy) }
+        // The first-open counter joins here with the backend; children send counts only.
+    }
+
+    // MARK: - Ads
+
+    /// After a win: maybe an interstitial (never after a fail, never mid-level), then continue.
+    func continueAfterWin(index: Int, attempts: Int) {
+        let level = levels[index]
+        let win = LevelWin(level: index + 1, attempts: attempts, isBoss: level.file.beat == .boss,
+                           secondsIntoSession: Date().timeIntervalSince(sessionStart))
+        let show = progress.age != nil && config.adsEnabled
+            && AdCadence.shouldShowInterstitial(after: win, state: progress.cadence, group: ageGroup,
+                                                ownsRemoveAds: ownsRemoveAds, config: config.adCadence)
+        if show, ads.showInterstitial(done: { [weak self] in self?.next(after: index) }) {
+            update { AdCadence.recordInterstitialShown(&$0.cadence) }
+        } else if !show {
+            next(after: index)
+        }
+    }
+
+    /// Rewarded ads are opt-in and never award squishies.
+    var canWatchRewarded: Bool { progress.age != nil && config.adsEnabled && ads.rewardedReady }
+
+    func watchRewarded(_ granted: @escaping () -> Void) {
+        ads.showRewarded { earned in if earned { granted() } }
     }
 
     // MARK: - Helpers

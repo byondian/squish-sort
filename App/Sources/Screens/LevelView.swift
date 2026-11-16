@@ -65,9 +65,27 @@ final class LevelController: ObservableObject {
         scene.reload(session.board)
     }
 
+    var canExtraJar: Bool {
+        guard let model else { return false }
+        return model.canUseFreeExtraJar(usedThisLevel: extraJarUsed) || (!extraJarUsed && model.canWatchRewarded)
+    }
+
+    var canHint: Bool {
+        guard let model else { return false }
+        return model.hintsAvailable || model.canWatchRewarded
+    }
+
     func extraJar() {
-        guard let model, model.canUseFreeExtraJar(usedThisLevel: extraJarUsed) else { return }
-        model.useFreeExtraJar()
+        guard let model else { return }
+        if model.canUseFreeExtraJar(usedThisLevel: extraJarUsed) {
+            model.useFreeExtraJar()
+            addJar()
+        } else if !extraJarUsed && model.canWatchRewarded {
+            model.watchRewarded { [weak self] in self?.addJar() }
+        }
+    }
+
+    private func addJar() {
         extraJarUsed = true
         session.addExtraJar()
         outcome = nil
@@ -75,13 +93,17 @@ final class LevelController: ObservableObject {
     }
 
     func hint() {
-        guard let model, model.hintsAvailable else { return }
-        // Replay the stored solution while the player is on it, else search.
-        let move = Solver.hint(session.board)
-        if let move {
+        guard let model else { return }
+        if model.hintsAvailable {
             model.useHint()
-            scene.showHint(move)
+            showHint()
+        } else if model.canWatchRewarded {
+            model.watchRewarded { [weak self] in self?.showHint() }
         }
+    }
+
+    private func showHint() {
+        if let move = Solver.hint(session.board) { scene.showHint(move) }
     }
 
     func retry() {
@@ -120,11 +142,11 @@ struct LevelView: View {
                 switch outcome {
                 case .won(let stars):
                     WinCard(stars: stars, showpiece: controller.level.file.beat == .showpiece) {
-                        model.next(after: controller.index)
+                        model.continueAfterWin(index: controller.index, attempts: controller.attempts)
                     }
                 case .stuck:
                     StuckCard(canUndo: controller.session.canUndo,
-                              canExtraJar: model.canUseFreeExtraJar(usedThisLevel: controller.extraJarUsed),
+                              canExtraJar: controller.canExtraJar,
                               undo: controller.undo, extraJar: controller.extraJar, retry: controller.retry)
                 }
             }
@@ -170,12 +192,12 @@ struct LevelView: View {
             if number >= 7 {
                 Button { controller.extraJar() } label: { Label("Extra jar", systemImage: "plus") }
                     .buttonStyle(SquishButtonStyle(fill: Theme.mint, text: Theme.plum))
-                    .disabled(!model.canUseFreeExtraJar(usedThisLevel: controller.extraJarUsed))
+                    .disabled(!controller.canExtraJar)
             }
             if number >= 4 {
                 Button { controller.hint() } label: { Label("Hint", systemImage: "lightbulb.fill") }
                     .buttonStyle(SquishButtonStyle(fill: Theme.butter, text: Theme.plum))
-                    .disabled(!model.hintsAvailable)
+                    .disabled(!controller.canHint)
             }
             Button { controller.retry() } label: { Image(systemName: "arrow.clockwise") }
                 .buttonStyle(SquishButtonStyle(fill: .white, text: Theme.plum))

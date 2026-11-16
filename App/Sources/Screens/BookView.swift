@@ -79,8 +79,6 @@ struct BookView: View {
     }
 }
 
-extension Collectible: Identifiable {}
-
 struct TopBar: View {
     @EnvironmentObject var model: AppModel
     let title: LocalizedStringKey
