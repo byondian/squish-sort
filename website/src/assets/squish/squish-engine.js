@@ -22,7 +22,7 @@
      quad  how much bending and bulging is allowed
      vp    volume kept when squashed (1 = sides bulge fully)
      smin/smax  limits of squash and stretch
-     grav  gravity in body sizes per s^2;  fric floor grip 0..1;  rest bounce 0..1
+     grav  gravity in body sizes per s^2;  fric floor grip 0..1;  rest bounce 0..1 (only off landings faster than 0.6 toy sizes/s)
      land  how much a landing squashes (0 none, 1 splat);  grip how much the base sticks to the floor when pulled
      press how deep a press goes, as a share of the distance to the base
      grabR radius of the firm patch under a finger;  halo strength of the wide soft patch around it
@@ -37,14 +37,14 @@
      Look (used by the drawer): kd strength of light and shade;  gloss and shin size and tightness of the wet highlight;
      ao how dark the inside of a dent gets */
   const MATERIALS = {
-    foam: { label: 'Slow-rise foam', k: 300, beta: 0.68, c: 62, quad: 0.55, vp: 0.9, smin: 0.40, smax: 1.7, grav: 9, fric: 0.9, rest: 0.05, press: 0.46, grabR: 0.20, halo: 0.35, land: 0.6, grip: 0.5, firm: 0.44,
+    foam: { label: 'Slow-rise foam', k: 300, beta: 0.68, c: 62, quad: 0.55, vp: 0.9, smin: 0.40, smax: 1.7, grav: 9, fric: 0.9, rest: 0.3, press: 0.46, grabR: 0.20, halo: 0.35, land: 0.7, grip: 0.5, firm: 0.44,
       poke: 0.95, pokeR: 0.13, zk: 77, zd: 60, zc: 0.25, zland: 0, puff: 0.2, tk: 60, td: 14, look: 0.07, kd: 0.6, gloss: 0, shin: 20, ao: 0.42 },
     // Jelly is Ian's pick (16 Nov): seven parts the firm jelly, three parts the gel ball
-    jelly: { label: 'Jelly', k: 660, beta: 0.73, c: 8.8, quad: 0.63, vp: 1, smin: 0.44, smax: 1.95, grav: 9.6, fric: 0.56, rest: 0.17, press: 0.46, grabR: 0.21, halo: 0.4, land: 0.82, grip: 0.31, firm: 0.48,
+    jelly: { label: 'Jelly', k: 660, beta: 0.73, c: 8.8, quad: 0.63, vp: 1, smin: 0.44, smax: 1.95, grav: 9.6, fric: 0.56, rest: 0.62, press: 0.46, grabR: 0.21, halo: 0.4, land: 0.95, grip: 0.31, firm: 0.48,
       poke: 0.9, pokeR: 0.13, zk: 320, zd: 5.5, zc: 0.62, zland: 0.6, puff: 0.18, tk: 140, td: 4.7, look: 0.083, kd: 0.5, gloss: 0.64, shin: 31, ao: 0.29 },
-    gel: { label: 'Gel ball', k: 300, beta: 0.8, c: 12, quad: 0.7, vp: 1, smin: 0.42, smax: 2.1, grav: 11, fric: 0.6, rest: 0.04, press: 0.5, grabR: 0.22, halo: 0.5, land: 1.0, grip: 0.35, firm: 0.42,
+    gel: { label: 'Gel ball', k: 300, beta: 0.8, c: 12, quad: 0.7, vp: 1, smin: 0.42, smax: 2.1, grav: 11, fric: 0.6, rest: 0.5, press: 0.5, grabR: 0.22, halo: 0.5, land: 1.0, grip: 0.35, firm: 0.42,
       poke: 1.15, pokeR: 0.16, zk: 90, zd: 8, zc: 0.45, zland: 0.8, puff: 0.25, tk: 50, td: 4, look: 0.09, kd: 0.5, gloss: 0.85, shin: 44, ao: 0.26 },
-    mochi: { label: 'Mochi', k: 380, beta: 0.74, c: 12, quad: 0.5, vp: 1, smin: 0.40, smax: 2.6, grav: 9, fric: 1, rest: 0, press: 0.46, grabR: 0.19, halo: 0.3, land: 0.65, grip: 0.9, firm: 0.44,
+    mochi: { label: 'Mochi', k: 380, beta: 0.74, c: 12, quad: 0.5, vp: 1, smin: 0.40, smax: 2.6, grav: 9, fric: 1, rest: 0.25, press: 0.46, grabR: 0.19, halo: 0.3, land: 0.75, grip: 0.9, firm: 0.44,
       poke: 0.95, pokeR: 0.13, zk: 250, zd: 16, zc: 0.3, zland: 0.2, puff: 0.3, tk: 80, td: 10, look: 0.07, kd: 0.6, gloss: 0.15, shin: 14, ao: 0.4 }
   };
 
@@ -291,6 +291,8 @@
       if (dn > 0) contacts = 1;
       if (hitF && this.metric.air) impact = Math.max(impact, my);
       if (hitT) impact = Math.max(impact, -my * 0.7); if (hitL) impact = Math.max(impact, -mx * 0.8); if (hitR) impact = Math.max(impact, mx * 0.8);
+      // bounce only off a real landing; slow contact (resting, breathing, a soft set-down) just stops, so a settled toy never jitters
+      const eY = Math.abs(my) > S * 0.6 ? M.rest : 0, eX = Math.abs(mx) > S * 0.6 ? M.rest : 0;
       const slide = dn > 0 ? mx * Math.min(1, M.fric * h * 14) : 0, soft = S * 6, P = this.push, grip = M.grip || 0;
       // a real landing (not resting contact) starts a short push that squashes the body against the surface
       if (hitF && my > S * 0.6) { P.y = Math.min(my, soft) * land; P.sy = 1; } else if (hitT && -my > S * 0.6) { P.y = Math.min(-my, soft) * land; P.sy = -1; }
@@ -305,10 +307,10 @@
         if (!this.sim[k]) continue;
         p[k * 2] += sx; p[k * 2 + 1] += sy; v[k * 2] -= slide;
         if (dn > 0 && grip) { const gw = 1 - clamp((fl - p[k * 2 + 1]) / (Hc * 0.7), 0, 1), gf = grip * gw * gw * Math.min(1, h * 30); p[k * 2] -= v[k * 2] * h * gf; v[k * 2] *= (1 - gf); } // the base grips the floor, fading smoothly upwards, so a sideways pull leans and stretches
-        if (hitF) v[k * 2 + 1] -= my * (1 + M.rest);
-        if (hitT) v[k * 2 + 1] -= my * (1 + M.rest);
-        if (hitL) v[k * 2] -= mx * (1 + M.rest);
-        if (hitR) v[k * 2] -= mx * (1 + M.rest);
+        if (hitF) v[k * 2 + 1] -= my * (1 + eY);
+        if (hitT) v[k * 2 + 1] -= my * (1 + eY);
+        if (hitL) v[k * 2] -= mx * (1 + eX);
+        if (hitR) v[k * 2] -= mx * (1 + eX);
         if (this.core[k]) { // whatever is still outside is put back point by point
           if (p[k * 2 + 1] > fl) p[k * 2 + 1] = fl; else if (world.top != null && p[k * 2 + 1] < world.top) p[k * 2 + 1] = world.top;
           if (p[k * 2] < world.left) p[k * 2] = world.left; else if (p[k * 2] > world.right) p[k * 2] = world.right; }
