@@ -20,10 +20,13 @@ public struct AdRequestPolicy: Equatable, Sendable {
 
 public enum AdPolicy {
     /// Apple's tracking prompt: only for players who may get personalised ads,
-    /// never in gentle mode, once, after the first win at level 5 or later.
-    public static func shouldAskTracking(profile: AgeProfile?, storefront: String, levelWon: Int, alreadyAsked: Bool) -> Bool {
+    /// never in gentle mode, once, at the start of level 7 (or the first level
+    /// started after it), with the board already on screen.
+    public static let trackingPromptLevel = 7
+
+    public static func shouldAskTracking(profile: AgeProfile?, storefront: String, levelStarting: Int, alreadyAsked: Bool) -> Bool {
         guard AgePolicy.mayPersonaliseAds(profile: profile, storefront: storefront), !alreadyAsked else { return false }
-        return levelWon >= 5
+        return levelStarting >= trackingPromptLevel
     }
 
     /// The request policy for this player right now, from their profile and the current storefront.

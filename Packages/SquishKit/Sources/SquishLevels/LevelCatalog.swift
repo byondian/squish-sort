@@ -11,10 +11,10 @@ public enum LevelCatalog {
         return w * levelsPerWorld + index
     }
 
-    /// Capsule after levels 3, 6, 9, 12, 15 and 18, then every 5th level from 25.
-    public static func isCapsuleLevel(globalNumber n: Int) -> Bool {
-        if n <= 18 { return n % 3 == 0 }
-        return n >= 25 && n % 5 == 0
+    /// A capsule every 3rd level of a world and on its last level:
+    /// 3, 6, 9, 12, 15, 18 and 20.
+    public static func isCapsuleLevel(index: Int) -> Bool {
+        index % 3 == 0 || index == levelsPerWorld
     }
 
     /// Reads every Levels/<world>/<nn>.json under `root`, in play order.

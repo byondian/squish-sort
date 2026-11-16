@@ -4,6 +4,7 @@ import Foundation
 /// dates; every feature it can switch on is already in the reviewed build.
 public struct GameConfig: Codable, Equatable, Sendable {
     public var adCadence = AdCadenceConfig()
+    public var capsuleOdds = CapsuleOdds()
     /// Christmas Workshop opens on this day (device local date), no new build needed.
     public var christmasUnlock = "2026-12-18"
     /// Snow on the home screen from this day.
@@ -24,6 +25,7 @@ public struct GameConfig: Codable, Equatable, Sendable {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         let d = GameConfig()
         adCadence = try c.decodeIfPresent(AdCadenceConfig.self, forKey: .adCadence) ?? d.adCadence
+        capsuleOdds = try c.decodeIfPresent(CapsuleOdds.self, forKey: .capsuleOdds) ?? d.capsuleOdds
         christmasUnlock = try c.decodeIfPresent(String.self, forKey: .christmasUnlock) ?? d.christmasUnlock
         snowFrom = try c.decodeIfPresent(String.self, forKey: .snowFrom) ?? d.snowFrom
         adsEnabled = try c.decodeIfPresent(Bool.self, forKey: .adsEnabled) ?? d.adsEnabled

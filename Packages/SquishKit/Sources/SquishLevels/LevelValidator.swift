@@ -20,9 +20,8 @@ public enum LevelValidator {
         if !(2...BoardLayout.maxJars).contains(file.jars.count) { p.append("\(id): \(file.jars.count) jars, allowed 2 to \(BoardLayout.maxJars)") }
         if file.jars.contains(where: { $0.count > file.capacity }) { p.append("\(id): a jar is over capacity") }
         if file.beat != Beat.expected(forIndex: file.index) { p.append("\(id): beat \(file.beat.rawValue), the sawtooth expects \(Beat.expected(forIndex: file.index).rawValue)") }
-        if let n = LevelCatalog.globalNumber(world: file.world, index: file.index),
-           file.capsule != LevelCatalog.isCapsuleLevel(globalNumber: n) {
-            p.append("\(id): capsule flag should be \(LevelCatalog.isCapsuleLevel(globalNumber: n))")
+        if file.capsule != LevelCatalog.isCapsuleLevel(index: file.index) {
+            p.append("\(id): capsule flag should be \(LevelCatalog.isCapsuleLevel(index: file.index))")
         }
 
         var counts: [String: Int] = [:]

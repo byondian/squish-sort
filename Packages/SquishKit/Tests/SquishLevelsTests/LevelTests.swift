@@ -69,8 +69,8 @@ final class LevelTests: XCTestCase {
     }
 
     func testCapsuleSchedule() {
-        let capsules = (1...80).filter(LevelCatalog.isCapsuleLevel(globalNumber:))
-        XCTAssertEqual(capsules, [3, 6, 9, 12, 15, 18, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80])
+        let capsules = (1...20).filter(LevelCatalog.isCapsuleLevel(index:))
+        XCTAssertEqual(capsules, [3, 6, 9, 12, 15, 18, 20])
     }
 }
 
@@ -93,14 +93,27 @@ final class SolverTests: XCTestCase {
         // Not stuck yet (moves exist) but unwinnable: the hint must be nil so nothing is charged.
         let b = Board(capacity: 4, jars: [[Piece(kind: 0), Piece(kind: 1), Piece(kind: 0), Piece(kind: 1)],
                                           [Piece(kind: 1), Piece(kind: 0), Piece(kind: 1), Piece(kind: 0)]])
-        XCTAssertNil(Solver.hint(b))
+        XCTAssertEqual(Solver.hint(b), .unwinnable)
     }
 
     func testHintIsALegalMove() throws {
         let file = try LevelCatalog.loadFiles(root: levelsRoot).first { $0.id == "toyshop-08" }!
         let level = try Level(file: file)
-        let hint = try XCTUnwrap(Solver.hint(level.board, maxStates: 200_000))
+        guard case .move(let hint) = Solver.hint(level.board) else { return XCTFail("no hint for toyshop-08") }
         XCTAssertTrue(level.board.isLegal(hint))
+    }
+
+    func testAHintIsFoundOnEveryLevelWithinTheMemoryLimit() throws {
+        for file in try LevelCatalog.loadFiles(root: levelsRoot) {
+            let level = try Level(file: file)
+            guard case .move(let hint) = Solver.hint(level.board) else { XCTFail("no hint for \(file.id)"); continue }
+            XCTAssertTrue(level.board.isLegal(hint), file.id)
+        }
+    }
+
+    func testRunningOutOfRoomIsNotCalledUnwinnable() throws {
+        let file = try LevelCatalog.loadFiles(root: levelsRoot).first { $0.id == "toyshop-08" }!
+        XCTAssertEqual(Solver.hint(try Level(file: file).board, maxStates: 1, maxNodes: 1), .gaveUp)
     }
 
     func testDuetLevelSolutionRespectsDuets() throws {

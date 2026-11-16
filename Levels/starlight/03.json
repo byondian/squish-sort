@@ -15,6 +15,6 @@
   "mechanics": {"hidden": [], "sticky": [[0, 2], [1, 1]], "frozen": []},
   "par": 6,
   "solution": [[0, 3], [1, 0], [2, 0], [2, 3], [1, 2], [1, 3]],
-  "capsule": false,
+  "capsule": true,
   "softenAfterFails": null
 }

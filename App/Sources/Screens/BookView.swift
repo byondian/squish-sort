@@ -28,7 +28,7 @@ struct BookView: View {
                     ForEach(worlds, id: \.id) { world in
                         shelf(world.id, world.name)
                     }
-                    Text("Odds: common 70%, rare 25%, ultra-rare 5%. Squishies are earned by playing and are never sold.")
+                    Text("Capsule odds: rare \(model.capsuleOddsPercent.rare)%, ultra-rare \(model.capsuleOddsPercent.ultra)%. Common squishies join when you sort a jar of them. Squishies are earned by playing and are never sold.")
                         .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.6))
                 }
                 .padding(16)

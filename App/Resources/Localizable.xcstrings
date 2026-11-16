@@ -1,6 +1,28 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%@ joined your book!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@がずかんに入ったよ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 도감에 등록!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@加入圖鑑了！"
+          }
+        }
+      }
+    },
     "%lld": {
       "shouldTranslate": false
     },
@@ -299,6 +321,28 @@
         }
       }
     },
+    "Can I be your Buddy?": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バディになってもいい？"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "내가 네 버디가 되어도 돼?"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "我可以當你的夥伴嗎？"
+          }
+        }
+      }
+    },
     "Capsule next level!": {
       "localizations": {
         "ja": {
@@ -317,6 +361,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "下一關有扭蛋！"
+          }
+        }
+      }
+    },
+    "Capsule odds: rare %lld%%, ultra-rare %lld%%. Common squishies join when you sort a jar of them. Squishies are earned by playing and are never sold.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "カプセルの確率：レア%1$lld%%、ウルトラレア%2$lld%%。コモンはびんをそろえると仲間になります。スクイーズはプレイでもらえます。販売はしていません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "캡슐 확률: 레어 %1$lld%%, 울트라 레어 %2$lld%%. 일반 스퀴시는 병을 완성하면 도감에 들어와요. 스퀴시는 플레이로만 얻을 수 있으며 판매하지 않아요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "扭蛋機率：稀有 %1$lld%%、超稀有 %2$lld%%。普通軟軟在排好一罐時加入圖鑑。軟軟只能靠遊玩獲得，絕不販售。"
           }
         }
       }
@@ -1487,6 +1553,28 @@
         }
       }
     },
+    "Next, Apple asks if ads can be matched to you. Either answer is fine: you can play everything.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このあと、Appleが広告をあなたに合わせてよいか聞きます。どちらを選んでも、ぜんぶ遊べます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다음에 Apple이 맞춤 광고를 허용할지 물어봐요. 어느 쪽을 골라도 모든 것을 즐길 수 있어요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "接下來 Apple 會詢問是否允許依你的喜好顯示廣告。選哪個都可以，所有內容都能玩。"
+          }
+        }
+      }
+    },
     "Night": {
       "localizations": {
         "ja": {
@@ -1615,28 +1703,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "確定"
-          }
-        }
-      }
-    },
-    "Odds: common 70%, rare 25%, ultra-rare 5%. Squishies are earned by playing and are never sold.": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "確率：コモン70%、レア25%、ウルトラレア5%。スクイーズはプレイでもらえます。販売はしていません。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "확률: 일반 70%, 레어 25%, 울트라 레어 5%. 스퀴시는 플레이로만 얻을 수 있으며 판매하지 않아요."
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "機率：普通 70%、稀有 25%、超稀有 5%。軟軟只能靠遊玩獲得，絕不販售。"
           }
         }
       }
@@ -1813,28 +1879,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "隱私權政策"
-          }
-        }
-      }
-    },
-    "Real squishies": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "本物のスクイーズ"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "진짜 스퀴시"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "真的捏捏樂"
           }
         }
       }
@@ -2345,6 +2389,28 @@
         }
       }
     },
+    "This one is tricky! Try a move, then ask me again.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "これはむずかしい！ひとつ動かしてから、もういちど聞いてね。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이건 어려워! 한 번 움직인 다음 다시 물어봐."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這題有點難！先移動一步，再問我一次。"
+          }
+        }
+      }
+    },
     "This opens our website in Safari. The squishies there are affiliate links: we may earn a little if you buy.": {
       "localizations": {
         "ja": {
@@ -2759,6 +2825,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "年份"
+          }
+        }
+      }
+    },
+    "Yes!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "うん！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "좋아!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "好啊！"
           }
         }
       }

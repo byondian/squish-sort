@@ -33,10 +33,9 @@ SHAPE = {
 WORLD_BUMP = {0: 0, 1: 1, 2: 1, 3: 1}
 
 
-def capsule_level(global_number):
-    if global_number <= 18:
-        return global_number % 3 == 0
-    return global_number % 5 == 0 and global_number >= 25
+def capsule_level(pos):
+    """Every 3rd level of a world, plus its last level."""
+    return pos % 3 == 0 or pos == 20
 
 
 # Commons borrowed for 7- and 8-kind levels, picked so no two pieces on a
@@ -210,7 +209,7 @@ def make_level(world_idx, pos):
         raise SystemExit(f"{level['id']}: unsolvable or too big ({explored} states)")
     level["par"] = len(sol)
     level["solution"] = [list(m) for m in sol]
-    level["capsule"] = capsule_level(global_number)
+    level["capsule"] = capsule_level(pos)
     level["softenAfterFails"] = 3 if beat in ("tension", "boss") else None
     return level
 

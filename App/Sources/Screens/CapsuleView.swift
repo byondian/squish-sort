@@ -31,7 +31,11 @@ struct CapsuleView: View {
                         .transition(.scale(scale: 2.5).combined(with: .opacity))
                 }
                 Text(verbatim: bookCount).font(Theme.body(15)).foregroundStyle(Theme.plum.opacity(0.7))
-                Text("Squeeze me!").font(Theme.body(18)).foregroundStyle(Theme.plum.opacity(0.7))
+                if asksToBeBuddy {
+                    SpeechBubble(text: String(localized: "Can I be your Buddy?"))
+                } else {
+                    Text("Squeeze me!").font(Theme.body(18)).foregroundStyle(Theme.plum.opacity(0.7))
+                }
                 // Double capsule: opt-in ad, same odds. Gentle mode gets it only in the book.
                 if !model.isGentleMode && model.bonusCapsuleWorld != nil && model.canWatchRewarded {
                     Button {
@@ -40,8 +44,18 @@ struct CapsuleView: View {
                     } label: { Label("Another capsule", systemImage: "play.rectangle.fill") }
                     .buttonStyle(SquishButtonStyle(fill: Theme.grape))
                 }
-                Button("Next", action: done).buttonStyle(SquishButtonStyle())
+                if asksToBeBuddy {
+                    Button("Yes!") {
+                        model.haptics.complete()
+                        model.adoptFirstBuddy(collectible)
+                        done()
+                    }
+                    .buttonStyle(SquishButtonStyle())
                     .accessibilityIdentifier("capsule-next")
+                } else {
+                    Button("Next", action: done).buttonStyle(SquishButtonStyle())
+                        .accessibilityIdentifier("capsule-next")
+                }
             } else {
                 capsule
                     .rotationEffect(.degrees(angle))
@@ -60,6 +74,11 @@ struct CapsuleView: View {
         }
         .frame(maxWidth: .infinity)
         .background(Theme.marshmallow.ignoresSafeArea())
+    }
+
+    /// The first squishy out of a capsule (Peach Bun) offers to be the Buddy.
+    private var asksToBeBuddy: Bool {
+        collectible.id == CapsuleDrops.firstCapsuleID && model.offersFirstBuddy
     }
 
     /// "5/17" for the squishy's world shelf.

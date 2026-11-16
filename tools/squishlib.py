@@ -135,7 +135,7 @@ def key(b, canonical):
     return tuple(parts)
 
 
-def solve(b, max_states=3_000_000):
+def solve(b, max_states=3_000_000, weight=1, max_nodes=None):
     """A* with the run-count heuristic (admissible: a move removes at most one run)."""
     canonical = not any(p[2] > 0 for jar in b.jars for p in jar)
     counts = {}
@@ -146,7 +146,7 @@ def solve(b, max_states=3_000_000):
     start = key(b, canonical)
     nodes = [(b, -1, None)]
     best = {start: 0}
-    heap = [(heuristic(b, kind_jars), 0, 0)]
+    heap = [(weight * heuristic(b, kind_jars), 0, 0)]
     explored = 0
     while heap:
         fval, negg, idx = heapq.heappop(heap)
@@ -161,7 +161,7 @@ def solve(b, max_states=3_000_000):
                 idx = nodes[idx][1]
             return list(reversed(path)), explored
         explored += 1
-        if explored > max_states:
+        if explored > max_states or (max_nodes and len(nodes) > max_nodes):
             return None, explored
         for (f, t) in cur.moves():
             if canonical and len(cur.jars[t]) == 0 and cur.run_length(f) == len(cur.jars[f]):
@@ -172,7 +172,7 @@ def solve(b, max_states=3_000_000):
             if ng < best.get(k, 1 << 30):
                 best[k] = ng
                 nodes.append((nb, idx, (f, t)))
-                heapq.heappush(heap, (ng + heuristic(nb, kind_jars), -ng, len(nodes) - 1))
+                heapq.heappush(heap, (ng + weight * heuristic(nb, kind_jars), -ng, len(nodes) - 1))
     return None, explored
 
 

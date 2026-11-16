@@ -5,8 +5,6 @@ import SquishPolicy
 /// once it unlocks. Nothing here pops up by itself.
 struct HomeView: View {
     @EnvironmentObject var model: AppModel
-    @State private var shopGate = false
-    @State private var shopGatePassed = false
 
     var body: some View {
         VStack(spacing: 14) {
@@ -52,26 +50,7 @@ struct HomeView: View {
                 if !model.isGentleMode {
                     tile("Shop", "cart.fill") { model.screen = .shop }
                 }
-                // Website link, 13+ only, behind the grown-up check. Never a pop-up.
-                if model.showsSquishyShop {
-                    tile("Real squishies", "safari.fill") { shopGate = true }
-                }
             }
-        }
-        .sheet(isPresented: $shopGate, onDismiss: {
-            if shopGatePassed {
-                shopGatePassed = false
-                model.openSquishyShop()
-            }
-        }) {
-            VStack(spacing: 0) {
-                Text("This opens our website in Safari. The squishies there are affiliate links: we may earn a little if you buy.")
-                    .font(Theme.body(15)).foregroundStyle(Theme.plum)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 24).padding(.top, 24)
-                ParentalGate(onPass: { shopGatePassed = true; shopGate = false }, onCancel: { shopGate = false })
-            }
-            .background(Theme.marshmallow.ignoresSafeArea())
         }
         .padding(16)
         .background(Theme.marshmallow.ignoresSafeArea())

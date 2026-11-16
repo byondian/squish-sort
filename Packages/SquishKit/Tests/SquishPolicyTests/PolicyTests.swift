@@ -98,7 +98,7 @@ final class AdPolicyTests: XCTestCase {
             let teen = AgeProfile(group: AgePolicy.group(for: AgeRange(lower: lower, upper: lower + 1), storefront: ""),
                                   source: .birthYear, storefront: "", lowerBound: lower)
             XCTAssertFalse(AgePolicy.mayPersonaliseAds(profile: teen, storefront: ""), "age \(lower)")
-            XCTAssertFalse(AdPolicy.shouldAskTracking(profile: teen, storefront: "", levelWon: 9, alreadyAsked: false))
+            XCTAssertFalse(AdPolicy.shouldAskTracking(profile: teen, storefront: "", levelStarting: 9, alreadyAsked: false))
             // The real storefront turns out to be the UK: still no.
             XCTAssertFalse(AgePolicy.mayPersonaliseAds(profile: teen, storefront: "GBR"), "age \(lower)")
             let p = AdPolicy.requestPolicy(profile: teen, storefront: "GBR", consent: .obtained, trackingAllowed: true)
@@ -117,7 +117,7 @@ final class AdPolicyTests: XCTestCase {
         let teen = AgeProfile(group: .teen, source: .birthYear, storefront: "USA", lowerBound: 15)
         XCTAssertTrue(AgePolicy.mayPersonaliseAds(profile: teen, storefront: "USA"))
         XCTAssertFalse(AgePolicy.mayPersonaliseAds(profile: teen, storefront: "GBR"))
-        XCTAssertFalse(AdPolicy.shouldAskTracking(profile: teen, storefront: "GBR", levelWon: 9, alreadyAsked: false))
+        XCTAssertFalse(AdPolicy.shouldAskTracking(profile: teen, storefront: "GBR", levelStarting: 9, alreadyAsked: false))
         let uk = AdPolicy.requestPolicy(profile: teen, storefront: "GBR", consent: .obtained, trackingAllowed: true)
         XCTAssertFalse(uk.allowPersonalisedAds)
         XCTAssertTrue(uk.tagForUnderAgeOfConsent)
@@ -144,11 +144,11 @@ final class AdPolicyTests: XCTestCase {
         let teen = AgeProfile(group: .teen, source: .birthYear, storefront: "USA", lowerBound: 15)
         let child = AgeProfile(group: .child, source: .skipped, storefront: "USA", lowerBound: 15)
         XCTAssertFalse(AgePolicy.mayPersonaliseAds(profile: child, storefront: "USA"), "children can never be marked for personalisation")
-        XCTAssertFalse(AdPolicy.shouldAskTracking(profile: teen, storefront: "USA", levelWon: 4, alreadyAsked: false))
-        XCTAssertTrue(AdPolicy.shouldAskTracking(profile: teen, storefront: "USA", levelWon: 5, alreadyAsked: false))
-        XCTAssertFalse(AdPolicy.shouldAskTracking(profile: teen, storefront: "USA", levelWon: 9, alreadyAsked: true))
-        XCTAssertFalse(AdPolicy.shouldAskTracking(profile: child, storefront: "USA", levelWon: 9, alreadyAsked: false))
-        XCTAssertFalse(AdPolicy.shouldAskTracking(profile: nil, storefront: "USA", levelWon: 9, alreadyAsked: false))
+        XCTAssertFalse(AdPolicy.shouldAskTracking(profile: teen, storefront: "USA", levelStarting: 6, alreadyAsked: false))
+        XCTAssertTrue(AdPolicy.shouldAskTracking(profile: teen, storefront: "USA", levelStarting: 7, alreadyAsked: false))
+        XCTAssertFalse(AdPolicy.shouldAskTracking(profile: teen, storefront: "USA", levelStarting: 9, alreadyAsked: true))
+        XCTAssertFalse(AdPolicy.shouldAskTracking(profile: child, storefront: "USA", levelStarting: 9, alreadyAsked: false))
+        XCTAssertFalse(AdPolicy.shouldAskTracking(profile: nil, storefront: "USA", levelStarting: 9, alreadyAsked: false))
     }
 
     func testDeclaredAgeGatesSpanAtLeastTwoYears() {
@@ -316,40 +316,66 @@ final class CapsuleTests: XCTestCase {
         XCTAssertEqual(CapsuleDrops.open(world: "toyshop", roster: roster, state: &state, rng: &rng)?.id, "peach-bun")
     }
 
-    func testRareGuaranteedByTheFourthCapsuleOfEachWorld() {
+    func testCapsulesHoldOnlyRaresAndUltras() {
+        var state = CollectionState()
+        state.totalCapsules = 1 // past the Peach Bun capsule
+        var rng = SplitMix64(seed: 7)
+        for _ in 0..<200 {
+            let got = CapsuleDrops.open(world: "toyshop", roster: roster, state: &state, rng: &rng)!
+            XCTAssertTrue(got.rarity == .rare || got.rarity == .ultra, got.id)
+        }
+    }
+
+    func testAnUltraIsGuaranteedByTheSeventhCapsuleOfEachWorld() {
         for seed in 0..<200 as Range<UInt64> {
             var state = CollectionState()
-            state.totalCapsules = 1 // past the Peach Bun capsule
+            state.totalCapsules = 1
             var rng = SplitMix64(seed: seed)
-            var rare = false
-            for _ in 0..<4 {
+            var ultra = false
+            for _ in 0..<7 {
                 let got = CapsuleDrops.open(world: "sweetfactory", roster: roster, state: &state, rng: &rng)!
-                if got.rarity != .common { rare = true }
+                if got.rarity == .ultra { ultra = true }
             }
-            XCTAssertTrue(rare, "seed \(seed)")
+            XCTAssertTrue(ultra, "seed \(seed)")
         }
     }
 
-    func testNewCommonsFirstAndSecretsNeverDrop() {
-        var state = CollectionState()
-        state.totalCapsules = 1
-        var rng = SplitMix64(seed: 7)
-        var commons: [String] = []
-        for _ in 0..<60 {
-            let got = CapsuleDrops.open(world: "toyshop", roster: roster, state: &state, rng: &rng)!
-            XCTAssertNotEqual(got.rarity, .secret)
-            if got.rarity == .common { commons.append(got.id) }
+    func testNewFirstAcrossBothTiersBeforeAnySpare() {
+        for seed in 0..<50 as Range<UInt64> {
+            var state = CollectionState()
+            state.totalCapsules = 1
+            var rng = SplitMix64(seed: seed)
+            let shelf = roster.world("starlight", .rare).count + roster.world("starlight", .ultra).count
+            var got: [String] = []
+            for _ in 0..<shelf {
+                got.append(CapsuleDrops.open(world: "starlight", roster: roster, state: &state, rng: &rng)!.id)
+            }
+            XCTAssertEqual(Set(got).count, shelf, "seed \(seed): no spare before the shelf is full")
+            XCTAssertEqual(state.spareCount, 0)
         }
-        XCTAssertEqual(Set(commons.prefix(6)).count, 6, "the first six commons are all different")
     }
 
-    func testOddsAreRoughly70_25_5() {
+    func testOddsAreRoughly80_20AndFollowTheConfig() {
         var rng = SplitMix64(seed: 1)
         var counts: [Rarity: Int] = [:]
         for _ in 0..<20_000 { counts[CapsuleDrops.rollTier(&rng), default: 0] += 1 }
-        XCTAssertEqual(Double(counts[.common]!) / 20_000, 0.70, accuracy: 0.02)
-        XCTAssertEqual(Double(counts[.rare]!) / 20_000, 0.25, accuracy: 0.02)
-        XCTAssertEqual(Double(counts[.ultra]!) / 20_000, 0.05, accuracy: 0.01)
+        XCTAssertNil(counts[.common])
+        XCTAssertEqual(Double(counts[.rare]!) / 20_000, 0.80, accuracy: 0.02)
+        XCTAssertEqual(Double(counts[.ultra]!) / 20_000, 0.20, accuracy: 0.02)
+        var all = CapsuleOdds()
+        all.rare = 0
+        all.ultra = 1
+        XCTAssertEqual(CapsuleDrops.rollTier(&rng, odds: all), .ultra)
+    }
+
+    func testCommonsJoinTheBookBySortingOnce() {
+        var state = CollectionState()
+        let strawbie = roster.collectible("strawbie")!
+        XCTAssertTrue(state.addSorted(strawbie))
+        XCTAssertFalse(state.addSorted(strawbie), "only the first time")
+        XCTAssertEqual(state.owned["strawbie"], 1)
+        XCTAssertEqual(state.earnedLog.last?.source, "sorted")
+        XCTAssertFalse(state.addSorted(roster.collectible("peach-bun")!), "rares come from capsules only")
     }
 
     func testDropsAreTheSameWithOrWithoutRemoveAds() {
@@ -466,7 +492,8 @@ final class ExtrasTests: XCTestCase {
         XCTAssertTrue(open(.mysteryBag, capsules: 3, won: 10))
         XCTAssertFalse(open(.maker, capsules: 6, won: 19))
         XCTAssertTrue(open(.maker, capsules: 6, won: 20, world: true))
-        XCTAssertTrue(open(.buddy, capsules: 6, won: 20, world: true))
+        XCTAssertFalse(open(.buddy))
+        XCTAssertTrue(open(.buddy, capsules: 1, won: 3), "the Buddy arrives with the first capsule")
     }
 
     func testEachExtraHasARemoteOffSwitch() {

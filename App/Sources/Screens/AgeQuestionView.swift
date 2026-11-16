@@ -15,11 +15,9 @@ struct AgeQuestionView: View {
     var body: some View {
         VStack(spacing: 20) {
             Spacer()
-            SquishyView(id: "peach-bun", rarity: .rare).frame(width: 120, height: 120)
-            Text("To set up your collection book, what year were you born?")
-                .font(Theme.title(24))
-                .multilineTextAlignment(.center)
-                .foregroundStyle(Theme.plum)
+            // The Buddy asks (Peach Bun, unless the player has swapped already).
+            SpeechBubble(text: String(localized: "To set up your collection book, what year were you born?"))
+            SquishRefView(ref: model.progress.buddy.squishy ?? "peach-bun").frame(width: 120, height: 120)
             Picker("Year", selection: $year) {
                 Text("—").tag(Int?.none)
                 ForEach((currentYear - 100...currentYear).reversed(), id: \.self) { y in

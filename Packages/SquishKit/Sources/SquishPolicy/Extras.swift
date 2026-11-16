@@ -19,7 +19,7 @@ public enum Extras {
         case .squishRoom: return config.squishRoomEnabled && capsulesOpened >= 1
         case .mysteryBag: return config.mysteryBagEnabled && levelsWon >= mysteryBagAfterLevel
         case .maker: return config.makerEnabled && firstWorldComplete
-        case .buddy: return config.buddyEnabled && firstWorldComplete
+        case .buddy: return config.buddyEnabled && capsulesOpened >= 1
         }
     }
 }

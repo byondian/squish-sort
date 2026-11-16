@@ -26,6 +26,10 @@ final class AppModel: ObservableObject {
     @Published private(set) var progress: PlayerProgress
     @Published var capsule: Collectible?
     @Published var askAge = false
+    /// One line before Apple's tracking prompt, shown over the board at the start of level 7.
+    @Published var trackingExplainer = false
+    /// A common that just joined the book by being sorted, for the board's sticker.
+    @Published var joinedBook: Collectible?
     /// Win card offers: the opt-in bonus gift box (a rewarded ad for coins).
     @Published var giftOffered = false
     @Published var storefront = ""
@@ -200,10 +204,25 @@ final class AppModel: ObservableObject {
         var earned = false
         update { earned = $0.mystery.recordGuess(correct: correct, today: today) }
         if earned {
-            let world = levels.indices.contains(progress.highestUnlocked) ? levels[progress.highestUnlocked].file.world : LevelCatalog.worlds[0]
+            let world = mysteryCapsuleWorld
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) { [weak self] in self?.openCapsule(world: world) }
         }
         return correct
+    }
+
+    private func isBookComplete(_ world: String) -> Bool {
+        roster.collectibles.filter { $0.world == world && $0.rarity != .secret }
+            .allSatisfy { progress.collection.owns($0.id) }
+    }
+
+    /// The Mystery Bag capsule opens for the world the player is in, or for
+    /// another open world when that book is already complete. Never a locked world.
+    private var mysteryCapsuleWorld: String {
+        let open = openWorlds
+        let current = levels.indices.contains(progress.highestUnlocked) ? levels[progress.highestUnlocked].file.world : ""
+        let here = open.contains(current) ? current : (open.last ?? LevelCatalog.worlds[0])
+        if isBookComplete(here), let other = open.first(where: { !isBookComplete($0) }) { return other }
+        return here
     }
 
     // MARK: - Squishy Maker
@@ -243,6 +262,18 @@ final class AppModel: ObservableObject {
         guard buddyActive else { return nil }
         return buddyScript.line(trigger, language: language, using: &rng)
     }
+
+    /// Peach Bun asks "Can I be your Buddy?" on the first capsule screen.
+    func adoptFirstBuddy(_ squishy: Collectible) {
+        guard isExtraUnlocked(.buddy), progress.buddy.squishy == nil else { return }
+        update {
+            $0.buddy.squishy = squishy.id
+            $0.buddy.name = squishy.name(in: language)
+            $0.seenExtras.insert(Extra.buddy.rawValue)
+        }
+    }
+
+    var offersFirstBuddy: Bool { isExtraUnlocked(.buddy) && progress.buddy.squishy == nil }
 
     /// False when the name is empty or rude.
     func setBuddy(ref: String, name: String) -> Bool {
@@ -345,6 +376,14 @@ final class AppModel: ObservableObject {
         }
     }
 
+    /// A jar of `kind` was completed. Commons join the book the first time.
+    func jarSorted(kind: String) {
+        guard let squishy = roster.collectible(kind) else { return }
+        var added = false
+        update { added = $0.collection.addSorted(squishy) }
+        if added { joinedBook = squishy }
+    }
+
     /// Levels still to win before the next capsule level, counting from the level after `index`.
     /// 0 means the next level is a capsule level. Nil when there is none left.
     func levelsToNextCapsule(after index: Int) -> Int? {
@@ -372,11 +411,18 @@ final class AppModel: ObservableObject {
 
     private func openCapsule(world: String) {
         var state = progress.collection
-        if let got = CapsuleDrops.open(world: world, roster: roster, state: &state, rng: &rng) {
+        if let got = CapsuleDrops.open(world: world, roster: roster, state: &state, rng: &rng, odds: config.capsuleOdds) {
             capsuleIsNew = !progress.collection.owns(got.id)
             update { $0.collection = state }
             capsule = got
         }
+    }
+
+    /// The odds shown in the book always come from the same config the drops use.
+    var capsuleOddsPercent: (rare: Int, ultra: Int) {
+        let total = max(1, config.capsuleOdds.rare + config.capsuleOdds.ultra)
+        let rare = Int((Double(config.capsuleOdds.rare) / Double(total) * 100).rounded())
+        return (rare, 100 - rare)
     }
 
     enum AfterCapsule { case nothing, bonusCapsule }
@@ -403,7 +449,7 @@ final class AppModel: ObservableObject {
 
     func rerollSpares(world: String) -> Collectible? {
         var state = progress.collection
-        let got = CapsuleDrops.rerollSpares(world: world, roster: roster, state: &state, rng: &rng)
+        let got = CapsuleDrops.rerollSpares(world: world, roster: roster, state: &state, rng: &rng, odds: config.capsuleOdds)
         if got != nil { update { $0.collection = state } }
         return got
     }
@@ -460,11 +506,23 @@ final class AppModel: ObservableObject {
     }
 
     /// Apple's tracking prompt, once, for eligible players only (never gentle mode).
-    private func askTrackingIfDue(levelWon: Int) async {
-        guard AdPolicy.shouldAskTracking(profile: progress.age, storefront: storefront, levelWon: levelWon, alreadyAsked: progress.trackingAsked) else { return }
+    /// Called when a board comes on screen. From level 7 the explainer line
+    /// shows once, and its button leads to Apple's prompt.
+    func levelStarted(number: Int) {
+        guard !AppModel.isUITesting,
+              AdPolicy.shouldAskTracking(profile: progress.age, storefront: storefront, levelStarting: number,
+                                         alreadyAsked: progress.trackingAsked) else { return }
+        trackingExplainer = true
+    }
+
+    func askTracking() {
+        guard trackingExplainer else { return }
+        trackingExplainer = false
         update { $0.trackingAsked = true }
-        _ = await ATTrackingManager.requestTrackingAuthorization()
-        ads.update(policy: currentAdPolicy)
+        Task {
+            _ = await ATTrackingManager.requestTrackingAuthorization()
+            ads.update(policy: currentAdPolicy)
+        }
     }
 
     /// Bonus gift box: watch an ad, get a fixed number of coins.
@@ -513,10 +571,7 @@ final class AppModel: ObservableObject {
     /// After a win: maybe an interstitial (never after a fail, never mid-level), then continue.
     func continueAfterWin(index: Int, attempts: Int) {
         giftOffered = false
-        Task {
-            await askTrackingIfDue(levelWon: index + 1)
-            showInterstitialThenNext(index: index, attempts: attempts)
-        }
+        showInterstitialThenNext(index: index, attempts: attempts)
     }
 
     private func showInterstitialThenNext(index: Int, attempts: Int) {

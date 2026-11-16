@@ -26,6 +26,8 @@ final class LevelController: ObservableObject {
     @Published private(set) var thinking = false
     /// The hint search found no way to win from here. Nothing is charged for that.
     @Published var noWayThrough = false
+    /// The hint search ran out of room without an answer. Nothing is charged for that either.
+    @Published var hintGaveUp = false
     /// A hint found for the current board, waiting to be paid for or shown.
     private var foundHint: (board: Board, move: Move)?
     private(set) var attempts = 1
@@ -41,8 +43,13 @@ final class LevelController: ObservableObject {
         scene.onPlay = { [weak self] move in self?.play(move) }
         scene.onLift = { [weak model] in model?.haptics.lift() }
         scene.onReject = { [weak model] in model?.haptics.reject() }
-        scene.onLand = { [weak model] result in
-            if result.completedJar != nil { model?.haptics.complete() } else { model?.haptics.land() }
+        scene.onLand = { [weak self, weak model] result in
+            if let jar = result.completedJar {
+                model?.haptics.complete()
+                self?.jarCompleted(jar)
+            } else {
+                model?.haptics.land()
+            }
         }
         scene.onMoveFinished = { [weak self] _ in self?.checkOutcome() }
         // The very first board opens mid-move: one squishy already lifted and a
@@ -54,8 +61,14 @@ final class LevelController: ObservableObject {
 
     private func play(_ move: Move) -> (MoveResult, Board)? {
         guard let result = session.play(move) else { return nil }
-        noWayThrough = false
+        noWayThrough = false; hintGaveUp = false
         return (result, session.board)
+    }
+
+    /// Commons join the book the first time a jar of them is completed.
+    private func jarCompleted(_ jar: Int) {
+        guard let piece = session.board.jars[jar].first, level.kinds.indices.contains(Int(piece.kind)) else { return }
+        model?.jarSorted(kind: level.kinds[Int(piece.kind)])
     }
 
     private func checkOutcome() {
@@ -79,7 +92,7 @@ final class LevelController: ObservableObject {
 
     func undo() {
         guard session.undo() else { return }
-        noWayThrough = false
+        noWayThrough = false; hintGaveUp = false
         outcome = nil
         scene.reload(session.board)
     }
@@ -132,8 +145,8 @@ final class LevelController: ObservableObject {
             let move = await Task.detached(priority: .userInitiated) { Solver.hint(board) }.value
             thinking = false
             guard let model, board == session.board, outcome == nil else { return }
-            guard let move else {
-                noWayThrough = true
+            guard case .move(let move) = move else {
+                if move == .unwinnable { noWayThrough = true } else { hintGaveUp = true }
                 return
             }
             foundHint = (board, move)
@@ -159,7 +172,7 @@ final class LevelController: ObservableObject {
         // Real walls soften: one extra jar after enough fails.
         if let soften = level.file.softenAfterFails, attempts > soften { session.addExtraJar() }
         extraJarUsed = false
-        noWayThrough = false
+        noWayThrough = false; hintGaveUp = false
         outcome = nil
         scene.reload(session.board)
     }
@@ -185,9 +198,26 @@ struct LevelView: View {
                 helpers
             }
             .padding(.horizontal, 12)
-            if controller.noWayThrough && controller.outcome == nil {
+            if let joined = model.joinedBook {
+                JoinedBookSticker(squishy: joined, name: joined.name(in: model.language)) { model.joinedBook = nil }
+                    .id(joined.id)
+            }
+            if model.trackingExplainer && controller.outcome == nil {
+                Color.black.opacity(0.15).ignoresSafeArea()
+                VStack(spacing: 14) {
+                    Text("Next, Apple asks if ads can be matched to you. Either answer is fine: you can play everything.")
+                        .font(Theme.body(16)).foregroundStyle(Theme.plum)
+                        .multilineTextAlignment(.center)
+                    Button("Continue") { model.askTracking() }.buttonStyle(SquishButtonStyle())
+                }
+                .padding(24)
+                .background(RoundedRectangle(cornerRadius: 28).fill(Theme.marshmallow))
+                .padding(30)
+            }
+            if (controller.noWayThrough || controller.hintGaveUp) && controller.outcome == nil {
                 VStack {
-                    Text("No way through from here. Undo a few moves.")
+                    Text(controller.noWayThrough ? LocalizedStringKey("No way through from here. Undo a few moves.")
+                         : LocalizedStringKey("This one is tricky! Try a move, then ask me again."))
                         .font(Theme.body(15)).foregroundStyle(Theme.plum)
                         .padding(.horizontal, 16).padding(.vertical, 10)
                         .background(Capsule().fill(.white))
@@ -230,6 +260,9 @@ struct LevelView: View {
         }
         .background(LinearGradient(colors: model.boardTheme.colors, startPoint: .top, endPoint: .bottom).ignoresSafeArea())
         .animation(.spring(response: 0.35, dampingFraction: 0.7), value: controller.outcome)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: model.trackingExplainer)
+        .onAppear { model.levelStarted(number: number) }
+        .onDisappear { model.joinedBook = nil }
         .confirmationDialog(Text(controller.choosing == .hint ? "Hint" : "Extra jar"),
                             isPresented: Binding(get: { controller.choosing != nil }, set: { if !$0 { controller.choosing = nil } }),
                             titleVisibility: .visible) {
@@ -356,6 +389,41 @@ struct IconButton: View {
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier(system)
+    }
+}
+
+/// "<Name> joined your book!": the sticker pops up, then flies to the book corner.
+struct JoinedBookSticker: View {
+    let squishy: Collectible
+    let name: String
+    let done: () -> Void
+    @State private var phase = 0
+
+    var body: some View {
+        VStack {
+            HStack(spacing: 8) {
+                SquishyView(id: squishy.id, rarity: squishy.rarity).frame(width: 44, height: 44)
+                Text("\(name) joined your book!").font(Theme.body(15)).foregroundStyle(Theme.plum)
+            }
+            .padding(.horizontal, 14).padding(.vertical, 8)
+            .background(Capsule().fill(.white))
+            .overlay(Capsule().stroke(Theme.butter, lineWidth: 3))
+            .scaleEffect(phase == 0 ? 0.3 : (phase == 1 ? 1 : 0.2), anchor: phase == 2 ? .topTrailing : .center)
+            .opacity(phase == 1 ? 1 : 0)
+            .frame(maxWidth: .infinity, alignment: phase == 2 ? .trailing : .center)
+            .padding(.top, phase == 2 ? 8 : 92)
+            .padding(.horizontal, 12)
+            Spacer()
+        }
+        .allowsHitTesting(false)
+        .accessibilityElement(children: .combine)
+        .task {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { phase = 1 }
+            try? await Task.sleep(nanoseconds: 1_700_000_000)
+            withAnimation(.easeIn(duration: 0.35)) { phase = 2 }
+            try? await Task.sleep(nanoseconds: 400_000_000)
+            done()
+        }
     }
 }
 

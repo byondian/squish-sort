@@ -87,7 +87,6 @@ public struct Roster: Codable, Sendable {
 public struct CollectionState: Codable, Equatable, Sendable {
     public var owned: [String: Int] = [:]
     public var capsulesOpened: [String: Int] = [:]
-    public var rareOrBetterOpened: [String: Int] = [:]
     public var totalCapsules = 0
     /// Every squishy earned, in order, with where it came from. Kept for the
     /// January migration and for support.
@@ -105,47 +104,69 @@ public struct CollectionState: Codable, Equatable, Sendable {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         owned = try c.decodeIfPresent([String: Int].self, forKey: .owned) ?? [:]
         capsulesOpened = try c.decodeIfPresent([String: Int].self, forKey: .capsulesOpened) ?? [:]
-        rareOrBetterOpened = try c.decodeIfPresent([String: Int].self, forKey: .rareOrBetterOpened) ?? [:]
         totalCapsules = try c.decodeIfPresent(Int.self, forKey: .totalCapsules) ?? 0
         earnedLog = try c.decodeIfPresent([Earned].self, forKey: .earnedLog) ?? []
     }
 
     public func owns(_ id: String) -> Bool { (owned[id] ?? 0) > 0 }
     public var spareCount: Int { owned.values.reduce(0) { $0 + max(0, $1 - 1) } }
+
+    /// Commons join the book the first time a jar of them is completed.
+    /// Returns true only that first time. Rares and ultras come from capsules only.
+    public mutating func addSorted(_ squishy: Collectible) -> Bool {
+        guard squishy.rarity == .common, !owns(squishy.id) else { return false }
+        owned[squishy.id] = 1
+        earnedLog.append(.init(id: squishy.id, source: "sorted"))
+        return true
+    }
 }
 
-/// Capsule drops (game design doc).
+/// Capsule odds, out of rare + ultra. Remote config can change the numbers.
+public struct CapsuleOdds: Codable, Equatable, Sendable {
+    public var rare = 80
+    public var ultra = 20
+
+    public init() {}
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        rare = max(0, try c.decodeIfPresent(Int.self, forKey: .rare) ?? 80)
+        ultra = max(0, try c.decodeIfPresent(Int.self, forKey: .ultra) ?? 20)
+        if rare + ultra == 0 { rare = 80; ultra = 20 }
+    }
+}
+
+/// Capsule drops (rules approved 16 Nov 2026).
 ///
-/// - Odds 70 / 25 / 5 for common / rare / ultra-rare; secrets never drop.
+/// - Capsules hold only rares and ultras, 80 / 20. Commons join the book by
+///   sorting, and secrets never drop.
 /// - The first capsule in the game is always Peach Bun.
-/// - A rare or better is guaranteed by the 4th capsule of each world.
-/// - New first: a roll gives a squishy you don't own while that tier has one.
+/// - New first: a roll gives a squishy you don't own while that tier has one
+///   in the world, then the other tier, and only then a duplicate.
+/// - An ultra is guaranteed by the 7th capsule of each world.
 ///
-/// Remove Ads never affects drops: nothing here takes purchase state, and
-/// capsules can't be bought, sped up or re-rolled with money.
+/// Remove Ads and coins never affect drops: nothing here takes purchase state,
+/// and capsules can't be bought, sped up or re-rolled with money.
 public enum CapsuleDrops {
     public static let firstCapsuleID = "peach-bun"
-    public static let pityCapsule = 4
-    public static let odds: [(Rarity, Int)] = [(.common, 70), (.rare, 25), (.ultra, 5)]
+    public static let ultraPityCapsule = 7
     public static let sparesPerReroll = 3
 
-    public static func open<R: RandomNumberGenerator>(world: String, roster: Roster,
-                                                      state: inout CollectionState, rng: inout R) -> Collectible? {
+    public static func open<R: RandomNumberGenerator>(world: String, roster: Roster, state: inout CollectionState,
+                                                      rng: inout R, odds: CapsuleOdds = CapsuleOdds()) -> Collectible? {
         var pick: Collectible?
         if state.totalCapsules == 0, let first = roster.collectible(firstCapsuleID) {
             pick = first
         } else {
-            var tier = rollTier(&rng)
+            var tier = rollTier(&rng, odds: odds)
             let opened = state.capsulesOpened[world] ?? 0
-            if opened + 1 >= pityCapsule && (state.rareOrBetterOpened[world] ?? 0) == 0 && tier == .common {
-                tier = .rare
-            }
+            let hasUltra = roster.world(world, .ultra).contains { state.owns($0.id) }
+            if opened + 1 >= ultraPityCapsule && !hasUltra { tier = .ultra }
             pick = choose(world: world, tier: tier, roster: roster, state: state, rng: &rng)
         }
         guard let got = pick else { return nil }
         state.owned[got.id, default: 0] += 1
         state.capsulesOpened[world, default: 0] += 1
-        if got.rarity != .common { state.rareOrBetterOpened[world, default: 0] += 1 }
         state.totalCapsules += 1
         state.earnedLog.append(.init(id: got.id, source: "capsule"))
         return got
@@ -153,12 +174,12 @@ public enum CapsuleDrops {
 
     /// Squish 3 spares together for a squishy you don't have yet in `world`.
     /// Returns nil (and spends nothing) if there aren't 3 spares or nothing is missing.
-    public static func rerollSpares<R: RandomNumberGenerator>(world: String, roster: Roster,
-                                                              state: inout CollectionState, rng: inout R) -> Collectible? {
+    public static func rerollSpares<R: RandomNumberGenerator>(world: String, roster: Roster, state: inout CollectionState,
+                                                              rng: inout R, odds: CapsuleOdds = CapsuleOdds()) -> Collectible? {
         guard state.spareCount >= sparesPerReroll else { return nil }
         let missing = roster.collectibles.filter { $0.world == world && $0.rarity != .secret && !state.owns($0.id) }
         guard !missing.isEmpty else { return nil }
-        var tier = rollTier(&rng)
+        var tier = rollTier(&rng, odds: odds)
         if !missing.contains(where: { $0.rarity == tier }) { tier = missing[0].rarity }
         let pool = missing.filter { $0.rarity == tier }
         let got = pool[Int(rng.next() % UInt64(pool.count))]
@@ -175,24 +196,23 @@ public enum CapsuleDrops {
         return got
     }
 
-    static func rollTier<R: RandomNumberGenerator>(_ rng: inout R) -> Rarity {
-        let total = odds.reduce(0) { $0 + $1.1 }
-        var r = Int(rng.next() % UInt64(total))
-        for (tier, weight) in odds {
-            if r < weight { return tier }
-            r -= weight
-        }
-        return .common
+    static func rollTier<R: RandomNumberGenerator>(_ rng: inout R, odds: CapsuleOdds = CapsuleOdds()) -> Rarity {
+        let total = max(1, odds.rare + odds.ultra)
+        return Int(rng.next() % UInt64(total)) < odds.rare ? .rare : .ultra
     }
 
     static func choose<R: RandomNumberGenerator>(world: String, tier: Rarity, roster: Roster,
                                                  state: CollectionState, rng: inout R) -> Collectible? {
+        let other: Rarity = tier == .ultra ? .rare : .ultra
+        for t in [tier, other] {
+            let unowned = roster.world(world, t).filter { !state.owns($0.id) }
+            if !unowned.isEmpty { return unowned[Int(rng.next() % UInt64(unowned.count))] }
+        }
+        // Everything is owned: a spare from the rolled tier.
         var pool = roster.world(world, tier)
-        if pool.isEmpty { pool = roster.world(world, .common) }
+        if pool.isEmpty { pool = roster.world(world, other) }
         guard !pool.isEmpty else { return nil }
-        let unowned = pool.filter { !state.owns($0.id) }
-        let from = unowned.isEmpty ? pool : unowned
-        return from[Int(rng.next() % UInt64(from.count))]
+        return pool[Int(rng.next() % UInt64(pool.count))]
     }
 }
 
