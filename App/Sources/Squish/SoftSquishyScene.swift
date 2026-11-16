@@ -303,9 +303,23 @@ final class SoftSquishyScene: SKScene {
         guard let body else { return }
         for touch in touches {
             let at = point(touch), id = ObjectIdentifier(touch).hashValue
-            guard body.grab(id, x: at.x, y: at.y) else { continue }
+            var held = at
+            if mode == .room {
+                guard body.grab(id, x: at.x, y: at.y) else { continue }
+            } else {
+                // Press-only places: the press is taken near the top of the toy, so the whole toy
+                // squashes and says "squeeze me"; the dent still forms under the finger.
+                let b = body.bounds()
+                guard at.x >= b.x0, at.x <= b.x1, at.y >= b.y0, at.y <= b.y1 else { continue }
+                let top = (x: at.x, y: b.y0 + 0.08 * body.size)
+                if body.grab(id, x: top.x, y: top.y, dent: at) {
+                    held = top
+                } else if !body.grab(id, x: at.x, y: at.y) {
+                    continue
+                }
+            }
             touchTimes[id] = touch.timestamp
-            touchStarts[id] = (at.x, at.y, Double(touch.majorRadius))
+            touchStarts[id] = (held.x, held.y, Double(touch.majorRadius))
             waitsForPop = false
             onTouch?()
             if touch.tapCount == 2 { onDoubleTap?() }

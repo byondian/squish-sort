@@ -178,6 +178,22 @@ final class SquishBodyTests: XCTestCase {
         }
     }
 
+    /// Spec section 6, press-only places: the patch near the top, the dent under the finger.
+    func testAPressOnlyTouchSquashesTheWholeToy() {
+        let expected: [SquishFeel: Double] = [.foam: 0.537, .jelly: 0.566, .gel: 0.519, .mochi: 0.563]
+        for feel in SquishFeel.allCases {
+            let b = body(feel)
+            for _ in 0..<120 { b.step(h, world: world) }
+            let rest = b.bounds()
+            let restH = rest.y1 - rest.y0
+            XCTAssertTrue(b.grab(1, x: 200, y: rest.y0 + 0.08 * b.size, dent: (x: 200, y: (rest.y0 + rest.y1) / 2)))
+            for _ in 0..<108 { b.step(h, world: world) }
+            let pressed = b.bounds()
+            XCTAssertEqual((pressed.y1 - pressed.y0) / restH, expected[feel]!, accuracy: 0.03, "\(feel)")
+            XCTAssertGreaterThan(b.metric.Z, 0.7, "\(feel): and the dent is there")
+        }
+    }
+
     func testNothingTearsOrLeavesTheRoom() {
         var rng = SystemRandomNumberGenerator()
         for feel in SquishFeel.allCases {

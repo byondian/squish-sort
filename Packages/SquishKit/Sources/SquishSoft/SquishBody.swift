@@ -364,7 +364,9 @@ public final class SquishBody {
 
     /// Returns true if the finger landed on the squishy.
     @discardableResult
-    public func grab(_ id: Int, x: Double, y: Double) -> Bool {
+    /// `dent` puts the dent somewhere other than the patch: press-only places take the patch near the
+    /// top of the toy, so the whole toy squashes, and leave the dent under the finger.
+    public func grab(_ id: Int, x: Double, y: Double, dent: (x: Double, y: Double)? = nil) -> Bool {
         let S = size, R = material.grabR * S
         var best = 1e9
         for k in 0..<count where core[k] {
@@ -398,8 +400,9 @@ public final class SquishBody {
         // Where the finger is on the toy's own picture (0...1), for the dent.
         var fu = 0.0, fv = 0.0, fw = 0.0
         let r2 = (S * 0.09) * (S * 0.09)
+        let zx = dent?.x ?? x, zy = dent?.y ?? y
         for k in 0..<count {
-            let dx = Double(p[k * 2]) - x, dy = Double(p[k * 2 + 1]) - y
+            let dx = Double(p[k * 2]) - zx, dy = Double(p[k * 2 + 1]) - zy
             let ww = exp(-(dx * dx + dy * dy) / r2) + 1e-9
             fu += ww * Double(uv[k * 2])
             fv += ww * Double(uv[k * 2 + 1])
