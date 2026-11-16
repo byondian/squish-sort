@@ -136,6 +136,28 @@
         }
       }
     },
+    "%lld of %lld": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld / %2$lld"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld / %2$lld"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld / %2$lld"
+          }
+        }
+      }
+    },
     "%lld of %lld stars": {
       "localizations": {
         "ja": {
@@ -343,6 +365,28 @@
         }
       }
     },
+    "After level %lld": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "レベル%lldのあと"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "레벨 %lld 이후"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "第 %lld 關之後"
+          }
+        }
+      }
+    },
     "An extra guess wins coins. It doesn't fill the capsule bar.": {
       "localizations": {
         "ja": {
@@ -493,6 +537,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "魔王關 👑"
+          }
+        }
+      }
+    },
+    "Back tomorrow": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "またあした"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "내일 다시"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "明天再來"
           }
         }
       }
@@ -845,6 +911,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "金幣可買提示、多一個罐子和主題。軟軟只能靠遊玩獲得，絕不販售。"
+          }
+        }
+      }
+    },
+    "Collection": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コレクション"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "컬렉션"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "收藏"
           }
         }
       }
@@ -2957,6 +3045,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "為 Squish Sort 評分"
+          }
+        }
+      }
+    },
+    "Ready to open!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あけられるよ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "열 수 있어요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可以打開了！"
           }
         }
       }
