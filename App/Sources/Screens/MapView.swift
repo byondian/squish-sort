@@ -68,7 +68,7 @@ struct MapView: View {
             VStack(spacing: 2) {
                 Text("\(model.levelNumber(i))").font(Theme.title(18))
                 if current {
-                    Image(systemName: "play.fill").font(.system(size: 10, weight: .bold))
+                    Text("Play").font(.system(size: 11, weight: .heavy, design: .rounded)).lineLimit(1).minimumScaleFactor(0.6)
                 } else {
                     Text(String(repeating: "★", count: stars) + String(repeating: "☆", count: 3 - stars))
                         .font(.system(size: 10))
@@ -81,6 +81,14 @@ struct MapView: View {
             .overlay(Circle().stroke(current ? Theme.plum : .clear, lineWidth: 3))
             .overlay(alignment: .top) {
                 if boss { Text(verbatim: "👑").font(.system(size: 14)).offset(y: -9) }
+            }
+            // The Buddy (or the favourite squishy) sits on the level to play next.
+            .overlay(alignment: .topTrailing) {
+                if current {
+                    SquishRefView(ref: model.progress.buddy.squishy ?? model.progress.favouriteSquishy ?? "peach-bun")
+                        .frame(width: 34, height: 34).offset(x: 12, y: -16)
+                        .allowsHitTesting(false)
+                }
             }
             .scaleEffect(current ? 1.08 : 1)
         }
