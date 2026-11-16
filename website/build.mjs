@@ -225,7 +225,7 @@ ${waveTo('#DDF7EE', true)}
 function vars(code) {
   const t = T[code], o = SITE.operator;
   return {
-    operator: o.name, country: o.country,
+    operator: o.name, country: ({ ja: 'ルクセンブルク', ko: '룩셈부르크', 'zh-hant': '盧森堡' })[code] || o.country,
     postal: o.postal || t.doc.onRequest, phone: o.phone || t.doc.onRequest,
     support: SITE.email.support, privacy: SITE.email.privacy, updated: SITE.updated,
     h: href(code).replace(/\/$/, ''),
@@ -257,15 +257,15 @@ function support(code) {
 <h2>${esc(s.faqTitle)}</h2>${s.faq.map(([q, a]) => `<details class="faq"><summary>${esc(q)}</summary><p>${inline(a)}</p></details>`).join('')}
 <h2 id="contact">${esc(s.formTitle)}</h2>
 <p class="note">${esc(s.kid)}</p>
-<form class="contact" id="contact" novalidate data-t='${esc(JSON.stringify({ sending: s.sending, ok: s.ok, err: s.err.replace('{email}', SITE.email.support), send: s.send }))}'>
+<form class="contact" id="contact-form" novalidate data-t='${esc(JSON.stringify({ sending: s.sending, ok: s.ok, err: s.err.replace('{email}', SITE.email.support), send: s.send }))}'>
   <input type="hidden" name="lang" value="${code}"><input type="hidden" name="t" value="">
   <label class="hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off"></label>
-  <div class="row"><label>${esc(s.name)}<input name="name" required maxlength="80" autocomplete="nickname"></label>
+  <div class="row"><label>${esc(s.name)}<input name="name" maxlength="80" autocomplete="nickname"></label>
   <label>${esc(s.email)}<input name="email" type="email" required maxlength="200" autocomplete="email" inputmode="email"></label></div>
   <div class="row"><label>${esc(s.topic)}<select name="topic">${s.topics.map(o => `<option>${esc(o)}</option>`).join('')}</select></label>
   <label>${esc(s.device)}<input name="device" maxlength="80"></label></div>
   <label>${esc(s.message)}<textarea name="message" required maxlength="5000"></textarea></label>
-  <label class="check"><input type="checkbox" name="consent" required> <span>${esc(s.consent)} <a href="${href(code, 'privacy')}#support">→</a></span></label>
+  ${s.consent ? `<label class="check"><input type="checkbox" name="consent" required> <span>${esc(s.consent)} <a href="${href(code, 'privacy')}#support">→</a></span></label>` : `<p class="note">${esc(s.notice)} <a href="${href(code, 'privacy')}#support">→</a></p>`}
   <button class="btn" type="submit">${esc(s.send)}</button>
   <p class="status" role="status" aria-live="polite"></p>
 </form>

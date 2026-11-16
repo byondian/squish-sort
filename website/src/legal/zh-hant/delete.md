@@ -21,6 +21,8 @@ Squish Sort 沒有帳號，你的遊戲資料只存在你的 iPhone 上。**刪�
 - 在遊戲中：設定 > **隱私選項**（英國、歐洲經濟區和瑞士）可更改你的同意。
 - 成人可以在 [myadcenter.google.com](https://myadcenter.google.com) 和 [myactivity.google.com](https://myactivity.google.com) 查看並刪除與其 Google 帳戶相關的廣告活動。
 
+**Google 保有的資料：** 我們無法刪除 Google 已收到的廣告資料。你可以透過 Google 的[隱私權說明](https://support.google.com/policies/troubleshooter/9009584)直接向 Google 提出請求。
+
 ## 刪除客服訊息
 
 如果你曾寫信給我們，請用同一個電子郵件地址寄信到 privacy@squishsort.app，要求刪除對話。我們會在一個月內（通常快得多）確認完成。

@@ -12,12 +12,13 @@ description: squishsort.app sets no cookies. Here is what the site stores in you
 |---|---|---|---|
 | ss-muted | Local storage | Remembers if you muted the demo's sounds | Until you clear it |
 | ss-grownup | Session storage | Remembers you passed the grown-up check on the Squishy Shop | Until you close the tab |
+| ss-gate-no | Session storage | Keeps the Squishy Shop closed after a failed grown-up check | Until you close the tab |
 
 These are strictly necessary to remember choices you made, and never leave your device.
 
 ## Visitor statistics
 
-We use **Vercel Web Analytics** to count page visits. It does not use cookies or other identifiers stored on your device, does not track you across websites, and only gives us aggregated numbers (such as how many people visited a page and from which country).
+We use **Vercel Web Analytics** to count page visits. It does not use cookies or other identifiers stored on your device, does not track you across websites, and only gives us aggregated numbers (such as how many people visited a page, from which site and country, and on which kind of device). To count unique visits it uses a hash of your IP address and browser that resets every day.
 
 ## Other services
 

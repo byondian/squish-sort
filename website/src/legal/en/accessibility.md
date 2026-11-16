@@ -7,7 +7,7 @@ We want everyone to be able to enjoy a good squish.
 ## In the game
 
 - **Shape as well as colour:** every board squishy has its own silhouette, so players with colour vision deficiency can tell them apart.
-- **No time pressure:** no timers, no move limits, unlimited undo and retries. Levels get a little easier after a few fails.
+- **No time pressure:** no timers, no move limits and unlimited retries, with 5 undos per level (unlimited with Remove Ads). Levels get a little easier after a few fails.
 - **Tap or drag:** move squishies by tapping two jars or by dragging.
 - **Sound and haptics** can be switched off in Settings, and nothing in the game depends on hearing.
 - The game follows your iPhone's Reduce Motion setting where possible.
@@ -16,7 +16,7 @@ We are still improving support for VoiceOver and larger text sizes in the game. 
 
 ## On this website
 
-We aim to meet the Web Content Accessibility Guidelines (WCAG) 2.2 at level AA:
+We aim to meet the Web Content Accessibility Guidelines (WCAG) 2.2 at level AA. We haven't had the site formally audited yet.
 
 - Pages work with a keyboard and screen readers, with a "skip to content" link.
 - The playable demo can be played with a keyboard (Tab to a jar, Enter to pick it), and announces moves to screen readers.

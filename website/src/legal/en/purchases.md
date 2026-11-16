@@ -12,7 +12,7 @@ description: What you can buy in Squish Sort, what coins do, and the published c
 
 | Item | Type | What it does |
 |---|---|---|
-| Remove Ads | One-time purchase (Family Sharing on) | Stops the ads that play by themselves between levels, and gives you the optional rewards (extra jar, hint, double coins and so on) with one tap instead of a video |
+| Remove Ads | One-time purchase (Family Sharing on) | Stops the ads that play by themselves between levels and gives you the optional rewards (extra jar, hint, double coins and so on) with one tap instead of a video, under the same limit of 6 a day. It also gives unlimited undo (free players get 5 per level), one free extra jar per level (free players get 1 a day) and 3 free hints a day (everyone gets the first hint free) |
 | 1,000 coins | Consumable | Coins to spend in the game |
 | 3,500 coins | Consumable | Coins to spend in the game |
 | 7,500 coins | Consumable | Coins to spend in the game |
@@ -33,9 +33,10 @@ Prices are shown in the App Store in your local currency. We do not show prices 
 
 - **Clearing a level for the first time:** 50 coins pop out of the jars as you fill them, plus 50 more for three stars.
 - **Small bonuses:** filling two jars within 3 seconds (+10), the occasional glittering lucky squishy (+100), your first win of the day (+50), a win streak (+10 a step, up to +50; not in gentle mode) and any Mystery Bag guess (+50).
-- **Optional videos:** doubling the coins from a first clear, and the Buddy's daily gift (200 coins, free with no video in gentle mode).
+- **Stamp card:** your first win each day adds a stamp. Stamps 1 to 6 give 50, 50, 100, 100, 150 and 150 coins; the 7th moves the capsule bar one step. A missed day loses nothing.
+- **Optional videos:** doubling the coins from a first clear, one more Mystery Bag guess (+50), and the Buddy's daily gift (200 coins, free with no video in gentle mode).
 
-Replaying a level gives sparkles, not coins, so coins can't be farmed. Coins can't buy squishies, capsules or anything that changes capsule odds. Buddy items are just for fun.
+Replaying a level does not pay the level's coins again, so coins can't be farmed. Coins can't buy squishies, capsules or anything that changes capsule odds. Buddy items are just for fun.
 
 ## How squishies are earned
 
@@ -44,15 +45,15 @@ Replaying a level gives sparkles, not coins, so coins can't be farmed. Coins can
 **Capsules hold rare and ultra-rare squishies.** They are always free and can only be earned by playing:
 
 - **Clearing a capsule level for the first time:** levels 3, 6, 9, 12, 15, 18 and 20 of each world (7 capsules per world).
-- **The Mystery Bag** daily guessing game: three right guesses earn a capsule.
-- **The Christmas advent shelf:** the door for 24 December holds a Christmas capsule, and days 6, 12 and 18 move the capsule bar on.
+- **The capsule bar:** three steps fill it and give a capsule. Steps come from a right first guess in the daily **Mystery Bag**, from the 7th stamp of the stamp card and from advent days 6, 12 and 18. An extra guess from a video or Remove Ads pays coins only and never moves the bar.
+- **The Christmas advent shelf:** the door for 24 December holds a Christmas capsule; other doors give 100 coins or 2 Buddy treats.
 - **Squishing spares:** three duplicate squishies can be swapped for a squishy you don't have yet.
 
 **No ad and no purchase ever gives a capsule.**
 
 ## Drop rates {#drop}
 
-Each capsule contains one squishy from the world it was earned in.
+A level capsule contains one squishy from the world it was earned in. A capsule from the capsule bar opens for the world you are playing, or another unlocked world if that book is complete.
 
 | Rarity | Chance per capsule |
 |---|---|
@@ -68,9 +69,9 @@ Within a rarity, every squishy you **don't own yet** is equally likely. If you a
 | Toy Shop | 7 | 3 | 1 |
 | Sweet Factory | 7 | 3 | 1 |
 | Starlight Stage | 7 | 3 | 1 |
-| Christmas Workshop | 4 | 2 | 1 |
+| Santa's Grotto (Santa's Workshop in the US and Canada) | 4 | 2 | 1 |
 
-Example: in the Toy Shop with no rares owned, each of the 7 rares has an 80% ÷ 7 ≈ 11.4% chance, and each of the 3 ultras 20% ÷ 3 ≈ 6.7%.
+Example: in the Toy Shop, after your first capsule (always Peach Bun, a Toy Shop rare), each of the 6 remaining rares has an 80% ÷ 6 ≈ 13.3% chance, and each of the 3 ultras 20% ÷ 3 ≈ 6.7%.
 
 Two friendly rules on top:
 
@@ -82,8 +83,8 @@ Two friendly rules on top:
 - Remove Ads and coins never change what you get from capsules: no extra capsules, no better odds and no faster unlocks.
 - No timers, energy or lives to buy.
 - In gentle mode, the coin shop is only reachable from Settings, purchases need a grown-up check, and nothing pops up asking you to buy.
-- These rates match the game and we update this page before any change. Korea's rules on publishing probabilities apply to paid random items; ours are free, but we publish the odds anyway.
+- These rates are fixed in the game itself, so they can't change without an app update, and we update this page before any such update. Korea's rules on publishing probabilities apply to paid random items; ours are free, but we publish the odds anyway.
 
 ## Refunds and restoring
 
-Purchases are made with Apple. For refunds, visit [reportaproblem.apple.com](https://reportaproblem.apple.com). To restore Remove Ads, open Settings in the game and tap **Restore purchases**. Coins already credited can't be restored after the app is deleted, because they are stored only on your device.
+Purchases are made with Apple. For refunds, visit [reportaproblem.apple.com](https://reportaproblem.apple.com). To restore Remove Ads, open Settings in the game and tap **Restore purchases**. Coins already credited can't be restored after the app is deleted, because they are stored only on your device. The coin shop says so before you buy.

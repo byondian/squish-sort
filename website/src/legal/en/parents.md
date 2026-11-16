@@ -8,11 +8,11 @@ Squish Sort is a calm puzzle game rated 9+ on the App Store. There is **no chat,
 
 ## What is the game?
 
-Players sort squishy characters into jars until every jar holds one kind. There are no timers, no lives and no move limits, and any level can be retried as often as needed. Squishies are collected by sorting and from free capsules earned by playing. In December a festive Christmas Workshop and an advent shelf appear, with no countdowns and nothing to buy.
+Players sort squishy characters into jars until every jar holds one kind. There are no timers, no lives and no move limits, and any level can be retried as often as needed. Free players get 5 undos per level. Squishies are collected by sorting and from free capsules earned by playing. In December a festive side world, Santa's Grotto (Santa's Workshop in the US and Canada), and an advent shelf appear, with no countdowns and nothing to buy.
 
 ## The age question
 
-Early in the first play, before any ad can appear, the game asks for the player's age group using Apple's age range feature where available, or a neutral year-of-birth question with no default. We keep only the group (child, teen or adult), never the birth date. If the question is skipped, the game assumes a child.
+Early in the first play, before any ad can appear, the game asks for the player's age group using Apple's age range feature where available, or a neutral year-of-birth question with no default. We keep only the group (child, teen or adult) and, from 13, a minimum age band, never the birth date or year. If the question is skipped, the game assumes a child.
 
 ## Gentle mode
 
@@ -23,7 +23,7 @@ Gentle mode is on for players under 13 (under 14 in Korea) and for anyone who sk
 - Apple's tracking prompt is never shown.
 - Purchases and the coin shop sit behind a grown-up check, and are only reachable from Settings.
 - Optional reward videos are only offered for an extra jar or a hint, and the Buddy's daily gift is free. No win streaks.
-- The link to our Squishy Shop for grown-ups is hidden. For older players it sits in Settings behind a grown-up check.
+- The link to our Squishy Shop for grown-ups is hidden. For players 13 and over it sits in Settings behind a grown-up check, and the shop page itself asks for an adult's year of birth.
 
 **To turn gentle mode on:** open Settings in the game and tap **Set up for a child**. This works immediately.
 **To turn it off:** open Settings, tap **Turn off gentle mode**, pass the grown-up check and answer the age question.
@@ -39,7 +39,7 @@ Full details, including the capsule odds, are on [purchases and drop rates]({{h}
 
 ## Data and privacy
 
-Progress, collections and any names your child types (for their Squishy Buddy or made squishies) stay on the device. The game has no accounts and sends nothing about your child to us. The only data that leaves the device is the technical information Google needs to serve child-safe ads. See the [privacy policy]({{h}}/privacy#children-s-privacy).
+Progress, collections and any names your child types (for their Squishy Buddy or made squishies) stay on the device. The game has no accounts and sends nothing about your child to us beyond the standard request for its settings file (an IP address, which we don't link to any player). The only data that leaves the device is the technical information Google needs to serve child-safe ads. See the [privacy policy]({{h}}/privacy#children-s-privacy).
 
 ## Social features
 
@@ -51,7 +51,7 @@ The Buddy is a little friend that cheers the player on. It never gets sad, sick 
 
 ## Screen time
 
-The game has no daily rewards that punish missing a day and no countdowns designed to bring players back. The daily Mystery Bag is a single quick guess, and missed advent doors can be opened later. You can set limits for any app with Apple's Screen Time.
+The game has no daily rewards that punish missing a day and no countdowns designed to bring players back. The daily Mystery Bag is a single quick guess, the stamp card loses nothing on a missed day, and missed advent doors can be opened later. You can set limits for any app with Apple's Screen Time.
 
 ## Something worrying?
 

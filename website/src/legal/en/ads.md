@@ -19,7 +19,7 @@ Ads that play by themselves (between levels) currently follow these limits:
 
 And always:
 
-- Never in the first minute after you open the game.
+- Never in the first minute after the game starts up.
 - Only after a level is won: never mid-level and never after a fail.
 - Never after a boss level, after a level that gave a capsule, or when a win unlocks something new.
 - Watching an optional reward video resets the clock, so you get a break from ad breaks.
@@ -27,11 +27,11 @@ And always:
 
 We may adjust these numbers, and if we do we'll update this page.
 
-**Remove Ads** (a one-time purchase) switches these ads off for good.
+**Remove Ads** (a one-time purchase) switches these ads off for as long as you own it (a refund turns them back on).
 
 ## Reward videos: always your choice
 
-Some buttons offer a reward for watching a short video: an extra jar or a hint when you're stuck, double coins after a first clear, one more Mystery Bag guess, or the Buddy's daily gift of coins. They:
+Some buttons offer a reward for watching a short video: an extra jar or a hint when you're stuck, double coins after a first clear, one more Mystery Bag guess (it pays coins only and never moves the capsule bar), or the Buddy's daily gift of coins. They:
 
 - only play when you tap them, with at most 6 a day;
 - never give capsules or squishies, and never change capsule odds;
@@ -43,20 +43,20 @@ Some buttons offer a reward for watching a short video: an extra jar or a hint w
 | Player | Ads |
 |---|---|
 | Under 13 (under 14 in Korea), or age question skipped | Child-directed, non-personalised, general-audience (G-rated) ads. No tracking prompt, no advertising identifier |
-| Teens below their country's age of digital consent (all under-18s in the UK) | Non-personalised ads, marked as under the age of consent, rated up to PG |
+| Under 18 in the UK, US, Canada and Australia; under the local age of consent elsewhere (for example 16 in some EU countries, 13 in Japan, Taiwan, Hong Kong and Singapore) | Non-personalised ads, marked as under the age of consent, rated up to PG |
 | Older players | Non-personalised ads, unless you allow tracking and, in the UK/EEA/Switzerland, also agree in Google's consent form |
 
 Ads are served by **Google AdMob**. We block ad categories that don't suit a family game where Google lets us.
 
 ## Apple's tracking prompt
 
-If you are old enough, the game asks once, at the start of level 7 and after a one-line explanation, whether to "Allow" tracking. Saying **Allow** lets Google use Apple's advertising identifier to show ads more relevant to you. Saying **Ask App Not to Track** means you still see ads, just not personalised ones. Either way, the game plays exactly the same.
+If you are old enough for personalised ads, the game asks once, at the start of level 7 and after a one-line explanation, whether to "Allow" tracking. Saying **Allow** lets Google use Apple's advertising identifier to show ads more relevant to you. Saying **Ask App Not to Track** means you still see ads, just not personalised ones. Either way, the game plays exactly the same.
 
 ## Changing your mind
 
-- **In the game:** Settings > **Privacy choices** (shown in the UK, EEA and Switzerland) reopens Google's consent form.
+- **In the game:** Settings > **Privacy choices** (shown in the UK, EEA and Switzerland) reopens Google's consent form. The form first appears after the age question.
 - **On iPhone:** Settings > Privacy & Security > **Tracking**, to switch tracking off for Squish Sort or all apps.
-- **Reset your advertising identifier:** removing and reinstalling the app, or turning tracking off, stops it being shared.
+- **Stop sharing the advertising identifier:** turn tracking off in iPhone Settings.
 - **Google ad settings:** adults can manage ad personalisation at [myadcenter.google.com](https://myadcenter.google.com).
 
 ## Ad measurement
@@ -65,4 +65,4 @@ Apple's privacy-preserving SKAdNetwork tells ad networks whether an ad led to an
 
 ## Seen an ad that shouldn't be there?
 
-Please tell us at support@squishsort.app with a screenshot if you can. We'll block it.
+Please tell us at support@squishsort.app with a screenshot if you can. We'll review it and block the ad or advertiser where Google's tools allow.

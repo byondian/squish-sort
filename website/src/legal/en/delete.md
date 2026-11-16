@@ -21,6 +21,8 @@ This permanently deletes your progress, collection, coins, names and settings fr
 - In the game: Settings > **Privacy choices** (UK, EEA and Switzerland) to change your consent.
 - Adults can see and delete Google ad activity linked to their Google Account at [myadcenter.google.com](https://myadcenter.google.com) and [myactivity.google.com](https://myactivity.google.com).
 
+**Data held by Google:** we can't delete the advertising data Google has received. You can ask Google directly through its [privacy help centre](https://support.google.com/policies/troubleshooter/9009584).
+
 ## Delete support messages
 
 If you've written to us, email privacy@squishsort.app from the same address and ask us to delete the conversation. We'll confirm within one month (usually much sooner).

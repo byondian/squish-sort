@@ -7,7 +7,8 @@ description: Squish Sortとsquishsort.appの運営者、連絡先、EUの事業�
 Squish Sortとsquishsort.appは、次の者が運営しています。
 
 **{{operator}}**（個人開発者）
-郵送先：{{postal}}
+拠点：{{country}}
+郵送先（郵便転送サービス）：{{postal}}
 メール：support@squishsort.app
 電話：{{phone}}
 
@@ -17,7 +18,7 @@ App Storeの販売者は{{operator}}です。
 
 ## EUデジタルサービス法（DSA）：事業者情報
 
-{{operator}}は、EUデジタルサービス法上の事業者としてSquish Sortを提供しています。事業者情報（名前、住所、電話番号、メールアドレス）は、Appleの確認を経て、EU各国のApp Storeの商品ページにも表示されます。
+Squish Sortは、まだEU各国のApp Storeでは提供していません。提供を始める際は、{{operator}}がEUデジタルサービス法上の事業者として提供し、Appleの確認を経た事業者情報（名前、住所、電話番号、メールアドレス）がApp Storeの商品ページに表示されます。
 
 ## プライバシーに関するお問い合わせ
 
@@ -29,8 +30,8 @@ AppleはApp Storeでの販売について販売者の代理人として行動し
 
 ## 紛争
 
-問題はできるだけ直接解決したいと考えています。support@squishsort.appまでご連絡ください。消費者紛争の調停機関の手続きに参加する義務はなく、参加もしませんが、裁判所に訴えるあなたの権利はすべてそのまま残ります。購入に関する問題は、[reportaproblem.apple.com](https://reportaproblem.apple.com)からAppleに報告することもできます。
+問題はできるだけ直接解決したいと考えています。support@squishsort.appまでご連絡ください。EUの消費者の方へ：私たちはEUの消費者紛争解決機関の手続きに参加する義務はなく、現在は参加していませんが、裁判所に訴える権利はすべてそのまま残ります。購入に関する問題は、[reportaproblem.apple.com](https://reportaproblem.apple.com)からAppleに報告することもできます。
 
 ## コンテンツ
 
-すべてのスクイーズのキャラクター、アートワーク、文章、レベルはオリジナルで、© 2026 {{operator}}です。Apple、Appleのロゴ、iPhoneは、米国およびその他の国や地域で登録されたApple Inc.の商標です。App StoreはApple Inc.のサービスマークです。Google AdMobはGoogle LLCの商標です。
+すべてのスクイーズのキャラクター、アートワーク、文章、レベルはオリジナルで、© 2026 {{operator}}です。Apple、Appleのロゴ、iPhoneは、米国およびその他の国や地域で登録されたApple Inc.の商標です。App StoreはApple Inc.のサービスマークです。iPhoneの商標は、アイホン株式会社のライセンスにもとづき使用されています。Google AdMobはGoogle LLCの商標です。

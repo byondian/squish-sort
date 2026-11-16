@@ -16,12 +16,15 @@
   const show = () => { gate.hidden = true; box.hidden = false; render(); };
   let ok = false;
   try { ok = sessionStorage.getItem('ss-grownup') === '1'; } catch (e) {}
-  if (ok) show();
+  let locked = false;
+  try { locked = sessionStorage.getItem('ss-gate-no') === '1'; } catch (e) {}
+  if (ok) show(); else if (locked) document.getElementById('gate-msg').textContent = T.gateNo;
   document.getElementById('gate-form').addEventListener('submit', e => {
     e.preventDefault();
+    if (locked) return; // one try per visit, so a different year can't simply be retried
     const y = parseInt(document.getElementById('gy').value, 10), now = new Date().getFullYear();
     if (y > 1900 && now - y - 1 >= 18) { try { sessionStorage.setItem('ss-grownup', '1'); } catch (err) {} show(); }
-    else document.getElementById('gate-msg').textContent = T.gateNo;
+    else { locked = true; try { sessionStorage.setItem('ss-gate-no', '1'); } catch (err) {} document.getElementById('gate-msg').textContent = T.gateNo; }
   });
   const sel = document.getElementById('shop-country');
   const guess = () => { const l = (navigator.language || '').toUpperCase(); const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';

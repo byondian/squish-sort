@@ -1,6 +1,6 @@
 // Support form: posts to /api/contact, which emails support@ through Resend.
 (() => {
-  const f = document.getElementById('contact');
+  const f = document.querySelector('form.contact');
   if (!f) return;
   const T = JSON.parse(f.dataset.t), st = f.querySelector('.status'), btn = f.querySelector('button[type=submit]');
   f.elements.t.value = String(Date.now());
