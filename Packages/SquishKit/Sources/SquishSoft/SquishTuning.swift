@@ -40,6 +40,8 @@ public struct SquishMaterial: Codable, Equatable, Sendable {
     public var land: Double
     /// How much the base sticks to the floor when pulled.
     public var grip: Double
+    /// The thinnest a finger can squash the toy against a surface, as a share of its thickness there.
+    public var firm: Double
     // Depth (version 2).
     /// How deep a finger dents the surface (1 = about the toy's own puffiness), and the dent's radius in toy sizes.
     public var poke: Double
@@ -68,8 +70,9 @@ public struct SquishMaterial: Codable, Equatable, Sendable {
 
     public init(k: Double, beta: Double, c: Double, quad: Double, vp: Double, smin: Double, smax: Double, grav: Double,
                 fric: Double, rest: Double, press: Double, grabR: Double, halo: Double, land: Double, grip: Double,
-                poke: Double, pokeR: Double, zk: Double, zd: Double, zc: Double, zland: Double, puff: Double,
+                firm: Double, poke: Double, pokeR: Double, zk: Double, zd: Double, zc: Double, zland: Double, puff: Double,
                 tk: Double, td: Double, look: Double, kd: Double, gloss: Double, shin: Double, ao: Double) {
+        self.firm = firm
         self.poke = poke
         self.pokeR = pokeR
         self.zk = zk
@@ -217,6 +220,8 @@ public struct SquishTuning: Codable, Equatable, Sendable {
     public var restRelief = 0.2
     public var dentRelief = 0.3
     public var dentPinch = 0.004
+    /// How much of its own shape the painted face keeps when the outline is squashed (0 none, 1 all).
+    public var faceKeep = 0.5
     public var light = [-0.46, -0.62, 0.64]
     /// The most a tilt of the phone adds to the light and to the face slide.
     public var phoneTilt = 0.03
@@ -242,11 +247,11 @@ public struct SquishTuning: Codable, Equatable, Sendable {
         return m
     }
 
-    /// Second tuning (the depth version), 16 Nov 2026 (spec sections 5, 7 and 8).
+    /// Third tuning (depth, no folding flat, Ian's jelly mix), 16 Nov 2026 (spec sections 5, 7 and 8).
     public static let standard = SquishTuning(feels: [
         "foam": SquishFeelTuning(
             material: SquishMaterial(k: 300, beta: 0.68, c: 62, quad: 0.55, vp: 0.9, smin: 0.40, smax: 1.7, grav: 9,
-                                     fric: 0.9, rest: 0.05, press: 0.46, grabR: 0.20, halo: 0.35, land: 0.6, grip: 0.5,
+                                     fric: 0.9, rest: 0.05, press: 0.46, grabR: 0.20, halo: 0.35, land: 0.6, grip: 0.5, firm: 0.44,
                                      poke: 0.95, pokeR: 0.13, zk: 77, zd: 60, zc: 0.25, zland: 0, puff: 0.2,
                                      tk: 60, td: 14, look: 0.07, kd: 0.6, gloss: 0, shin: 20, ao: 0.42),
             loops: [
@@ -259,22 +264,24 @@ public struct SquishTuning: Codable, Equatable, Sendable {
             ],
             landingBubbles: 0, popsOnRelease: false, hapticSharpness: 0.2, hapticGrainSet: "crackle_press"),
         "jelly": SquishFeelTuning(
-            material: SquishMaterial(k: 820, beta: 0.7, c: 7.5, quad: 0.6, vp: 1, smin: 0.45, smax: 1.9, grav: 9,
-                                     fric: 0.55, rest: 0.22, press: 0.44, grabR: 0.20, halo: 0.35, land: 0.75, grip: 0.3,
-                                     poke: 0.8, pokeR: 0.12, zk: 420, zd: 4.5, zc: 0.7, zland: 0.5, puff: 0.15,
-                                     tk: 180, td: 5, look: 0.08, kd: 0.5, gloss: 0.55, shin: 26, ao: 0.3),
+            // Ian's pick (16 Nov): seven parts the firm jelly, three parts the gel ball.
+            material: SquishMaterial(k: 660, beta: 0.73, c: 8.8, quad: 0.63, vp: 1, smin: 0.44, smax: 1.95, grav: 9.6,
+                                     fric: 0.56, rest: 0.17, press: 0.46, grabR: 0.21, halo: 0.4, land: 0.82, grip: 0.31, firm: 0.48,
+                                     poke: 0.9, pokeR: 0.13, zk: 320, zd: 5.5, zc: 0.62, zland: 0.6, puff: 0.18,
+                                     tk: 140, td: 4.7, look: 0.083, kd: 0.5, gloss: 0.64, shin: 31, ao: 0.29),
             loops: [
-                SquishLoopRule("squelch_low", .change, gain: 0.17, cap: 0.22, blend: .shallow),
-                SquishLoopRule("squelch_high", .change, gain: 0.17, cap: 0.22, blend: .deep),
-                SquishLoopRule("hum", .speed, gain: 0.08, cap: 0.1),
+                // Lower and rounder, with the gel ball's bubbles both ways: the underwater sound.
+                SquishLoopRule("squelch_low", .change, gain: 0.13, cap: 0.18, blend: .shallow),
+                SquishLoopRule("squelch_high", .change, gain: 0.13, cap: 0.18, blend: .deep),
+                SquishLoopRule("hum", .speed, gain: 0.05, cap: 0.07),
             ],
             grains: [
-                SquishGrainRule("bubble", .press, gain: 16, cap: 12, over: 0.05, volume: 0.03...0.08),
+                SquishGrainRule("bubble", .change, gain: 40, cap: 30, over: 0.03, volume: 0.04...0.10),
             ],
             landingBubbles: 3, popsOnRelease: false, hapticSharpness: 0.4, hapticGrainSet: nil, hapticDentPop: true),
         "gel": SquishFeelTuning(
             material: SquishMaterial(k: 300, beta: 0.8, c: 12, quad: 0.7, vp: 1, smin: 0.42, smax: 2.1, grav: 11,
-                                     fric: 0.6, rest: 0.04, press: 0.5, grabR: 0.22, halo: 0.5, land: 1.0, grip: 0.35,
+                                     fric: 0.6, rest: 0.04, press: 0.5, grabR: 0.22, halo: 0.5, land: 1.0, grip: 0.35, firm: 0.42,
                                      poke: 1.15, pokeR: 0.16, zk: 90, zd: 8, zc: 0.45, zland: 0.8, puff: 0.25,
                                      tk: 50, td: 4, look: 0.09, kd: 0.5, gloss: 0.85, shin: 44, ao: 0.26),
             loops: [
@@ -288,7 +295,7 @@ public struct SquishTuning: Codable, Equatable, Sendable {
             landingBubbles: 3, popsOnRelease: true, hapticSharpness: 0.1, hapticGrainSet: nil),
         "mochi": SquishFeelTuning(
             material: SquishMaterial(k: 380, beta: 0.74, c: 12, quad: 0.5, vp: 1, smin: 0.40, smax: 2.6, grav: 9,
-                                     fric: 1, rest: 0, press: 0.46, grabR: 0.19, halo: 0.3, land: 0.65, grip: 0.9,
+                                     fric: 1, rest: 0, press: 0.46, grabR: 0.19, halo: 0.3, land: 0.65, grip: 0.9, firm: 0.44,
                                      poke: 0.95, pokeR: 0.13, zk: 250, zd: 16, zc: 0.3, zland: 0.2, puff: 0.3,
                                      tk: 80, td: 10, look: 0.07, kd: 0.6, gloss: 0.15, shin: 14, ao: 0.4),
             loops: [

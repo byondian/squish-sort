@@ -73,7 +73,7 @@ final class GoldenPathTests: XCTestCase {
         print("GOLDEN-PATH screen:\n\(app.debugDescription)")
     }
 
-    /// Pictures of the soft squishy at rest and just after a squeeze, kept with the test results so the
+    /// Pictures of the soft squishy at rest, just after a squeeze and held down hard, kept with the test results so the
     /// light and the dent can be looked at without a phone. Nothing here can fail the test.
     private func squeezeForThePicture() {
         let squishy = app.otherElements["capsule-squishy"]
@@ -83,6 +83,24 @@ final class GoldenPathTests: XCTestCase {
         squishy.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.55)).press(forDuration: 0.9)
         keep(app.screenshot(), as: "squishy-just-squeezed")
         Thread.sleep(forTimeInterval: 2.5)
+        // Pressed hard from the top and held: it should be a fat pancake with its face still a face.
+        // The press blocks this thread, so the pictures are taken from another one while it lasts.
+        let taken = DispatchGroup()
+        let held = HeldShots()
+        for (name, wait) in [("squishy-held-down-early", 1.3), ("squishy-held-down", 2.2)] {
+            taken.enter()
+            DispatchQueue.global().asyncAfter(deadline: .now() + wait) {
+                let shot = XCUIScreen.main.screenshot()
+                held.add(name, shot)
+                taken.leave()
+            }
+        }
+        let top = squishy.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.3))
+        let low = squishy.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.8))
+        top.press(forDuration: 0.2, thenDragTo: low, withVelocity: .slow, thenHoldForDuration: 2.4)
+        _ = taken.wait(timeout: .now() + 5)
+        for (name, shot) in held.all() { keep(shot, as: name) }
+        Thread.sleep(forTimeInterval: 2.0)
     }
 
     private func keep(_ shot: XCUIScreenshot, as name: String) {
@@ -161,5 +179,23 @@ final class GoldenPathTests: XCTestCase {
         nextLevel("Level 4")
         app.buttons["gearshape.fill"].firstMatch.tap()
         XCTAssertTrue(app.buttons["Set up for a child"].waitForExistence(timeout: 5))
+    }
+}
+
+/// Screenshots taken on another thread while a long press holds the test's own.
+private final class HeldShots: @unchecked Sendable {
+    private let lock = NSLock()
+    private var shots: [(String, XCUIScreenshot)] = []
+
+    func add(_ name: String, _ shot: XCUIScreenshot) {
+        lock.lock()
+        shots.append((name, shot))
+        lock.unlock()
+    }
+
+    func all() -> [(String, XCUIScreenshot)] {
+        lock.lock()
+        defer { lock.unlock() }
+        return shots
     }
 }

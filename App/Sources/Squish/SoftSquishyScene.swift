@@ -59,7 +59,8 @@ struct SquishMask {
 enum SquishLight {
     /// `u_hm` rest shape, `u_zm` surface (`SquishBody.surface`). `u_L` light in the toy's own frame.
     /// `u_m` = (kd, gloss, shin, relief), `u_m2` = (pinch, ao, dent relief, unused),
-    /// `u_e` = (1 / rest size, zres - 1, 1 / zres). Everything is written out in `main`
+    /// `u_e` = (1 / rest size, zres - 1, 1 / zres). `u_u` and `u_c0` let the painted face keep
+    /// more of its own shape than the outline does (`SquishBody.faceStretch`). Everything is written out in `main`
     /// with no helper functions, which is the form SpriteKit's shader translator is surest of.
     /// `q` counts downwards like the page; the data textures have their first row at 0.
     static let source = """
@@ -81,7 +82,8 @@ enum SquishLight {
         float z = (zc.r * 65280.0 + zc.g * 255.0) / 65535.0 * 4.0 - 2.0;
         float th = zc.b * 2.0;
         vec4 hh = texture2D(u_hm, q);
-        vec2 p = q - u_tilt * hh.b - u_m2.x * gz * hh.b;
+        vec2 dq = q - u_c0;
+        vec2 p = q + hh.b * vec2(u_u.x * dq.x + u_u.y * dq.y, u_u.y * dq.x + u_u.z * dq.y) - u_tilt * hh.b - u_m2.x * gz * hh.b;
         vec4 a = texture2D(u_texture, vec2(p.x, 1.0 - p.y));
         vec2 g = gh * th * u_m.w - gz * u_m2.z;
         vec3 N = normalize(vec3(-g, 1.0));
@@ -151,6 +153,8 @@ final class SoftSquishyScene: SKScene {
     private let lookUniform = SKUniform(name: "u_m", vectorFloat4: SIMD4<Float>(0.5, 0, 30, 0.2))
     private let dentUniform = SKUniform(name: "u_m2", vectorFloat4: SIMD4<Float>(0.004, 0.15, 0.3, 1))
     private let sizeUniform = SKUniform(name: "u_e", vectorFloat3: SIMD3<Float>(1.0 / 128, 96, 1.0 / 97))
+    private let faceUniform = SKUniform(name: "u_u", vectorFloat3: SIMD3<Float>(0, 0, 0))
+    private let centreUniform = SKUniform(name: "u_c0", vectorFloat2: SIMD2<Float>(0.5, 0.5))
     private let restUniform = SKUniform(name: "u_hm", texture: nil)
     private let surfaceUniform = SKUniform(name: "u_zm", texture: nil)
     private let motion = SquishMotion.shared
@@ -266,7 +270,7 @@ final class SoftSquishyScene: SKScene {
         sizeUniform.vectorFloat3Value = SIMD3(1 / Float(side), Float(body.zres - 1), 1 / Float(body.zres))
         if shader == nil {
             let made = SKShader(source: SquishLight.source)
-            made.uniforms = [lightUniform, tiltUniform, lookUniform, dentUniform, sizeUniform, restUniform, surfaceUniform]
+            made.uniforms = [lightUniform, tiltUniform, lookUniform, dentUniform, sizeUniform, faceUniform, centreUniform, restUniform, surfaceUniform]
             shader = made
         }
         sprite.shader = shader
@@ -436,6 +440,9 @@ final class SoftSquishyScene: SKScene {
             tiltUniform.vectorFloat2Value = reduceMotion
                 ? SIMD2(0, 0)
                 : SIMD2(Float(body.tilt.x + lean.x), Float(body.tilt.y + lean.y))
+            let face = body.faceStretch(keep: tuning.faceKeep)
+            faceUniform.vectorFloat3Value = SIMD3(Float(face.xx), Float(face.xy), Float(face.yy))
+            centreUniform.vectorFloat2Value = SIMD2(Float(body.c0.x), Float(body.c0.y))
         }
         guard !shadow.isHidden else { return }
         let b = body.bounds()

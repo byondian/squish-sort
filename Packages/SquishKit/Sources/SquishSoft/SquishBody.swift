@@ -74,6 +74,14 @@ public final class SquishBody {
         var fv = 0.0
         /// 1 = a normal press, up to about 1.6 = pressing hard.
         var force = 1.0
+        /// How much toy lies between the finger and each side (below, above, left, right).
+        var rb = 1.0
+        var rt = 1.0
+        var rl = 1.0
+        var rr = 1.0
+        /// Where the finger effectively is this step.
+        var ex = 0.0
+        var ey = 0.0
     }
 
     public struct Bounds: Sendable {
@@ -113,6 +121,27 @@ public final class SquishBody {
     public private(set) var baseV = 0.0
     public private(set) var halfW = 0.0
     public private(set) var c0 = (x: 0.5, y: 0.5)
+    /// The art's own box in the picture, 0...1.
+    private var box = (l: 0.0, r: 1.0, t: 0.0, b: 1.0)
+    /// The fitted stretch along its two main directions and their angle, for the drawer:
+    /// the painted face keeps more of its own shape than the outline does.
+    public private(set) var fit = (first: 1.0, second: 1.0, angle: 0.0)
+
+    /// How far the painted face should be pulled back towards its own shape when the
+    /// outline is squashed: a real toy's front bulges towards you, it does not flatten
+    /// like a drawing. `keep` is how much of its shape the face keeps (0 none, 1 all).
+    /// The three numbers are a symmetric 2 by 2 matrix (xx, xy, yy) for the light shader.
+    public func faceStretch(keep: Double) -> (xx: Double, xy: Double, yy: Double) {
+        let first: Double = min(max(fit.first, 0.3), 2.4)
+        let second: Double = min(max(fit.second, 0.3), 2.4)
+        let a1: Double = min(max(pow(first, keep), 0.62), 1.3) - 1
+        let a2: Double = min(max(pow(second, keep), 0.62), 1.3) - 1
+        let cp: Double = cos(fit.angle), sp: Double = sin(fit.angle)
+        let xx: Double = cp * cp * a1 + sp * sp * a2
+        let xy: Double = cp * sp * (a1 - a2)
+        let yy: Double = sp * sp * a1 + cp * cp * a2
+        return (xx, xy, yy)
+    }
 
     // Depth: a finer grid over the same square. z > 0 is pushed in, z < 0 bulges towards the viewer.
     /// Cells per side of the dent grid.
@@ -226,6 +255,7 @@ public final class SquishBody {
         footPad = max(0, (footV ?? foot) - foot) * size
         baseV = foot - cy
         halfW = (right - left) / 2
+        box = (left, right, top, max(foot, footV ?? foot))
         var mean = [0.0, 0.0, 0.0]
         for k in 0..<cnt {
             let x = Double(uv[k * 2]) - cx, y = Double(uv[k * 2 + 1]) - cy
@@ -355,7 +385,8 @@ public final class SquishBody {
         }
         let c = centre(), b = bounds()
         // A press pushes towards the base when resting, or towards the middle when held in the air.
-        let tx = c.x, ty = metric.air ? c.y : b.y1
+        // Mostly straight down, so an off-centre press does not fold the toy over.
+        let tx = metric.air ? c.x : x + 0.35 * (c.x - x), ty = metric.air ? c.y : b.y1
         let ax = x - tx, ay = y - ty
         var al = ax * ax + ay * ay
         if al == 0 { al = 1 }
@@ -374,8 +405,14 @@ public final class SquishBody {
             fv += ww * Double(uv[k * 2 + 1])
             fw += ww
         }
-        pointers[id] = Pointer(x: x, y: y, sx: x, sy: y, w: w, off: off, sc: sc,
-                               px: (tx - x) * material.press, py: (ty - y) * material.press, fu: fu / fw, fv: fv / fw)
+        let fu0 = fu / fw, fv0 = fv / fw
+        var made = Pointer(x: x, y: y, sx: x, sy: y, w: w, off: off, sc: sc,
+                           px: (tx - x) * material.press, py: (ty - y) * material.press, fu: fu0, fv: fv0)
+        made.rb = max(b.y1 - y, (box.b - fv0) * S)
+        made.rt = max(y - b.y0, (fv0 - box.t) * S)
+        made.rl = max(x - b.x0, (fu0 - box.l) * S)
+        made.rr = max(b.x1 - x, (box.r - fu0) * S)
+        pointers[id] = made
         return true
     }
 
@@ -482,13 +519,30 @@ public final class SquishBody {
         om /= (1 + 6 * h)
         let grav = M.grav * S, damp = 1 / (1 + M.c * h)
         var D = 0.0, sp2 = 0.0
+        // The goal shape knows about the floor and walls. Without this, a toy pushed down aims half of
+        // itself below the floor, and that half collapses flat onto it: the "folded drawing" look.
+        var gdn = 0.0, gup = 0.0, glf = 0.0, grt = 0.0
+        let wfl = world.map { $0.floor - footPad } ?? 0
         for k in 0..<n {
             let ux = Double(u[k * 2]), uy = Double(u[k * 2 + 1])
             let f2 = Double(f[k * 5 + 2]), f3 = Double(f[k * 5 + 3]), f4 = Double(f[k * 5 + 4])
-            let gx = cx + g00 * ux + g01 * uy + Q[0] * f2 + Q[1] * f3 + Q[2] * f4
-            let gy = cy + g10 * ux + g11 * uy + Q[3] * f2 + Q[4] * f3 + Q[5] * f4
+            let gx: Double = cx + g00 * ux + g01 * uy + Q[0] * f2 + Q[1] * f3 + Q[2] * f4
+            let gy: Double = cy + g10 * ux + g11 * uy + Q[3] * f2 + Q[4] * f3 + Q[5] * f4
             g[k * 2] = Float(gx)
             g[k * 2 + 1] = Float(gy)
+            if let world, core[k] {
+                if gy - wfl > gdn { gdn = gy - wfl }
+                if let top = world.top, top - gy > gup { gup = top - gy }
+                if world.left - gx > glf { glf = world.left - gx }
+                if gx - world.right > grt { grt = gx - world.right }
+            }
+        }
+        let gsx = glf > 0 ? glf : -grt, gsy = gdn > 0 ? -gdn : gup
+        for k in 0..<n {
+            let ux = Double(u[k * 2]), uy = Double(u[k * 2 + 1])
+            g[k * 2] = Float(Double(g[k * 2]) + gsx)
+            g[k * 2 + 1] = Float(Double(g[k * 2 + 1]) + gsy)
+            let gx = Double(g[k * 2]), gy = Double(g[k * 2 + 1])
             if !sim[k] { continue }
             let rx = Double(p[k * 2]) - cx, ry = Double(p[k * 2 + 1]) - cy
             // The rigid part of the motion is not damped.
@@ -509,7 +563,39 @@ public final class SquishBody {
         // Fingers hold a soft patch.
         var held = 0
         let flr = world.map { $0.floor - footPad } ?? 1e9
-        for id in pointers.keys.sorted() {
+        let firm = M.firm
+        let ids = pointers.keys.sorted()
+        // Where each finger effectively is: it cannot pull a patch too far from the body, and two fingers
+        // cannot pinch the toy between them thinner than its limit.
+        for id in ids {
+            guard var q = pointers[id] else { continue }
+            var fx = q.x, fy = q.y
+            let ddx = fx - cx, ddy = fy - cy, dd = hypot(ddx, ddy), far = S * 1.15
+            if dd > far {
+                fx = cx + ddx / dd * far
+                fy = cy + ddy / dd * far
+            }
+            q.ex = fx
+            q.ey = fy
+            pointers[id] = q
+        }
+        for a in 0..<ids.count {
+            for b in (a + 1)..<max(a + 1, ids.count) {
+                guard var A = pointers[ids[a]], var B = pointers[ids[b]] else { continue }
+                let d0 = hypot(A.fu - B.fu, A.fv - B.fv) * S * firm
+                let dx = B.ex - A.ex, dy = B.ey - A.ey, d = hypot(dx, dy)
+                if d < d0 && d0 > 1 {
+                    let nx = d > 0.5 ? dx / d : 1, ny = d > 0.5 ? dy / d : 0, add = (d0 - d) / 2
+                    A.ex -= nx * add
+                    A.ey -= ny * add
+                    B.ex += nx * add
+                    B.ey += ny * add
+                    pointers[ids[a]] = A
+                    pointers[ids[b]] = B
+                }
+            }
+        }
+        for id in ids {
             guard var q = pointers[id] else { continue }
             held += 1
             q.t += h
@@ -517,19 +603,35 @@ public final class SquishBody {
             pointers[id] = q
             let fade = 1 - SquishBody.smooth(S * 0.07, S * 0.45, q.drag)
             let ox = q.px * q.press * fade, oy = q.py * q.press * fade
-            var fx = q.x, fy = q.y
-            // A patch can only be pulled so far from the body.
-            let ddx = fx - cx, ddy = fy - cy, dd = hypot(ddx, ddy), mx = S * 1.15
-            if dd > mx {
-                fx = cx + ddx / dd * mx
-                fy = cy + ddy / dd * mx
+            var fx = q.ex, fy = q.ey
+            if let world {
+                // The toy has a core. A finger can squash the part between it and a surface to a share (firm)
+                // of its thickness and no further: past that the finger just sinks in and the dent takes over.
+                var ex = fx + ox, ey = fy + oy
+                let ex0 = ex, ey0 = ey
+                if ey > flr - firm * q.rb { ey = flr - firm * q.rb }
+                if let top = world.top, ey < top + firm * q.rt { ey = top + firm * q.rt }
+                if ex < world.left + firm * q.rl { ex = world.left + firm * q.rl }
+                if ex > world.right - firm * q.rr { ex = world.right - firm * q.rr }
+                fx += ex - ex0
+                fy += ey - ey0
+            }
+            // The patch is not a rigid plate. The part of it between the finger and a surface is squeezed in
+            // proportion, so the far edge of the toy lands on the surface instead of the lower half piling up flat.
+            var rd = 1.0, ru = 1.0, rl = 1.0, rr = 1.0
+            if let world {
+                rd = SquishBody.clamp((flr - fy) / q.rb, 0.05, 1)
+                if let top = world.top { ru = SquishBody.clamp((fy - top) / q.rt, 0.05, 1) }
+                rl = SquishBody.clamp((fx - world.left) / q.rl, 0.05, 1)
+                rr = SquishBody.clamp((world.right - fx) / q.rr, 0.05, 1)
             }
             for k in 0..<n {
                 let w = Double(q.w[k])
                 if w < 0.01 { continue }
                 let s = w * 0.5
-                var tx = fx + Double(q.off[k * 2]) + ox * Double(q.sc[k])
-                var ty = fy + Double(q.off[k * 2 + 1]) + oy * Double(q.sc[k])
+                let ofx = Double(q.off[k * 2]), ofy = Double(q.off[k * 2 + 1])
+                var tx: Double = fx + ofx * (ofx < 0 ? rl : rr) + ox * Double(q.sc[k])
+                var ty: Double = fy + ofy * (ofy > 0 ? rd : ru) + oy * Double(q.sc[k])
                 // A finger cannot push the toy through the floor or a wall.
                 if let world {
                     if ty > flr { ty = flr }
@@ -541,6 +643,16 @@ public final class SquishBody {
                 p[k * 2 + 1] = Float(Double(p[k * 2 + 1]) + s * (ty - Double(p[k * 2 + 1])))
                 v[k * 2] = Float(Double(v[k * 2]) + s * (q.vx - Double(v[k * 2])))
                 v[k * 2 + 1] = Float(Double(v[k * 2 + 1]) + s * (q.vy - Double(v[k * 2 + 1])))
+            }
+        }
+        // A soft toy cannot be squashed paper thin. Past its limit (firm) it pushes back hard, in any
+        // direction, so fully squished it is a fat pancake and the finger simply sinks into it.
+        let lo = min(raw1, raw2)
+        if lo < firm {
+            let gm = SquishBody.smooth(firm, firm * 0.62, lo) * 0.55
+            for k in 0..<n where sim[k] {
+                p[k * 2] = Float(Double(p[k * 2]) + (Double(g[k * 2]) - Double(p[k * 2])) * gm)
+                p[k * 2 + 1] = Float(Double(p[k * 2 + 1]) + (Double(g[k * 2 + 1]) - Double(p[k * 2 + 1])) * gm)
             }
         }
         // Floor, walls, ceiling. The whole body is pushed out together (so it never sags under its
@@ -759,6 +871,7 @@ public final class SquishBody {
         metric.cx = cx
         metric.cy = cy
         theta = th
+        fit = (raw1, raw2, ph)
     }
 
     // MARK: - Surface
