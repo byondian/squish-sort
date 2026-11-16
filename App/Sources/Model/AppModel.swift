@@ -680,14 +680,15 @@ final class AppModel: ObservableObject {
         heartsChanged(from: before)
     }
 
-    /// Hearts only ever add up: every 10 teach a trick, and the Buddy grows a little up to 50.
+    /// Hearts only ever add up: every 10 teach a trick, and each one makes the Buddy a little bigger.
     private func heartsChanged(from before: Int) {
         let now = progress.buddy.hearts
         if BuddyState.tricksKnown(hearts: now) > BuddyState.tricksKnown(hearts: before) {
             sounds.play("trick", or: "unlock_new")
             buddySays = String(localized: "I grew!")
             if showingNews == nil { showingNews = .trick(BuddyState.tricksKnown(hearts: now)) }
-        } else if BuddyState.growthSteps(hearts: now) > BuddyState.growthSteps(hearts: before) {
+        } else if now / 5 > before / 5, Double(before) * BuddyState.growthPerHeart < BuddyState.maxGrowth {
+            // Every fifth heart the Buddy says so; the growing itself shows on every treat.
             sounds.play("grow", or: "heart")
             buddySays = String(localized: "I grew!")
         } else {
