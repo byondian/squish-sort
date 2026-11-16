@@ -112,6 +112,13 @@ final class LevelController: ObservableObject {
         }
     }
 
+    /// After a rule's demo, the hand shows a good first move on the real board.
+    func pointAtFirstMove() {
+        guard session.moveCount == 0, let first = level.solution.first else { return }
+        scene.tutorialMove = first
+        scene.reload(session.board)
+    }
+
     private func play(_ move: Move) -> (MoveResult, Board)? {
         let ontoMatch = session.board.jars.indices.contains(move.to) && !session.board.jars[move.to].isEmpty
         let free = feverLeft > 0
@@ -442,12 +449,34 @@ struct LevelView: View {
     @StateObject private var controller: LevelController
     @State private var nudge = false
     @State private var bossSplash: Bool
+    /// The rule being shown before play, or replayed from the "?" button.
+    @State private var ruleDemo: BoardRule?
 
     init(index: Int, model: AppModel) {
         _controller = StateObject(wrappedValue: LevelController(index: index, model: model))
         // A boss level opens with its splash (not on a level already won, and not in UI tests).
         let level = model.levels[index]
         _bossSplash = State(initialValue: level.file.beat == .boss && model.progress.stars[level.id] == nil && !AppModel.isUITesting)
+    }
+
+    /// The twists on this board, for the "?" that replays their demos.
+    private var rules: [BoardRule] { BoardRule.rules(on: controller.level.board) }
+
+    /// The first rule on this board the player has not been shown yet.
+    private func showNewRule() {
+        guard !AppModel.isUITesting, ruleDemo == nil, controller.session.moveCount == 0 else { return }
+        ruleDemo = rules.first { !model.progress.rulesShown.contains($0.rawValue) }
+    }
+
+    private func closeRuleDemo() {
+        guard let shown = ruleDemo else { return }
+        ruleDemo = nil
+        if !model.progress.rulesShown.contains(shown.rawValue) {
+            model.update { $0.rulesShown.insert(shown.rawValue) }
+            // Another new rule on the same board comes next; otherwise the hand shows a first move.
+            showNewRule()
+            if ruleDemo == nil { controller.pointAtFirstMove() }
+        }
     }
 
     private var isBoss: Bool { controller.level.file.beat == .boss }
@@ -575,13 +604,27 @@ struct LevelView: View {
                     bossSplash = false
                     model.bossSplashShown()
                     model.sounds.startMusic("boss_loop")
+                    showNewRule()
                 }
                 .zIndex(50)
             }
         }
+        .overlay {
+            if let rule = ruleDemo {
+                ZStack {
+                    Color.black.opacity(0.3).ignoresSafeArea()
+                    RuleDemo(rule: rule, world: controller.level.file.world) { closeRuleDemo() }
+                        .id(rule)
+                }
+                .transition(.opacity)
+                .zIndex(40)
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: ruleDemo)
         .onAppear {
             controller.scene.darkBackground = darkRoom
             if isBoss && !bossSplash && !AppModel.isUITesting { model.sounds.startMusic("boss_loop") }
+            if !bossSplash { showNewRule() }
         }
         .onDisappear { model.sounds.stopMusic() }
         .animation(.spring(response: 0.35, dampingFraction: 0.7), value: controller.outcome)
@@ -643,6 +686,12 @@ struct LevelView: View {
                         .accessibilityLabel(Text("Levels"))
                 }
                 Spacer()
+                if let rule = rules.first, controller.outcome == nil {
+                    // Replays the demo of this board's twist.
+                    IconButton(system: "questionmark") { ruleDemo = rule }
+                        .accessibilityLabel(Text("How this works"))
+                        .accessibilityIdentifier("rule-help")
+                }
                 if model.showsCornerButtons {
                     IconButton(system: "book.fill") { model.screen = .book }
                     IconButton(system: "gearshape.fill") { model.screen = .settings }

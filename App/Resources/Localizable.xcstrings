@@ -1773,6 +1773,28 @@
         }
       }
     },
+    "Duet! They move together and need 2 spaces.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "デュエット！ふたりいっしょに動くから、2つ空きがいるよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "듀엣! 둘이 함께 움직이니 2칸이 필요해요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "二重唱！它們一起移動，需要2個空位。"
+          }
+        }
+      }
+    },
     "Ears": {
       "localizations": {
         "ja": {
@@ -2081,6 +2103,28 @@
         }
       }
     },
+    "Frozen! Moves next to it melt the ice.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "こおってる！となりで動かすと氷がとけるよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "꽁꽁! 옆에서 움직이면 얼음이 녹아요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "結冰了！在旁邊移動就能融化冰塊。"
+          }
+        }
+      }
+    },
     "Gel": {
       "localizations": {
         "ja": {
@@ -2257,6 +2301,28 @@
         }
       }
     },
+    "Got it!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "わかった！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "알겠어요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "知道了！"
+          }
+        }
+      }
+    },
     "Grumpy": {
       "localizations": {
         "ja": {
@@ -2389,6 +2455,28 @@
         }
       }
     },
+    "Hidden! Move the one above to unwrap it.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "かくれてる！上の子を動かすと出てくるよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "숨어 있어요! 위에 있는 친구를 옮기면 나타나요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "藏起來了！移開上面那個就能拆開。"
+          }
+        }
+      }
+    },
     "Hint": {
       "localizations": {
         "ja": {
@@ -2429,6 +2517,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "呵呵！"
+          }
+        }
+      }
+    },
+    "How this works": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あそびかた"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "방법 보기"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "玩法說明"
           }
         }
       }

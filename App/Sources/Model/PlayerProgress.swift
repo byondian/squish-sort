@@ -73,6 +73,8 @@ struct PlayerProgress: Codable, Equatable {
     var setGoalsClaimed: Set<String> = []
     /// The long boss splash has been seen once: after that a tap skips it.
     var bossSplashSeen = false
+    /// Board rules whose demo has been shown (wrapped, duet, frozen).
+    var rulesShown: Set<String> = []
 
     init() {}
 
@@ -156,6 +158,7 @@ struct PlayerProgress: Codable, Equatable {
         seenCards = v(.seenCards, Set(collection.owned.keys))
         setGoalsClaimed = v(.setGoalsClaimed, d.setGoalsClaimed)
         bossSplashSeen = v(.bossSplashSeen, d.bossSplashSeen)
+        rulesShown = v(.rulesShown, d.rulesShown)
     }
 
     static func today(_ date: Date = Date()) -> String {
