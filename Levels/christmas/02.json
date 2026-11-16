@@ -10,7 +10,7 @@
     ["elfie", "elfie", "santa", "santa"],
     []
   ],
-  "mechanics": {"hidden": [], "sticky": [], "frozen": [[0, 1], [1, 0]]},
+  "mechanics": {"hidden": [], "sticky": [], "frozen": [[0, 1]]},
   "par": 3,
   "solution": [[0, 2], [1, 0], [1, 2]],
   "capsule": false,

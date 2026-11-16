@@ -50,6 +50,22 @@ struct RootView: View {
         .fullScreenCover(isPresented: $model.askAge) {
             AgeQuestionView().environmentObject(model)
         }
+        .overlay(alignment: .top) {
+            if let toast = model.toast {
+                // A short thank-you that fades by itself. Never blocks a tap.
+                Text(verbatim: toast).font(Theme.body(15)).foregroundStyle(Theme.plum)
+                    .padding(.horizontal, 16).padding(.vertical, 10)
+                    .background(Capsule().fill(.white))
+                    .padding(.top, 8)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .allowsHitTesting(false)
+                    .task {
+                        try? await Task.sleep(nanoseconds: 2_600_000_000)
+                        model.toast = nil
+                    }
+            }
+        }
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: model.toast)
         .preferredColorScheme(.light)
     }
 }

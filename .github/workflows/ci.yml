@@ -70,7 +70,8 @@ jobs:
             -destination "id=$UDID" CODE_SIGNING_ALLOWED=NO | tee test.log | grep -E "Test Case|error:|TEST" || true
           if ! grep -q "TEST SUCCEEDED" test.log; then
             echo "::group::UI test diagnostics"
-            grep -E "GOLDEN-PATH|scene-state|Button|StaticText|error" test.log | head -200 || true
+            grep -E "error:|failed" test.log | head -40 || true
+            grep -A 140 "GOLDEN-PATH" test.log | head -600 || true
             echo "::endgroup::"
             exit 1
           fi

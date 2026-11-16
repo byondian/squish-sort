@@ -33,7 +33,7 @@ struct ShopView: View {
                         }
                         .buttonStyle(SquishButtonStyle(fill: .white, text: Theme.plum))
                     }
-                    Text("Win levels to earn coins too: 5 a win, 10 with three stars.")
+                    Text("Win levels to earn coins too: 50 a win, 100 with three stars.")
                         .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.6))
 
                     Text("Board themes").font(Theme.title(20)).foregroundStyle(Theme.plum)

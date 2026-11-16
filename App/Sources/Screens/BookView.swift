@@ -17,15 +17,7 @@ struct BookView: View {
             TopBar(title: "Collection book")
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
-                    // Gentle mode's only place for the bonus capsule (Ian, 16 Nov): calm, never a pop-up.
-                    if model.isGentleMode && model.bonusCapsuleWorld != nil && model.canWatchRewarded {
-                        Button { model.openBonusCapsule() } label: {
-                            Label("Bonus capsule (watch an ad)", systemImage: "play.rectangle.fill")
-                        }
-                        .buttonStyle(SquishButtonStyle(fill: Theme.grape))
-                        .font(Theme.body(15))
-                    }
-                    ForEach(worlds, id: \.id) { world in
+                    ForEach(worlds.filter { showsShelf($0.id) }, id: \.id) { world in
                         shelf(world.id, world.name)
                     }
                     Text("Capsule odds: rare \(model.capsuleOddsPercent.rare)%, ultra-rare \(model.capsuleOddsPercent.ultra)%. Common squishies join when you sort a jar of them. Squishies are earned by playing and are never sold.")
@@ -44,6 +36,13 @@ struct BookView: View {
             .foregroundStyle(Theme.plum)
             .presentationDetents([.medium])
         }
+    }
+
+    /// The Christmas shelf appears once the festive door has been opened (or something from it is owned).
+    private func showsShelf(_ world: String) -> Bool {
+        guard world == ChristmasWorld.id else { return true }
+        return model.progress.christmasEntered
+            || model.roster.collectibles.contains { $0.world == world && model.progress.collection.owns($0.id) }
     }
 
     private func shelf(_ world: String, _ name: LocalizedStringKey) -> some View {

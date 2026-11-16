@@ -5,8 +5,12 @@ import Foundation
 public struct GameConfig: Codable, Equatable, Sendable {
     public var adCadence = AdCadenceConfig()
     public var capsuleOdds = CapsuleOdds()
-    /// Christmas Workshop opens on this day (device local date), no new build needed.
-    public var christmasUnlock = "2026-12-18"
+    public var coins = CoinRules()
+    /// Opt-in ads a day, across every placement.
+    public var optInAdsPerDay = 6
+    /// The festive door shows between these days (device local date, inclusive).
+    public var christmasOpenFrom = "2026-12-01"
+    public var christmasOpenUntil = "2027-01-06"
     /// Snow on the home screen from this day.
     public var snowFrom = "2026-12-01"
     public var adsEnabled = true
@@ -26,7 +30,10 @@ public struct GameConfig: Codable, Equatable, Sendable {
         let d = GameConfig()
         adCadence = try c.decodeIfPresent(AdCadenceConfig.self, forKey: .adCadence) ?? d.adCadence
         capsuleOdds = try c.decodeIfPresent(CapsuleOdds.self, forKey: .capsuleOdds) ?? d.capsuleOdds
-        christmasUnlock = try c.decodeIfPresent(String.self, forKey: .christmasUnlock) ?? d.christmasUnlock
+        coins = try c.decodeIfPresent(CoinRules.self, forKey: .coins) ?? d.coins
+        optInAdsPerDay = max(0, try c.decodeIfPresent(Int.self, forKey: .optInAdsPerDay) ?? d.optInAdsPerDay)
+        christmasOpenFrom = try c.decodeIfPresent(String.self, forKey: .christmasOpenFrom) ?? d.christmasOpenFrom
+        christmasOpenUntil = try c.decodeIfPresent(String.self, forKey: .christmasOpenUntil) ?? d.christmasOpenUntil
         snowFrom = try c.decodeIfPresent(String.self, forKey: .snowFrom) ?? d.snowFrom
         adsEnabled = try c.decodeIfPresent(Bool.self, forKey: .adsEnabled) ?? d.adsEnabled
         telemetryEnabled = try c.decodeIfPresent(Bool.self, forKey: .telemetryEnabled) ?? d.telemetryEnabled
@@ -44,8 +51,8 @@ public struct GameConfig: Codable, Equatable, Sendable {
     }
 
     /// `today` as yyyy-MM-dd in the player's time zone.
-    public func isWorldUnlocked(_ world: String, today: String) -> Bool {
-        world == "christmas" ? today >= christmasUnlock : true
+    public func isChristmasWindow(today: String) -> Bool {
+        today >= christmasOpenFrom && today <= christmasOpenUntil
     }
 
     public func showsSnow(today: String) -> Bool { today >= snowFrom }

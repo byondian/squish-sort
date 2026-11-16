@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// World map: the four worlds and their levels with stars.
+/// World map: the three worlds of the main path, plus Christmas Workshop once its door has been opened.
 struct MapView: View {
     @EnvironmentObject var model: AppModel
 
@@ -25,12 +25,9 @@ struct MapView: View {
                                 .buttonStyle(SquishButtonStyle(fill: Theme.butter, text: Theme.plum))
                         }
                     }
-                    ForEach(worlds, id: \.id) { world in
+                    ForEach(worlds.filter { $0.id != "christmas" || model.progress.christmasEntered }, id: \.id) { world in
                         VStack(alignment: .leading, spacing: 10) {
                             Text(world.name).font(Theme.title(22)).foregroundStyle(Theme.plum)
-                            if !model.config.isWorldUnlocked(world.id, today: model.today) {
-                                Text("Opens 18 December").font(Theme.body(15)).foregroundStyle(Theme.plum.opacity(0.6))
-                            }
                             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 5), spacing: 10) {
                                 ForEach(model.levels.indices.filter { model.levels[$0].file.world == world.id }, id: \.self) { i in
                                     levelBubble(i)
@@ -52,7 +49,7 @@ struct MapView: View {
             if unlocked { model.screen = .level(i) }
         } label: {
             VStack(spacing: 2) {
-                Text("\(i + 1)").font(Theme.title(18))
+                Text("\(model.levelNumber(i))").font(Theme.title(18))
                 Text(String(repeating: "★", count: stars) + String(repeating: "☆", count: 3 - stars))
                     .font(.system(size: 10))
             }

@@ -36,14 +36,6 @@ struct CapsuleView: View {
                 } else {
                     Text("Squeeze me!").font(Theme.body(18)).foregroundStyle(Theme.plum.opacity(0.7))
                 }
-                // Double capsule: opt-in ad, same odds. Gentle mode gets it only in the book.
-                if !model.isGentleMode && model.bonusCapsuleWorld != nil && model.canWatchRewarded {
-                    Button {
-                        // The ad is presented once this screen has finished closing.
-                        model.capsuleClosed(then: .bonusCapsule)
-                    } label: { Label("Another capsule", systemImage: "play.rectangle.fill") }
-                    .buttonStyle(SquishButtonStyle(fill: Theme.grape))
-                }
                 if asksToBeBuddy {
                     Button("Yes!") {
                         model.haptics.complete()
@@ -74,6 +66,7 @@ struct CapsuleView: View {
         }
         .frame(maxWidth: .infinity)
         .background(Theme.marshmallow.ignoresSafeArea())
+        .onAppear { model.sounds.play("capsule_roll") }
     }
 
     /// The first squishy out of a capsule (Peach Bun) offers to be the Buddy.
@@ -107,6 +100,8 @@ struct CapsuleView: View {
         var delta = (a2 - a1) * 180 / .pi
         if delta > 180 { delta -= 360 }
         if delta < -180 { delta += 360 }
+        // A ratchet tick every 40 degrees of twist.
+        if Int(angle / 40) != Int((angle + abs(delta)) / 40) { model.sounds.play("capsule_twist") }
         angle += abs(delta)
         if angle > 300 { open() }
     }
@@ -114,11 +109,21 @@ struct CapsuleView: View {
     private func open() {
         guard !opened else { return }
         model.haptics.complete()
+        let ultra = collectible.rarity == .ultra
+        model.sounds.play("capsule_click")
+        model.sounds.play(ultra ? "drumroll" : "capsule_shake")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            model.sounds.play("capsule_pop")
+            model.sounds.play(ultra ? "reveal_ultra" : "reveal_rare")
+        }
         // A quick shake before the pop.
         withAnimation(.easeInOut(duration: 0.06).repeatCount(5, autoreverses: true)) { shake = 9 }
         withAnimation(.spring(response: 0.5, dampingFraction: 0.55).delay(0.35)) { opened = true }
         if model.capsuleIsNew {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) { model.haptics.win() }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
+                model.haptics.win()
+                model.sounds.play("new_stamp")
+            }
         }
     }
 }

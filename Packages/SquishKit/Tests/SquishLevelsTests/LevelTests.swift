@@ -16,7 +16,10 @@ final class LevelTests: XCTestCase {
     func testEightyLevelsTwentyPerWorld() throws {
         let all = try files()
         XCTAssertEqual(all.count, 80)
-        for world in LevelCatalog.worlds {
+        XCTAssertEqual(LevelCatalog.mainLevelCount, 60)
+        XCTAssertEqual(Array(all.prefix(60)).map(\.world), LevelCatalog.worlds.flatMap { Array(repeating: $0, count: 20) },
+                       "the main path comes first, in play order")
+        for world in LevelCatalog.allWorlds {
             let inWorld = all.filter { $0.world == world }
             XCTAssertEqual(inWorld.map(\.index), Array(1...20), world)
         }

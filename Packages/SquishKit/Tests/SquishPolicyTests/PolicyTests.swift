@@ -404,11 +404,16 @@ final class CapsuleTests: XCTestCase {
 
 final class ConfigTests: XCTestCase {
     func testPartialRemoteConfigKeepsDefaults() {
-        let json = #"{"adCadence": {"sessionGraceSeconds": 90}, "christmasUnlock": "2026-12-15"}"#
+        let json = #"{"adCadence": {"sessionGraceSeconds": 90}, "christmasOpenFrom": "2026-12-05", "coins": {"lucky": 150}}"#
         let c = GameConfig.decodeOrDefault(Data(json.utf8))
         XCTAssertEqual(c.adCadence.sessionGraceSeconds, 90)
         XCTAssertEqual(c.adCadence.tiers.count, 3)
-        XCTAssertEqual(c.christmasUnlock, "2026-12-15")
+        XCTAssertEqual(c.christmasOpenFrom, "2026-12-05")
+        XCTAssertEqual(c.christmasOpenUntil, "2027-01-06")
+        XCTAssertEqual(c.coins.lucky, 150)
+        XCTAssertEqual(c.coins.winBase, 50, "numbers that aren't sent keep their defaults")
+        XCTAssertEqual(c.optInAdsPerDay, 6)
+        XCTAssertEqual(c.capsuleOdds, CapsuleOdds())
         XCTAssertTrue(c.adsEnabled)
     }
 
@@ -417,11 +422,37 @@ final class ConfigTests: XCTestCase {
         XCTAssertEqual(GameConfig.decodeOrDefault(nil), GameConfig())
     }
 
-    func testChristmasUnlocksByDate() {
-        let c = GameConfig()
-        XCTAssertFalse(c.isWorldUnlocked("christmas", today: "2026-12-17"))
-        XCTAssertTrue(c.isWorldUnlocked("christmas", today: "2026-12-18"))
-        XCTAssertTrue(c.isWorldUnlocked("toyshop", today: "2026-11-25"))
+    func testTheFestiveDoorNeedsLevelTenAndTheWindowAndStaysOnceOpened() {
+        func door(_ today: String, ten: Bool = true, entered: Bool = false) -> Bool {
+            ChristmasWorld.doorShows(today: today, levelTenWon: ten, entered: entered)
+        }
+        XCTAssertFalse(door("2026-11-30"))
+        XCTAssertTrue(door("2026-12-01"))
+        XCTAssertFalse(door("2026-12-01", ten: false))
+        XCTAssertTrue(door("2027-01-06"))
+        XCTAssertFalse(door("2027-01-07"), "after the window the door isn't there for players who never opened it")
+        XCTAssertTrue(door("2027-03-01", entered: true), "once opened, the world stays open")
+        XCTAssertTrue(door("2026-11-01", ten: false, entered: true))
+    }
+
+    func testAdventDoorsCatchUpAndRewardsAreFixed() {
+        XCTAssertEqual(Advent.doorsAvailable(today: "2026-11-30"), 0)
+        XCTAssertEqual(Advent.doorsAvailable(today: "2026-12-01"), 1)
+        XCTAssertEqual(Advent.doorsAvailable(today: "2026-12-09"), 9)
+        XCTAssertEqual(Advent.doorsAvailable(today: "2026-12-31"), 24)
+        XCTAssertEqual(Advent.doorsAvailable(today: "2027-01-06"), 24, "doors stay openable until the window ends")
+        XCTAssertEqual(Advent.doorsAvailable(today: "2027-01-07"), 0)
+        XCTAssertEqual(Advent.reward(day: 1), .coins(100))
+        XCTAssertEqual(Advent.reward(day: 2), .treats(2))
+        for day in [6, 12, 18] { XCTAssertEqual(Advent.reward(day: day), .capsuleStep) }
+        XCTAssertEqual(Advent.reward(day: 24), .christmasCapsule)
+        XCTAssertEqual(Advent.reward(day: 23), .coins(100))
+        var state = AdventState()
+        XCTAssertFalse(state.open(day: 5, available: 4), "not before its day")
+        XCTAssertTrue(state.open(day: 3, available: 4), "a missed day can be caught up")
+        XCTAssertFalse(state.open(day: 3, available: 4), "once each")
+        XCTAssertFalse(state.open(day: 25, available: 24))
+        XCTAssertFalse(state.open(day: 0, available: 24))
     }
 }
 
@@ -430,9 +461,9 @@ final class CoinTests: XCTestCase {
         var w = CoinWallet()
         w.earn(Coins.earned(forWinWithStars: 3))
         w.earn(Coins.earned(forWinWithStars: 1))
-        XCTAssertEqual(w.balance, 15)
+        XCTAssertEqual(w.balance, 150)
         XCTAssertFalse(w.spend(on: .hint), "can't go below zero")
-        w.earn(10)
+        w.earn(100)
         XCTAssertTrue(w.spend(on: .hint))
         XCTAssertEqual(w.balance, 0)
     }
@@ -442,7 +473,9 @@ final class CoinTests: XCTestCase {
         let pack = Coins.packs[1]
         XCTAssertTrue(w.credit(pack: pack, transactionID: 42))
         XCTAssertFalse(w.credit(pack: pack, transactionID: 42))
-        XCTAssertEqual(w.balance, 350)
+        XCTAssertEqual(w.balance, 3500)
+        XCTAssertEqual(Coins.packs.map(\.coins), [1000, 3500, 7500])
+        XCTAssertEqual(Coins.packs[0].productID, "com.ianatkinson.squishsort.coins1000")
     }
 
     func testNothingInTheShopIsASquishy() {
@@ -450,12 +483,85 @@ final class CoinTests: XCTestCase {
     }
 
     func testALevelPaysOnceSoReplaysCannotBeFarmed() {
-        XCTAssertEqual(Coins.earned(forWinWithStars: 2, previousBest: nil), 5)
-        XCTAssertEqual(Coins.earned(forWinWithStars: 3, previousBest: nil), 10)
+        XCTAssertEqual(Coins.earned(forWinWithStars: 2, previousBest: nil), 50)
+        XCTAssertEqual(Coins.earned(forWinWithStars: 3, previousBest: nil), 100)
         XCTAssertEqual(Coins.earned(forWinWithStars: 3, previousBest: 3), 0, "a replay pays nothing")
         XCTAssertEqual(Coins.earned(forWinWithStars: 1, previousBest: 2), 0)
-        XCTAssertEqual(Coins.earned(forWinWithStars: 3, previousBest: 1), 5, "the three-star difference, once")
+        XCTAssertEqual(Coins.earned(forWinWithStars: 3, previousBest: 1), 50, "the three-star difference, once")
+        XCTAssertEqual(Coins.starBonus(stars: 3, previousBest: nil), 50)
+        XCTAssertEqual(Coins.starBonus(stars: 3, previousBest: 3), 0)
+        XCTAssertEqual(Coins.starBonus(stars: 2, previousBest: nil), 0)
         XCTAssertEqual(Coins.earned(forWinWithStars: 2, previousBest: 3), 0)
+    }
+
+    func testPricesAreTenTimesTheOldOnes() {
+        XCTAssertEqual(Coins.Item.allCases.map(\.price), [250, 400, 3000, 100, 600])
+        XCTAssertEqual(CoinRules().dailyGift, 200)
+    }
+
+    func testJarsShareTheBaseCoinsAndTheLastJarTakesTheRemainder() {
+        XCTAssertEqual(Coins.jarShares(jars: 2), [25, 25])
+        XCTAssertEqual(Coins.jarShares(jars: 3), [16, 16, 18])
+        XCTAssertEqual(Coins.jarShares(jars: 8), [6, 6, 6, 6, 6, 6, 6, 8])
+        for jars in 1...10 { XCTAssertEqual(Coins.jarShares(jars: jars).reduce(0, +), 50) }
+        XCTAssertEqual(Coins.jarShares(jars: 0), [])
+    }
+
+    func testThePotPaysEachJarOnceWithDoublePopAndLucky() {
+        var pot = LevelPot(firstClear: true, jars: 3, luckyKind: 2)
+        XCTAssertEqual(pot.jarCompleted(kind: 0, at: 10), .init(coins: 16, doublePop: false, lucky: false))
+        XCTAssertEqual(pot.jarCompleted(kind: 0, at: 11), .init(), "undo and redo of the same jar adds nothing")
+        XCTAssertEqual(pot.jarCompleted(kind: 1, at: 12.5), .init(coins: 26, doublePop: true, lucky: false), "two jars within 3 s")
+        XCTAssertEqual(pot.jarCompleted(kind: 2, at: 30), .init(coins: 118, doublePop: false, lucky: true))
+        XCTAssertEqual(pot.coins, 160)
+        var replay = LevelPot(firstClear: false, jars: 3, luckyKind: 2)
+        XCTAssertEqual(replay.jarCompleted(kind: 2, at: 1), .init(), "replays throw sparkles, not coins")
+        XCTAssertEqual(replay.coins, 0)
+    }
+
+    func testTheLuckySquishyIsStableAndRoughlyOneLevelInFive() {
+        XCTAssertNil(Coins.luckyKind(levelNumber: 9, levelID: "toyshop-09", installSeed: "a", kinds: 4), "from level 10")
+        var lucky = 0
+        for n in 0..<2000 {
+            let a = Coins.luckyKind(levelNumber: 20, levelID: "level-\(n)", installSeed: "seed", kinds: 6)
+            XCTAssertEqual(a, Coins.luckyKind(levelNumber: 20, levelID: "level-\(n)", installSeed: "seed", kinds: 6), "a restart never re-rolls it")
+            if let a {
+                lucky += 1
+                XCTAssertTrue((0..<6).contains(a))
+            }
+        }
+        XCTAssertEqual(Double(lucky) / 2000, 0.2, accuracy: 0.04)
+    }
+
+    func testTheStreakCountsFirstTryFirstClearsAndIsCapped() {
+        XCTAssertEqual(Coins.nextStreak(current: 0, firstClear: true, attempts: 1), 1)
+        XCTAssertEqual(Coins.nextStreak(current: 3, firstClear: true, attempts: 2), 0, "a retry breaks it")
+        XCTAssertEqual(Coins.nextStreak(current: 3, firstClear: false, attempts: 1), 3, "replays can't farm or break it")
+        XCTAssertEqual((0...8).map { Coins.streakBonus(streak: $0) }, [0, 0, 10, 20, 30, 40, 50, 50, 50])
+    }
+
+    func testOptInAdsAreCappedADayAndGentleModeGetsOnlyHintAndExtraJar() {
+        var ads = OptInAdState()
+        for _ in 0..<6 {
+            XCTAssertTrue(ads.canWatch(today: "2026-12-01", cap: 6))
+            ads.record(today: "2026-12-01")
+        }
+        XCTAssertFalse(ads.canWatch(today: "2026-12-01", cap: 6))
+        XCTAssertTrue(ads.canWatch(today: "2026-12-02", cap: 6), "a new day starts again")
+        XCTAssertEqual(OptInReward.allCases.filter { $0.isOffered(to: .child) }, [.hint, .extraJar])
+        XCTAssertEqual(OptInReward.allCases.filter { $0.isOffered(to: .teen) }, OptInReward.allCases)
+    }
+
+    func testRemoveAdsIsOfferedOnceAfterTheThirdInterstitialAndNeverToChildren() {
+        func offer(_ shown: Int, _ group: AgeGroup = .adult, already: Bool = false, owns: Bool = false) -> Bool {
+            RemoveAdsOffer.shouldShow(interstitialsShown: shown, group: group, alreadyShown: already, ownsRemoveAds: owns)
+        }
+        XCTAssertFalse(offer(2))
+        XCTAssertTrue(offer(3))
+        XCTAssertTrue(offer(3, .teen))
+        XCTAssertFalse(offer(9, .child))
+        XCTAssertFalse(offer(9, already: true))
+        XCTAssertFalse(offer(9, owns: true))
     }
 
     func testWalletAndCollectionDecodeFromOlderOrPartialSaves() throws {
@@ -545,6 +651,25 @@ final class ExtrasTests: XCTestCase {
         XCTAssertEqual(s.steps, 0)
     }
 
+    func testOneMoreMysteryGuessAfterAWrongOneOnceADay() {
+        var s = MysteryState()
+        XCTAssertFalse(s.canOfferExtraGuess(today: "2026-12-01"), "nothing to offer before a guess")
+        _ = s.recordGuess(correct: false, today: "2026-12-01")
+        XCTAssertTrue(s.canOfferExtraGuess(today: "2026-12-01"))
+        s.grantExtraGuess(today: "2026-12-01")
+        XCTAssertTrue(s.canPlay(today: "2026-12-01"))
+        _ = s.recordGuess(correct: false, today: "2026-12-01")
+        XCTAssertFalse(s.canOfferExtraGuess(today: "2026-12-01"), "once a day")
+        XCTAssertFalse(s.canPlay(today: "2026-12-01"))
+        _ = s.recordGuess(correct: true, today: "2026-12-02")
+        XCTAssertFalse(s.canOfferExtraGuess(today: "2026-12-02"), "only after a wrong guess")
+        XCTAssertEqual(s.steps, 1)
+        XCTAssertFalse(s.addStep())
+        XCTAssertTrue(s.addStep(), "an advent step fills the same bar")
+        XCTAssertEqual(s.steps, 0)
+        XCTAssertEqual(try JSONDecoder().decode(MysteryState.self, from: Data(#"{"steps": 2}"#.utf8)).steps, 2)
+    }
+
     func testMakerPartsOpenWithWorlds() {
         XCTAssertEqual(MakerParts.shapes(worldsCompleted: 1), 3)
         XCTAssertEqual(MakerParts.shapes(worldsCompleted: 10), MadeSquishy.Shape.allCases.count)
@@ -628,8 +753,8 @@ final class ExtrasTests: XCTestCase {
         XCTAssertEqual(b.hearts, 6)
         b.hearts = 1000
         XCTAssertEqual(b.tricksUnlocked, BuddyState.tricks)
-        XCTAssertEqual(Coins.Item.treat.price, 10)
-        XCTAssertEqual(Coins.Item.gift.price, 60)
+        XCTAssertEqual(Coins.Item.treat.price, 100)
+        XCTAssertEqual(Coins.Item.gift.price, 600)
     }
 
     func testBuddyStateDecodesFromAnOlderSave() throws {

@@ -30,8 +30,10 @@ final class AppModel: ObservableObject {
     @Published var trackingExplainer = false
     /// A common that just joined the book by being sorted, for the board's sticker.
     @Published var joinedBook: Collectible?
-    /// Win card offers: the opt-in bonus gift box (a rewarded ad for coins).
-    @Published var giftOffered = false
+    /// What the last win paid, for the win card.
+    @Published private(set) var lastWin = WinSummary()
+    /// A short line at the top of the screen that fades by itself.
+    @Published var toast: String?
     @Published var storefront = ""
     /// The Buddy's speech bubble on the home screen. Never shown during a level.
     @Published var buddySays: String?
@@ -46,11 +48,13 @@ final class AppModel: ObservableObject {
     let buddyScript: BuddyScript
     let purchases: PurchaseService
     let haptics = Haptics()
+    let sounds = SoundService()
     let ads = AdsService()
     private let store = ProgressStore()
     private var rng = SystemRandomNumberGenerator()
     private var sessionStart = Date()
     private var greetedThisSession = false
+    private var thankedForAdThisSession = false
     /// The last win opened a capsule or unlocked an extra, so no forced ad follows it.
     private var lastWinHadReward = false
     /// Whether the capsule on screen is a squishy the player didn't have yet.
@@ -68,6 +72,7 @@ final class AppModel: ObservableObject {
         buddyScript = AppModel.loadBuddyScript()
         purchases = PurchaseService(cachedOwnership: loaded.ownsRemoveAds)
         haptics.enabled = loaded.hapticsOn
+        sounds.enabled = loaded.soundOn
         // New players land straight on Level 1; the home screen arrives with the first capsule.
         screen = loaded.highestUnlocked >= 3 ? .home : .level(min(loaded.highestUnlocked, max(0, levels.count - 1)))
         purchases.onChange = { [weak self] owns in self?.update { $0.ownsRemoveAds = owns } }
@@ -113,9 +118,76 @@ final class AppModel: ObservableObject {
 
     var today: String { PlayerProgress.today() }
 
+    /// Levels on the main path come first in `levels`; side-world levels follow.
+    var mainLevelCount: Int { levels.filter { LevelCatalog.worlds.contains($0.file.world) }.count }
+
+    func isSideLevel(_ index: Int) -> Bool {
+        levels.indices.contains(index) && !LevelCatalog.worlds.contains(levels[index].file.world)
+    }
+
+    /// The number on the board: 1 to 60 on the main path, 1 to 20 in a side world.
+    func levelNumber(_ index: Int) -> Int {
+        isSideLevel(index) ? levels[index].file.index : index + 1
+    }
+
     func isUnlocked(_ index: Int) -> Bool {
         guard levels.indices.contains(index) else { return false }
-        return index <= progress.highestUnlocked && config.isWorldUnlocked(levels[index].file.world, today: today)
+        if isSideLevel(index) {
+            return progress.christmasEntered && levels[index].file.index - 1 <= progress.christmasUnlocked
+        }
+        return index <= progress.highestUnlocked
+    }
+
+    // MARK: - Christmas Workshop and the advent shelf
+
+    var christmasLevels: [Int] { levels.indices.filter { levels[$0].file.world == ChristmasWorld.id } }
+
+    /// The festive door on the home screen. Once opened, the world stays for good.
+    var showsFestiveDoor: Bool {
+        !christmasLevels.isEmpty && showsCornerButtons
+            && ChristmasWorld.doorShows(today: today, levelTenWon: levels.count > 9 && progress.stars[levels[9].id] != nil,
+                                        entered: progress.christmasEntered, config: config)
+    }
+
+    func openFestiveDoor() {
+        guard showsFestiveDoor else { return }
+        if !progress.christmasEntered {
+            update { $0.christmasEntered = true }
+            sounds.play("sleigh")
+        }
+        if let next = christmasLevels.last(where: { isUnlocked($0) }) { screen = .level(next) }
+    }
+
+    /// Doors that can be open today (0 hides the shelf).
+    var adventDoors: Int { showsCornerButtons ? Advent.doorsAvailable(today: today, config: config) : 0 }
+
+    /// Opens one advent door. Rewards are fixed and need no ad.
+    @discardableResult
+    func openAdventDoor(_ day: Int) -> Advent.Reward? {
+        // Read before `update`: nothing may read `progress` while it is being changed.
+        let available = adventDoors
+        var opened = false
+        update { opened = $0.advent.open(day: day, available: available) }
+        guard opened else { return nil }
+        let reward = Advent.reward(day: day, rules: config.coins)
+        sounds.play("sleigh")
+        switch reward {
+        case .coins(let amount):
+            update { $0.wallet.earn(amount) }
+            sounds.play("coin_shower")
+        case .treats(let count):
+            update { $0.buddy.treats += count }
+            sounds.play("heart")
+        case .capsuleStep:
+            var full = false
+            update { full = $0.mystery.addStep() }
+            sounds.play("heart")
+            if full { openCapsule(world: mysteryCapsuleWorld) }
+        case .christmasCapsule:
+            openCapsule(world: ChristmasWorld.id)
+        }
+        haptics.complete()
+        return reward
     }
 
     /// Corner buttons (book, map, settings) appear after the first capsule.
@@ -133,7 +205,7 @@ final class AppModel: ObservableObject {
         return !ids.isEmpty && ids.allSatisfy { progress.stars[$0] != nil }
     }
 
-    var worldsCompleted: Int { LevelCatalog.worlds.filter { isWorldComplete($0) }.count }
+    var worldsCompleted: Int { LevelCatalog.allWorlds.filter { isWorldComplete($0) }.count }
 
     func isExtraUnlocked(_ extra: Extra) -> Bool {
         Extras.isUnlocked(extra, capsulesOpened: progress.collection.totalCapsules, levelsWon: levelsWon,
@@ -187,7 +259,7 @@ final class AppModel: ObservableObject {
     // MARK: - Mystery Bag
 
     private var openWorlds: [String] {
-        LevelCatalog.worlds.filter { world in
+        LevelCatalog.allWorlds.filter { world in
             guard let first = levels.firstIndex(where: { $0.file.world == world }) else { return false }
             return isUnlocked(first)
         }
@@ -202,12 +274,31 @@ final class AppModel: ObservableObject {
         guard let bag = mysteryBag, progress.mystery.canPlay(today: today) else { return false }
         let correct = bag.answer.id == id
         var earned = false
-        update { earned = $0.mystery.recordGuess(correct: correct, today: today) }
+        update {
+            earned = $0.mystery.recordGuess(correct: correct, today: today)
+            // Any guess pays, right or wrong.
+            $0.wallet.earn(config.coins.mysteryGuess)
+        }
+        sounds.play(correct ? "mystery_right" : "mystery_close")
         if earned {
             let world = mysteryCapsuleWorld
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) { [weak self] in self?.openCapsule(world: world) }
         }
         return correct
+    }
+
+    /// After a wrong guess: one more, once a day, by opt-in ad. Never in gentle mode.
+    var offersExtraMysteryGuess: Bool {
+        progress.mystery.canOfferExtraGuess(today: today) && canOptIn(.extraGuess)
+    }
+
+    func takeExtraMysteryGuess(_ ready: @escaping () -> Void) {
+        guard offersExtraMysteryGuess else { return }
+        optIn(.extraGuess) { [weak self] in
+            guard let self else { return }
+            self.update { $0.mystery.grantExtraGuess(today: self.today) }
+            ready()
+        }
     }
 
     private func isBookComplete(_ world: String) -> Bool {
@@ -220,7 +311,7 @@ final class AppModel: ObservableObject {
     private var mysteryCapsuleWorld: String {
         let open = openWorlds
         let current = levels.indices.contains(progress.highestUnlocked) ? levels[progress.highestUnlocked].file.world : ""
-        let here = open.contains(current) ? current : (open.last ?? LevelCatalog.worlds[0])
+        let here = open.contains(current) ? current : (open.first ?? LevelCatalog.worlds[0])
         if isBookComplete(here), let other = open.first(where: { !isBookComplete($0) }) { return other }
         return here
     }
@@ -292,6 +383,7 @@ final class AppModel: ObservableObject {
         let away = progress.buddy.lastOpenedAt.map { (now.timeIntervalSince1970 - $0) / 3600 }
         let first = !greetedThisSession
         if first {
+            sounds.play("buddy_hello")
             greetedThisSession = true
             update { $0.buddy.lastOpenedAt = now.timeIntervalSince1970 }
         }
@@ -316,6 +408,7 @@ final class AppModel: ObservableObject {
 
     func pokeBuddy() {
         haptics.land()
+        sounds.play("buddy_giggle")
         buddyAsksMood = false
         buddySays = buddyLine("poke")
     }
@@ -324,6 +417,7 @@ final class AppModel: ObservableObject {
         guard buddyActive, progress.buddy.treats > 0 else { return }
         update { _ = $0.buddy.feedStoredTreat() }
         haptics.complete()
+        sounds.play("buddy_munch")
         buddySays = buddyLine("treat")
     }
 
@@ -332,7 +426,27 @@ final class AppModel: ObservableObject {
         guard buddyActive, item == .treat || item == .gift, spend(item) else { return }
         update { $0.buddy.give(item) }
         haptics.complete()
+        sounds.play(item == .gift ? "heart" : "buddy_munch")
         buddySays = buddyLine("treat")
+    }
+
+    // MARK: - The Buddy's daily gift
+
+    /// Once a day the Buddy holds a gift box of coins: by opt-in ad, or free in gentle mode.
+    var dailyGiftReady: Bool {
+        buddyActive && progress.dailyGiftDay != today && (isGentleMode || canOptIn(.dailyGift))
+    }
+
+    func takeDailyGift() {
+        guard dailyGiftReady else { return }
+        let grant: () -> Void = { [weak self] in
+            guard let self else { return }
+            self.update { $0.dailyGiftDay = self.today; $0.wallet.earn(self.config.coins.dailyGift) }
+            self.sounds.play("coin_shower")
+            self.haptics.win()
+            self.buddySays = self.buddyLine("treat")
+        }
+        if isGentleMode { grant() } else { optIn(.dailyGift, granted: grant) }
     }
 
     /// Re-derived from the current storefront every time (unknown storefront = strictest).
@@ -347,32 +461,79 @@ final class AppModel: ObservableObject {
 
     // MARK: - Levels
 
-    func won(index: Int, moves: Int, stars: Int, attempts: Int, playSeconds: Double) {
+    /// What a win paid. The pot is what the jars threw; the rest is added on the win card.
+    struct WinSummary: Equatable {
+        var pot = 0
+        var starBonus = 0
+        var streak = 0
+        var streakBonus = 0
+        var dailyBonus = 0
+        var firstClear = false
+        var doubled = false
+        /// The one soft Remove Ads line (after the 3rd interstitial ever, 13 and over).
+        var offersRemoveAds = false
+        var total: Int { pot * (doubled ? 2 : 1) + starBonus + streakBonus + dailyBonus }
+    }
+
+    /// `pot` is what the level's jars threw on this attempt (0 on a replay).
+    func won(index: Int, moves: Int, stars: Int, attempts: Int, playSeconds: Double, pot: Int) {
         let level = levels[index]
+        let rules = config.coins
         // A level pays out once. Replays can raise the stars (and pay the
-        // three-star difference once) but never another capsule or more coins.
+        // three-star bonus once) but never another capsule or more jar coins.
         let previousBest = progress.stars[level.id]
         let firstClear = previousBest == nil
         let extrasBefore = Extra.allCases.filter { isExtraUnlocked($0) }
+        var summary = WinSummary()
+        summary.firstClear = firstClear
+        summary.pot = firstClear ? pot : 0
+        summary.starBonus = Coins.starBonus(stars: stars, previousBest: previousBest, rules: rules)
+        let streak = Coins.nextStreak(current: progress.winStreak, firstClear: firstClear, attempts: attempts)
+        if firstClear && !isGentleMode {
+            summary.streak = streak
+            summary.streakBonus = Coins.streakBonus(streak: streak, rules: rules)
+        }
+        summary.dailyBonus = progress.lastWinDay == today ? 0 : rules.firstWinOfDay
+        summary.offersRemoveAds = RemoveAdsOffer.shouldShow(interstitialsShown: progress.cadence.interstitialsShown, group: ageGroup,
+                                                            alreadyShown: progress.removeAdsOfferShown, ownsRemoveAds: ownsRemoveAds)
+        let side = isSideLevel(index)
         update { p in
-            p.wallet.earn(Coins.earned(forWinWithStars: stars, previousBest: previousBest))
-            if firstClear {
-                p.winsSinceGift += 1
-                if level.file.capsule { p.bonusCapsules.append(level.file.world) }
-            }
+            p.wallet.earn(summary.total)
+            p.winStreak = streak
+            p.lastWinDay = today
+            if summary.offersRemoveAds { p.removeAdsOfferShown = true }
             p.buddy.earnTreatForWin()
             p.stars[level.id] = max(previousBest ?? 0, stars)
-            p.highestUnlocked = max(p.highestUnlocked, min(index + 1, levels.count - 1))
+            if side {
+                p.christmasUnlocked = max(p.christmasUnlocked, min(level.file.index, LevelCatalog.levelsPerWorld - 1))
+            } else {
+                p.highestUnlocked = max(p.highestUnlocked, min(index + 1, max(0, mainLevelCount - 1)))
+            }
             AdCadence.recordPlayTime(playSeconds, &p.cadence)
             AdCadence.recordWin(&p.cadence)
         }
-        // Bonus gift box every 4th first clear that isn't a capsule level. Opt-in,
-        // and never on the win card in gentle mode (no pop-up offers for under-13s).
-        giftOffered = firstClear && !isGentleMode && !level.file.capsule && progress.winsSinceGift >= 4 && canWatchRewarded
+        lastWin = summary
         levelCheer = buddyLine(stars >= 3 ? "win_3star" : "win")
-        lastWinHadReward = (firstClear && level.file.capsule) || Extra.allCases.filter { isExtraUnlocked($0) } != extrasBefore
+        let unlockedExtra = Extra.allCases.filter { isExtraUnlocked($0) } != extrasBefore
+        lastWinHadReward = (firstClear && level.file.capsule) || unlockedExtra
+        if unlockedExtra { sounds.play("unlock_new") }
         if firstClear && level.file.capsule {
             openCapsule(world: level.file.world)
+        }
+    }
+
+    /// "x2 coins" on the win card of a first clear: doubles the banked pot only.
+    var offersDoubleCoins: Bool {
+        lastWin.firstClear && lastWin.pot > 0 && !lastWin.doubled && canOptIn(.doubleCoins)
+    }
+
+    func doubleCoins() {
+        guard offersDoubleCoins else { return }
+        optIn(.doubleCoins) { [weak self] in
+            guard let self, !self.lastWin.doubled else { return }
+            self.update { $0.wallet.earn(self.lastWin.pot) }
+            self.lastWin.doubled = true
+            self.sounds.play("coin_shower")
         }
     }
 
@@ -385,26 +546,33 @@ final class AppModel: ObservableObject {
     }
 
     /// Levels still to win before the next capsule level, counting from the level after `index`.
-    /// 0 means the next level is a capsule level. Nil when there is none left.
+    /// 0 means the next level is a capsule level. Nil when the world path has none left.
     func levelsToNextCapsule(after index: Int) -> Int? {
-        guard index + 1 < levels.count else { return nil }
-        return levels[(index + 1)...].firstIndex { $0.file.capsule }.map { $0 - index - 1 }
+        let end = isSideLevel(index) ? levels.count : mainLevelCount
+        guard index + 1 < end else { return nil }
+        return levels[(index + 1)..<end].firstIndex { $0.file.capsule }.map { $0 - index - 1 }
     }
 
-    /// Coins a win on this level would pay now (0 on a replay that doesn't improve).
-    func coinsForWin(index: Int, stars: Int) -> Int {
-        Coins.earned(forWinWithStars: stars, previousBest: progress.stars[levels[index].id])
+    /// The lucky squishy's kind on this level for this player, if it has one and it still pays.
+    func luckyKind(index: Int) -> Int? {
+        let level = levels[index]
+        guard progress.stars[level.id] == nil else { return nil }
+        return Coins.luckyKind(levelNumber: isSideLevel(index) ? progress.stars.count + 1 : index + 1, levelID: level.id,
+                               installSeed: progress.installID, kinds: level.kinds.count, rules: config.coins)
     }
 
     func failed(playSeconds: Double) {
         update { AdCadence.recordPlayTime(playSeconds, &$0.cadence) }
+        sounds.play("stuck")
         levelCheer = buddyLine("fail")
     }
 
     func next(after index: Int) {
         let n = index + 1
         levelCheer = nil
-        screen = isUnlocked(n) ? .level(n) : .map
+        // The main path never rolls on into a side world.
+        let samePath = isSideLevel(n) == isSideLevel(index)
+        screen = samePath && isUnlocked(n) ? .level(n) : homeScreen
     }
 
     // MARK: - Capsules
@@ -425,26 +593,16 @@ final class AppModel: ObservableObject {
         return (rare, 100 - rare)
     }
 
-    enum AfterCapsule { case nothing, bonusCapsule }
-    private var afterCapsule = AfterCapsule.nothing
-
-    /// Closes the capsule screen. What follows (the birthday question after the
-    /// first capsule, or the opt-in bonus capsule ad) waits for `capsuleDismissed`,
-    /// because nothing can be presented while the cover is still closing.
-    func capsuleClosed(then next: AfterCapsule = .nothing) {
-        afterCapsule = next
+    /// Closes the capsule screen. The birthday question after the first capsule
+    /// waits for `capsuleDismissed`, because nothing can be presented while the
+    /// cover is still closing.
+    func capsuleClosed() {
         capsule = nil
     }
 
     /// Called by the capsule cover's onDismiss.
     func capsuleDismissed() {
-        let next = afterCapsule
-        afterCapsule = .nothing
-        if progress.age == nil {
-            askAge = true
-        } else if next == .bonusCapsule {
-            openBonusCapsule()
-        }
+        if progress.age == nil { askAge = true }
     }
 
     func rerollSpares(world: String) -> Collectible? {
@@ -469,7 +627,6 @@ final class AppModel: ObservableObject {
     /// change at once and any ad loaded under the old flags is thrown away.
     func switchToGentleMode() {
         update { $0.age = AgeProfile(group: .child, source: .parentSetGentleMode, storefront: storefront) }
-        giftOffered = false
         ads.update(policy: currentAdPolicy)
     }
 
@@ -525,29 +682,6 @@ final class AppModel: ObservableObject {
         }
     }
 
-    /// Bonus gift box: watch an ad, get a fixed number of coins.
-    func openGift() {
-        giftOffered = false
-        watchRewarded { [weak self] in
-            self?.update { $0.wallet.earn(Coins.bonusGift); $0.winsSinceGift = 0 }
-        }
-    }
-
-    /// Double capsule: an extra capsule for a capsule level, by opt-in ad. Same odds.
-    /// Teens and adults get it on the capsule screen; gentle mode only from the book.
-    var bonusCapsuleWorld: String? { progress.bonusCapsules.last }
-
-    func openBonusCapsule() {
-        guard let world = bonusCapsuleWorld else { return }
-        watchRewarded { [weak self] in
-            guard let self else { return }
-            self.update { p in
-                if let i = p.bonusCapsules.lastIndex(of: world) { p.bonusCapsules.remove(at: i) }
-            }
-            self.openCapsule(world: world)
-        }
-    }
-
     // MARK: - Coins
 
     func spend(_ item: Coins.Item) -> Bool {
@@ -570,13 +704,13 @@ final class AppModel: ObservableObject {
 
     /// After a win: maybe an interstitial (never after a fail, never mid-level), then continue.
     func continueAfterWin(index: Int, attempts: Int) {
-        giftOffered = false
         showInterstitialThenNext(index: index, attempts: attempts)
     }
 
     private func showInterstitialThenNext(index: Int, attempts: Int) {
         let level = levels[index]
-        let win = LevelWin(level: index + 1, attempts: attempts, isBoss: level.file.beat == .boss,
+        // Ad tiers count every level cleared, on the main path and in side worlds.
+        let win = LevelWin(level: isSideLevel(index) ? progress.stars.count : index + 1, attempts: attempts, isBoss: level.file.beat == .boss,
                            secondsIntoSession: Date().timeIntervalSince(sessionStart), hadReward: lastWinHadReward)
         if RatingPrompt.shouldAsk(after: win, group: ageGroup, alreadyAsked: progress.ratingAsked) {
             update { $0.ratingAsked = true }
@@ -595,12 +729,30 @@ final class AppModel: ObservableObject {
     /// Rewarded ads are opt-in and never award squishies.
     var canWatchRewarded: Bool { progress.age != nil && config.adsEnabled && ads.rewardedReady }
 
-    func watchRewarded(_ granted: @escaping () -> Void) {
-        ads.showRewarded { [weak self] earned in
-            guard earned else { return }
-            // A watched rewarded ad counts as the ad break.
-            self?.update { AdCadence.recordRewardedWatched(&$0.cadence) }
+    /// Whether an opt-in reward can be offered now: right for the age group,
+    /// under the daily cap, and either an ad is ready or the player owns Remove Ads.
+    func canOptIn(_ reward: OptInReward) -> Bool {
+        reward.isOffered(to: ageGroup) && progress.optInAds.canWatch(today: today, cap: config.optInAdsPerDay)
+            && (ownsRemoveAds || canWatchRewarded)
+    }
+
+    /// Remove Ads owners get the reward with one tap and no ad, under the same daily cap.
+    func optIn(_ reward: OptInReward, granted: @escaping () -> Void) {
+        guard canOptIn(reward) else { return }
+        if ownsRemoveAds {
+            update { $0.optInAds.record(today: today) }
             granted()
+            return
+        }
+        ads.showRewarded { [weak self] earned in
+            guard let self, earned else { return }
+            // A watched opt-in ad counts as the ad break.
+            self.update { AdCadence.recordRewardedWatched(&$0.cadence); $0.optInAds.record(today: self.today) }
+            granted()
+            if !self.thankedForAdThisSession {
+                self.thankedForAdThisSession = true
+                self.toast = String(localized: "Thanks! No ad breaks for a while.")
+            }
         }
     }
 
@@ -641,6 +793,7 @@ final class AppModel: ObservableObject {
     /// Ads are told when the game's sound is off, so they start muted too.
     func setSound(_ on: Bool) {
         update { $0.soundOn = on }
+        sounds.enabled = on
         ads.setMuted(!on)
     }
 

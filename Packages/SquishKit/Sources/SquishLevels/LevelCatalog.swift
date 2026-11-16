@@ -1,15 +1,14 @@
 import Foundation
 
-/// The worlds in play order and where their level files live.
+/// The worlds in play order (main path first, then side worlds) and where their level files live.
 public enum LevelCatalog {
-    public static let worlds = ["toyshop", "sweetfactory", "starlight", "christmas"]
+    /// The main path, in play order: 60 levels.
+    public static let worlds = ["toyshop", "sweetfactory", "starlight"]
+    /// Side worlds have their own level numbers 1 to 20 and are not on the map's main path.
+    public static let sideWorlds = ["christmas"]
+    public static var allWorlds: [String] { worlds + sideWorlds }
     public static let levelsPerWorld = 20
-
-    /// 1-based number across all worlds (toyshop-01 is 1, sweetfactory-01 is 21).
-    public static func globalNumber(world: String, index: Int) -> Int? {
-        guard let w = worlds.firstIndex(of: world) else { return nil }
-        return w * levelsPerWorld + index
-    }
+    public static var mainLevelCount: Int { worlds.count * levelsPerWorld }
 
     /// A capsule every 3rd level of a world and on its last level:
     /// 3, 6, 9, 12, 15, 18 and 20.
@@ -21,7 +20,7 @@ public enum LevelCatalog {
     public static func loadFiles(root: URL) throws -> [LevelFile] {
         var out: [LevelFile] = []
         let fm = FileManager.default
-        for world in worlds {
+        for world in allWorlds {
             let dir = root.appendingPathComponent(world, isDirectory: true)
             guard let names = try? fm.contentsOfDirectory(atPath: dir.path) else { continue }
             for name in names.sorted() where name.hasSuffix(".json") {

@@ -56,6 +56,17 @@ final class GoldenPathTests: XCTestCase {
         }
     }
 
+    /// The birthday question has to be off screen before the win card can be used.
+    private func waitForAgeQuestionToClose() {
+        let skip = app.buttons["Skip"]
+        let deadline = Date().addingTimeInterval(8)
+        while skip.exists && Date() < deadline { Thread.sleep(forTimeInterval: 0.25) }
+        if skip.exists {
+            dump("birthday question still on screen")
+            XCTFail("birthday question still on screen")
+        }
+    }
+
     private func dump(_ what: String) {
         let state = app.staticTexts["scene-state"]
         print("GOLDEN-PATH \(what); scene-state: \(state.exists ? state.label : "missing")")
@@ -91,6 +102,7 @@ final class GoldenPathTests: XCTestCase {
         let skip = app.buttons["Skip"]
         XCTAssertTrue(skip.waitForExistence(timeout: 8), "birthday question after the first capsule")
         skip.tap()
+        waitForAgeQuestionToClose()
         nextLevel("Level 4")
         app.buttons["gearshape.fill"].firstMatch.tap()
         XCTAssertTrue(app.staticTexts["Gentle mode is on"].waitForExistence(timeout: 5))
@@ -102,6 +114,7 @@ final class GoldenPathTests: XCTestCase {
         let skip = app.buttons["Skip"]
         XCTAssertTrue(skip.waitForExistence(timeout: 8))
         skip.tap()
+        waitForAgeQuestionToClose()
         nextLevel("Level 4")
         app.buttons["gearshape.fill"].firstMatch.tap()
         let off = app.buttons["Turn off gentle mode"]
@@ -124,6 +137,7 @@ final class GoldenPathTests: XCTestCase {
         XCTAssertTrue(picker.waitForExistence(timeout: 8))
         picker.adjust(toPickerWheelValue: "1990")
         app.buttons["Continue"].tap()
+        waitForAgeQuestionToClose()
         nextLevel("Level 4")
         app.buttons["gearshape.fill"].firstMatch.tap()
         XCTAssertTrue(app.buttons["Set up for a child"].waitForExistence(timeout: 5))

@@ -20,8 +20,9 @@ final class LevelController: ObservableObject {
     @Published private(set) var extraJarUsed = false
     /// Paid-for helper choice sheet: watch an ad or spend coins.
     @Published var choosing: Coins.Item?
-    /// Coins the last win paid (0 on a replay), for the win card.
-    @Published private(set) var earnedCoins = 0
+    /// Coins the jars have thrown on this attempt. Banked on the win; a retry empties it.
+    @Published private(set) var pot: LevelPot
+    private var jarsDone = 0
     /// The hint search is running.
     @Published private(set) var thinking = false
     /// The hint search found no way to win from here. Nothing is charged for that.
@@ -40,10 +41,22 @@ final class LevelController: ObservableObject {
         level = model.levels[index]
         session = GameSession(board: level.board, par: level.par, undoLimit: model.undoLimit)
         scene = BoardScene(board: level.board, kinds: level.kinds)
+        let lucky = model.luckyKind(index: index)
+        pot = LevelPot(firstClear: model.progress.stars[level.id] == nil, jars: level.kinds.count,
+                       luckyKind: lucky, rules: model.config.coins)
+        scene.luckyKind = lucky.map { UInt8($0) }
         scene.onPlay = { [weak self] move in self?.play(move) }
-        scene.onLift = { [weak model] in model?.haptics.lift() }
-        scene.onReject = { [weak model] in model?.haptics.reject() }
+        scene.onLift = { [weak model] in
+            model?.haptics.lift()
+            model?.sounds.play("lift")
+        }
+        scene.onReject = { [weak model] in
+            model?.haptics.reject()
+            model?.sounds.play("reject")
+        }
         scene.onLand = { [weak self, weak model] result in
+            model?.sounds.move(run: result.count)
+            if !result.thawedJars.isEmpty { model?.sounds.play("thaw") }
             if let jar = result.completedJar {
                 model?.haptics.complete()
                 self?.jarCompleted(jar)
@@ -67,8 +80,32 @@ final class LevelController: ObservableObject {
 
     /// Commons join the book the first time a jar of them is completed.
     private func jarCompleted(_ jar: Int) {
-        guard let piece = session.board.jars[jar].first, level.kinds.indices.contains(Int(piece.kind)) else { return }
-        model?.jarSorted(kind: level.kinds[Int(piece.kind)])
+        guard let model, let piece = session.board.jars[jar].first, level.kinds.indices.contains(Int(piece.kind)) else { return }
+        model.jarSorted(kind: level.kinds[Int(piece.kind)])
+        jarsDone += 1
+        model.sounds.jarComplete(number: jarsDone)
+        // First clear: the jar throws its share of coins into the level pot.
+        let payout = pot.jarCompleted(kind: Int(piece.kind), at: Date().timeIntervalSince(started))
+        guard payout.coins > 0 else { return }
+        scene.throwCoins(fromJar: jar, count: min(10, max(3, payout.coins / 6)))
+        for i in 0..<3 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45 + 0.09 * Double(i)) { [weak model] in model?.sounds.coin() }
+        }
+        if payout.lucky {
+            model.sounds.play("lucky")
+            model.sounds.play("coin_shower")
+            scene.popLabel(String(localized: "Lucky!"), atJar: jar)
+        } else if payout.doublePop {
+            model.sounds.play("double_pop")
+            scene.popLabel(String(localized: "Double pop!"), atJar: jar)
+        }
+    }
+
+    private func newPot() {
+        guard let model else { return }
+        pot = LevelPot(firstClear: model.progress.stars[level.id] == nil, jars: level.kinds.count,
+                       luckyKind: model.luckyKind(index: index), rules: model.config.coins)
+        jarsDone = 0
     }
 
     private func checkOutcome() {
@@ -77,10 +114,11 @@ final class LevelController: ObservableObject {
         switch session.status {
         case .won(let stars):
             outcome = .won(stars: stars)
-            earnedCoins = model.coinsForWin(index: index, stars: stars)
             scene.celebrate()
             model.haptics.win()
-            model.won(index: index, moves: session.moveCount, stars: stars, attempts: attempts, playSeconds: seconds)
+            model.sounds.play(level.file.beat == .boss ? "win_boss" : "win")
+            model.won(index: index, moves: session.moveCount, stars: stars, attempts: attempts, playSeconds: seconds,
+                      pot: pot.coins)
         case .stuck:
             outcome = .stuck
             scene.sigh()
@@ -122,7 +160,7 @@ final class LevelController: ObservableObject {
             }
         }
         if withAd {
-            model.watchRewarded(grant)
+            model.optIn(item == .hint ? .hint : .extraJar, granted: grant)
         } else if model.spend(item) {
             grant()
         }
@@ -168,6 +206,8 @@ final class LevelController: ObservableObject {
         model?.levelCheer = nil
         attempts += 1
         started = Date()
+        // A retry empties the pot, so coins can't be farmed.
+        newPot()
         session = GameSession(board: level.board, par: level.par, undoLimit: model?.undoLimit ?? 5)
         // Real walls soften: one extra jar after enough fails.
         if let soften = level.file.softenAfterFails, attempts > soften { session.addExtraJar() }
@@ -186,7 +226,9 @@ struct LevelView: View {
         _controller = StateObject(wrappedValue: LevelController(index: index, model: model))
     }
 
-    private var number: Int { controller.index + 1 }
+    private var number: Int { model.levelNumber(controller.index) }
+    /// Helpers and the tracking prompt follow the main path; a side world has them all.
+    private var pathNumber: Int { model.isSideLevel(controller.index) ? 99 : controller.index + 1 }
 
     var body: some View {
         ZStack {
@@ -243,12 +285,14 @@ struct LevelView: View {
                 switch outcome {
                 case .won(let stars):
                     WinCard(stars: stars, showpiece: controller.level.file.beat == .showpiece,
-                            coins: controller.earnedCoins,
+                            summary: model.lastWin,
                             toCapsule: model.levelsToNextCapsule(after: controller.index),
                             // The first two levels roll straight on after the celebration.
                             autoAdvance: controller.index < 2,
-                            haptics: model.haptics,
-                            gift: model.giftOffered ? { model.openGift() } : nil) {
+                            haptics: model.haptics, sounds: model.sounds,
+                            doubleCoins: model.offersDoubleCoins ? { model.doubleCoins() } : nil,
+                            doubleIsFree: model.ownsRemoveAds,
+                            removeAds: model.lastWin.offersRemoveAds ? { model.screen = .shop } : nil) {
                         model.continueAfterWin(index: controller.index, attempts: controller.attempts)
                     }
                 case .stuck:
@@ -261,14 +305,17 @@ struct LevelView: View {
         .background(LinearGradient(colors: model.boardTheme.colors, startPoint: .top, endPoint: .bottom).ignoresSafeArea())
         .animation(.spring(response: 0.35, dampingFraction: 0.7), value: controller.outcome)
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: model.trackingExplainer)
-        .onAppear { model.levelStarted(number: number) }
+        .onAppear { model.levelStarted(number: pathNumber) }
         .onDisappear { model.joinedBook = nil }
         .confirmationDialog(Text(controller.choosing == .hint ? "Hint" : "Extra jar"),
                             isPresented: Binding(get: { controller.choosing != nil }, set: { if !$0 { controller.choosing = nil } }),
                             titleVisibility: .visible) {
             if let item = controller.choosing {
-                if model.canWatchRewarded {
-                    Button("Watch an ad") { controller.pay(for: item, withAd: true) }
+                if model.canOptIn(item == .hint ? .hint : .extraJar) {
+                    // Remove Ads owners get it with one tap and no ad.
+                    Button(model.ownsRemoveAds ? LocalizedStringKey("Free") : LocalizedStringKey("Watch an ad")) {
+                        controller.pay(for: item, withAd: true)
+                    }
                 }
                 if model.progress.wallet.canAfford(item) {
                     Button("Use \(item.price) coins") { controller.pay(for: item, withAd: false) }
@@ -309,6 +356,16 @@ struct LevelView: View {
                         .accessibilityIdentifier("move-count")
                 }
                 .animation(.spring(response: 0.3, dampingFraction: 0.5), value: controller.session.moveCount)
+                // The level pot: coins thrown by finished jars, banked on the win.
+                if controller.pot.paysCoins {
+                    Label("\(controller.pot.coins)", systemImage: "circle.hexagongrid.fill")
+                        .font(Theme.body(14)).foregroundStyle(Theme.plum)
+                        .padding(.horizontal, 10).padding(.vertical, 3)
+                        .background(Capsule().fill(Theme.butter.opacity(0.6)))
+                        .contentTransition(.numericText())
+                        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: controller.pot.coins)
+                        .accessibilityIdentifier("level-pot")
+                }
             }
             .foregroundStyle(Theme.plum)
             Spacer()
@@ -323,19 +380,19 @@ struct LevelView: View {
     // Undo appears after level 2, Hint after 4, Extra jar after 7 (game design doc).
     private var helpers: some View {
         HStack(spacing: 10) {
-            if number >= 2 {
+            if pathNumber >= 2 {
                 Button { controller.undo() } label: {
                     Label(undoLabel, systemImage: "arrow.uturn.backward")
                 }
                 .buttonStyle(SquishButtonStyle(fill: .white, text: Theme.plum))
                 .disabled(!controller.session.canUndo)
             }
-            if number >= 7 {
+            if pathNumber >= 7 {
                 Button { controller.extraJar() } label: { Label("Extra jar", systemImage: "plus") }
                     .buttonStyle(SquishButtonStyle(fill: Theme.mint, text: Theme.plum))
                     .disabled(!controller.canExtraJar)
             }
-            if number >= 4 {
+            if pathNumber >= 4 {
                 Button { controller.hint() } label: { Label("Hint", systemImage: "lightbulb.fill") }
                     .buttonStyle(SquishButtonStyle(fill: Theme.butter, text: Theme.plum))
                     .disabled(!controller.canHint)
@@ -430,20 +487,24 @@ struct JoinedBookSticker: View {
 struct WinCard: View {
     let stars: Int
     let showpiece: Bool
-    var coins = 0
+    let summary: AppModel.WinSummary
     /// Levels still to win before the next capsule (0 = the next level has one).
     var toCapsule: Int?
     var autoAdvance = false
     var haptics: Haptics?
-    /// Opt-in bonus gift box (rewarded ad). Nil when not offered.
-    var gift: (() -> Void)?
+    var sounds: SoundService?
+    /// "x2 coins" by opt-in ad (one tap for Remove Ads owners). Nil when not offered.
+    var doubleCoins: (() -> Void)?
+    var doubleIsFree = false
+    /// The one soft Remove Ads line. Nil when it isn't due.
+    var removeAds: (() -> Void)?
     let next: () -> Void
     @State private var shown = 0
     @State private var coinsShown = 0
     @State private var left = false
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 14) {
             Text(showpiece ? "Genius!" : "Sorted!").font(Theme.title(34)).foregroundStyle(Theme.plum)
             HStack(spacing: 10) {
                 ForEach(0..<3) { i in
@@ -454,9 +515,19 @@ struct WinCard: View {
                         .rotationEffect(.degrees(i < shown ? 0 : -25))
                 }
             }
-            if coins > 0 {
-                Label("+\(coinsShown)", systemImage: "circle.hexagongrid.fill").font(Theme.title(20)).foregroundStyle(Theme.plum)
-                    .contentTransition(.numericText())
+            if summary.total > 0 {
+                HStack(spacing: 10) {
+                    Label("+\(coinsShown)", systemImage: "circle.hexagongrid.fill").font(Theme.title(22)).foregroundStyle(Theme.plum)
+                        .contentTransition(.numericText())
+                        .accessibilityIdentifier("win-coins")
+                    if summary.streak >= 2 {
+                        // First-try streak. Never shown when it breaks, never in gentle mode.
+                        Label("\(summary.streak)", systemImage: "flame.fill").font(Theme.body(16)).foregroundStyle(Theme.bubblegum)
+                    }
+                }
+                if summary.dailyBonus > 0 {
+                    Text("First win today: +\(summary.dailyBonus)").font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.7))
+                }
             }
             if let toCapsule {
                 Label {
@@ -466,30 +537,46 @@ struct WinCard: View {
                 }
                 .font(Theme.body(14)).foregroundStyle(Theme.grape)
             }
-            if let gift {
-                Button(action: gift) { Label("Bonus gift", systemImage: "gift.fill") }
-                    .buttonStyle(SquishButtonStyle(fill: Theme.grape))
+            if let doubleCoins {
+                Button(action: doubleCoins) {
+                    Label("x2 coins", systemImage: doubleIsFree ? "sparkles" : "play.rectangle.fill")
+                }
+                .buttonStyle(SquishButtonStyle(fill: Theme.grape))
             }
             Button("Next") { go() }.buttonStyle(SquishButtonStyle()).font(Theme.title(22))
                 .accessibilityIdentifier("win-next")
+            if let removeAds {
+                Button("Like playing without breaks? Remove Ads is in the shop.", action: removeAds)
+                    .font(Theme.body(12)).foregroundStyle(Theme.plum.opacity(0.6))
+                    .multilineTextAlignment(.center)
+            }
         }
         .padding(28)
         .background(RoundedRectangle(cornerRadius: 32).fill(Theme.marshmallow))
         .padding(30)
+        .onChange(of: summary.total) { _, total in
+            // Doubled: the number jumps up with the coin shower.
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.5)) { coinsShown = total }
+        }
         .task {
-            // Stars slam in one by one, each with a tap you can feel.
+            // Stars slam in one by one, each with a tap you can feel and hear.
             for i in 1...max(1, stars) {
                 try? await Task.sleep(nanoseconds: 300_000_000)
                 withAnimation(.spring(response: 0.25, dampingFraction: 0.4)) { shown = i }
                 haptics?.land()
+                sounds?.star(i)
             }
-            // Coins count up.
-            if coins > 0 {
-                for n in 1...coins {
-                    try? await Task.sleep(nanoseconds: 45_000_000)
-                    withAnimation(.easeOut(duration: 0.05)) { coinsShown = n }
+            // Coins count up into the total.
+            let total = summary.total
+            if total > 0 {
+                let steps = min(total, 18)
+                for n in 1...steps {
+                    try? await Task.sleep(nanoseconds: 40_000_000)
+                    withAnimation(.easeOut(duration: 0.05)) { coinsShown = total * n / steps }
+                    if n % 3 == 0 { sounds?.coin() }
                 }
                 haptics?.complete()
+                if summary.streak >= 2 { sounds?.play("streak") }
             }
             if autoAdvance {
                 try? await Task.sleep(nanoseconds: 700_000_000)

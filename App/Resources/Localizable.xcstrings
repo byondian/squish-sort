@@ -48,14 +48,80 @@
         }
       }
     },
+    "%lld treats for your Buddy!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バディにおやつ%lldこ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "버디에게 간식 %lld개!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "給夥伴 %lld 個點心！"
+          }
+        }
+      }
+    },
     "%lld/%lld": {
       "shouldTranslate": false
     },
     "+%lld": {
       "shouldTranslate": false
     },
+    "+%lld coins!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コイン+%lld！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "코인 +%lld!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "金幣 +%lld！"
+          }
+        }
+      }
+    },
     "?": {
       "shouldTranslate": false
+    },
+    "A Christmas capsule!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "クリスマスカプセルだ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "크리스마스 캡슐이야!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "聖誕扭蛋！"
+          }
+        }
+      }
     },
     "Ads removed. Thank you!": {
       "localizations": {
@@ -97,28 +163,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "多一個罐子就能繼續玩。"
-          }
-        }
-      }
-    },
-    "Another capsule": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "もう1つカプセル"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "캡슐 하나 더"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "再開一個扭蛋"
           }
         }
       }
@@ -229,50 +273,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "棋盤主題"
-          }
-        }
-      }
-    },
-    "Bonus capsule (watch an ad)": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ボーナスカプセル（広告を見る）"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "보너스 캡슐 (광고 보기)"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "額外扭蛋（看廣告）"
-          }
-        }
-      }
-    },
-    "Bonus gift": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ボーナスギフト"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "보너스 선물"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "額外禮物"
           }
         }
       }
@@ -427,6 +427,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "選擇你的夥伴"
+          }
+        }
+      }
+    },
+    "Christmas": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "クリスマス"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "크리스마스"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "聖誕節"
           }
         }
       }
@@ -651,6 +673,28 @@
         }
       }
     },
+    "Daily gift": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今日のプレゼント"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오늘의 선물"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每日禮物"
+          }
+        }
+      }
+    },
     "Delete": {
       "localizations": {
         "ja": {
@@ -669,6 +713,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "刪除"
+          }
+        }
+      }
+    },
+    "Door %lld": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld番のとびら"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld번 문"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "第 %lld 扇門"
+          }
+        }
+      }
+    },
+    "Double pop!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ダブルポップ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "더블 팝!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雙重啵！"
           }
         }
       }
@@ -783,6 +871,28 @@
         }
       }
     },
+    "First win today: +%lld": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今日のはじめてのクリア：+%lld"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오늘의 첫 승리: +%lld"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今日首勝：+%lld"
+          }
+        }
+      }
+    },
     "For your Buddy": {
       "localizations": {
         "ja": {
@@ -801,6 +911,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "給夥伴"
+          }
+        }
+      }
+    },
+    "Free": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無料"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "무료"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "免費"
           }
         }
       }
@@ -1179,6 +1311,28 @@
         }
       }
     },
+    "Like playing without breaks? Remove Ads is in the shop.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "休みなしで遊びたい？「広告を消す」はショップにあるよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "쉬지 않고 놀고 싶나요? '광고 제거'는 상점에 있어요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "想不中斷地玩嗎？「移除廣告」就在商店裡。"
+          }
+        }
+      }
+    },
     "Low squeak": {
       "localizations": {
         "ja": {
@@ -1197,6 +1351,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "低音"
+          }
+        }
+      }
+    },
+    "Lucky!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ラッキー！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "럭키!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "幸運！"
           }
         }
       }
@@ -1729,24 +1905,46 @@
         }
       }
     },
-    "Opens 18 December": {
+    "One more guess": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "12月18日オープン"
+            "value": "もう1回こたえる"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "12월 18일 오픈"
+            "value": "한 번 더 맞히기"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "12 月 18 日開放"
+            "value": "再猜一次"
+          }
+        }
+      }
+    },
+    "One step closer to a capsule!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "カプセルまであと一歩近づいたよ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "캡슐에 한 걸음 더 가까워졌어!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "離扭蛋又近一步！"
           }
         }
       }
@@ -2389,6 +2587,28 @@
         }
       }
     },
+    "Thanks! No ad breaks for a while.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ありがとう！しばらく広告はお休みだよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "고마워! 한동안 광고 없이 놀 수 있어."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "謝謝！接下來一陣子不會有廣告休息。"
+          }
+        }
+      }
+    },
     "This one is tricky! Try a move, then ask me again.": {
       "localizations": {
         "ja": {
@@ -2785,24 +3005,24 @@
         }
       }
     },
-    "Win levels to earn coins too: 5 a win, 10 with three stars.": {
+    "Win levels to earn coins too: 50 a win, 100 with three stars.": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "レベルをクリアしてもコインがもらえます：1回5枚、星3つなら10枚。"
+            "value": "レベルをクリアしてもコインがもらえます。1回50、星3つで100。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "레벨을 깨도 코인을 받아요: 승리마다 5개, 별 3개면 10개."
+            "value": "레벨을 깨도 코인을 받아요. 한 번에 50, 별 3개면 100."
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "過關也能賺金幣：每次 5 枚，三顆星 10 枚。"
+            "value": "過關也能得到金幣：每關 50，三星 100。"
           }
         }
       }
@@ -2935,6 +3155,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "新！"
+          }
+        }
+      }
+    },
+    "x2 coins": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コイン2倍"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "코인 2배"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "金幣 2 倍"
           }
         }
       }

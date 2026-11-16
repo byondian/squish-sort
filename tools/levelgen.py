@@ -5,7 +5,7 @@ Deterministic (fixed seeds), so re-running reproduces the same files. Levels 1-3
 and 5 are hand-built from the game design doc; the rest are chosen from random
 candidates by target par for their beat. CI re-solves every level in Swift.
 
-Usage: python3 tools/levelgen.py [--only toyshop-07]
+Usage: python3 tools/levelgen.py [--only toyshop-07] [--world christmas]
 """
 import json, os, random, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -31,6 +31,9 @@ SHAPE = {
 }
 # Later worlds start a little bigger at the same positions.
 WORLD_BUMP = {0: 0, 1: 1, 2: 1, 3: 1}
+# Christmas Workshop is a side world that opens after main level 10, so it is
+# tuned like main levels 12 to 35: Toy Shop sizes for its first half.
+SIDE_WORLD = 3
 
 
 def capsule_level(pos):
@@ -61,7 +64,7 @@ def mechanic_count(mech, pos):
     if mech == "sticky":
         return min(1 + pos // 5, 4)
     if mech == "frozen":
-        return min(1 + pos // 6, 4)
+        return min(1 + pos // 8, 3)
     return 0
 
 
@@ -164,7 +167,10 @@ def make_level(world_idx, pos):
     global_number = world_idx * 20 + pos
     beat = BEATS[(pos - 1) % 10]
     base_k, empties, mult = SHAPE[pos]
-    k = min(8, base_k + (WORLD_BUMP[world_idx] if pos > 3 else 0))
+    bump = WORLD_BUMP[world_idx] if pos > 3 else 0
+    if world_idx == SIDE_WORLD and pos <= 10:
+        bump = 0
+    k = min(8, base_k + bump)
     if pos in (5, 15):
         k = base_k
     names = kinds_for(world_idx, k)
@@ -197,7 +203,7 @@ def make_level(world_idx, pos):
         target = mult * k if mult else None
         if world_idx > 0 and pos <= 3 and mech:
             # intro levels of a mechanic world keep the mechanic gentle
-            mcount = 1 if pos == 1 else 2
+            mcount = 1 if pos == 1 or (world_idx == SIDE_WORLD and pos == 2) else 2
         jars, mechanics = choose(rng, level, names, empties, mech, mcount, target)
     level["jars"] = jars
     level["mechanics"] = {"hidden": mechanics.get("hidden", []),
@@ -239,7 +245,12 @@ def main():
     only = None
     if "--only" in sys.argv:
         only = sys.argv[sys.argv.index("--only") + 1]
+    world = None
+    if "--world" in sys.argv:
+        world = sys.argv[sys.argv.index("--world") + 1]
     for w in range(len(WORLDS)):
+        if world and WORLDS[w][0] != world:
+            continue
         for pos in range(1, 21):
             lid = f"{WORLDS[w][0]}-{pos:02d}"
             if only and only != lid:

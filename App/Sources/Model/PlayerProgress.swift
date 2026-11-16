@@ -32,9 +32,20 @@ struct PlayerProgress: Codable, Equatable {
     var trackingAsked = false
     var ownedThemes: Set<String> = [BoardTheme.cream.rawValue]
     var theme = BoardTheme.cream.rawValue
-    /// Worlds of capsule levels whose bonus capsule (opt-in ad) hasn't been taken.
-    var bonusCapsules: [String] = []
-    var winsSinceGift = 0
+    /// Christmas Workshop: opened through the festive door (it then stays open for good).
+    var christmasEntered = false
+    /// Furthest unlocked Christmas level, 0-based within that world.
+    var christmasUnlocked = 0
+    var advent = AdventState()
+    /// Consecutive first-try wins on new levels.
+    var winStreak = 0
+    /// yyyy-MM-dd of the last win, for the first-win-of-the-day coins.
+    var lastWinDay: String?
+    /// yyyy-MM-dd the Buddy's daily gift was last taken.
+    var dailyGiftDay: String?
+    var optInAds = OptInAdState()
+    /// The one soft Remove Ads line on the win card has been shown.
+    var removeAdsOfferShown = false
     var buddy = BuddyState()
     var mystery = MysteryState()
     /// Squishies built in the Maker. They live in the Squish Room and as a Buddy only.
@@ -71,8 +82,14 @@ struct PlayerProgress: Codable, Equatable {
         trackingAsked = v(.trackingAsked, d.trackingAsked)
         ownedThemes = v(.ownedThemes, d.ownedThemes)
         theme = v(.theme, d.theme)
-        bonusCapsules = v(.bonusCapsules, d.bonusCapsules)
-        winsSinceGift = v(.winsSinceGift, d.winsSinceGift)
+        christmasEntered = v(.christmasEntered, d.christmasEntered)
+        christmasUnlocked = v(.christmasUnlocked, d.christmasUnlocked)
+        advent = v(.advent, d.advent)
+        winStreak = v(.winStreak, d.winStreak)
+        lastWinDay = (try? c.decodeIfPresent(String.self, forKey: .lastWinDay)) ?? nil
+        dailyGiftDay = (try? c.decodeIfPresent(String.self, forKey: .dailyGiftDay)) ?? nil
+        optInAds = v(.optInAds, d.optInAds)
+        removeAdsOfferShown = v(.removeAdsOfferShown, d.removeAdsOfferShown)
         buddy = v(.buddy, d.buddy)
         mystery = v(.mystery, d.mystery)
         made = v(.made, d.made)

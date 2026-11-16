@@ -15,6 +15,9 @@ final class PieceNode: SKNode {
     /// bottom centre, so squash and stretch are anchored at the bottom.
     private let content = SKNode()
     private var art: SKSpriteNode?
+    private let glitter = SKLabelNode(text: "✨")
+    /// The level's lucky squishy glitters (unless it is still wrapped).
+    var isLucky = false
 
     init(kindID: String, diameter d: CGFloat) {
         self.kindID = kindID
@@ -90,6 +93,17 @@ final class PieceNode: SKNode {
         duetMark.isHidden = true
         content.addChild(duetMark)
 
+        glitter.fontSize = d * 0.42
+        glitter.verticalAlignmentMode = .center
+        glitter.position = CGPoint(x: d * 0.3, y: d * 0.3)
+        glitter.zPosition = 3
+        glitter.isHidden = true
+        glitter.run(.repeatForever(.sequence([
+            .group([.scale(to: 1.25, duration: 0.5), .fadeAlpha(to: 1, duration: 0.5)]),
+            .group([.scale(to: 0.8, duration: 0.5), .fadeAlpha(to: 0.55, duration: 0.5)]),
+        ])))
+        content.addChild(glitter)
+
         startBreathing()
     }
 
@@ -137,6 +151,7 @@ final class PieceNode: SKNode {
         ice.isHidden = !piece.isFrozen
         ice.alpha = piece.frozen >= 2 ? 1 : 0.6
         duetMark.isHidden = !piece.bondedAbove
+        glitter.isHidden = !isLucky || piece.hidden
         if wasHidden && !piece.hidden {
             // Unwrap: a little pop.
             run(.sequence([.scale(to: 1.15, duration: 0.08), .scale(to: 1, duration: 0.12)]))

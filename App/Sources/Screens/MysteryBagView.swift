@@ -2,7 +2,8 @@ import SwiftUI
 import SquishPolicy
 
 /// Mystery Bag: once a day, poke the bag three ways, then guess who's inside.
-/// A right guess moves the capsule bar on one step. No purchase, no ads.
+/// Any guess pays coins, and a right guess moves the capsule bar on one step.
+/// After a wrong guess, one more guess a day by opt-in ad (never in gentle mode).
 struct MysteryBagView: View {
     @EnvironmentObject var model: AppModel
     @State private var poked: Set<Int> = []
@@ -10,6 +11,8 @@ struct MysteryBagView: View {
     /// Nil until the player has guessed in this visit.
     @State private var guessedRight: Bool?
     @State private var jiggle = false
+    /// A wrong guess from earlier in this visit, greyed out for the extra guess.
+    @State private var ruledOut: String?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -55,6 +58,12 @@ struct MysteryBagView: View {
         VStack(spacing: 12) {
             bagShape.opacity(0.5)
             Text("Come back tomorrow for a new bag").font(Theme.body(18)).foregroundStyle(Theme.plum)
+            if model.offersExtraMysteryGuess {
+                Button { model.takeExtraMysteryGuess {} } label: {
+                    Label("One more guess", systemImage: model.ownsRemoveAds ? "sparkles" : "play.rectangle.fill")
+                }
+                .buttonStyle(SquishButtonStyle(fill: Theme.grape))
+            }
         }
     }
 
@@ -113,6 +122,8 @@ struct MysteryBagView: View {
                         .background(RoundedRectangle(cornerRadius: 20).fill(.white))
                     }
                     .buttonStyle(.plain)
+                    .disabled(choice.id == ruledOut)
+                    .opacity(choice.id == ruledOut ? 0.35 : 1)
                     .accessibilityIdentifier("guess-\(choice.id)")
                 }
             }
@@ -121,9 +132,25 @@ struct MysteryBagView: View {
 
     private func result(_ bag: MysteryBag, right: Bool) -> some View {
         VStack(spacing: 14) {
-            SquishyView(id: bag.answer.id, rarity: bag.answer.rarity).frame(width: 190, height: 190)
+            if right || !model.offersExtraMysteryGuess {
+                SquishyView(id: bag.answer.id, rarity: bag.answer.rarity).frame(width: 190, height: 190)
+            } else {
+                bagShape
+            }
             Text(right ? LocalizedStringKey("Yes! You got it!") : LocalizedStringKey("So close!")).font(Theme.title(28)).foregroundStyle(Theme.plum)
-            Text("It was \(bag.answer.name(in: model.language)).").font(Theme.body(18)).foregroundStyle(Theme.plum)
+            Label("+\(model.config.coins.mysteryGuess)", systemImage: "circle.hexagongrid.fill")
+                .font(Theme.body(17)).foregroundStyle(Theme.plum)
+            if !right && model.offersExtraMysteryGuess {
+                // The answer stays hidden while one more guess is on offer.
+                Button {
+                    model.takeExtraMysteryGuess { withAnimation { guessedRight = nil } }
+                } label: {
+                    Label("One more guess", systemImage: model.ownsRemoveAds ? "sparkles" : "play.rectangle.fill")
+                }
+                .buttonStyle(SquishButtonStyle(fill: Theme.grape))
+            } else {
+                Text("It was \(bag.answer.name(in: model.language)).").font(Theme.body(18)).foregroundStyle(Theme.plum)
+            }
             Text("Come back tomorrow for a new bag").font(Theme.body(15)).foregroundStyle(Theme.plum.opacity(0.6))
         }
     }
@@ -131,6 +158,7 @@ struct MysteryBagView: View {
     private func pokeButton(_ index: Int, _ title: LocalizedStringKey, _ icon: String) -> some View {
         Button {
             model.haptics.land()
+            model.sounds.play("mystery_poke")
             withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { _ = poked.insert(index) }
             withAnimation(.easeInOut(duration: 0.08).repeatCount(4, autoreverses: true)) { jiggle.toggle() }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { jiggle = false }
@@ -161,7 +189,7 @@ struct MysteryBagView: View {
     private func guess(_ choice: Collectible) {
         guard guessedRight == nil else { return }
         let right = model.guessMystery(choice.id)
-        if right { model.haptics.win() } else { model.haptics.reject() }
+        if right { model.haptics.win() } else { model.haptics.reject(); ruledOut = choice.id }
         withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) { guessedRight = right }
     }
 }

@@ -28,14 +28,19 @@ struct HomeView: View {
             Button { model.screen = .level(model.progress.highestUnlocked) } label: {
                 VStack(spacing: 2) {
                     Text("Play").font(Theme.title(30))
-                    Text("Level \(model.progress.highestUnlocked + 1)").font(Theme.body(15)).opacity(0.85)
+                    Text("Level \(model.levelNumber(model.progress.highestUnlocked))").font(Theme.body(15)).opacity(0.85)
                 }
                 .frame(maxWidth: .infinity)
             }
             .buttonStyle(SquishButtonStyle())
             .accessibilityIdentifier("home-play")
+            if model.adventDoors > 0 { AdventShelf() }
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 3), spacing: 10) {
                 tile("Levels", "map.fill") { model.screen = .map }
+                // The festive door: Christmas Workshop, a side world. No countdown anywhere.
+                if model.showsFestiveDoor {
+                    tile("Christmas", "snowflake") { model.openFestiveDoor() }
+                }
                 tile("Book", "book.fill") { model.screen = .book }
                 if model.isExtraUnlocked(.squishRoom) {
                     tile("Squish Room", "hand.tap.fill", extra: .squishRoom) { model.open(.squishRoom) }
@@ -71,6 +76,72 @@ struct HomeView: View {
             }
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// 24 little doors, 1 to 24 December. Every door up to today can be opened once,
+/// so missed days are caught up. Fixed rewards, no ad, no streak.
+struct AdventShelf: View {
+    @EnvironmentObject var model: AppModel
+    @State private var said: LocalizedStringKey?
+
+    var body: some View {
+        VStack(spacing: 6) {
+            if let said {
+                Text(said).font(Theme.body(14)).foregroundStyle(Theme.plum)
+                    .transition(.scale(scale: 0.6).combined(with: .opacity))
+            }
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(1...Advent.doors, id: \.self) { day in door(day).id(day) }
+                    }
+                    .padding(.horizontal, 4).padding(.vertical, 4)
+                }
+                .onAppear {
+                    // Start at the first door that can still be opened.
+                    if let first = (1...Advent.doors).first(where: { canOpen($0) }) { proxy.scrollTo(first, anchor: .leading) }
+                }
+            }
+        }
+        .accessibilityIdentifier("advent-shelf")
+    }
+
+    private func canOpen(_ day: Int) -> Bool {
+        day <= model.adventDoors && !model.progress.advent.opened.contains(day)
+    }
+
+    private func door(_ day: Int) -> some View {
+        let opened = model.progress.advent.opened.contains(day)
+        let ready = canOpen(day)
+        return Button {
+            guard let reward = model.openAdventDoor(day) else { return }
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) { said = text(for: reward) }
+        } label: {
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(opened ? Color.white.opacity(0.5) : (ready ? Theme.bubblegum : Theme.mint.opacity(0.6)))
+                if opened {
+                    Image(systemName: "checkmark").font(.system(size: 16, weight: .bold)).foregroundStyle(Theme.plum.opacity(0.4))
+                } else {
+                    Text(verbatim: "\(day)").font(Theme.title(18)).foregroundStyle(ready ? .white : Theme.plum.opacity(0.5))
+                }
+            }
+            .frame(width: 44, height: 52)
+            .scaleEffect(ready ? 1.06 : 1)
+        }
+        .buttonStyle(.plain)
+        .disabled(!ready)
+        .accessibilityLabel(Text("Door \(day)"))
+    }
+
+    private func text(for reward: Advent.Reward) -> LocalizedStringKey {
+        switch reward {
+        case .coins(let amount): return "+\(amount) coins!"
+        case .treats(let count): return "\(count) treats for your Buddy!"
+        case .capsuleStep: return "One step closer to a capsule!"
+        case .christmasCapsule: return "A Christmas capsule!"
+        }
     }
 }
 
@@ -122,6 +193,14 @@ struct BuddyHomeView: View {
                         .font(Theme.body(15)).foregroundStyle(Theme.bubblegum)
                 }
                 .foregroundStyle(Theme.plum)
+                if model.dailyGiftReady {
+                    // The Buddy's daily gift: coins by opt-in ad, or free in gentle mode.
+                    Button { withAnimation { model.takeDailyGift() }; squish() } label: {
+                        Label("Daily gift", systemImage: model.isGentleMode || model.ownsRemoveAds ? "gift.fill" : "play.rectangle.fill")
+                    }
+                    .buttonStyle(SquishButtonStyle(fill: Theme.grape))
+                    .accessibilityIdentifier("daily-gift")
+                }
                 HStack(spacing: 10) {
                     Button { withAnimation { model.feedBuddy() }; squish() } label: {
                         Label("Treat ×\(model.progress.buddy.treats)", systemImage: "birthday.cake.fill")

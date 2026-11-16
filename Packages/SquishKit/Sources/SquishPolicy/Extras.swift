@@ -35,6 +35,65 @@ public enum SquishyShop {
     }
 }
 
+// MARK: - Christmas Workshop (side world)
+
+/// A side world behind a festive door on the home screen. The door shows once
+/// level 10 is won and the date is inside the window. A player who has opened
+/// it keeps the world for good; for everyone else the door just isn't there
+/// after the window. No countdown and no "last chance" anywhere.
+public enum ChristmasWorld {
+    public static let id = "christmas"
+    public static let doorAfterLevel = 10
+
+    public static func doorShows(today: String, levelTenWon: Bool, entered: Bool, config: GameConfig = GameConfig()) -> Bool {
+        entered || (levelTenWon && config.isChristmasWindow(today: today))
+    }
+}
+
+/// Advent shelf: 24 doors with fixed rewards. Every door up to today's date can
+/// be opened once, so missed days are caught up. No ad, no streak, no notification.
+public enum Advent {
+    public static let doors = 24
+
+    public enum Reward: Equatable, Sendable {
+        case coins(Int)
+        case treats(Int)
+        /// One step on the capsule bar (the same bar as the Mystery Bag).
+        case capsuleStep
+        case christmasCapsule
+    }
+
+    public static func reward(day: Int, rules: CoinRules = CoinRules()) -> Reward {
+        switch day {
+        case 24: return .christmasCapsule
+        case 6, 12, 18: return .capsuleStep
+        default: return day % 2 == 1 ? .coins(rules.adventCoins) : .treats(2)
+        }
+    }
+
+    /// How many doors can be open today: 0 outside the window, the day of the
+    /// month in the opening month, and all 24 after it until the window ends.
+    public static func doorsAvailable(today: String, config: GameConfig = GameConfig()) -> Int {
+        guard config.isChristmasWindow(today: today), today.count == 10, config.christmasOpenFrom.count == 10 else { return 0 }
+        guard today.prefix(7) == config.christmasOpenFrom.prefix(7) else { return doors }
+        guard let day = Int(today.suffix(2)), let first = Int(config.christmasOpenFrom.suffix(2)) else { return 0 }
+        return min(doors, max(0, day - first + 1))
+    }
+}
+
+public struct AdventState: Codable, Equatable, Sendable {
+    public var opened: Set<Int> = []
+
+    public init() {}
+
+    /// Opens a door once. False when it is already open or not yet available.
+    public mutating func open(day: Int, available: Int) -> Bool {
+        guard (1...Advent.doors).contains(day), day <= available, !opened.contains(day) else { return false }
+        opened.insert(day)
+        return true
+    }
+}
+
 // MARK: - Mystery Bag
 
 /// Daily guessing game: three clues, pick 1 of 4. No purchase and no ad anywhere.
@@ -81,16 +140,44 @@ public struct MysteryState: Codable, Equatable, Sendable {
     public var lastPlayedDay: String?
     /// Right guesses towards the next free capsule.
     public var steps = 0
+    /// The day of the last wrong guess, and of the last extra guess taken.
+    public var wrongDay: String?
+    public var extraGuessDay: String?
 
     public init() {}
 
     public func canPlay(today: String) -> Bool { lastPlayedDay != today }
 
+    /// After a wrong guess: one more guess, once a day (by opt-in ad; the caller checks age).
+    public func canOfferExtraGuess(today: String) -> Bool {
+        lastPlayedDay == today && wrongDay == today && extraGuessDay != today
+    }
+
+    public mutating func grantExtraGuess(today: String) {
+        guard canOfferExtraGuess(today: today) else { return }
+        extraGuessDay = today
+        lastPlayedDay = nil
+    }
+
+    /// One step on the capsule bar from somewhere else (an advent door).
+    /// Returns true when it fills the bar and earns a capsule.
+    public mutating func addStep() -> Bool {
+        steps += 1
+        if steps >= MysteryBag.stepsPerCapsule {
+            steps = 0
+            return true
+        }
+        return false
+    }
+
     /// One guess a day. Returns true when this guess fills the bar and earns a capsule.
     public mutating func recordGuess(correct: Bool, today: String) -> Bool {
         guard canPlay(today: today) else { return false }
         lastPlayedDay = today
-        guard correct else { return false }
+        guard correct else {
+            wrongDay = today
+            return false
+        }
         steps += 1
         if steps >= MysteryBag.stepsPerCapsule {
             steps = 0

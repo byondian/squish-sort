@@ -11,6 +11,8 @@ import DeclaredAgeRange
 enum DeclaredAge {
     @MainActor
     static func request(storefront: String) async -> AgeRange? {
+        // UI tests can't drive Apple's system sheet, so they use the app's own question.
+        if AppModel.isUITesting { return nil }
         #if canImport(DeclaredAgeRange)
         if #available(iOS 26.0, *) {
             guard let vc = topViewController() else { return nil }

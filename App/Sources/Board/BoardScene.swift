@@ -29,6 +29,8 @@ final class BoardScene: SKScene {
     private var busy = false
     /// First-ever board: this move's squishy starts lifted with a hand on the target jar.
     var tutorialMove: Move?
+    /// The kind that glitters on this level (the lucky squishy), if any.
+    var luckyKind: UInt8?
 
     init(board: Board, kinds: [String]) {
         self.board = board
@@ -115,6 +117,7 @@ final class BoardScene: SKScene {
                 let node = PieceNode(kindID: kinds[Int(piece.kind)], diameter: geometry.piece * 0.86)
                 node.position = slot(j, i)
                 node.zPosition = 5
+                node.isLucky = piece.kind == luckyKind
                 node.apply(piece)
                 addChild(node)
                 nodes.append(node)
@@ -163,6 +166,52 @@ final class BoardScene: SKScene {
         label.run(.sequence([
             .scale(to: 1.25, duration: 0.12), .scale(to: 1, duration: 0.08),
             .group([.moveBy(x: 0, y: geometry.piece * 0.8, duration: 0.5), .fadeOut(withDuration: 0.5)]),
+            .removeFromParent(),
+        ]))
+    }
+
+    /// Coins burst out of a finished jar and fly up to the level pot.
+    func throwCoins(fromJar j: Int, count: Int) {
+        guard j < geometry.centers.count, count > 0 else { return }
+        let start = CGPoint(x: geometry.centers[j].x, y: geometry.centers[j].y + geometry.jarSize.height * 0.5)
+        let target = CGPoint(x: size.width / 2, y: size.height - geometry.piece * 0.2)
+        for i in 0..<count {
+            let coin = SKShapeNode(circleOfRadius: geometry.piece * 0.15)
+            coin.fillColor = UIColor(hex: 0xFFD86B)
+            coin.strokeColor = .plum
+            coin.lineWidth = 1.5
+            coin.position = start
+            coin.zPosition = 45
+            addChild(coin)
+            let burst = CGPoint(x: start.x + CGFloat.random(in: -1...1) * geometry.piece * 0.8,
+                                y: start.y + CGFloat.random(in: 0.2...1) * geometry.piece)
+            let fly = SKAction.move(to: target, duration: 0.35)
+            fly.timingMode = .easeIn
+            coin.run(.sequence([
+                .wait(forDuration: 0.04 * Double(i)),
+                .move(to: burst, duration: 0.15),
+                fly,
+                .group([.scale(to: 0.3, duration: 0.08), .fadeOut(withDuration: 0.08)]),
+                .removeFromParent(),
+            ]))
+        }
+    }
+
+    /// A short word that pops above a jar ("Double pop!", "Lucky!").
+    func popLabel(_ text: String, atJar j: Int) {
+        guard j < geometry.centers.count else { return }
+        let label = SKLabelNode(text: text)
+        label.fontName = "AvenirNext-Heavy"
+        label.fontSize = geometry.piece * 0.5
+        label.fontColor = UIColor(hex: 0xFF7EB6)
+        let x = min(max(geometry.centers[j].x, geometry.piece * 2), size.width - geometry.piece * 2)
+        label.position = CGPoint(x: x, y: geometry.centers[j].y + geometry.jarSize.height * 0.75)
+        label.zPosition = 46
+        label.setScale(0.3)
+        addChild(label)
+        label.run(.sequence([
+            .scale(to: 1.2, duration: 0.12), .scale(to: 1, duration: 0.08), .wait(forDuration: 0.5),
+            .group([.moveBy(x: 0, y: geometry.piece * 0.6, duration: 0.4), .fadeOut(withDuration: 0.4)]),
             .removeFromParent(),
         ]))
     }

@@ -1,16 +1,94 @@
-/// Coins (Ian, 16 Nov 2026): earned by winning, also sold in packs. Spent on
+import Foundation
+
+/// Coin amounts (rules approved 16 Nov 2026). Remote config can change the numbers.
+public struct CoinRules: Codable, Equatable, Sendable {
+    public var winBase = 50
+    public var threeStarBonus = 50
+    /// Two jars completed within `doublePopSeconds`.
+    public var doublePop = 10
+    public var doublePopSeconds: Double = 3
+    public var lucky = 100
+    public var luckyFromLevel = 10
+    /// About one first-clear level in this many has a lucky squishy.
+    public var luckyOneIn = 5
+    public var firstWinOfDay = 50
+    public var mysteryGuess = 50
+    public var streakStep = 10
+    public var streakCap = 50
+    public var dailyGift = 200
+    public var adventCoins = 100
+
+    public init() {}
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let d = CoinRules()
+        func int(_ key: CodingKeys, _ fallback: Int) -> Int { max(0, ((try? c.decodeIfPresent(Int.self, forKey: key)) ?? nil) ?? fallback) }
+        winBase = int(.winBase, d.winBase)
+        threeStarBonus = int(.threeStarBonus, d.threeStarBonus)
+        doublePop = int(.doublePop, d.doublePop)
+        doublePopSeconds = ((try? c.decodeIfPresent(Double.self, forKey: .doublePopSeconds)) ?? nil) ?? d.doublePopSeconds
+        lucky = int(.lucky, d.lucky)
+        luckyFromLevel = int(.luckyFromLevel, d.luckyFromLevel)
+        luckyOneIn = int(.luckyOneIn, d.luckyOneIn)
+        firstWinOfDay = int(.firstWinOfDay, d.firstWinOfDay)
+        mysteryGuess = int(.mysteryGuess, d.mysteryGuess)
+        streakStep = int(.streakStep, d.streakStep)
+        streakCap = int(.streakCap, d.streakCap)
+        dailyGift = int(.dailyGift, d.dailyGift)
+        adventCoins = int(.adventCoins, d.adventCoins)
+    }
+}
+
+/// Coins (Ian, 16 Nov 2026): earned by playing, also sold in packs. Spent on
 /// hints, extra jars, board themes and Buddy treats and gifts only. Nothing paid leads to squishies or
 /// capsules: capsules come only from finishing levels, and every level can be
 /// finished free (no move limit, unlimited retries, auto-softening).
 public enum Coins {
-    public static func earned(forWinWithStars stars: Int) -> Int { stars >= 3 ? 10 : 5 }
+    public static func earned(forWinWithStars stars: Int, rules: CoinRules = CoinRules()) -> Int {
+        rules.winBase + (stars >= 3 ? rules.threeStarBonus : 0)
+    }
 
     /// Coins for a win, given the best stars the level had before. A level pays
     /// once: in full on the first clear, plus the three-star difference once if
     /// a replay gets there. Replays otherwise pay nothing, so easy levels can't be farmed.
-    public static func earned(forWinWithStars stars: Int, previousBest: Int?) -> Int {
-        guard let previousBest else { return earned(forWinWithStars: stars) }
-        return max(0, earned(forWinWithStars: stars) - earned(forWinWithStars: previousBest))
+    public static func earned(forWinWithStars stars: Int, previousBest: Int?, rules: CoinRules = CoinRules()) -> Int {
+        guard let previousBest else { return earned(forWinWithStars: stars, rules: rules) }
+        return max(0, earned(forWinWithStars: stars, rules: rules) - earned(forWinWithStars: previousBest, rules: rules))
+    }
+
+    /// The three-star bonus this win adds on the win card: once per level.
+    public static func starBonus(stars: Int, previousBest: Int?, rules: CoinRules = CoinRules()) -> Int {
+        stars >= 3 && (previousBest ?? 0) < 3 ? rules.threeStarBonus : 0
+    }
+
+    /// The base win coins split across the level's jars; the last jar takes the remainder.
+    public static func jarShares(jars: Int, rules: CoinRules = CoinRules()) -> [Int] {
+        guard jars > 0 else { return [] }
+        var shares = Array(repeating: rules.winBase / jars, count: jars)
+        shares[jars - 1] += rules.winBase - (rules.winBase / jars) * jars
+        return shares
+    }
+
+    /// Consecutive first-try wins on levels not cleared before. A replay
+    /// neither moves nor breaks the streak, so it can't be farmed.
+    public static func nextStreak(current: Int, firstClear: Bool, attempts: Int) -> Int {
+        guard firstClear else { return current }
+        return attempts == 1 ? current + 1 : 0
+    }
+
+    /// From a streak of 2: +10 a step, capped. Never in gentle mode (the caller checks).
+    public static func streakBonus(streak: Int, rules: CoinRules = CoinRules()) -> Int {
+        streak >= 2 ? min(rules.streakCap, (streak - 1) * rules.streakStep) : 0
+    }
+
+    /// The lucky squishy's kind for this level, or nil when the level has none.
+    /// A stable hash of the install seed and level id, so a restart never re-rolls it.
+    public static func luckyKind(levelNumber: Int, levelID: String, installSeed: String, kinds: Int,
+                                 rules: CoinRules = CoinRules()) -> Int? {
+        guard levelNumber >= rules.luckyFromLevel, rules.luckyOneIn > 0, kinds > 0 else { return nil }
+        guard MysteryBag.stableHash(installSeed + "|lucky|" + levelID) % UInt64(rules.luckyOneIn) == 0 else { return nil }
+        return Int(MysteryBag.stableHash(installSeed + "|kind|" + levelID) % UInt64(kinds))
     }
 
     public enum Item: String, Codable, CaseIterable, Sendable {
@@ -20,11 +98,11 @@ public enum Coins {
 
         public var price: Int {
             switch self {
-            case .hint: return 25
-            case .extraJar: return 40
-            case .theme: return 300
-            case .treat: return 10
-            case .gift: return 60
+            case .hint: return 250
+            case .extraJar: return 400
+            case .theme: return 3000
+            case .treat: return 100
+            case .gift: return 600
             }
         }
     }
@@ -35,15 +113,101 @@ public enum Coins {
     }
 
     public static let packs: [Pack] = [
-        Pack(productID: "com.ianatkinson.squishsort.coins100", coins: 100),
-        Pack(productID: "com.ianatkinson.squishsort.coins350", coins: 350),
-        Pack(productID: "com.ianatkinson.squishsort.coins750", coins: 750),
+        Pack(productID: "com.ianatkinson.squishsort.coins1000", coins: 1000),
+        Pack(productID: "com.ianatkinson.squishsort.coins3500", coins: 3500),
+        Pack(productID: "com.ianatkinson.squishsort.coins7500", coins: 7500),
     ]
 
     public static func pack(for productID: String) -> Pack? { packs.first { $0.productID == productID } }
+}
 
-    /// Free gift from the opt-in bonus gift box (a rewarded ad). Fixed, never random.
-    public static let bonusGift = 20
+/// The coins a level's jars have thrown so far. Banked on the win; a retry or
+/// leaving the level starts a new, empty pot, so nothing can be farmed.
+public struct LevelPot: Equatable, Sendable {
+    public struct Payout: Equatable, Sendable {
+        public var coins = 0
+        public var doublePop = false
+        public var lucky = false
+
+        public init(coins: Int = 0, doublePop: Bool = false, lucky: Bool = false) {
+            self.coins = coins
+            self.doublePop = doublePop
+            self.lucky = lucky
+        }
+    }
+
+    public private(set) var coins = 0
+    /// False on a replay: jars throw sparkles, not coins.
+    public let paysCoins: Bool
+    private let shares: [Int]
+    private let luckyKind: Int?
+    private let rules: CoinRules
+    private var paidKinds: Set<Int> = []
+    private var lastJarAt: Double?
+
+    public init(firstClear: Bool, jars: Int, luckyKind: Int? = nil, rules: CoinRules = CoinRules()) {
+        paysCoins = firstClear
+        shares = Coins.jarShares(jars: jars, rules: rules)
+        self.luckyKind = firstClear ? luckyKind : nil
+        self.rules = rules
+    }
+
+    /// A jar of `kind` was completed `seconds` into the attempt. Each kind pays
+    /// once, so undoing and completing the same jar again adds nothing.
+    public mutating func jarCompleted(kind: Int, at seconds: Double) -> Payout {
+        guard paysCoins, !paidKinds.contains(kind) else { return Payout() }
+        var out = Payout()
+        out.coins = paidKinds.count < shares.count ? shares[paidKinds.count] : 0
+        paidKinds.insert(kind)
+        if let last = lastJarAt, seconds - last <= rules.doublePopSeconds {
+            out.doublePop = true
+            out.coins += rules.doublePop
+        }
+        lastJarAt = seconds
+        if kind == luckyKind {
+            out.lucky = true
+            out.coins += rules.lucky
+        }
+        coins += out.coins
+        return out
+    }
+}
+
+/// Opt-in (rewarded) ads: capped per day across every placement.
+public struct OptInAdState: Codable, Equatable, Sendable {
+    public var day: String?
+    public var count = 0
+
+    public init() {}
+
+    public func used(today: String) -> Int { day == today ? count : 0 }
+
+    public func canWatch(today: String, cap: Int) -> Bool { used(today: today) < cap }
+
+    public mutating func record(today: String) {
+        if day != today { day = today; count = 0 }
+        count += 1
+    }
+}
+
+public enum OptInReward: String, CaseIterable, Sendable {
+    case hint, extraJar, doubleCoins, extraGuess, dailyGift
+
+    /// Gentle mode is offered opt-in ads only for a hint and for the extra jar.
+    /// (Its daily gift is free, with no ad.)
+    public func isOffered(to group: AgeGroup) -> Bool {
+        group != .child || self == .hint || self == .extraJar
+    }
+}
+
+/// One soft "Remove Ads" line on the win card after the 3rd interstitial ever,
+/// for players of 13 and over, then never again outside the shop and Settings.
+public enum RemoveAdsOffer {
+    public static let afterInterstitials = 3
+
+    public static func shouldShow(interstitialsShown: Int, group: AgeGroup, alreadyShown: Bool, ownsRemoveAds: Bool) -> Bool {
+        !alreadyShown && !ownsRemoveAds && group != .child && interstitialsShown >= afterInterstitials
+    }
 }
 
 public struct CoinWallet: Codable, Equatable, Sendable {
