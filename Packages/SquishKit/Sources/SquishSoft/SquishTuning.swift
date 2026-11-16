@@ -7,9 +7,9 @@ import Foundation
 public enum SquishFeel: String, Codable, CaseIterable, Sendable {
     case foam, jelly, gel, mochi
 
-    /// Roster entries name their feel; anything missing or unknown is slow-rise foam.
+    /// Roster entries name their feel; anything missing or unknown is jelly.
     public init(named name: String?) {
-        self = name.flatMap(SquishFeel.init(rawValue:)) ?? .foam
+        self = name.flatMap(SquishFeel.init(rawValue:)) ?? .jelly
     }
 }
 
@@ -233,7 +233,7 @@ public struct SquishTuning: Codable, Equatable, Sendable {
     public var reducedPress = 0.5
 
     public func feel(_ feel: SquishFeel) -> SquishFeelTuning {
-        feels[feel.rawValue] ?? SquishTuning.standard.feels[SquishFeel.foam.rawValue]!
+        feels[feel.rawValue] ?? SquishTuning.standard.feels[SquishFeel.jelly.rawValue]!
     }
 
     public func material(_ feel: SquishFeel, reduceMotion: Bool = false) -> SquishMaterial {

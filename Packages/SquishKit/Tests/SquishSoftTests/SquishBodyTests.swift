@@ -231,8 +231,8 @@ final class SquishBodyTests: XCTestCase {
     func testEveryFeelHasItsNumbers() throws {
         let tuning = SquishTuning.standard
         for feel in SquishFeel.allCases { XCTAssertNotNil(tuning.feels[feel.rawValue]) }
-        XCTAssertEqual(SquishFeel(named: nil), .foam)
-        XCTAssertEqual(SquishFeel(named: "slime"), .foam)
+        XCTAssertEqual(SquishFeel(named: nil), .jelly)
+        XCTAssertEqual(SquishFeel(named: "slime"), .jelly)
         XCTAssertEqual(SquishFeel(named: "mochi"), .mochi)
         // The table is plain data, so the design thread can retune it without touching the code.
         let copy = try JSONDecoder().decode(SquishTuning.self, from: JSONEncoder().encode(tuning))

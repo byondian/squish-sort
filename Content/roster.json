@@ -10,7 +10,7 @@
     "ko": "딸기콩",
     "zh-Hant": "莓莓"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "tango",
@@ -22,7 +22,7 @@
     "ko": "탱고",
     "zh-Hant": "小橘狐"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "sunny",
@@ -34,7 +34,7 @@
     "ko": "삐약이",
     "zh-Hant": "啾啾"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "minty",
@@ -46,7 +46,7 @@
     "ko": "민트개굴",
     "zh-Hant": "呱呱"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "blu",
@@ -58,7 +58,7 @@
     "ko": "블루",
     "zh-Hant": "小藍鯨"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "grapey",
@@ -70,7 +70,7 @@
     "ko": "포도문어",
     "zh-Hant": "葡萄章魚"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "peach-bun",
@@ -82,7 +82,7 @@
     "ko": "복숭아빵",
     "zh-Hant": "桃桃包"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "dino-rex",
@@ -94,7 +94,7 @@
     "ko": "꼬마렉스",
     "zh-Hant": "小暴龍"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "capy",
@@ -106,7 +106,7 @@
     "ko": "카삐",
     "zh-Hant": "水豚豚"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "axo",
@@ -130,7 +130,7 @@
     "ko": "뾰족이",
     "zh-Hant": "刺刺"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "snooze",
@@ -142,7 +142,7 @@
     "ko": "쿨쿨늘보",
     "zh-Hant": "懶懶"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "buzzy",
@@ -154,7 +154,7 @@
     "ko": "윙윙이",
     "zh-Hant": "嗡嗡"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "sparkle-unicorn",
@@ -166,7 +166,7 @@
     "ko": "반짝유니콘",
     "zh-Hant": "閃閃獨角獸"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "blaze-dragon",
@@ -178,7 +178,7 @@
     "ko": "불꽃드래곤",
     "zh-Hant": "焰焰龍"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "morphy",
@@ -191,7 +191,7 @@
     "ko": "변신말랑이",
     "zh-Hant": "變變"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "golden-shop-cat",
@@ -203,7 +203,7 @@
     "ko": "황금복냥이",
     "zh-Hant": "金招財貓"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "macaron",
@@ -275,7 +275,7 @@
     "ko": "뱅글롤리",
     "zh-Hant": "捲捲糖"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "mochi-ice",
@@ -323,7 +323,7 @@
     "ko": "딸기젖소",
     "zh-Hant": "草莓牛牛"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "cream-puff",
@@ -335,7 +335,7 @@
     "ko": "슈크림",
     "zh-Hant": "泡芙芙"
    },
-   "feel": "mochi"
+   "feel": "foam"
   },
   {
    "id": "taffy-snake",
@@ -359,7 +359,7 @@
     "ko": "초코박쥐",
     "zh-Hant": "巧克蝠"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "birthday-cake",
@@ -396,7 +396,7 @@
     "ko": "변신소프티",
     "zh-Hant": "旋旋甜筒"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "golden-gummy",
@@ -420,7 +420,7 @@
     "ko": "룰루",
     "zh-Hant": "露露兔"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "riff",
@@ -432,7 +432,7 @@
     "ko": "리프",
     "zh-Hant": "弦弦熊"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "zuzu",
@@ -444,7 +444,7 @@
     "ko": "살랑냥",
     "zh-Hant": "珠珠貓"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "pip",
@@ -456,7 +456,7 @@
     "ko": "막내멍",
     "zh-Hant": "皮皮汪"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "nova",
@@ -468,7 +468,7 @@
     "ko": "노바",
     "zh-Hant": "諾諾虎"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "coco",
@@ -480,7 +480,7 @@
     "ko": "쿵쿵이",
     "zh-Hant": "琴琴龍"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "lightstick-lamb",
@@ -492,7 +492,7 @@
     "ko": "응원봉양",
     "zh-Hant": "應援小羊"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "photocard-panda",
@@ -504,7 +504,7 @@
     "ko": "포카판다",
     "zh-Hant": "小卡熊貓"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "encore-otter",
@@ -516,7 +516,7 @@
     "ko": "앵콜수달",
     "zh-Hant": "安可水獺"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "fan-sign-hamster",
@@ -528,7 +528,7 @@
     "ko": "팬싸햄찌",
     "zh-Hant": "簽名倉鼠"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "chomp",
@@ -540,7 +540,7 @@
     "ko": "와앙상어",
     "zh-Hant": "咬咬鯊"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "mushie",
@@ -552,7 +552,7 @@
     "ko": "몽글버섯",
     "zh-Hant": "菇菇"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "sleepy-moon",
@@ -564,7 +564,7 @@
     "ko": "꾸벅달님",
     "zh-Hant": "睏睏月"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "centre-star",
@@ -576,7 +576,7 @@
     "ko": "센터스타",
     "zh-Hant": "主角星星"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "star-narwhal",
@@ -588,7 +588,7 @@
     "ko": "별빛일각고래",
     "zh-Hant": "星光一角鯨"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "glimmer",
@@ -601,7 +601,7 @@
     "ko": "변신반짝이",
     "zh-Hant": "亮晶晶"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "golden-mic",
@@ -613,7 +613,7 @@
     "ko": "황금마이크",
     "zh-Hant": "金麥克風"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "santa",
@@ -625,7 +625,7 @@
     "ko": "말랑산타",
     "zh-Hant": "聖誕老公公"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "elfie",
@@ -637,7 +637,7 @@
     "ko": "요정엘피",
     "zh-Hant": "小精靈"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "reindeer",
@@ -649,7 +649,7 @@
     "ko": "땡땡사슴",
     "zh-Hant": "點點鹿"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "snowbo",
@@ -661,7 +661,7 @@
     "ko": "눈보",
     "zh-Hant": "胖胖雪人"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "ginger",
@@ -685,7 +685,7 @@
     "ko": "뒤뚱이",
     "zh-Hant": "搖搖企鵝"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "candy-cane-cat",
@@ -697,7 +697,7 @@
     "ko": "캔디케인냥",
     "zh-Hant": "拐杖糖喵"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "hot-cocoa-bear",
@@ -709,7 +709,7 @@
     "ko": "코코아곰",
     "zh-Hant": "熱可可熊"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "polar-bear",
@@ -721,7 +721,7 @@
     "ko": "포근북극곰",
     "zh-Hant": "白熊熊"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "nutcracker-mouse",
@@ -733,7 +733,7 @@
     "ko": "호두까기쥐",
     "zh-Hant": "胡桃鉗鼠"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "starry-tree",
@@ -745,7 +745,7 @@
     "ko": "반짝별트리",
     "zh-Hant": "星星聖誕樹"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "flurry",
@@ -758,7 +758,7 @@
     "ko": "변신눈송이",
     "zh-Hant": "雪花花"
    },
-   "feel": "foam"
+   "feel": "jelly"
   },
   {
    "id": "golden-bell",
@@ -770,7 +770,7 @@
     "ko": "황금방울",
     "zh-Hant": "金鈴鈴"
    },
-   "feel": "foam"
+   "feel": "jelly"
   }
  ],
  "squishRoomToys": [

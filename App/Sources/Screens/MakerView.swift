@@ -15,7 +15,7 @@ struct MakerView: View {
     var body: some View {
         VStack(spacing: 0) {
             TopBar(title: "Squishy Maker")
-            SoftSquishy(toy: "\(draft.shape)-\(draft.ears)-\(draft.accessory)", look: String(describing: draft), feel: .foam) {
+            SoftSquishy(toy: "\(draft.shape)-\(draft.ears)-\(draft.accessory)", look: String(describing: draft), feel: .jelly) {
                 MadeSquishyView(made: draft)
             }
             .frame(width: 200, height: 200)

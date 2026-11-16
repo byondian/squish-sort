@@ -130,7 +130,7 @@ final class SoftSquishyScene: SKScene {
     private var body: SquishBody?
     private var image: UIImage?
     private var mask: SquishMask?
-    private var feel = SquishFeel.foam
+    private var feel = SquishFeel.jelly
     private let sprite = SKSpriteNode()
     private let shadow = SKShapeNode(ellipseOf: CGSize(width: 100, height: 18))
     private var world = SquishBody.World(floor: 0, left: 0, right: 0)
