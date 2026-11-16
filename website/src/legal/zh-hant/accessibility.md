@@ -1,30 +1,30 @@
 ---
-title: Accessibility
-description: How we make Squish Sort and squishsort.app usable for as many players as possible, and how to tell us about problems.
+title: 無障礙
+description: 我們如何讓 Squish Sort 和 squishsort.app 讓越多玩家使用越好，以及如何告訴我們遇到的問題。
 ---
-We want everyone to be able to enjoy a good squish.
+我們希望每個人都能享受捏一捏的樂趣。
 
-## In the game
+## 遊戲中
 
-- **Shape as well as colour:** every board squishy has its own silhouette, so players with colour vision deficiency can tell them apart.
-- **No time pressure:** no timers, no move limits, unlimited undo and retries. Levels get a little easier after a few fails.
-- **Tap or drag:** move squishies by tapping two jars or by dragging.
-- **Sound and haptics** can be switched off in Settings, and nothing in the game depends on hearing.
-- The game follows your iPhone's Reduce Motion setting where possible.
+- **不只靠顏色，也靠形狀：** 棋盤上每隻軟軟都有自己的輪廓，色覺辨識障礙的玩家也能分辨。
+- **沒有時間壓力：** 沒有計時器、沒有步數限制，可以無限復原和重試。失敗幾次後，關卡會稍微變簡單。
+- **點選或拖曳：** 依序點選兩個罐子，或用拖曳的方式移動軟軟。
+- **音效和觸覺回饋**可以在設定中關閉，遊戲中沒有任何內容需要靠聽覺。
+- 遊戲會盡可能遵循 iPhone 的「減少動態效果」設定。
 
-We are still improving support for VoiceOver and larger text sizes in the game. If something gets in your way, please tell us.
+我們仍在改善遊戲對 VoiceOver 和較大字體的支援。如果有任何地方造成不便，請告訴我們。
 
-## On this website
+## 本網站
 
-We aim to meet the Web Content Accessibility Guidelines (WCAG) 2.2 at level AA:
+我們以符合網頁內容無障礙指引（WCAG）2.2 AA 等級為目標：
 
-- Pages work with a keyboard and screen readers, with a "skip to content" link.
-- The playable demo can be played with a keyboard (Tab to a jar, Enter to pick it), and announces moves to screen readers.
-- Animations calm down if your device asks for reduced motion.
-- Text colours meet contrast guidelines against their backgrounds.
+- 網頁可用鍵盤和螢幕閱讀器操作，並有「跳至主要內容」連結。
+- 試玩版可用鍵盤遊玩（按 Tab 選擇罐子，按 Enter 拿起），並會向螢幕閱讀器播報每一步。
+- 如果你的裝置要求減少動態效果，動畫會變得平緩。
+- 文字顏色與背景的對比符合指引標準。
 
-**Known limitations:** the giant squishy at the top of the home page is decorative and mostly visual; it can be squeezed with Enter or Space.
+**已知限制：** 首頁上方的巨大軟軟是裝飾性的，主要是視覺效果；可以用 Enter 或空白鍵捏它。
 
-## Tell us
+## 告訴我們
 
-Found a barrier? Email support@squishsort.app with what happened and the device you use. We aim to reply within two working days. This statement was last reviewed on {{updated}}.
+遇到障礙了嗎？請寫信到 support@squishsort.app，說明發生了什麼事以及你使用的裝置。我們會盡量在兩個工作天內回覆。本聲明最後檢視於 {{updated}}。

@@ -1,150 +1,154 @@
 ---
-title: Privacy policy
-description: How Squish Sort and squishsort.app use personal data, in plain words, including children's privacy, ads, retention and your rights.
+title: 隱私權政策
+description: 用簡單的話說明 Squish Sort App 與 squishsort.app 如何處理個人資料，包括兒童隱私、廣告、保存期間與你的權利。
 ---
 :::summary
-**The short version**
+**重點整理**
 
-- Squish Sort has **no accounts**. Your progress, collection, coins, settings and any names you type stay **on your iPhone**. We never receive them.
-- The game asks your age once, and keeps only an age group (child, teen or adult), never your birth date.
-- Ads are shown by **Google AdMob**. Google receives technical data such as your IP address and device information to show and measure ads. Ads are only **personalised** for players old enough to agree **and** who tap Allow on Apple's tracking prompt (and, in the UK, EEA and Switzerland, also agree in Google's consent form).
-- Players under 13 (under 14 in Korea), and anyone who skips the age question, get **gentle mode**: child-safe, non-personalised ads, no tracking prompt and no tracking.
-- **Purchases** go through Apple. We never see your card or Apple Account details.
-- If you write to support, we use your email only to reply.
-- We do not sell personal data.
+- Squish Sort **沒有帳號**。你的進度、圖鑑、金幣、設定和你輸入的名字都**只存在你的 iPhone 上**，我們不會收到。
+- 遊戲只會問一次年齡，而且只保存年齡層（兒童、青少年或成人），不保存生日。
+- 廣告由 **Google AdMob** 提供。為了顯示及評估廣告，Google 會收到 IP 位址和裝置資訊等技術資料。只有達到可同意年齡、**而且**在 Apple 的追蹤提示中點選「允許」的玩家，才會看到**個人化廣告**（在英國、歐洲經濟區和瑞士，還需要在 Google 的同意表單中同意）。
+- 未滿 13 歲（在韓國為未滿 14 歲）的玩家，以及跳過年齡問題的人，會進入**溫和模式**：只顯示適合兒童的非個人化廣告，不顯示追蹤提示，也不追蹤。
+- **購買**透過 Apple 進行。我們看不到你的信用卡或 Apple 帳號資料。
+- 如果你寫信給客服，我們只會用你的電子郵件回覆你。
+- 我們不會販售個人資料。
 :::
 
-## Who we are
+## 我們是誰
 
-Squish Sort is made by {{operator}}, an independent developer based in {{country}} ("we", "us"). We are the controller for the personal data described here.
+Squish Sort 由位於{{country}}的獨立開發者 {{operator}}（以下稱「我們」）製作。我們是本政策所述個人資料的控管者。
 
-- Email for privacy questions and requests: privacy@squishsort.app
-- Email for everything else: support@squishsort.app
-- Postal address: {{postal}}
+- 隱私問題與請求：privacy@squishsort.app
+- 其他問題：support@squishsort.app
+- 郵寄地址：{{postal}}
 
-This policy covers the Squish Sort app for iPhone and this website, squishsort.app.
+本政策適用於 iPhone 版 Squish Sort App 及本網站 squishsort.app。
 
-## What stays on your iPhone
+## 只存在你 iPhone 上的資料
 
-These are saved only on your device. We do not receive them, and they are deleted when you delete the app:
+以下資料只儲存在你的裝置上。我們不會收到，刪除 App 時也會一併刪除：
 
-- Game progress, stars, levels completed and settings (such as sound).
-- Your squishy collection, spares, capsules opened and coin balance.
-- Names you give your Squishy Buddy or squishies you make in the Squishy Maker. Names are filtered for rude words and never leave the device.
-- Your age group (child, teen or adult), how it was set (Apple's age range, the age question, a parent's choice or a skipped question), your App Store country, and a yes/no flag for whether personalised ads may be offered. **Your year of birth is used once to work out the group and is not stored.**
-- Your answer to the Buddy's "How are you today?" question is not stored at all.
-- Records of purchases you made (the product and Apple's transaction number), so a purchase is only counted once.
+- 遊戲進度、星星、已過的關卡和設定（例如音效）。
+- 你的軟軟收藏、重複的軟軟、開過的扭蛋和金幣餘額。
+- 你為軟軟夥伴，或在捏捏樂製作所做的軟軟取的名字。名字會過濾不雅字詞，而且絕不離開裝置。
+- 你的年齡層（兒童、青少年或成人）、設定方式（Apple 的年齡範圍、年齡問題、家長設定或跳過）、你的 App Store 國家或地區，以及是否可以提供個人化廣告的是／否標記。**出生年份只用一次來判斷年齡層，不會保存。**
+- 夥伴問的「你今天好嗎？」的答案完全不會保存。
+- 你的購買紀錄（商品和 Apple 的交易編號），讓每筆購買只計算一次。
 
-iPhone backups (iCloud or computer) may include this game data. Those backups are controlled by you and Apple, not by us.
+iPhone 的備份（iCloud 或電腦）可能包含這些遊戲資料。這些備份由你和 Apple 控管，而不是我們。
 
-## What leaves your iPhone, and why
+## 離開你 iPhone 的資料及原因
 
-| What | Who receives it | Why | Legal basis (UK/EU) |
+| 資料 | 接收者 | 目的 | 法律依據（英國／歐盟） |
 |---|---|---|---|
-| A request for the game's settings file (your IP address and basic device and app information, as with any web request) | Us, through our host Vercel | Lets us switch features or seasonal events on and off without an app update. No player data is sent. | Legitimate interests (running the game) |
-| IP address, device and app information, ad interactions, approximate location worked out from the IP address, and an app-specific device identifier | Google (AdMob) | To show ads, limit how often you see the same ad, measure ads and prevent fraud | Legitimate interests; consent where required (see below) |
-| Apple's advertising identifier (IDFA) and personalised ads | Google (AdMob) | Personalised ads, only if you are old enough and allowed tracking | Consent (Apple's prompt and, in the UK/EEA/CH, Google's form) |
-| Your choices in Google's consent form | Google | To remember and respect your ad choices | Legal obligation and legitimate interests |
-| Purchase details | Apple | To process payments, refunds and Family Sharing | Contract (Apple is responsible for this processing) |
-| Anonymous, aggregated install and usage numbers | Apple, then us in App Store Connect | Apple shares statistics only from people who chose to share with app developers | Your choice in iPhone settings |
+| 讀取遊戲設定檔的請求（和所有網路請求一樣，包含你的 IP 位址及基本裝置與 App 資訊） | 我們，透過主機服務商 Vercel | 讓我們不必更新 App 就能開關功能或季節活動。不會傳送任何玩家資料。 | 正當利益（營運遊戲） |
+| IP 位址、裝置與 App 資訊、廣告互動、由 IP 位址推估的大致位置，以及 App 專屬的裝置識別碼 | Google（AdMob） | 顯示廣告、限制同一則廣告的出現次數、評估廣告成效及防止詐欺 | 正當利益；必要時取得同意（見下方） |
+| Apple 的廣告識別碼（IDFA）及個人化廣告 | Google（AdMob） | 個人化廣告，僅限達到可同意年齡且允許追蹤的玩家 | 同意（Apple 的提示，以及在英國／歐洲經濟區／瑞士的 Google 表單） |
+| 你在 Google 同意表單中的選擇 | Google | 記住並尊重你的廣告選擇 | 法律義務及正當利益 |
+| 購買資料 | Apple | 處理付款、退款及家人共享 | 契約（此處理由 Apple 負責） |
+| 匿名、彙總的安裝與使用數據 | Apple，再透過 App Store Connect 提供給我們 | Apple 只分享選擇與開發者分享資料的使用者的統計 | 你在 iPhone 設定中的選擇 |
 
-The app contains **no analytics or crash-reporting tools** of its own, and no social features, chat, accounts or location access in this version.
+此版本的 App **沒有任何自有的分析或當機回報工具**，也沒有社群功能、聊天、帳號或位置存取。
 
-## Ads, tracking and your choices
+## 廣告、追蹤與你的選擇
 
-- **Players under 13 (under 14 in Korea), and anyone who skips the age question:** every ad request is marked as directed to children. Google then shows only non-personalised, general-audience (G-rated) ads and must limit its data use under children's privacy laws. Apple's tracking prompt is never shown.
-- **Teens under the age where they can agree to personalised ads in their country** (16 in some EU countries, and all under-18s in the UK): ads are non-personalised and requests are marked as under the age of consent.
-- **Everyone else:** after a few levels, the game may show Apple's prompt asking to allow tracking. If you tap Ask App Not to Track, you still get ads, but they are not personalised and the IDFA is not shared. In the UK, EEA and Switzerland, Google's consent form also appears. You can change your answer at any time in **Settings > Privacy choices** in the game, and in iPhone **Settings > Privacy & Security > Tracking**.
+- **未滿 13 歲（在韓國為未滿 14 歲）的玩家，以及跳過年齡問題的人：** 每一則廣告請求都會標示為以兒童為對象。Google 只會顯示非個人化、普遍級（G 級）的廣告，並必須依兒童隱私法律限制資料使用。絕不顯示 Apple 的追蹤提示。
+- **未達所在國家可同意個人化廣告年齡的青少年**（部分歐盟國家為 16 歲，英國為所有未滿 18 歲者）：廣告為非個人化，請求會標示為未達同意年齡。
+- **其他所有人：** 在第 7 關開始時，遊戲可能會顯示 Apple 詢問是否允許追蹤的提示。如果你點選「要求 App 不要追蹤」，仍然會看到廣告，但不會是個人化廣告，也不會分享 IDFA。在英國、歐洲經濟區和瑞士，還會出現 Google 的同意表單。你隨時可以在遊戲的**設定 > 隱私選項**，以及 iPhone 的**設定 > 隱私權與安全性 > 追蹤**中更改。
 
-Google's own policies explain how it uses data from apps that show its ads: [How Google uses information from sites or apps that use its services](https://policies.google.com/technologies/partner-sites). More detail is on our [ads and tracking page]({{h}}/ads).
+Google 如何使用顯示其廣告的 App 所提供的資料，請見 Google 的政策：[Google 如何使用採用我們服務的網站或應用程式所提供的資訊](https://policies.google.com/technologies/partner-sites?hl=zh-TW)。更多說明請見我們的[廣告與追蹤]({{h}}/ads)頁面。
 
-## Children's privacy
+## 兒童隱私 {#children-s-privacy}
 
-Squish Sort is designed for a mixed audience, including children. We follow the US Children's Online Privacy Protection Act (COPPA), the UK Age Appropriate Design Code, the GDPR rules for children and Korea's rules for under-14s. In short:
+Squish Sort 是為包括兒童在內的各年齡層玩家設計的。我們遵守美國《兒童線上隱私保護法》（COPPA）、英國《適齡設計規範》、GDPR 的兒童相關規定，以及韓國對未滿 14 歲者的規定。簡單來說：
 
-- Nothing that sends data (the ads system) starts before the age question is answered or skipped.
-- A child's age group is set to gentle mode. Unknown or unclear ages are treated as a child.
-- We do not collect children's names, contact details, photos, voice, precise location or any other information that identifies them.
-- For children, the only data that leaves the device is the technical data Google needs to show child-directed, non-personalised ads and to keep them safe from fraud (such as an IP address and an app-specific device identifier). This is the "support for internal operations" use allowed by COPPA. It is not used for behavioural advertising or profiling, and we do not let it be shared with third parties for their own purposes.
-- Children can't make purchases or leave gentle mode without passing a grown-up check. There are no pop-ups pushing purchases in gentle mode.
-- If a child writes to support, we use the message only to reply (ideally to a parent) and then delete it.
+- 在回答或跳過年齡問題之前，任何會傳送資料的功能（廣告系統）都不會啟動。
+- 兒童的年齡層會設為溫和模式。年齡不明或不清楚時，一律視為兒童。
+- 我們不收集兒童的姓名、聯絡方式、照片、聲音、精確位置或任何其他可識別身分的資訊。
+- 對兒童而言，離開裝置的資料只有 Google 顯示以兒童為對象的非個人化廣告、以及防止詐欺所需的技術資料（例如 IP 位址和 App 專屬的裝置識別碼）。這屬於 COPPA 允許的「支援內部營運」用途，不會用於行為廣告或建立個人檔案，我們也不允許第三方為其自身目的分享這些資料。
+- 兒童必須通過大人確認才能購買或離開溫和模式。溫和模式中不會跳出推銷購買的視窗。
+- 如果兒童寫信給客服，我們只會用該訊息回覆（最好是回覆家長），之後便會刪除。
 
-**Parents' rights:** you can ask us at any time what information we hold about your child, ask us to delete it, and refuse further collection. Because we hold nothing on our servers about players, deleting the app removes all game data. To stop all collection, delete the app. Write to privacy@squishsort.app with any question. See also the [parents' guide]({{h}}/parents).
+**家長的權利：** 你隨時可以詢問我們保有哪些關於你孩子的資訊、要求刪除，並拒絕進一步收集。由於我們的伺服器上不保存任何玩家資料，刪除 App 就會移除所有遊戲資料。若要停止所有收集，請刪除 App。如有任何問題，請寫信到 privacy@squishsort.app。也請參考[家長指南]({{h}}/parents)。
 
-## Support messages and the contact form {#support}
+## 客服訊息與聯絡表單 {#support}
 
-If you email us or use the contact form, we receive your name or nickname, email address, message and anything else you include (such as your iPhone model). We use it only to answer you and to keep a record of the conversation. Emails are delivered and stored by our email provider Resend. Legal basis: legitimate interests (answering you) and, for privacy requests, legal obligation.
+如果你寫電子郵件給我們或使用聯絡表單，我們會收到你的名字或暱稱、電子郵件地址、訊息內容，以及你提供的其他資訊（例如 iPhone 型號）。這些資料只用來回覆你並保留對話紀錄。電子郵件由我們的郵件服務商 Resend 傳送及儲存。法律依據：正當利益（回覆你）；隱私請求則為法律義務。
 
-## The website
+## 本網站
 
-- **No cookies.** This website does not set cookies.
-- **Hosting:** our host, Vercel, processes your IP address and browser details to deliver pages and protect the site, and keeps short-lived server logs.
-- **Visitor statistics:** we use Vercel Web Analytics, which counts page views without cookies and without identifying you or following you across sites.
-- **Your browser remembers** a couple of small preferences on your device only (for example, whether the demo's sound is muted). See [cookies on this website]({{h}}/cookies).
-- **App Store badge:** once the game is out, the "Download on the App Store" badge is loaded from Apple's servers, so Apple receives your IP address when the page loads.
-- **Squishy Shop:** links to shops such as Amazon are affiliate links. If you click one, that shop receives your visit and may use its own cookies under its own privacy policy.
+- **不使用 Cookie。** 本網站不設定任何 Cookie。
+- **主機服務：** 我們的主機服務商 Vercel 會處理你的 IP 位址和瀏覽器資訊，以提供網頁並保護網站，並保留短期的伺服器紀錄。
+- **訪客統計：** 我們使用 Vercel Web Analytics，在不使用 Cookie、不識別你、也不跨網站追蹤的情況下計算瀏覽次數。
+- **你的瀏覽器會記住**幾個小設定，只存在你的裝置上（例如是否已將試玩版靜音）。請見[本網站的 Cookie]({{h}}/cookies)。
+- **App Store 標誌：** 遊戲上架後，「在 App Store 下載」標誌會從 Apple 的伺服器載入，因此網頁載入時 Apple 會收到你的 IP 位址。
+- **軟軟商店：** 前往 Amazon 等商店的連結是聯盟行銷連結。點選後，該商店會收到你的造訪紀錄，並可能依其隱私權政策使用自己的 Cookie。
 
-## How long we keep data
+## 資料保存期間
 
-| Data | How long |
+| 資料 | 保存期間 |
 |---|---|
-| Game data on your iPhone | Until you delete the app (and any backups you keep) |
-| Server logs from the settings file and website | Short-term, normally up to 30 days, at our host |
-| Website statistics | Aggregated counts only, no personal profile |
-| Support emails and form messages | Up to 24 months after the conversation ends, then deleted. Messages from or about a child are deleted once answered |
-| Records of privacy requests | 3 years, to show we handled them |
-| Data received by Google for ads | Under Google's retention policies (for example, Google anonymises IP addresses in ad logs after 9 months and cookie or identifier data after 18 months) |
+| iPhone 上的遊戲資料 | 直到你刪除 App（以及你保留的任何備份） |
+| 設定檔和網站的伺服器紀錄 | 短期，通常最長 30 天，存放於主機服務商 |
+| 網站統計 | 僅彙總數字，不建立個人檔案 |
+| 客服電子郵件與表單訊息 | 對話結束後最長 24 個月，之後刪除。來自兒童或與兒童有關的訊息在回覆後刪除 |
+| 隱私請求紀錄 | 3 年，以證明我們已妥善處理 |
+| Google 為廣告收到的資料 | 依 Google 的保存政策（例如 Google 會在 9 個月後將廣告紀錄中的 IP 位址匿名化，18 個月後將 Cookie 或識別碼資料匿名化） |
 
-## Who processes data for us
+## 替我們處理資料的對象
 
-- **Google LLC / Google Ireland Ltd** (AdMob and the consent form) for ads. For personalised ads Google acts as an independent controller.
-- **Vercel Inc.** (USA) for website hosting and the settings file.
-- **Resend (Plus Five Five, Inc.)** (USA) for email.
-- **Apple Inc.** handles App Store purchases, refunds, and App Store statistics under its own privacy policy.
+- **Google LLC / Google Ireland Ltd**（AdMob 與同意表單）：廣告。就個人化廣告而言，Google 為獨立控管者。
+- **Vercel Inc.**（美國）：網站主機與設定檔。
+- **Resend（Plus Five Five, Inc.）**（美國）：電子郵件。
+- **Apple Inc.**：依其自身的隱私權政策處理 App Store 購買、退款及 App Store 統計。
 
-We do not sell personal data, and we do not share it for money.
+我們不會販售個人資料，也不會為了金錢分享個人資料。
 
-## International transfers
+## 跨境傳輸
 
-Google, Vercel and Resend are based in the United States, so data may be processed there. Where UK or EU law requires it, these transfers are protected by the EU-US Data Privacy Framework (and its UK extension) or by Standard Contractual Clauses.
+Google、Vercel 和 Resend 位於美國，因此資料可能在美國處理。依英國或歐盟法律要求時，這些傳輸受歐美資料隱私框架（及其英國延伸）或標準契約條款保護。
 
-## Your rights
+## 你的權利
 
-Depending on where you live, you may have the right to access, correct or delete your personal data, to object to or restrict its use, to data portability, and to withdraw consent at any time (for example, by turning off tracking). Because we keep no player data on our servers, most requests are answered by deleting the app, but write to privacy@squishsort.app and we will answer within one month (or sooner where the law requires). We may need to confirm it's really you, without asking for more data than necessary.
+依你居住的地區，你可能有權查詢、更正或刪除你的個人資料，反對或限制其使用，要求資料可攜，以及隨時撤回同意（例如關閉追蹤）。由於我們的伺服器上不保存玩家資料，大多數請求只要刪除 App 即可完成，但你也可以寫信到 privacy@squishsort.app，我們會在一個月內（或法律要求的更短期限內）回覆。我們可能需要確認是你本人，但不會要求超過必要的資料。
 
-You can also complain to your data protection authority, for example the CNPD in Luxembourg, the ICO in the UK or your local authority in the EU.
+你也可以向你所在地的資料保護主管機關申訴，例如盧森堡的 CNPD 或英國的 ICO。
 
-## Extra information for your country
+## 各國家／地區的補充資訊
 
-### United States (including California and other states)
+### 台灣
 
-- We don't sell personal information. Personalised ads for adults who allow tracking may count as "sharing" for cross-context behavioural advertising under California law. You can opt out at any time by choosing Ask App Not to Track or switching tracking off in iPhone settings. Children under 13 never get personalised ads, so their data is never sold or shared. Teens aged 13 to 15 only get personalised ads if they themselves opt in by tapping Allow on Apple's tracking prompt.
-- Categories collected in the last 12 months: identifiers (IP address, device identifiers, IDFA only with permission), internet activity (ad interactions), approximate location (from IP), and, if you contact us, your name and email. Sources: your device and you. Purposes: as described above.
-- We honour Global Privacy Control signals on this website (it does not track you anyway).
-- We will not discriminate against you for using your rights. To use them, email privacy@squishsort.app. An authorised agent may make a request for you with your written permission.
+- 依《個人資料保護法》第 8 條，我們告知如下：蒐集者為 {{operator}}；蒐集目的、資料類別、利用期間、地區、對象及方式如上所述；利用地區包括台灣以外的美國及歐洲。
+- 你可以依《個人資料保護法》第 3 條，請求查詢或閱覽、製給複製本、補充或更正、停止蒐集處理或利用，以及刪除你的個人資料。請寫信到 privacy@squishsort.app。
+- 你可以自由選擇是否提供資料。不允許追蹤或不提供聯絡資料，都不會影響你玩遊戲；但若不提供電子郵件，我們將無法回覆你的客服訊息。
 
-### Republic of Korea
+### 香港
 
-- Players under 14 in Korea are treated as children: no personalised ads and no tracking, and we do not collect information that needs a guardian's consent.
-- Overseas transfer: data is sent to Google LLC (USA), Vercel Inc. (USA) and Resend (USA) over the internet when the app or site is used, for the purposes and periods above. You can refuse by not allowing tracking, or by not using the service. Refusing personalised ads does not stop you playing.
-- Person responsible for personal information: {{operator}}, privacy@squishsort.app.
-- You can also ask for help from the Personal Information Infringement Report Center (privacy.kisa.or.kr, call 118) or the Personal Information Dispute Mediation Committee (www.kopico.go.kr, 1833-6972).
-- The [Korean version](/ko/privacy) of this policy contains the full details required by the Personal Information Protection Act.
+依《個人資料（私隱）條例》，你可以要求查閱及改正你的個人資料。我們不會將個人資料用於直接促銷。請寫信到 privacy@squishsort.app。
 
-### Japan
+### 新加坡
 
-- Data sent to Google, Vercel and Resend is provided to businesses in the United States. The US has no single comprehensive privacy law like Japan's, but these companies follow measures equivalent to Japan's standards, including contractual safeguards.
-- We protect data by keeping almost everything on your device, limiting what leaves it, using encrypted connections and limiting access to our mailboxes.
-- To request disclosure, correction, suspension of use or deletion, email privacy@squishsort.app.
+依《個人資料保護法》（PDPA），你可以要求查閱或更正你的個人資料，或撤回同意。我們不會將個人資料用於直接行銷。資料保護聯絡人：{{operator}}，privacy@squishsort.app。
 
-### Taiwan, Hong Kong and Singapore
+### 美國（包括加州及其他州）
 
-You can ask to access or correct your personal data, or ask us to stop using it, by emailing privacy@squishsort.app. We do not use personal data for direct marketing.
+- 我們不販售個人資訊。依加州法律，向允許追蹤的成人顯示個人化廣告可能被視為跨情境行為廣告的「分享」。你隨時可以選擇「要求 App 不要追蹤」或在 iPhone 設定中關閉追蹤來選擇退出。未滿 13 歲的兒童絕不會看到個人化廣告，因此他們的資料絕不會被販售或分享。13 至 15 歲的青少年只有在本人於 Apple 追蹤提示中點選「允許」選擇加入時，才會看到個人化廣告。
+- 過去 12 個月收集的類別：識別碼（IP 位址、裝置識別碼，IDFA 僅限取得許可時）、網路活動（廣告互動）、大致位置（由 IP 推估），以及你聯絡我們時提供的名字和電子郵件。來源：你的裝置和你本人。目的：如上所述。
+- 本網站會遵循全球隱私控制（GPC）訊號（本網站本來就不追蹤你）。
+- 我們不會因你行使權利而給予差別待遇。如要行使權利，請寫信到 privacy@squishsort.app。經你書面授權的代理人也可以代你提出請求。
 
-## Changes to this policy
+### 大韓民國
 
-If what the app or website does with data changes, we update this page and the "Last updated" date before the change goes live. If the change is important, we will also say so in the app.
+在韓國，未滿 14 歲的玩家視為兒童：不顯示個人化廣告、不追蹤，我們也不收集需要法定代理人同意的資訊。《個人資訊保護法》要求的完整內容請見本政策的[韓文版](/ko/privacy)。
 
-## Languages
+### 日本
 
-This policy is also available in Japanese, Korean and Traditional Chinese. If the versions differ, the version in your language applies to you where the law requires it; otherwise the English version applies.
+傳送至 Google、Vercel 和 Resend 的資料會提供給位於美國的企業。如要請求揭露、更正、停止利用或刪除，請寫信到 privacy@squishsort.app。完整內容請見[日文版](/ja/privacy)。
+
+## 政策變更
+
+如果 App 或網站處理資料的方式有所改變，我們會在變更生效前更新本頁面及「最後更新」日期。如果是重大變更，我們也會在 App 中告知。
+
+## 語言
+
+本政策也提供英文、日文和韓文版本。各版本內容不一致時，如法律有要求，適用你所使用語言的版本；否則以英文版為準。

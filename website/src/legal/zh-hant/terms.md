@@ -1,72 +1,72 @@
 ---
-title: Terms of use
-description: The rules for playing Squish Sort and buying in-app items, in plain words.
+title: 使用條款
+description: 用簡單的話說明遊玩 Squish Sort 和購買 App 內項目的規則。
 ---
 :::summary
-**The short version:** Squish Sort is free to play. You can buy Remove Ads and packs of coins through Apple. Coins and squishies have no cash value. Squishies are never for sale. Be kind, enjoy the squish, and your legal rights as a consumer always stay in place.
+**重點整理：** Squish Sort 可以免費遊玩。你可以透過 Apple 購買「移除廣告」和金幣包。金幣和軟軟沒有現金價值。軟軟絕不販售。請友善待人、盡情地捏，你身為消費者的法律權利永遠不受影響。
 :::
 
-## Who these terms are with
+## 條款的當事人
 
-These terms are between you and {{operator}} ("we"), the developer of Squish Sort. By downloading or playing Squish Sort you agree to them. If you are a child, please read them with a parent or carer.
+本條款是你與 Squish Sort 的開發者 {{operator}}（以下稱「我們」）之間的約定。下載或遊玩 Squish Sort，即表示你同意本條款。如果你是兒童，請和爸媽或照顧你的大人一起閱讀。
 
-The app is licensed to you under Apple's [Licensed Application End User License Agreement](https://www.apple.com/legal/internet-services/itunes/dev/stdeula/) (the "Apple EULA"). These terms add rules specific to Squish Sort. If they conflict with the Apple EULA, the Apple EULA wins, except where these terms give you more rights.
+本 App 依 Apple 的[授權應用程式終端使用者授權協議](https://www.apple.com/legal/internet-services/itunes/dev/stdeula/)（以下稱「Apple EULA」）授權給你。本條款補充 Squish Sort 專屬的規則。如果本條款與 Apple EULA 衝突，以 Apple EULA 為準，但本條款給你更多權利的情況除外。
 
-## Playing the game
+## 遊玩遊戲
 
-- We give you a personal, non-transferable licence to play Squish Sort on Apple devices you own or control, as allowed by the App Store rules.
-- Please don't copy, modify, reverse engineer or sell the game or its artwork, or use cheats or tools that interfere with it.
-- Names you type for your Squishy Buddy or made squishies stay on your device, but please keep them kind.
-- We may update the game, add or change levels, events and features, or switch features off. If we ever stop offering the game, purchases you have made keep working on your device as far as we can make that possible.
+- 在 App Store 規則允許的範圍內，我們授予你在你擁有或控制的 Apple 裝置上遊玩 Squish Sort 的個人、不可轉讓的授權。
+- 請勿複製、修改、反向工程或販售遊戲或其美術，也請勿使用會干擾遊戲的作弊程式或工具。
+- 你為軟軟夥伴或自製軟軟取的名字只存在你的裝置上，但請取友善的名字。
+- 我們可能會更新遊戲，新增或變更關卡、活動和功能，或關閉某些功能。如果我們停止提供遊戲，會盡可能讓你已購買的項目繼續在你的裝置上運作。
 
-## Purchases
+## 購買
 
-- **Remove Ads** is a one-time purchase. It stops the ads that play by themselves (between levels). Optional reward videos stay available for everyone and only play when you tap them. Remove Ads is shared with your Family Sharing group.
-- **Coin packs** are consumable. Coins are spent in the game on hints, extra jars, board themes and Squishy Buddy treats and gifts.
-- **Squishies and capsules can never be bought**, directly or with coins. Paying never changes what you find in capsules. See [purchases and drop rates]({{h}}/purchases).
-- Coins and squishies are a licence to use game content. They have no cash value, can't be exchanged for money or transferred between people, and are not your property.
-- Prices are shown in the App Store in your currency, including any taxes Apple collects.
-- Payments, Ask to Buy, Family Sharing and refunds are handled by Apple under its terms. To request a refund, visit [reportaproblem.apple.com](https://reportaproblem.apple.com). You can restore Remove Ads at any time in **Settings > Restore purchases**.
-- Under EU and UK law you normally have 14 days to withdraw from a digital purchase. By buying an item that is delivered straight away, you agree it is delivered immediately and you lose that right once delivery starts. Apple's refund process is still available to you.
+- **移除廣告**是一次性購買項目。它會停止在關卡之間自動播放的廣告，並讓你在相同的每日上限內一鍵領取選擇性影片獎勵，不用看影片。移除廣告可與你的家人共享群組共用。
+- **金幣包**是消耗性項目。金幣在遊戲中用於提示、多一個罐子、棋盤主題，以及軟軟夥伴的點心和禮物。
+- **軟軟和扭蛋永遠無法購買**，不論直接購買或用金幣。付費絕不會改變扭蛋開出的內容。請見[購買項目與獲得機率]({{h}}/purchases)。
+- 金幣和軟軟是使用遊戲內容的授權。它們沒有現金價值，不能兌換成金錢或轉讓給他人，也不是你的財產。
+- 價格以你的貨幣顯示在 App Store 中，包含 Apple 代收的稅金。
+- 付款、「詢問後購買」、家人共享和退款由 Apple 依其條款處理。如要申請退款，請前往 [reportaproblem.apple.com](https://reportaproblem.apple.com)。你隨時可以在**設定 > 恢復購買**中恢復移除廣告。
+- 依歐盟和英國法律，你通常有 14 天可以撤回數位購買。購買立即提供的項目時，你同意立即交付，並在交付開始後失去該權利。依台灣《通訊交易解除權合理例外情事適用準則》，非以有形媒介提供之數位內容，經消費者事先同意始提供者，亦得排除七日解除權。你仍然可以使用 Apple 的退款流程。
 
-## Ads
+## 廣告
 
-The game is funded by ads. When and how ads appear, and how to control personalisation, is explained on our [ads and tracking page]({{h}}/ads).
+本遊戲靠廣告營運。廣告何時及如何出現、如何控制個人化，請見我們的[廣告與追蹤]({{h}}/ads)頁面。
 
-## Your data
+## 你的資料
 
-Our [privacy policy]({{h}}/privacy) explains what data is used and why.
+我們的[隱私權政策]({{h}}/privacy)說明使用哪些資料及原因。
 
-## Our content
+## 我們的內容
 
-The game, its squishies, artwork, sounds, levels and the Squish Sort name are ours or licensed to us. All squishies are original characters.
+遊戲、軟軟、美術、音效、關卡和 Squish Sort 名稱屬於我們或已授權給我們。所有軟軟都是原創角色。
 
-## If something goes wrong
+## 發生問題時
 
-- We work hard to make the game fun and reliable, but we provide it "as is" and can't promise it will always be available or free from bugs.
-- Nothing in these terms limits liability that can't be limited by law, including for death or personal injury caused by negligence, or fraud, or your statutory rights as a consumer (for example, that digital content must be as described and fit for purpose).
-- Otherwise, our total liability to you is limited to the amount you paid us for in-app purchases in the 12 months before the claim.
+- 我們努力讓遊戲有趣又穩定，但遊戲是「依現狀」提供，無法保證隨時可用或沒有錯誤。
+- 本條款不會限制依法不得限制的責任，包括因過失造成的死亡或人身傷害、詐欺，或你身為消費者的法定權利（例如數位內容必須與描述相符且適合其用途）。
+- 除此之外，我們對你的總責任以你在提出請求前 12 個月內向我們支付的 App 內購買金額為上限。但因我們的故意或重大過失造成的損害，不適用此上限。
 
-## Apple
+## 關於 Apple
 
-You and we agree that:
+你與我們同意：
 
-- These terms are between you and us, not Apple. Apple is not responsible for the app or its content.
-- Apple has no obligation to provide maintenance or support for the app.
-- If the app fails to conform to any applicable warranty, you may notify Apple, and Apple will refund the purchase price (if any). To the maximum extent permitted by law, Apple has no other warranty obligation for the app.
-- Apple is not responsible for addressing any claims relating to the app, including product liability claims, claims that the app fails to meet legal or regulatory requirements, and consumer protection or privacy claims.
-- If a third party claims the app infringes their intellectual property, we, not Apple, are responsible for the investigation, defence, settlement and discharge of that claim.
-- You confirm you are not located in a country subject to a US government embargo or designated as a "terrorist supporting" country, and you are not on any US government list of prohibited or restricted parties.
-- Apple and its subsidiaries are third-party beneficiaries of these terms and, once you accept them, Apple has the right to enforce them against you.
+- 本條款是你與我們之間的約定，而非與 Apple。Apple 不對 App 或其內容負責。
+- Apple 沒有義務為 App 提供任何維護或支援服務。
+- 如果 App 不符合任何適用的保證，你可以通知 Apple，Apple 將退還購買價格（如有）。在法律允許的最大範圍內，Apple 對 App 不負其他保證義務。
+- Apple 不負責處理任何與 App 有關的請求，包括產品責任請求、App 不符合法律或法規要求的請求，以及消費者保護或隱私相關請求。
+- 如果第三方主張 App 侵害其智慧財產權，由我們而非 Apple 負責調查、抗辯、和解及解決該請求。
+- 你確認你不在受美國政府禁運的國家，或被指定為「支持恐怖主義」的國家，也不在任何美國政府的禁止或限制對象名單上。
+- Apple 及其子公司是本條款的第三方受益人，一旦你接受本條款，Apple 有權對你執行本條款。
 
-## Changes
+## 條款變更
 
-We may update these terms when the game changes or the law requires it. We'll update the date at the top, and tell you in the app if a change is important. If you don't agree with a change, you can stop playing and delete the app.
+遊戲變更或法律要求時，我們可能會更新本條款。我們會更新頁面上方的日期，若是重要變更，也會在 App 中告知。如果你不同意變更，可以停止遊玩並刪除 App。
 
-## Law and disputes
+## 準據法與爭議
 
-These terms are governed by the laws of Luxembourg. If you are a consumer, you also keep the protection of the mandatory laws of the country where you live, and you can bring a claim in your local courts. Please contact us first at support@squishsort.app so we can try to sort things out.
+本條款適用盧森堡法律。如果你是消費者，你仍受居住地國家強制性法律的保護，並可以在當地法院提起訴訟。請先寫信到 support@squishsort.app 和我們聯絡，讓我們試著一起解決。
 
-## Contact
+## 聯絡方式
 
-{{operator}} · support@squishsort.app · Postal address: {{postal}}
+{{operator}} · support@squishsort.app · 郵寄地址：{{postal}}

@@ -1,77 +1,89 @@
 ---
-title: Purchases and drop rates
-description: What you can buy in Squish Sort, what coins do, and the published capsule drop rates. Squishies are never for sale.
+title: 購買項目與獲得機率
+description: Squish Sort 可以買什麼、金幣的用途，以及公開的扭蛋獲得機率。軟軟絕不販售。
 ---
 :::summary
-- You can buy **Remove Ads** and **coin packs**. That's all.
-- **Squishies and capsules are never for sale.** Capsules are earned only by playing, and paying never changes the odds.
-- Every level can be finished for free.
+- 你可以購買**移除廣告**和**金幣包**，就這樣。
+- **軟軟和扭蛋絕不販售。** 扭蛋只能靠遊玩獲得，付費也絕不改變機率。
+- 每一關都能免費破關。
 :::
 
-## What you can buy
+## 可以購買的項目
 
-| Item | Type | What it does |
+| 項目 | 類型 | 內容 |
 |---|---|---|
-| Remove Ads | One-time purchase (Family Sharing on) | Stops the ads that play by themselves between levels. Reward videos you choose to watch stay available |
-| 100 coins | Consumable | Coins to spend in the game |
-| 350 coins | Consumable | Coins to spend in the game |
-| 750 coins | Consumable | Coins to spend in the game |
+| 移除廣告 | 一次性購買（可家人共享） | 停止在關卡之間自動播放的廣告，並讓你一鍵領取選擇性獎勵（多一個罐子、提示、金幣加倍等），不用看影片 |
+| 1,000 金幣 | 消耗性 | 在遊戲中使用的金幣 |
+| 3,500 金幣 | 消耗性 | 在遊戲中使用的金幣 |
+| 7,500 金幣 | 消耗性 | 在遊戲中使用的金幣 |
 
-Prices are shown in the App Store in your local currency. We do not show prices on this website.
+價格以當地貨幣顯示在 App Store 中。本網站不顯示價格。
 
-## What coins buy
+## 金幣可以買什麼
 
-| Item | Coins |
+| 項目 | 金幣 |
 |---|---|
-| Hint | 25 |
-| Extra jar | 40 |
-| Board theme | 300 |
-| Squishy Buddy treat | 10 |
-| Squishy Buddy gift | 60 |
+| 提示 | 250 |
+| 多一個罐子 | 400 |
+| 棋盤主題 | 3,000 |
+| 軟軟夥伴點心 | 100 |
+| 軟軟夥伴禮物 | 600 |
 
-**You can also earn coins by playing:** 5 coins for clearing a level for the first time (10 with three stars), and 20 from the optional bonus gift video. Coins can't buy squishies, capsules or anything that changes capsule odds. Buddy items are just for fun and never affect squishies or levels.
+## 遊玩賺金幣
 
-## Capsules: how squishies are earned
+- **首次過關：** 每裝滿一個罐子就會跳出金幣，共 50 金幣，三顆星再加 50。
+- **小獎勵：** 3 秒內裝滿兩個罐子（+10）、偶爾出現的閃亮幸運軟軟（+100）、當天第一次過關（+50）、連勝（每階 +10，最多 +50；溫和模式沒有），以及猜中神秘袋（+50）。
+- **選擇性影片：** 首次過關的金幣加倍，以及夥伴的每日禮物（200 金幣，溫和模式中免費且不用看影片）。
 
-Capsules are free, and can only be earned by playing:
+重玩已過的關卡會得到亮晶晶，而不是金幣，所以無法刷金幣。金幣不能買軟軟、扭蛋或任何改變扭蛋機率的東西。夥伴的道具純粹好玩。
 
-- **Clearing a capsule level for the first time.** In the Toy Shop, capsules come after levels 3, 6, 9, 12, 15 and 18. In the Sweet Factory, Starlight Stage and Christmas Workshop, after levels 5, 10, 15 and 20.
-- **The Mystery Bag** daily guessing game: three right guesses earn a capsule.
-- **Doubling a capsule** by watching an optional video, available to everyone in the same way.
-- **Squishing spares:** three duplicate squishies can be swapped for a squishy you don't have yet.
+## 如何獲得軟軟
 
-## Drop rates {#drop}
+**普通軟軟靠分類加入圖鑑。** 第一次用你還沒有的種類裝滿一個罐子時，它就會加入你的圖鑑。
 
-Each capsule contains one squishy from the world it was earned in.
+**扭蛋裡有稀有和超稀有軟軟。** 扭蛋永遠免費，只能靠遊玩獲得：
 
-| Rarity | Chance per capsule |
+- **首次通過扭蛋關卡：** 每個世界的第 3、6、9、12、15、18 和 20 關（每個世界 7 顆扭蛋）。
+- **神秘袋**每日猜謎遊戲：猜對三次就能獲得一顆扭蛋。
+- **聖誕降臨曆架：** 12 月 24 日的小門裡有聖誕扭蛋，而 6 日、12 日和 18 日會推進扭蛋進度條。
+- **交換重複的軟軟：** 3 個重複的軟軟可以換一個你還沒有的軟軟。
+
+**任何廣告或購買都絕不會給你扭蛋。**
+
+## 獲得機率 {#drop}
+
+每顆扭蛋裝有一隻來自獲得該扭蛋之世界的軟軟。
+
+| 稀有度 | 每顆扭蛋的機率 |
 |---|---|
-| Common | 70% |
-| Rare | 25% |
-| Ultra rare | 5% |
-| Secret | 0% (secrets are found by playing, never in capsules) |
+| 稀有 | 80% |
+| 超稀有 | 20% |
+| 普通 | 0%（普通軟軟靠分類獲得） |
+| 隱藏 | 0%（隱藏軟軟在遊玩中發現，絕不會出現在扭蛋中） |
 
-Within a rarity, every squishy you **don't own yet** is equally likely, so duplicates only appear once you have them all in that rarity. For example, in the Toy Shop there are 6 commons: with none owned, each has a 70% ÷ 6 ≈ 11.7% chance.
+在同一稀有度中，每一隻你**還沒有**的軟軟機率都相同。如果你已經擁有該世界中抽到的稀有度的所有軟軟，就會改從另一個稀有度給你一隻，所以只有在收集完該世界所有稀有和超稀有軟軟後，才會出現重複。
 
-| World | Common | Rare | Ultra rare | Secret |
-|---|---|---|---|---|
-| Toy Shop | 6 | 7 | 3 | 1 |
-| Sweet Factory | 6 | 7 | 3 | 1 |
-| Starlight Stage | 6 | 7 | 3 | 1 |
-| Christmas Workshop | 6 | 4 | 2 | 1 |
+| 世界 | 稀有 | 超稀有 | 隱藏 |
+|---|---|---|---|
+| 玩具店 | 7 | 3 | 1 |
+| 糖果工廠 | 7 | 3 | 1 |
+| 星光舞台 | 7 | 3 | 1 |
+| 聖誕工坊 | 4 | 2 | 1 |
 
-Two friendly rules on top:
+例如：在玩具店還沒有任何稀有軟軟時，7 隻稀有軟軟各有 80% ÷ 7 ≈ 11.4% 的機率，3 隻超稀有軟軟各有 20% ÷ 3 ≈ 6.7% 的機率。
 
-- Your very first capsule always contains **Peach Bun**.
-- If your first three capsules from a world were all common, the **fourth is guaranteed rare or better**.
+另外還有兩條貼心規則：
 
-## Our promises
+- 你的第一顆扭蛋一定是**桃桃包**。
+- 如果你在某個世界開到第 7 顆扭蛋，還沒有拿到該世界的超稀有軟軟，第 7 顆**保證是超稀有**。
 
-- Remove Ads and coins never change what you get from capsules: no extra rolls, no better odds and no faster unlocks.
-- No timers, energy or lives to buy.
-- In gentle mode, the coin shop is only reachable from Settings, purchases need a grown-up check, and nothing pops up asking you to buy.
-- These rates match the game's code and we will update this page before any change. Korea's rules on publishing probabilities apply to paid random items; ours are free, but we publish the odds anyway.
+## 我們的承諾
 
-## Refunds and restoring
+- 移除廣告和金幣絕不改變扭蛋內容：沒有額外扭蛋、沒有更好的機率，也沒有更快解鎖。
+- 沒有需要購買的計時器、體力或生命。
+- 在溫和模式中，金幣商店只能從設定進入，購買需要大人確認，也不會跳出任何推銷購買的視窗。
+- 這些機率與遊戲一致，任何變更前我們都會先更新本頁。依台灣《線上遊戲定型化契約應記載及不得記載事項》，付費機率型商品須揭露機率；我們的扭蛋免費且無法付費取得，但我們仍公開機率。
 
-Purchases are made with Apple. For refunds, visit [reportaproblem.apple.com](https://reportaproblem.apple.com). To restore Remove Ads, open Settings in the game and tap **Restore purchases**. Coins already credited can't be restored after the app is deleted, because they are stored only on your device.
+## 退款與恢復購買
+
+購買透過 Apple 進行。如需退款，請前往 [reportaproblem.apple.com](https://reportaproblem.apple.com)。如要恢復移除廣告，請打開遊戲設定並點選**恢復購買**。已入帳的金幣只儲存在你的裝置上，所以刪除 App 後無法恢復。

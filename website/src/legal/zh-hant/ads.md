@@ -1,62 +1,68 @@
 ---
-title: Ads and tracking
-description: When ads appear in Squish Sort, which ads children see, how Apple's tracking prompt works and how to change your choices.
+title: 廣告與追蹤
+description: Squish Sort 何時出現廣告、兒童會看到哪些廣告、Apple 追蹤提示如何運作，以及如何更改你的選擇。
 ---
 :::summary
-Squish Sort is free because of ads. We keep them fair: **no ads in the first six levels, never in the middle of a level, never right after you fail**, and far fewer in gentle mode. Ads are personalised only if you are old enough and say yes.
+Squish Sort 靠廣告維持免費。我們讓廣告保持公平：**前 6 關沒有廣告，絕不在關卡中途或失敗後立刻出現**，溫和模式中更是少很多。只有達到可同意年齡並點選「允許」的人，才會看到個人化廣告。
 :::
 
-## When ads appear
+## 廣告何時出現
 
-Ads that play by themselves (between levels) currently follow these limits:
+在關卡之間自動播放的廣告，目前遵守以下上限：
 
-| Levels | At most |
+| 關卡 | 最多 |
 |---|---|
-| 1 to 6 | No ads |
-| 7 to 15 | One ad every 4 levels, and at least 4 minutes of play apart |
-| 16 to 30 | One ad every 3 levels, and at least 3 minutes of play apart |
-| 31 onwards | One ad every 2 levels, and at least 90 seconds of play apart |
+| 第 1～6 關 | 沒有廣告 |
+| 第 7～15 關 | 每 4 關 1 次，且遊玩時間至少相隔 4 分鐘 |
+| 第 16～30 關 | 每 3 關 1 次，且遊玩時間至少相隔 3 分鐘 |
+| 第 31 關之後 | 每 2 關 1 次，且遊玩時間至少相隔 90 秒 |
 
-And always:
+而且一定：
 
-- Never in the first minute after you open the game.
-- Only after a level is won: never mid-level and never after a fail.
-- Never after a boss level that took more than one try.
-- In **gentle mode**, the first ad comes at level 12 or later, and every gap is doubled.
+- 打開遊戲後的第一分鐘內不會出現。
+- 只在過關後出現：絕不在關卡中途，也絕不在失敗後。
+- 魔王關卡之後、獲得扭蛋的關卡之後，或過關解鎖新內容時，都不會出現。
+- 觀看選擇性獎勵影片會重新計時，讓你暫時休息不看廣告。
+- 在**溫和模式**中，第一則廣告在第 12 關或之後才出現，而且每段間隔都加倍。
 
-We may adjust these numbers, and if we do we'll update this page.
+我們可能會調整這些數字，調整時會更新本頁。
 
-**Remove Ads** (a one-time purchase) switches these ads off for good.
+**移除廣告**（一次性購買）會永久關閉這些廣告。
 
-## Reward videos: always your choice
+## 獎勵影片：永遠由你決定
 
-Some buttons offer a reward for watching a short video: an extra jar, more moves after a fail, a bonus gift of coins, or doubling the capsule you just earned. These only play when you tap them, are the same for everyone (including Remove Ads owners), and never change capsule odds. In gentle mode they are offered quietly, never in a pop-up.
+有些按鈕提供看短片換獎勵：卡關時多一個罐子或提示、首次過關後金幣加倍、神秘袋多猜一次，或夥伴每天的金幣禮物。獎勵影片：
 
-## Which ads you see
+- 只在你點選時播放，每天最多 6 次；
+- 絕不提供扭蛋或軟軟，也絕不改變扭蛋機率；
+- **移除廣告**的擁有者一鍵就能領取，不用看影片；
+- 在**溫和模式**中只提供多一個罐子或提示，而夥伴的每日禮物免費，不用看影片。
 
-| Player | Ads |
+## 你會看到哪些廣告
+
+| 玩家 | 廣告 |
 |---|---|
-| Under 13 (under 14 in Korea), or age question skipped | Child-directed, non-personalised, general-audience (G-rated) ads. No tracking prompt, no advertising identifier |
-| Teens below their country's age of digital consent (all under-18s in the UK) | Non-personalised ads, marked as under the age of consent, rated up to PG |
-| Older players | Non-personalised ads, unless you allow tracking and, in the UK/EEA/Switzerland, also agree in Google's consent form |
+| 未滿 13 歲（韓國為未滿 14 歲），或跳過年齡問題 | 以兒童為對象、非個人化、普遍級（G 級）的廣告。沒有追蹤提示，不使用廣告識別碼 |
+| 未達所在國家數位同意年齡的青少年（英國為所有未滿 18 歲者） | 非個人化廣告，標示為未達同意年齡，最高為輔導級（PG） |
+| 其他玩家 | 非個人化廣告，除非你允許追蹤，且在英國／歐洲經濟區／瑞士也在 Google 的同意表單中同意 |
 
-Ads are served by **Google AdMob**. We block ad categories that don't suit a family game where Google lets us.
+廣告由 **Google AdMob** 提供。在 Google 允許的範圍內，我們會封鎖不適合家庭遊戲的廣告類別。
 
-## Apple's tracking prompt
+## Apple 的追蹤提示
 
-If you are old enough, the game may ask once (after you win level 5 or later) whether to "Allow" tracking. Saying **Allow** lets Google use Apple's advertising identifier to show ads more relevant to you. Saying **Ask App Not to Track** means you still see ads, just not personalised ones. Either way, the game plays exactly the same.
+如果你已達可同意年齡，遊戲會在第 7 關開始時，先用一句話說明，然後詢問一次是否「允許」追蹤。點選**允許**，Google 就能使用 Apple 的廣告識別碼，向你顯示更相關的廣告。點選**要求 App 不要追蹤**，你仍然會看到廣告，只是不會個人化。不論選哪一個，遊戲玩起來都完全一樣。
 
-## Changing your mind
+## 改變主意
 
-- **In the game:** Settings > **Privacy choices** (shown in the UK, EEA and Switzerland) reopens Google's consent form.
-- **On iPhone:** Settings > Privacy & Security > **Tracking**, to switch tracking off for Squish Sort or all apps.
-- **Reset your advertising identifier:** removing and reinstalling the app, or turning tracking off, stops it being shared.
-- **Google ad settings:** adults can manage ad personalisation at [myadcenter.google.com](https://myadcenter.google.com).
+- **在遊戲中：** 設定 > **隱私選項**（在英國、歐洲經濟區和瑞士顯示）會重新開啟 Google 的同意表單。
+- **在 iPhone 上：** 設定 > 隱私權與安全性 > **追蹤**，可為 Squish Sort 或所有 App 關閉追蹤。
+- **停止分享廣告識別碼：** 移除並重新安裝 App，或關閉追蹤，就不會再分享。
+- **Google 廣告設定：** 成人可以在 [myadcenter.google.com](https://myadcenter.google.com) 管理廣告個人化。
 
-## Ad measurement
+## 廣告成效評估
 
-Apple's privacy-preserving SKAdNetwork tells ad networks whether an ad led to an install, without identifying you.
+Apple 保護隱私的 SKAdNetwork 會告訴廣告聯播網某則廣告是否帶來安裝，但不會識別你。
 
-## Seen an ad that shouldn't be there?
+## 看到不該出現的廣告？
 
-Please tell us at support@squishsort.app with a screenshot if you can. We'll block it.
+請寫信到 support@squishsort.app 告訴我們，可以的話附上螢幕截圖。我們會封鎖它。

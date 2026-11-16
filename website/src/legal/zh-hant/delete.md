@@ -1,34 +1,34 @@
 ---
-title: Your data and deletion
-description: How to see, reset or delete your Squish Sort data, and how to ask us to delete anything we hold.
+title: 你的資料與刪除
+description: 如何查看、重設或刪除你的 Squish Sort 資料，以及如何要求我們刪除我們保有的任何資料。
 ---
 :::summary
-Squish Sort has no accounts, and your game data is stored only on your iPhone. **Deleting the app deletes your data.**
+Squish Sort 沒有帳號，你的遊戲資料只存在你的 iPhone 上。**刪除 App 就會刪除你的資料。**
 :::
 
-## Delete your game data
+## 刪除遊戲資料
 
-1. Press and hold the Squish Sort icon on your Home Screen.
-2. Tap **Remove App**, then **Delete App**.
+1. 在主畫面上按住 Squish Sort 圖像。
+2. 點選**移除 App**，再點選**刪除 App**。
 
-This permanently deletes your progress, collection, coins, names and settings from the device. If you back up your iPhone, older backups may still contain them until those backups are replaced or deleted.
+這會從裝置上永久刪除你的進度、收藏、金幣、名字和設定。如果你有備份 iPhone，舊的備份可能仍包含這些資料，直到備份被取代或刪除為止。
 
-**Before deleting:** Remove Ads can be restored later from Settings > Restore purchases. Coins and squishies cannot be restored, because they exist only on your device.
+**刪除之前：** 移除廣告之後可以從設定 > 恢復購買恢復。金幣和軟軟只存在你的裝置上，所以無法恢復。
 
-## Reset or limit advertising data
+## 重設或限制廣告資料
 
-- iPhone Settings > Privacy & Security > **Tracking**: switch tracking off for Squish Sort or all apps.
-- In the game: Settings > **Privacy choices** (UK, EEA and Switzerland) to change your consent.
-- Adults can see and delete Google ad activity linked to their Google Account at [myadcenter.google.com](https://myadcenter.google.com) and [myactivity.google.com](https://myactivity.google.com).
+- iPhone 設定 > 隱私權與安全性 > **追蹤**：為 Squish Sort 或所有 App 關閉追蹤。
+- 在遊戲中：設定 > **隱私選項**（英國、歐洲經濟區和瑞士）可更改你的同意。
+- 成人可以在 [myadcenter.google.com](https://myadcenter.google.com) 和 [myactivity.google.com](https://myactivity.google.com) 查看並刪除與其 Google 帳戶相關的廣告活動。
 
-## Delete support messages
+## 刪除客服訊息
 
-If you've written to us, email privacy@squishsort.app from the same address and ask us to delete the conversation. We'll confirm within one month (usually much sooner).
+如果你曾寫信給我們，請用同一個電子郵件地址寄信到 privacy@squishsort.app，要求刪除對話。我們會在一個月內（通常快得多）確認完成。
 
-## Ask what we hold
+## 查詢我們保有的資料
 
-You can ask us for a copy of any personal data we hold about you (in practice, only support emails). Email privacy@squishsort.app. Parents can ask the same on behalf of their child.
+你可以要求我們提供我們保有的任何關於你的個人資料副本（實際上只有客服電子郵件）。請寫信到 privacy@squishsort.app。家長也可以代替孩子提出相同的請求。
 
-## Need help?
+## 需要幫忙嗎？
 
-Write to privacy@squishsort.app or use the [support form]({{h}}/support).
+請寫信到 privacy@squishsort.app，或使用[客服表單]({{h}}/support)。

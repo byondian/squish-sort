@@ -1,30 +1,30 @@
 ---
-title: Cookies on this website
-description: squishsort.app sets no cookies. Here is what the site stores in your browser instead, and which other services are involved.
+title: 本網站的 Cookie
+description: squishsort.app 不設定任何 Cookie。以下說明網站改為在瀏覽器中儲存了什麼，以及涉及哪些其他服務。
 ---
 :::summary
-**This website does not use cookies,** so there is no cookie banner. A few small preferences are kept in your browser only, and never sent to us.
+**本網站不使用 Cookie，**所以沒有 Cookie 橫幅。只有幾個小設定保存在你的瀏覽器中，而且絕不會傳給我們。
 :::
 
-## What is stored in your browser
+## 儲存在瀏覽器中的資料
 
-| Name | Where | What for | How long |
+| 名稱 | 位置 | 用途 | 保存期間 |
 |---|---|---|---|
-| ss-muted | Local storage | Remembers if you muted the demo's sounds | Until you clear it |
-| ss-grownup | Session storage | Remembers you passed the grown-up check on the Squishy Shop | Until you close the tab |
+| ss-muted | 本機儲存空間 | 記住你是否已將試玩版靜音 | 直到你清除為止 |
+| ss-grownup | 工作階段儲存空間 | 記住你已通過軟軟商店的大人確認 | 直到你關閉分頁為止 |
 
-These are strictly necessary to remember choices you made, and never leave your device.
+這些資料是記住你所做選擇的必要資料，絕不會離開你的裝置。
 
-## Visitor statistics
+## 訪客統計
 
-We use **Vercel Web Analytics** to count page visits. It does not use cookies or other identifiers stored on your device, does not track you across websites, and only gives us aggregated numbers (such as how many people visited a page and from which country).
+我們使用 **Vercel Web Analytics** 計算網頁瀏覽次數。它不使用 Cookie 或儲存在你裝置上的其他識別碼，不會跨網站追蹤你，只提供彙總數字（例如有多少人造訪某個網頁，以及來自哪個國家）。
 
-## Other services
+## 其他服務
 
-- **Hosting:** Vercel delivers the site and keeps short-lived logs, including IP addresses, for security.
-- **App Store badge:** once the game is released, Apple's badge image loads from Apple's servers.
-- **Squishy Shop links:** if you follow an affiliate link to a shop such as Amazon, that shop may set its own cookies under its own policy.
+- **主機服務：** Vercel 提供網站，並為了安全保留包含 IP 位址的短期紀錄。
+- **App Store 標誌：** 遊戲上架後，Apple 的標誌圖片會從 Apple 的伺服器載入。
+- **軟軟商店連結：** 如果你點選前往 Amazon 等商店的聯盟行銷連結，該商店可能會依其政策設定自己的 Cookie。
 
-Fonts and images are served from our own site. We do not use social media plugins, ad trackers or Google Fonts.
+字型和圖片由我們自己的網站提供。我們不使用社群媒體外掛、廣告追蹤器或 Google Fonts。
 
-More detail is in the [privacy policy]({{h}}/privacy).
+更多說明請見[隱私權政策]({{h}}/privacy)。

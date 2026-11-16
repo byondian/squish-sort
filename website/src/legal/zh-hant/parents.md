@@ -1,58 +1,58 @@
 ---
-title: Parents' guide
-description: A guide for parents and carers: age, gentle mode, ads, purchases, data and safety in Squish Sort.
+title: 家長指南
+description: 給家長和照顧者的指南：Squish Sort 的年齡、溫和模式、廣告、購買、資料與安全。
 ---
 :::summary
-Squish Sort is a calm puzzle game rated 9+ on the App Store. There is **no chat, no friends list, no accounts and no location**. Younger players get **gentle mode** automatically.
+Squish Sort 是一款輕鬆的益智遊戲，在 App Store 的分級為 9+。**沒有聊天、沒有好友名單、沒有帳號，也沒有位置資訊。** 年紀較小的玩家會自動進入**溫和模式**。
 :::
 
-## What is the game?
+## 這是什麼遊戲？
 
-Players sort squishy characters into jars until every jar holds one kind. There are no timers, no lives and no move limits, and any level can be retried as often as needed. Squishies are collected from free capsules earned by playing.
+玩家把軟綿綿的軟軟角色分類到罐子裡，直到每個罐子都只有一種軟軟。沒有計時器、沒有生命、沒有步數限制，每一關都能想重玩幾次就重玩幾次。軟軟靠分類收集，或從遊玩獲得的免費扭蛋中取得。12 月會出現節慶限定的聖誕工坊和降臨曆架，沒有倒數計時，也沒有要購買的東西。
 
-## The age question
+## 年齡問題
 
-Early in the first play, before any ad can appear, the game asks for the player's age group using Apple's age range feature where available, or a neutral year-of-birth question with no default. We keep only the group (child, teen or adult), never the birth date. If the question is skipped, the game assumes a child.
+第一次遊玩時、在任何廣告出現之前，遊戲會詢問玩家的年齡層。可以時會使用 Apple 的年齡範圍功能，否則會問一個沒有預設值的中立出生年份問題。我們只保存年齡層（兒童、青少年或成人），絕不保存生日。如果跳過問題，遊戲會視為兒童。
 
-## Gentle mode
+## 溫和模式
 
-Gentle mode is on for players under 13 (under 14 in Korea) and for anyone who skipped the age question. In gentle mode:
+未滿 13 歲（在韓國為未滿 14 歲）的玩家，以及跳過年齡問題的人，會開啟溫和模式。在溫和模式中：
 
-- Ads are child-directed, non-personalised and general audience only.
-- The first ad between levels comes at level 12 or later, and ads are half as frequent.
-- Apple's tracking prompt is never shown.
-- Purchases and the coin shop sit behind a grown-up check, and are only reachable from Settings.
-- Reward offers appear quietly (for example in the collection book), never as pop-ups.
-- The link to our Squishy Shop for grown-ups is hidden.
+- 只會出現以兒童為對象、非個人化、普遍級的廣告。
+- 關卡之間的第一則廣告在第 12 關或之後才出現，廣告頻率減半。
+- 絕不顯示 Apple 的追蹤提示。
+- 購買和金幣商店需要通過大人確認，而且只能從設定進入。
+- 選擇性獎勵影片只提供多一個罐子或提示，夥伴的每日禮物免費。沒有連勝獎勵。
+- 給大人的軟軟商店連結會被隱藏。對其他玩家，連結位於設定中，並需要大人確認。
 
-**To turn gentle mode on:** open Settings in the game and tap **Set up for a child**. This works immediately.
-**To turn it off:** open Settings, tap **Turn off gentle mode**, pass the grown-up check and answer the age question.
+**開啟溫和模式：** 打開遊戲的設定，點選**設定為兒童使用**，會立即生效。
+**關閉溫和模式：** 打開設定，點選**關閉溫和模式**，通過大人確認並回答年齡問題。
 
-## Purchases
+## 購買
 
-- Remove Ads stops the automatic ads and is shared with your Family Sharing group.
-- Coin packs buy hints, extra jars, themes and Buddy treats. Coins never buy squishies.
-- Use Apple's **Ask to Buy** (Family Sharing) or **Screen Time > Content & Privacy Restrictions > iTunes & App Store Purchases** to stop in-app purchases completely.
-- Refunds are handled by Apple at [reportaproblem.apple.com](https://reportaproblem.apple.com).
+- 移除廣告會停止自動播放的廣告，並可與你的家人共享群組共用。
+- 金幣包可以買提示、多一個罐子、主題和夥伴點心。金幣絕不能買軟軟，任何購買或廣告也絕不會給扭蛋。
+- 使用 Apple 的**詢問後購買**（家人共享）或**螢幕使用時間 > 內容與隱私權限制 > iTunes 與 App Store 購買項目**，可以完全停止 App 內購買。
+- 退款由 Apple 在 [reportaproblem.apple.com](https://reportaproblem.apple.com) 處理。
 
-Full details, including the capsule odds, are on [purchases and drop rates]({{h}}/purchases).
+包括扭蛋機率在內的完整資訊，請見[購買項目與獲得機率]({{h}}/purchases)。
 
-## Data and privacy
+## 資料與隱私
 
-Progress, collections and any names your child types (for their Squishy Buddy or made squishies) stay on the device. The game has no accounts and sends nothing about your child to us. The only data that leaves the device is the technical information Google needs to serve child-safe ads. See the [privacy policy]({{h}}/privacy#children-s-privacy).
+進度、收藏，以及孩子輸入的任何名字（給軟軟夥伴或自製軟軟的名字）都只留在裝置上。遊戲沒有帳號，也不會傳送任何關於你孩子的資料給我們。唯一離開裝置的資料，是 Google 提供兒童安全廣告所需的技術資訊。請見[隱私權政策]({{h}}/privacy#children-s-privacy)。
 
-## Social features
+## 社群功能
 
-None in this version: no chat, messages, friends, leaderboards, user-generated content sharing or contact with strangers. If we add social features in future, they will be off by default for children and we'll update this guide first.
+此版本沒有：沒有聊天、訊息、好友、排行榜、使用者內容分享，也不會與陌生人接觸。如果未來加入社群功能，兒童預設為關閉，我們也會先更新這份指南。
 
-## The Squishy Buddy
+## 軟軟夥伴
 
-The Buddy is a little friend that cheers the player on. It never gets sad, sick or hungry if the player is away, sends no notifications, and its "How are you today?" question is never stored or sent anywhere.
+夥伴是為玩家加油的小朋友。玩家很久沒來時，它不會難過、生病或肚子餓，也不會傳送通知；它問的「你今天好嗎？」答案絕不會被保存或傳送到任何地方。
 
-## Screen time
+## 使用時間
 
-The game has no daily rewards that punish missing a day and no countdowns designed to bring players back. The daily Mystery Bag is a single quick guess. You can set limits for any app with Apple's Screen Time.
+遊戲沒有錯過一天就會受罰的每日獎勵，也沒有為了把玩家拉回來而設計的倒數計時。每日神秘袋只是一次快速猜謎，錯過的降臨曆小門之後也能打開。你可以用 Apple 的螢幕使用時間為任何 App 設定限制。
 
-## Something worrying?
+## 有擔心的地方嗎？
 
-Email support@squishsort.app (or privacy@squishsort.app for data questions). We read every message.
+請寫信到 support@squishsort.app（資料相關問題請寄到 privacy@squishsort.app）。每封訊息我們都會親自閱讀。
