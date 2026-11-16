@@ -1069,6 +1069,28 @@
         }
       }
     },
+    "Finishing Toy Shop opened the Maker. Make your very own squishy and give it a name.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "おもちゃ屋さんをクリアして、メーカーがオープン！じぶんだけのスクイーズを作って、名前をつけよう。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "장난감 가게를 다 깨서 메이커가 열렸어! 나만의 스퀴시를 만들고 이름을 지어 줘."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完成玩具店，製作所開放了！做一個專屬於你的捏捏樂，幫它取名字。"
+          }
+        }
+      }
+    },
     "First win today: +%lld": {
       "localizations": {
         "ja": {
@@ -1571,28 +1593,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "幸運！"
-          }
-        }
-      }
-    },
-    "Make your very own squishy and give it a name.": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "じぶんだけのスクイーズを作って、名前をつけよう。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "나만의 스퀴시를 만들고 이름을 지어 줘."
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "做一個專屬於你的捏捏樂，幫它取名字。"
           }
         }
       }

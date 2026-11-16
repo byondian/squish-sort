@@ -88,7 +88,7 @@ struct NewsCard: View {
         case .unlocked(let extra):
             return extra == .mysteryBag
                 ? "Poke the bag and guess who's inside. A new bag every day, on your shelf at home."
-                : "Make your very own squishy and give it a name."
+                : "Finishing Toy Shop opened the Maker. Make your very own squishy and give it a name."
         }
     }
 }
