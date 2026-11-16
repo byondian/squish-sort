@@ -179,6 +179,12 @@ final class SessionTests: XCTestCase {
             XCTAssertEqual(Stars.rating(moves: two + 1, par: par), 1)
         }
         XCTAssertNil(Stars.moveLimit(forStars: 1, par: 10))
+        // Hard levels: about half the slack.
+        XCTAssertEqual(Stars.moveLimit(forStars: 3, par: 24, tight: true), 26)
+        XCTAssertEqual(Stars.moveLimit(forStars: 2, par: 24, tight: true), 28)
+        XCTAssertEqual(Stars.rating(moves: 27, par: 24, tight: true), 2)
+        XCTAssertEqual(Stars.rating(moves: 29, par: 24, tight: true), 1)
+        XCTAssertEqual(Stars.rating(moves: 9, par: 8, tight: true), 3)
     }
 
     func testStarsAgainstPar() {

@@ -103,9 +103,13 @@ final class AppModel: ObservableObject {
     static let isUITesting = ProcessInfo.processInfo.arguments.contains("-uiTesting")
 
     init() {
-        let loaded = AppModel.isUITesting ? PlayerProgress() : store.load()
-        progress = loaded
+        var loaded = AppModel.isUITesting ? PlayerProgress() : store.load()
         levels = AppModel.loadLevels()
+        if loaded.version < 2 {
+            loaded.migrate(path: levels.filter { LevelCatalog.worlds.contains($0.file.world) }.map(\.id))
+            store.save(loaded)
+        }
+        progress = loaded
         roster = AppModel.loadRoster()
         config = RemoteConfig.cached()
         buddyScript = AppModel.loadBuddyScript()
@@ -718,7 +722,7 @@ final class AppModel: ObservableObject {
             p.buddy.earnTreatForWin()
             p.stars[level.id] = max(previousBest ?? 0, stars)
             if side {
-                p.christmasUnlocked = max(p.christmasUnlocked, min(level.file.index, LevelCatalog.levelsPerWorld - 1))
+                p.christmasUnlocked = max(p.christmasUnlocked, min(level.file.index, LevelCatalog.levelCount(in: level.file.world) - 1))
             } else {
                 p.highestUnlocked = max(p.highestUnlocked, min(index + 1, max(0, mainLevelCount - 1)))
             }

@@ -20,6 +20,8 @@ WORLDS = [
     ("starlight", ["lumi", "riff", "zuzu", "pip", "nova", "coco"], "sticky"),
     ("christmas", ["santa", "elfie", "reindeer", "snowbo", "ginger", "waddles"], "frozen"),
 ]
+# Worlds grow as the game goes on. The last level of a world is always a boss.
+LENGTHS = {"toyshop": 15, "sweetfactory": 20, "starlight": 25, "christmas": 20}
 BEATS = ["intro", "easy", "easy", "medium", "showpiece", "breather", "bonus", "tension", "calm", "boss"]
 
 # (kinds, empty jars, target par as a multiple of kinds) for world positions 1..20.
@@ -28,7 +30,12 @@ SHAPE = {
     6: (3, 2, 2.0), 7: (5, 2, 2.6), 8: (6, 2, 2.8), 9: (4, 2, 2.2), 10: (8, 2, 3.0),
     11: (4, 2, 2.4), 12: (5, 2, 2.4), 13: (5, 2, 2.5), 14: (6, 2, 2.8), 15: (8, 2, None),
     16: (4, 2, 2.2), 17: (6, 2, 3.0), 18: (7, 2, 3.2), 19: (5, 2, 2.3), 20: (8, 2, 3.4),
+    21: (5, 2, 2.6), 22: (6, 2, 2.8), 23: (6, 2, 3.0), 24: (7, 2, 3.2), 25: (8, 2, 3.6),
 }
+# A world's last level when it is not on a tenth: a boss this size.
+FINALE = (8, 2, 3.2)
+# From this level of a world on, an earlier world's new thing mixes back in.
+MIX = {"starlight": (13, "hidden")}
 # Later worlds start a little bigger at the same positions.
 WORLD_BUMP = {0: 0, 1: 1, 2: 1, 3: 1}
 # Santa's Grotto is a side world that opens after main level 10, so it is
@@ -36,9 +43,9 @@ WORLD_BUMP = {0: 0, 1: 1, 2: 1, 3: 1}
 SIDE_WORLD = 3
 
 
-def capsule_level(pos):
+def capsule_level(pos, last=20):
     """Every 3rd level of a world, plus its last level."""
-    return pos % 3 == 0 or pos == 20
+    return pos % 3 == 0 or pos == last
 
 
 # Commons borrowed for 7- and 8-kind levels, picked so no two pieces on a
@@ -68,7 +75,7 @@ def mechanic_count(mech, pos):
     return 0
 
 
-def random_board(rng, names, empties, mech, mcount):
+def random_board(rng, names, empties, mech, mcount, mix_hidden=0):
     """Returns (jars, mechanics) or None."""
     units = []
     if mech == "sticky":
@@ -118,6 +125,11 @@ def random_board(rng, names, empties, mech, mcount):
                 if len(picks) == mcount:
                     break
             mechanics["frozen"] = sorted(picks)
+        if mix_hidden:
+            # wrapped pieces mixed into a duet world: never a duet piece, never the top of a jar
+            taken = {(j, i) for j, i in sticky} | {(j, i + 1) for j, i in sticky}
+            spots = [[j, i] for j in range(len(jars)) for i in range(CAP - 1) if (j, i) not in taken]
+            mechanics["hidden"] = sorted(rng.sample(spots, min(mix_hidden, len(spots))))
         jars = jars + [[] for _ in range(empties)]
         return jars, mechanics
     return None
@@ -138,11 +150,11 @@ def staircase(rng, names):
     return jars
 
 
-def choose(rng, level, names, empties, mech, mcount, target):
+def choose(rng, level, names, empties, mech, mcount, target, mix_hidden=0):
     """Best solvable random candidate by distance to target par (lowest par if no target)."""
     best = None
     for _ in range(80):
-        cand = random_board(rng, names, empties, mech, mcount)
+        cand = random_board(rng, names, empties, mech, mcount, mix_hidden)
         if cand is None:
             continue
         jars_c, mech_c = cand
@@ -164,14 +176,16 @@ def choose(rng, level, names, empties, mech, mcount, target):
 
 def make_level(world_idx, pos):
     world, own, mech = WORLDS[world_idx]
-    global_number = world_idx * 20 + pos
-    beat = BEATS[(pos - 1) % 10]
-    base_k, empties, mult = SHAPE[pos]
+    last = LENGTHS[world]
+    finale = pos == last and pos % 10 != 0
+    beat = "boss" if pos == last else BEATS[(pos - 1) % 10]
+    base_k, empties, mult = FINALE if finale else SHAPE[pos]
     bump = WORLD_BUMP[world_idx] if pos > 3 else 0
     if world_idx == SIDE_WORLD and pos <= 10:
         bump = 0
     k = min(8, base_k + bump)
-    if pos in (5, 15):
+    showpiece = pos in (5, 15) and not finale
+    if showpiece or finale:
         k = base_k
     names = kinds_for(world_idx, k)
     rng = random.Random(f"{world}-{pos}")
@@ -190,7 +204,7 @@ def make_level(world_idx, pos):
         r, y, b = own[0], own[2], own[4]
         names = [r, y, b]
         jars = [[r, y, y, b], [y, b, b, r], [b, r, r, y], [], []]
-    elif pos in (5, 15):
+    elif showpiece:
         jars = staircase(rng, names)
         if mech:
             # a light touch of the world's mechanic on the showpiece
@@ -204,7 +218,9 @@ def make_level(world_idx, pos):
         if world_idx > 0 and pos <= 3 and mech:
             # intro levels of a mechanic world keep the mechanic gentle
             mcount = 1 if pos == 1 or (world_idx == SIDE_WORLD and pos == 2) else 2
-        jars, mechanics = choose(rng, level, names, empties, mech, mcount, target)
+        mix_from, mix_mech = MIX.get(world, (99, None))
+        mix_hidden = min(2 + (pos - mix_from) // 2, 6) if pos >= mix_from and mix_mech == "hidden" else 0
+        jars, mechanics = choose(rng, level, names, empties, mech, mcount, target, mix_hidden)
     level["jars"] = jars
     level["mechanics"] = {"hidden": mechanics.get("hidden", []),
                           "sticky": mechanics.get("sticky", []),
@@ -215,7 +231,7 @@ def make_level(world_idx, pos):
         raise SystemExit(f"{level['id']}: unsolvable or too big ({explored} states)")
     level["par"] = len(sol)
     level["solution"] = [list(m) for m in sol]
-    level["capsule"] = capsule_level(pos)
+    level["capsule"] = capsule_level(pos, last)
     level["softenAfterFails"] = 3 if beat in ("tension", "boss") else None
     return level
 
@@ -251,7 +267,7 @@ def main():
     for w in range(len(WORLDS)):
         if world and WORLDS[w][0] != world:
             continue
-        for pos in range(1, 21):
+        for pos in range(1, LENGTHS[WORLDS[w][0]] + 1):
             lid = f"{WORLDS[w][0]}-{pos:02d}"
             if only and only != lid:
                 continue

@@ -5,7 +5,8 @@ import SquishPolicy
 /// Everything the player has, in one Codable file with atomic writes.
 /// Collectible ids are stable so the January accounts update can migrate them.
 struct PlayerProgress: Codable, Equatable {
-    var version = 1
+    /// 2 since the worlds became 15, 20 and 25 levels long (build 3).
+    var version = 2
     /// Best stars per level id.
     var stars: [String: Int] = [:]
     /// Index into the play-order level list of the furthest unlocked level.
@@ -67,12 +68,36 @@ struct PlayerProgress: Codable, Equatable {
 
     init() {}
 
+    /// Saves from before the worlds changed length (every world had 20 levels) point at the old
+    /// place on the path. Finds the same level by its id; a level that is gone moves on to the
+    /// start of the next world, and its stars are dropped.
+    /// - Parameter path: ids of the main path as it is now, in play order.
+    mutating func migrate(path: [String], oldWorlds: [String] = ["toyshop", "sweetfactory", "starlight"], oldLength: Int = 20) {
+        guard version < 2 else { return }
+        version = 2
+        guard !path.isEmpty else { return }
+        let world = oldWorlds[min(max(0, highestUnlocked / oldLength), oldWorlds.count - 1)]
+        let number = highestUnlocked % oldLength + 1
+        let id = world + "-" + (number < 10 ? "0" : "") + String(number)
+        if let same = path.firstIndex(of: id) {
+            highestUnlocked = same
+        } else if let w = oldWorlds.firstIndex(of: world), w + 1 < oldWorlds.count,
+                  let next = path.firstIndex(where: { $0.hasPrefix(oldWorlds[w + 1] + "-") }) {
+            highestUnlocked = next
+        } else {
+            highestUnlocked = path.count - 1
+        }
+        let gone = oldWorlds.flatMap { w in (1...oldLength).map { w + "-" + ($0 < 10 ? "0" : "") + String($0) } }
+            .filter { !path.contains($0) }
+        for id in gone { stars[id] = nil }
+    }
+
     /// Every field is optional on disk, so adding fields never loses a player's progress.
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         let d = PlayerProgress()
         func v<T: Decodable>(_ key: CodingKeys, _ fallback: T) -> T { ((try? c.decodeIfPresent(T.self, forKey: key)) ?? nil) ?? fallback }
-        version = v(.version, d.version)
+        version = v(.version, 1)
         stars = v(.stars, d.stars)
         highestUnlocked = v(.highestUnlocked, d.highestUnlocked)
         collection = v(.collection, d.collection)

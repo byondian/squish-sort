@@ -44,7 +44,7 @@ final class LevelController: ObservableObject {
         self.index = index
         self.model = model
         level = model.levels[index]
-        session = GameSession(board: level.board, par: level.par, undoLimit: model.undoLimit)
+        session = GameSession(board: level.board, par: level.par, undoLimit: model.undoLimit, tightStars: level.tightStars)
         scene = BoardScene(board: level.board, kinds: level.kinds)
         chain = SortChain(timed: !model.isGentleMode)
         let lucky = model.luckyKind(index: index)
@@ -246,7 +246,7 @@ final class LevelController: ObservableObject {
         started = Date()
         // A retry empties the pot, so coins can't be farmed.
         newPot()
-        session = GameSession(board: level.board, par: level.par, undoLimit: model?.undoLimit ?? 5)
+        session = GameSession(board: level.board, par: level.par, undoLimit: model?.undoLimit ?? 5, tightStars: level.tightStars)
         // Real walls soften: one extra jar after enough fails.
         if let soften = level.file.softenAfterFails, attempts > soften { session.addExtraJar() }
         extraJarUsed = false
@@ -333,7 +333,7 @@ struct LevelView: View {
                             summary: model.lastWin,
                             moves: controller.session.moveCount,
                             perfect: controller.session.moveCount <= controller.level.par,
-                            threeStarMoves: Stars.moveLimit(forStars: 3, par: controller.level.par),
+                            threeStarMoves: Stars.moveLimit(forStars: 3, par: controller.level.par, tight: controller.level.tightStars),
                             // Not while good news is waiting behind the win card: that is told first.
                             retry: controller.index < 2 || !model.news.isEmpty ? nil : { controller.retry() },
                             toCapsule: model.levelsToNextCapsule(after: controller.index),
@@ -435,7 +435,7 @@ struct LevelView: View {
                     Text("HARD").font(Theme.body(13)).foregroundStyle(Theme.bubblegum)
                 }
                 // The stars still to be won, and the moves left before the next one goes.
-                StarMeter(moves: controller.session.moveCount, par: controller.level.par,
+                StarMeter(moves: controller.session.moveCount, par: controller.level.par, tight: controller.level.tightStars,
                           gentle: model.isGentleMode, haptics: model.haptics, sounds: model.sounds)
                 // The level pot: coins thrown by finished jars, banked on the win.
                 if controller.pot.paysCoins {
@@ -461,7 +461,7 @@ struct LevelView: View {
     private var starsSlipped: Bool {
         let moves = controller.session.moveCount
         return moves > 0 && !model.isGentleMode && controller.index >= 2
-            && Stars.rating(moves: moves, par: controller.level.par) < 3
+            && Stars.rating(moves: moves, par: controller.level.par, tight: controller.level.tightStars) < 3
     }
 
     // Undo appears after level 2, Hint after 4, Extra jar after 7 (game design doc).
@@ -542,6 +542,11 @@ struct LevelView: View {
     }
 }
 
+extension Level {
+    /// Tension and boss levels give stars with less slack.
+    var tightStars: Bool { file.beat == .tension || file.beat == .boss }
+}
+
 struct IconButton: View {
     let system: String
     let action: () -> Void
@@ -600,6 +605,7 @@ struct JoinedBookSticker: View {
 struct StarMeter: View {
     let moves: Int
     let par: Int
+    var tight = false
     /// Gentle mode: stars and a plain move count only. No limit, no warning colour, no falling star.
     var gentle = false
     var haptics: Haptics?
@@ -609,8 +615,8 @@ struct StarMeter: View {
     @State private var fell = false
 
     var body: some View {
-        let lit = Stars.rating(moves: moves, par: par)
-        let limit = gentle ? nil : Stars.moveLimit(forStars: lit, par: par)
+        let lit = Stars.rating(moves: moves, par: par, tight: tight)
+        let limit = gentle ? nil : Stars.moveLimit(forStars: lit, par: par, tight: tight)
         let near = !gentle && moves > 0 && (limit.map { $0 - moves <= 2 } ?? false)
         HStack(spacing: 6) {
             HStack(spacing: 4) {

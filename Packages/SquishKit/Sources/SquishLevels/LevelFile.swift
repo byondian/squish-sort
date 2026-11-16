@@ -5,8 +5,9 @@ import SquishCore
 public enum Beat: String, Codable, CaseIterable, Sendable {
     case intro, easy, medium, showpiece, breather, bonus, tension, calm, boss
 
-    /// The beat a level at this position in its world must have.
-    public static func expected(forIndex index: Int) -> Beat {
+    /// The beat a level at this position in its world must have. A world always ends on a boss.
+    public static func expected(forIndex index: Int, world: String) -> Beat {
+        if index == LevelCatalog.levelCount(in: world) { return .boss }
         let pattern: [Beat] = [.intro, .easy, .easy, .medium, .showpiece, .breather, .bonus, .tension, .calm, .boss]
         return pattern[(index - 1) % pattern.count]
     }

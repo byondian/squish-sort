@@ -4,17 +4,18 @@
 /// Passing needs only 1 star.
 public enum Stars {
     /// The most moves that still earn this many stars (nil for 1 star: any solve).
-    public static func moveLimit(forStars stars: Int, par: Int) -> Int? {
+    /// `tight` is for the hard levels (tension and boss): about half the slack.
+    public static func moveLimit(forStars stars: Int, par: Int, tight: Bool = false) -> Int? {
         switch stars {
-        case 3...: return par + max(2, par / 5)
-        case 2: return par + max(4, par / 3)
+        case 3...: return par + (tight ? max(1, par / 10) : max(2, par / 5))
+        case 2: return par + (tight ? max(3, par / 5) : max(4, par / 3))
         default: return nil
         }
     }
 
-    public static func rating(moves: Int, par: Int) -> Int {
-        if moves <= par + max(2, par / 5) { return 3 }
-        if moves <= par + max(4, par / 3) { return 2 }
+    public static func rating(moves: Int, par: Int, tight: Bool = false) -> Int {
+        if let three = moveLimit(forStars: 3, par: par, tight: tight), moves <= three { return 3 }
+        if let two = moveLimit(forStars: 2, par: par, tight: tight), moves <= two { return 2 }
         return 1
     }
 }

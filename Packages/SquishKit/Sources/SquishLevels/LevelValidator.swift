@@ -15,13 +15,15 @@ public enum LevelValidator {
         let expectedID = file.world + "-" + String(format: "%02d", file.index)
         if file.id != expectedID { p.append("\(id): id should be \(expectedID)") }
         if !LevelCatalog.allWorlds.contains(file.world) { p.append("\(id): unknown world \(file.world)") }
-        if !(1...LevelCatalog.levelsPerWorld).contains(file.index) { p.append("\(id): index out of range") }
+        if !(1...LevelCatalog.levelCount(in: file.world)).contains(file.index) { p.append("\(id): index out of range") }
         if file.capacity != launchCapacity { p.append("\(id): capacity \(file.capacity), launch levels use \(launchCapacity)") }
         if !(2...BoardLayout.maxJars).contains(file.jars.count) { p.append("\(id): \(file.jars.count) jars, allowed 2 to \(BoardLayout.maxJars)") }
         if file.jars.contains(where: { $0.count > file.capacity }) { p.append("\(id): a jar is over capacity") }
-        if file.beat != Beat.expected(forIndex: file.index) { p.append("\(id): beat \(file.beat.rawValue), the sawtooth expects \(Beat.expected(forIndex: file.index).rawValue)") }
-        if file.capsule != LevelCatalog.isCapsuleLevel(index: file.index) {
-            p.append("\(id): capsule flag should be \(LevelCatalog.isCapsuleLevel(index: file.index))")
+        let beat = Beat.expected(forIndex: file.index, world: file.world)
+        if file.beat != beat { p.append("\(id): beat \(file.beat.rawValue), the sawtooth expects \(beat.rawValue)") }
+        let capsule = LevelCatalog.isCapsuleLevel(index: file.index, world: file.world)
+        if file.capsule != capsule {
+            p.append("\(id): capsule flag should be \(capsule)")
         }
 
         var counts: [String: Int] = [:]
