@@ -139,6 +139,8 @@ final class SoftSquishyScene: SKScene {
     }
 
     var mode = Mode.pressOnly
+    /// The Buddy on Home: once thrown and settled, it slides back to the middle.
+    var comesHome = false
     var reduceMotion = false
     var soundOn: () -> Bool = { true }
     var hapticsOn: () -> Bool = { true }
@@ -427,7 +429,15 @@ final class SoftSquishyScene: SKScene {
         let busy = !touchTimes.isEmpty || pokeEnds != nil || m.air || m.speed > 0.02 || m.Z > 0.01 || abs(m.rate) > 0.01
         stillFor = busy ? 0 : stillFor + dt
         drawTick &+= 1
-        if stillFor < 1 || drawTick % 3 == 0 { draw() }
+        var sliding = false
+        if comesHome, stillFor > 0.5, size.width > 0 {
+            let off = Double(size.width) / 2 - body.centre().x
+            if abs(off) > 1.5 {
+                body.shift(dx: off * min(1, dt * 4))
+                sliding = true
+            }
+        }
+        if stillFor < 1 || sliding || drawTick % 3 == 0 { draw() }
     }
 
     private func feedback(_ dt: Double) {

@@ -55,7 +55,6 @@ struct HomeView: View {
         .background(
             LinearGradient(stops: [.init(color: Color(hex: 0xFFE1EE), location: 0), .init(color: Color(hex: 0xFFF0F4), location: 0.48),
                                    .init(color: Color(hex: 0xFFF6EA), location: 1)], startPoint: .top, endPoint: .bottom)
-                .overlay { bubbles }
                 .ignoresSafeArea()
         )
         .overlay {
@@ -89,20 +88,6 @@ struct HomeView: View {
         }
     }
 
-    /// A few soft bubbles in the background.
-    private var bubbles: some View {
-        GeometryReader { geo in
-            ForEach(0..<7, id: \.self) { i in
-                let d = CGFloat(40 + (i * 37) % 70)
-                Circle().fill(Color.white.opacity(0.35))
-                    .overlay(Circle().stroke(Color.white.opacity(0.6), lineWidth: 1.5))
-                    .frame(width: d, height: d)
-                    .position(x: geo.size.width * CGFloat((i * 53) % 100) / 100, y: geo.size.height * CGFloat((i * 29 + 11) % 100) / 100)
-            }
-        }
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
-    }
 
     /// The main button: straight into the level to play next.
     private func playButton(height: CGFloat) -> some View {
@@ -513,7 +498,7 @@ struct BuddyHomeView: View {
                     }
                 }
                 // The Buddy is as soft as in the Squish Room: knead, pull, pinch, pick up and throw.
-                SoftSquishy(toy: ref, look: ref, feel: model.feel(for: ref), mode: .room, pokes: pokes,
+                SoftSquishy(toy: ref, look: ref, feel: model.feel(for: ref), mode: .room, pokes: pokes, comesHome: true,
                             onTouch: { withAnimation { model.pokeBuddy() } }, onDoubleTap: { playTrick() }) {
                     SquishRefView(ref: ref)
                 }

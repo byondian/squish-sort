@@ -20,6 +20,8 @@ struct SoftSquishy<Art: View>: View {
     var pokes = 0
     /// Add one for a quick shake.
     var wiggles = 0
+    /// Slides back to the middle after being thrown (the Buddy on Home).
+    var comesHome = false
     var onTouch: (() -> Void)?
     var onLetGo: ((Double) -> Void)?
     var onDoubleTap: (() -> Void)?
@@ -49,6 +51,7 @@ struct SoftSquishy<Art: View>: View {
         let scene = holder.scene
         let model = self.model
         scene.mode = mode
+        scene.comesHome = comesHome
         scene.reduceMotion = reduceMotion
         scene.sounds = model.sounds.squish
         scene.haptics = model.haptics.squish

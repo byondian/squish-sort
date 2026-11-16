@@ -331,6 +331,15 @@ public final class SquishBody {
         }
     }
 
+    /// Slides the whole body sideways without changing its shape or speed (the Buddy walking home).
+    /// Not part of the reference engine: the app calls it only while the toy sits still.
+    public func shift(dx: Double) {
+        for k in 0..<count {
+            p[k * 2] += Float(dx)
+            g[k * 2] += Float(dx)
+        }
+    }
+
     /// Stops all movement where it is (Reduce Motion: let go without a throw).
     public func stop() {
         for i in v.indices { v[i] = 0 }
