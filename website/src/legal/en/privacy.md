@@ -54,7 +54,7 @@ The app contains **no analytics or crash-reporting tools** of its own, and no so
 
 - **Players under 13 (under 14 in Korea), and anyone who skips the age question:** every ad request is marked as directed to children. Google then shows only non-personalised, general-audience (G-rated) ads and must limit its data use under children's privacy laws. Apple's tracking prompt is never shown.
 - **Teens under the age where they can agree to personalised ads in their country** (16 in some EU countries, and all under-18s in the UK): ads are non-personalised and requests are marked as under the age of consent.
-- **Everyone else:** after a few levels, the game may show Apple's prompt asking to allow tracking. If you tap Ask App Not to Track, you still get ads, but they are not personalised and the IDFA is not shared. In the UK, EEA and Switzerland, Google's consent form also appears. You can change your answer at any time in **Settings > Privacy choices** in the game, and in iPhone **Settings > Privacy & Security > Tracking**.
+- **Everyone else:** at the start of level 7, the game may show Apple's prompt asking to allow tracking. If you tap Ask App Not to Track, you still get ads, but they are not personalised and the IDFA is not shared. In the UK, EEA and Switzerland, Google's consent form also appears. You can change your answer at any time in **Settings > Privacy choices** in the game, and in iPhone **Settings > Privacy & Security > Tracking**.
 
 Google's own policies explain how it uses data from apps that show its ads: [How Google uses information from sites or apps that use its services](https://policies.google.com/technologies/partner-sites). More detail is on our [ads and tracking page]({{h}}/ads).
 

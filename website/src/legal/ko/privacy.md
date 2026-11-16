@@ -1,150 +1,126 @@
 ---
-title: Privacy policy
-description: How Squish Sort and squishsort.app use personal data, in plain words, including children's privacy, ads, retention and your rights.
+title: 개인정보 처리방침
+description: Squish Sort 앱과 squishsort.app 웹사이트가 개인정보를 어떻게 처리하는지 안내합니다. 아동 개인정보, 광고, 보유 기간, 국외 이전, 정보주체의 권리를 포함합니다.
 ---
 :::summary
-**The short version**
+**한눈에 보기**
 
-- Squish Sort has **no accounts**. Your progress, collection, coins, settings and any names you type stay **on your iPhone**. We never receive them.
-- The game asks your age once, and keeps only an age group (child, teen or adult), never your birth date.
-- Ads are shown by **Google AdMob**. Google receives technical data such as your IP address and device information to show and measure ads. Ads are only **personalised** for players old enough to agree **and** who tap Allow on Apple's tracking prompt (and, in the UK, EEA and Switzerland, also agree in Google's consent form).
-- Players under 13 (under 14 in Korea), and anyone who skips the age question, get **gentle mode**: child-safe, non-personalised ads, no tracking prompt and no tracking.
-- **Purchases** go through Apple. We never see your card or Apple Account details.
-- If you write to support, we use your email only to reply.
-- We do not sell personal data.
+- Squish Sort에는 **계정이 없습니다**. 진행 상황, 도감, 코인, 설정, 직접 입력한 이름은 모두 **사용자의 아이폰에만** 저장되며 저희에게 전송되지 않습니다.
+- 처음에 나이를 한 번 묻고, 생년월일이 아닌 연령대(어린이·청소년·성인)만 저장합니다.
+- 광고는 **Google AdMob**이 제공합니다. 광고 표시와 측정을 위해 Google이 IP 주소, 기기 정보 같은 기술 정보를 받습니다. **맞춤형 광고**는 동의할 수 있는 나이이고 **Apple의 추적 요청에서 "허용"을 누른 경우에만** 표시됩니다.
+- 한국에서는 **만 14세 미만**과 나이 질문을 건너뛴 모든 사용자에게 **순한 모드**가 적용됩니다. 어린이에게 안전한 비맞춤형 광고만 나오고, 추적 요청을 띄우지 않으며 추적하지 않습니다.
+- **구매**는 Apple이 처리합니다. 저희는 카드 정보나 Apple 계정 정보를 받지 않습니다.
+- 고객지원으로 연락하시면 이메일은 답장에만 사용합니다.
+- 개인정보를 판매하지 않습니다.
 :::
 
-## Who we are
+## 1. 개인정보 처리자
 
-Squish Sort is made by {{operator}}, an independent developer based in {{country}} ("we", "us"). We are the controller for the personal data described here.
+Squish Sort는 {{country}}에 거주하는 개인 개발자 {{operator}}(이하 "저희")가 만들고 운영합니다. 이 방침은 아이폰용 Squish Sort 앱과 웹사이트 squishsort.app에 적용됩니다.
 
-- Email for privacy questions and requests: privacy@squishsort.app
-- Email for everything else: support@squishsort.app
-- Postal address: {{postal}}
+- 개인정보 문의 및 요청: privacy@squishsort.app
+- 그 밖의 문의: support@squishsort.app
+- 우편 주소: {{postal}}
 
-This policy covers the Squish Sort app for iPhone and this website, squishsort.app.
+## 2. 처리하는 개인정보 항목, 목적, 보유 기간
 
-## What stays on your iPhone
+### 사용자의 기기에만 저장되는 정보 (저희에게 전송되지 않음)
 
-These are saved only on your device. We do not receive them, and they are deleted when you delete the app:
+다음 정보는 아이폰 안에만 저장되며, 앱을 삭제하면 함께 삭제됩니다.
 
-- Game progress, stars, levels completed and settings (such as sound).
-- Your squishy collection, spares, capsules opened and coin balance.
-- Names you give your Squishy Buddy or squishies you make in the Squishy Maker. Names are filtered for rude words and never leave the device.
-- Your age group (child, teen or adult), how it was set (Apple's age range, the age question, a parent's choice or a skipped question), your App Store country, and a yes/no flag for whether personalised ads may be offered. **Your year of birth is used once to work out the group and is not stored.**
-- Your answer to the Buddy's "How are you today?" question is not stored at all.
-- Records of purchases you made (the product and Apple's transaction number), so a purchase is only counted once.
+- 게임 진행 상황, 별, 클리어한 레벨, 설정(소리 등)
+- 스퀴시 도감, 중복 스퀴시, 연 캡슐 수, 코인 잔액
+- 스퀴시 버디나 스퀴시 메이커로 만든 스퀴시에 붙인 이름 (비속어 필터 적용, 기기 밖으로 나가지 않음)
+- 연령대(어린이·청소년·성인), 설정 방법(Apple 연령대 기능, 나이 질문, 보호자 설정, 건너뜀), App Store 국가, 맞춤형 광고 제공 가능 여부(예/아니요). **출생 연도는 연령대를 정하는 데 한 번만 사용하고 저장하지 않습니다.**
+- 버디의 "오늘 기분 어때?" 질문에 대한 답은 전혀 저장하지 않습니다.
+- 구매 기록(상품과 Apple 거래 번호). 같은 구매가 두 번 반영되지 않도록 하기 위한 것입니다.
 
-iPhone backups (iCloud or computer) may include this game data. Those backups are controlled by you and Apple, not by us.
+아이폰 백업(iCloud 또는 컴퓨터)에 이 게임 데이터가 포함될 수 있으며, 백업은 사용자와 Apple이 관리합니다.
 
-## What leaves your iPhone, and why
+### 기기 밖으로 전송되는 정보
 
-| What | Who receives it | Why | Legal basis (UK/EU) |
+| 항목 | 받는 곳 | 목적 | 보유 기간 |
 |---|---|---|---|
-| A request for the game's settings file (your IP address and basic device and app information, as with any web request) | Us, through our host Vercel | Lets us switch features or seasonal events on and off without an app update. No player data is sent. | Legitimate interests (running the game) |
-| IP address, device and app information, ad interactions, approximate location worked out from the IP address, and an app-specific device identifier | Google (AdMob) | To show ads, limit how often you see the same ad, measure ads and prevent fraud | Legitimate interests; consent where required (see below) |
-| Apple's advertising identifier (IDFA) and personalised ads | Google (AdMob) | Personalised ads, only if you are old enough and allowed tracking | Consent (Apple's prompt and, in the UK/EEA/CH, Google's form) |
-| Your choices in Google's consent form | Google | To remember and respect your ad choices | Legal obligation and legitimate interests |
-| Purchase details | Apple | To process payments, refunds and Family Sharing | Contract (Apple is responsible for this processing) |
-| Anonymous, aggregated install and usage numbers | Apple, then us in App Store Connect | Apple shares statistics only from people who chose to share with app developers | Your choice in iPhone settings |
+| 게임 설정 파일 요청 시의 IP 주소와 기본 기기·앱 정보 (일반적인 웹 요청과 동일) | 저희 (호스팅: Vercel) | 앱 업데이트 없이 기능과 시즌 이벤트를 켜고 끄기 위해. 플레이어 정보는 보내지 않음 | 서버 로그, 보통 최대 30일 |
+| IP 주소, 기기·앱 정보, 광고 상호작용, IP로 추정한 대략적 위치, 앱별 기기 식별자 | Google (AdMob) | 광고 표시, 같은 광고 반복 제한, 광고 측정, 부정 행위 방지 | Google 정책에 따름 (예: 광고 로그의 IP 주소는 9개월 후 익명화) |
+| Apple 광고 식별자(IDFA)와 맞춤형 광고 | Google (AdMob) | 맞춤형 광고. 나이 조건을 충족하고 추적을 허용한 경우에만 | Google 정책에 따름 |
+| 구매 정보 | Apple | 결제, 환불, 가족 공유 처리 | Apple 정책에 따름 |
+| 익명·통계 형태의 설치 및 이용 수치 | Apple → 저희 (App Store Connect) | 앱 개발자와 공유하기로 선택한 사용자의 통계만 | 통계 형태로만 보관 |
 
-The app contains **no analytics or crash-reporting tools** of its own, and no social features, chat, accounts or location access in this version.
+앱에는 자체 분석 도구나 오류 보고 도구가 **없으며**, 이번 버전에는 소셜 기능, 채팅, 계정, 위치 접근도 없습니다.
 
-## Ads, tracking and your choices
+### 고객지원 메시지와 문의 양식 {#support}
 
-- **Players under 13 (under 14 in Korea), and anyone who skips the age question:** every ad request is marked as directed to children. Google then shows only non-personalised, general-audience (G-rated) ads and must limit its data use under children's privacy laws. Apple's tracking prompt is never shown.
-- **Teens under the age where they can agree to personalised ads in their country** (16 in some EU countries, and all under-18s in the UK): ads are non-personalised and requests are marked as under the age of consent.
-- **Everyone else:** after a few levels, the game may show Apple's prompt asking to allow tracking. If you tap Ask App Not to Track, you still get ads, but they are not personalised and the IDFA is not shared. In the UK, EEA and Switzerland, Google's consent form also appears. You can change your answer at any time in **Settings > Privacy choices** in the game, and in iPhone **Settings > Privacy & Security > Tracking**.
+이메일이나 문의 양식으로 연락하시면 이름(또는 닉네임), 이메일 주소, 메시지, 직접 적어 주신 내용(아이폰 기종 등)을 받습니다. 답장과 상담 기록 보관에만 사용하며, 대화가 끝난 뒤 **최대 24개월** 보관 후 삭제합니다. 어린이가 보냈거나 어린이에 관한 메시지는 답장 후 바로 삭제합니다. 개인정보 관련 요청 기록은 처리 사실을 증명하기 위해 3년간 보관합니다.
 
-Google's own policies explain how it uses data from apps that show its ads: [How Google uses information from sites or apps that use its services](https://policies.google.com/technologies/partner-sites). More detail is on our [ads and tracking page]({{h}}/ads).
+## 3. 만 14세 미만 아동의 개인정보
 
-## Children's privacy
+Squish Sort는 어린이를 포함한 다양한 연령층을 위한 게임입니다. 한국에서는 만 14세 미만을 아동으로 봅니다.
 
-Squish Sort is designed for a mixed audience, including children. We follow the US Children's Online Privacy Protection Act (COPPA), the UK Age Appropriate Design Code, the GDPR rules for children and Korea's rules for under-14s. In short:
+- 데이터를 보내는 기능(광고)은 나이 질문에 답하거나 건너뛰기 전에는 시작되지 않습니다.
+- 만 14세 미만이거나 나이가 불분명하면 순한 모드가 적용됩니다.
+- 아동의 이름, 연락처, 사진, 음성, 정확한 위치 등 아동을 식별할 수 있는 정보를 수집하지 않으므로, 법정대리인의 동의가 필요한 개인정보를 처리하지 않습니다.
+- 아동의 경우 기기 밖으로 나가는 정보는 Google이 아동 대상 비맞춤형 광고를 보여 주고 부정 행위를 막는 데 필요한 기술 정보(IP 주소, 앱별 기기 식별자 등)뿐입니다. 행태 기반 광고나 프로파일링에 사용되지 않습니다.
+- 아동은 보호자 확인 없이 구매하거나 순한 모드를 끌 수 없으며, 순한 모드에서는 구매를 권유하는 팝업이 없습니다.
+- 법정대리인은 언제든지 아동에 관한 정보의 열람, 삭제, 처리 정지를 요청할 수 있습니다. 서버에 플레이어 정보를 보관하지 않으므로 앱을 삭제하면 모든 게임 데이터가 삭제됩니다. 자세한 내용은 [보호자 안내]({{h}}/parents)를 참고하세요.
 
-- Nothing that sends data (the ads system) starts before the age question is answered or skipped.
-- A child's age group is set to gentle mode. Unknown or unclear ages are treated as a child.
-- We do not collect children's names, contact details, photos, voice, precise location or any other information that identifies them.
-- For children, the only data that leaves the device is the technical data Google needs to show child-directed, non-personalised ads and to keep them safe from fraud (such as an IP address and an app-specific device identifier). This is the "support for internal operations" use allowed by COPPA. It is not used for behavioural advertising or profiling, and we do not let it be shared with third parties for their own purposes.
-- Children can't make purchases or leave gentle mode without passing a grown-up check. There are no pop-ups pushing purchases in gentle mode.
-- If a child writes to support, we use the message only to reply (ideally to a parent) and then delete it.
+## 4. 개인정보의 제3자 제공
 
-**Parents' rights:** you can ask us at any time what information we hold about your child, ask us to delete it, and refuse further collection. Because we hold nothing on our servers about players, deleting the app removes all game data. To stop all collection, delete the app. Write to privacy@squishsort.app with any question. See also the [parents' guide]({{h}}/parents).
+저희는 개인정보를 판매하지 않으며, 대가를 받고 제공하지 않습니다. 맞춤형 광고에 동의한 성인 사용자의 경우 Google이 자체 정책에 따라 독립적인 처리자로서 정보를 이용합니다. 법령에 따라 요구되는 경우를 제외하고는 그 밖의 제3자에게 제공하지 않습니다.
 
-## Support messages and the contact form {#support}
+## 5. 개인정보 처리의 위탁
 
-If you email us or use the contact form, we receive your name or nickname, email address, message and anything else you include (such as your iPhone model). We use it only to answer you and to keep a record of the conversation. Emails are delivered and stored by our email provider Resend. Legal basis: legitimate interests (answering you) and, for privacy requests, legal obligation.
-
-## The website
-
-- **No cookies.** This website does not set cookies.
-- **Hosting:** our host, Vercel, processes your IP address and browser details to deliver pages and protect the site, and keeps short-lived server logs.
-- **Visitor statistics:** we use Vercel Web Analytics, which counts page views without cookies and without identifying you or following you across sites.
-- **Your browser remembers** a couple of small preferences on your device only (for example, whether the demo's sound is muted). See [cookies on this website]({{h}}/cookies).
-- **App Store badge:** once the game is out, the "Download on the App Store" badge is loaded from Apple's servers, so Apple receives your IP address when the page loads.
-- **Squishy Shop:** links to shops such as Amazon are affiliate links. If you click one, that shop receives your visit and may use its own cookies under its own privacy policy.
-
-## How long we keep data
-
-| Data | How long |
+| 수탁자 | 위탁 업무 |
 |---|---|
-| Game data on your iPhone | Until you delete the app (and any backups you keep) |
-| Server logs from the settings file and website | Short-term, normally up to 30 days, at our host |
-| Website statistics | Aggregated counts only, no personal profile |
-| Support emails and form messages | Up to 24 months after the conversation ends, then deleted. Messages from or about a child are deleted once answered |
-| Records of privacy requests | 3 years, to show we handled them |
-| Data received by Google for ads | Under Google's retention policies (for example, Google anonymises IP addresses in ad logs after 9 months and cookie or identifier data after 18 months) |
+| Vercel Inc. | 웹사이트 및 게임 설정 파일 호스팅 |
+| Resend (Plus Five Five, Inc.) | 이메일 발송·수신 및 보관 |
+| Google LLC | 광고 제공(AdMob) 및 광고 동의 관리 |
 
-## Who processes data for us
+## 6. 개인정보의 국외 이전
 
-- **Google LLC / Google Ireland Ltd** (AdMob and the consent form) for ads. For personalised ads Google acts as an independent controller.
-- **Vercel Inc.** (USA) for website hosting and the settings file.
-- **Resend (Plus Five Five, Inc.)** (USA) for email.
-- **Apple Inc.** handles App Store purchases, refunds, and App Store statistics under its own privacy policy.
+| 이전받는 자 (연락처) | 국가 | 이전 항목 | 이전 시기 및 방법 | 이용 목적 | 보유 기간 |
+|---|---|---|---|---|---|
+| Google LLC (googlekrsupport@google.com) | 미국 | IP 주소, 기기·앱 정보, 광고 상호작용, 앱별 기기 식별자, (허용 시) IDFA | 앱에서 광고를 불러올 때 네트워크로 전송 | 광고 표시·측정, 부정 행위 방지 | Google 정책에 따름 |
+| Vercel Inc. (privacy@vercel.com) | 미국 | IP 주소, 브라우저·기기 정보 | 앱 실행 시 설정 파일 요청, 웹사이트 방문 시 네트워크로 전송 | 호스팅, 보안 | 최대 30일 |
+| Resend (privacy@resend.com) | 미국 | 이름(닉네임), 이메일 주소, 메시지 내용 | 문의 양식 제출 또는 이메일 송수신 시 네트워크로 전송 | 고객 문의 응대 | 대화 종료 후 최대 24개월 |
 
-We do not sell personal data, and we do not share it for money.
+국외 이전을 원하지 않으시면 추적을 허용하지 않거나(맞춤형 광고 거부) 서비스 이용을 중단하실 수 있습니다. 맞춤형 광고를 거부해도 게임은 똑같이 플레이할 수 있습니다. 다만 광고 표시에 필요한 기본 기술 정보의 전송은 앱 이용에 필수적이므로, 이를 원하지 않으시면 앱을 삭제하셔야 합니다.
 
-## International transfers
+## 7. 개인정보의 파기
 
-Google, Vercel and Resend are based in the United States, so data may be processed there. Where UK or EU law requires it, these transfers are protected by the EU-US Data Privacy Framework (and its UK extension) or by Standard Contractual Clauses.
+보유 기간이 지나거나 목적이 달성된 개인정보는 지체 없이 파기합니다. 전자 파일은 복구할 수 없는 방법으로 삭제합니다. 기기에 저장된 게임 데이터는 사용자가 앱을 삭제하면 파기됩니다.
 
-## Your rights
+## 8. 정보주체와 법정대리인의 권리와 행사 방법
 
-Depending on where you live, you may have the right to access, correct or delete your personal data, to object to or restrict its use, to data portability, and to withdraw consent at any time (for example, by turning off tracking). Because we keep no player data on our servers, most requests are answered by deleting the app, but write to privacy@squishsort.app and we will answer within one month (or sooner where the law requires). We may need to confirm it's really you, without asking for more data than necessary.
+정보주체(만 14세 미만 아동의 경우 법정대리인)는 언제든지 개인정보의 열람, 정정, 삭제, 처리 정지를 요구하고 동의를 철회할 수 있습니다. privacy@squishsort.app으로 요청하시면 10일 이내에 조치 결과를 알려 드립니다. 대리인을 통해서도 요청할 수 있으며, 본인 확인을 위해 꼭 필요한 정보만 요청드릴 수 있습니다.
 
-You can also complain to your data protection authority, for example the CNPD in Luxembourg, the ICO in the UK or your local authority in the EU.
+## 9. 개인정보 자동 수집 장치의 설치·운영 및 거부
 
-## Extra information for your country
+- **앱:** 맞춤형 광고에 Apple 광고 식별자(IDFA)가 사용될 수 있습니다. 아이폰 **설정 > 개인정보 보호 및 보안 > 추적**에서 언제든지 끌 수 있습니다. 영국, EEA, 스위스에서는 게임의 **설정 > 개인정보 선택**에서도 변경할 수 있습니다.
+- **웹사이트:** 쿠키를 사용하지 않습니다. 방문 통계는 쿠키 없이 집계하는 Vercel Web Analytics를 사용합니다. 자세한 내용은 [웹사이트 쿠키]({{h}}/cookies)를 참고하세요.
 
-### United States (including California and other states)
+## 10. 개인정보의 안전성 확보 조치
 
-- We don't sell personal information. Personalised ads for adults who allow tracking may count as "sharing" for cross-context behavioural advertising under California law. You can opt out at any time by choosing Ask App Not to Track or switching tracking off in iPhone settings. Children under 13 never get personalised ads, so their data is never sold or shared. Teens aged 13 to 15 only get personalised ads if they themselves opt in by tapping Allow on Apple's tracking prompt.
-- Categories collected in the last 12 months: identifiers (IP address, device identifiers, IDFA only with permission), internet activity (ad interactions), approximate location (from IP), and, if you contact us, your name and email. Sources: your device and you. Purposes: as described above.
-- We honour Global Privacy Control signals on this website (it does not track you anyway).
-- We will not discriminate against you for using your rights. To use them, email privacy@squishsort.app. An authorised agent may make a request for you with your written permission.
+대부분의 정보를 사용자 기기에만 저장하고 외부로 나가는 정보를 최소화하며, 모든 통신을 암호화(HTTPS)하고, 메일함과 관리 계정의 접근 권한을 운영자 본인으로 제한하며 2단계 인증을 사용합니다.
 
-### Republic of Korea
+## 11. 개인정보 보호책임자
 
-- Players under 14 in Korea are treated as children: no personalised ads and no tracking, and we do not collect information that needs a guardian's consent.
-- Overseas transfer: data is sent to Google LLC (USA), Vercel Inc. (USA) and Resend (USA) over the internet when the app or site is used, for the purposes and periods above. You can refuse by not allowing tracking, or by not using the service. Refusing personalised ads does not stop you playing.
-- Person responsible for personal information: {{operator}}, privacy@squishsort.app.
-- You can also ask for help from the Personal Information Infringement Report Center (privacy.kisa.or.kr, call 118) or the Personal Information Dispute Mediation Committee (www.kopico.go.kr, 1833-6972).
-- The [Korean version](/ko/privacy) of this policy contains the full details required by the Personal Information Protection Act.
+- 성명: {{operator}}
+- 연락처: privacy@squishsort.app
 
-### Japan
+개인정보 침해에 대한 상담이나 신고가 필요하시면 아래 기관에 문의하실 수 있습니다.
 
-- Data sent to Google, Vercel and Resend is provided to businesses in the United States. The US has no single comprehensive privacy law like Japan's, but these companies follow measures equivalent to Japan's standards, including contractual safeguards.
-- We protect data by keeping almost everything on your device, limiting what leaves it, using encrypted connections and limiting access to our mailboxes.
-- To request disclosure, correction, suspension of use or deletion, email privacy@squishsort.app.
+- 개인정보침해신고센터: privacy.kisa.or.kr / 국번 없이 118
+- 개인정보분쟁조정위원회: www.kopico.go.kr / 1833-6972
+- 대검찰청 사이버수사과: www.spo.go.kr / 국번 없이 1301
+- 경찰청 사이버수사국: ecrm.police.go.kr / 국번 없이 182
 
-### Taiwan, Hong Kong and Singapore
+## 12. 다른 국가의 이용자를 위한 정보
 
-You can ask to access or correct your personal data, or ask us to stop using it, by emailing privacy@squishsort.app. We do not use personal data for direct marketing.
+- **영국·EU:** 처리 근거는 게임 운영을 위한 정당한 이익, 맞춤형 광고에 대한 동의(Apple 추적 요청 및 Google 동의 양식)입니다. 데이터 보호 감독기관(룩셈부르크 CNPD, 영국 ICO 등)에 민원을 제기할 수 있습니다. 미국으로의 이전은 EU-미국 데이터 프라이버시 프레임워크 또는 표준계약조항으로 보호됩니다.
+- **미국:** 아동 온라인 개인정보 보호법(COPPA)을 준수합니다. 개인정보를 판매하지 않으며, 추적을 허용한 이용자의 맞춤형 광고는 캘리포니아법상 "공유"에 해당할 수 있습니다. 추적을 끄면 언제든지 거부할 수 있습니다.
+- 전체 내용은 [영어판](/privacy)에도 있습니다.
 
-## Changes to this policy
+## 13. 방침의 변경
 
-If what the app or website does with data changes, we update this page and the "Last updated" date before the change goes live. If the change is important, we will also say so in the app.
-
-## Languages
-
-This policy is also available in Japanese, Korean and Traditional Chinese. If the versions differ, the version in your language applies to you where the law requires it; otherwise the English version applies.
+앱이나 웹사이트의 정보 처리 방식이 바뀌면 시행 전에 이 페이지와 "최종 수정일"을 업데이트하고, 중요한 변경은 앱에서도 알려 드립니다. 이 방침은 {{updated}}부터 시행됩니다.

@@ -8,7 +8,7 @@ Squish Sort is a calm puzzle game rated 9+ on the App Store. There is **no chat,
 
 ## What is the game?
 
-Players sort squishy characters into jars until every jar holds one kind. There are no timers, no lives and no move limits, and any level can be retried as often as needed. Squishies are collected from free capsules earned by playing.
+Players sort squishy characters into jars until every jar holds one kind. There are no timers, no lives and no move limits, and any level can be retried as often as needed. Squishies are collected by sorting and from free capsules earned by playing. In December a festive Christmas Workshop and an advent shelf appear, with no countdowns and nothing to buy.
 
 ## The age question
 
@@ -22,8 +22,8 @@ Gentle mode is on for players under 13 (under 14 in Korea) and for anyone who sk
 - The first ad between levels comes at level 12 or later, and ads are half as frequent.
 - Apple's tracking prompt is never shown.
 - Purchases and the coin shop sit behind a grown-up check, and are only reachable from Settings.
-- Reward offers appear quietly (for example in the collection book), never as pop-ups.
-- The link to our Squishy Shop for grown-ups is hidden.
+- Optional reward videos are only offered for an extra jar or a hint, and the Buddy's daily gift is free. No win streaks.
+- The link to our Squishy Shop for grown-ups is hidden. For older players it sits in Settings behind a grown-up check.
 
 **To turn gentle mode on:** open Settings in the game and tap **Set up for a child**. This works immediately.
 **To turn it off:** open Settings, tap **Turn off gentle mode**, pass the grown-up check and answer the age question.
@@ -31,7 +31,7 @@ Gentle mode is on for players under 13 (under 14 in Korea) and for anyone who sk
 ## Purchases
 
 - Remove Ads stops the automatic ads and is shared with your Family Sharing group.
-- Coin packs buy hints, extra jars, themes and Buddy treats. Coins never buy squishies.
+- Coin packs buy hints, extra jars, themes and Buddy treats. Coins never buy squishies, and no purchase or ad ever gives a capsule.
 - Use Apple's **Ask to Buy** (Family Sharing) or **Screen Time > Content & Privacy Restrictions > iTunes & App Store Purchases** to stop in-app purchases completely.
 - Refunds are handled by Apple at [reportaproblem.apple.com](https://reportaproblem.apple.com).
 
@@ -51,7 +51,7 @@ The Buddy is a little friend that cheers the player on. It never gets sad, sick 
 
 ## Screen time
 
-The game has no daily rewards that punish missing a day and no countdowns designed to bring players back. The daily Mystery Bag is a single quick guess. You can set limits for any app with Apple's Screen Time.
+The game has no daily rewards that punish missing a day and no countdowns designed to bring players back. The daily Mystery Bag is a single quick guess, and missed advent doors can be opened later. You can set limits for any app with Apple's Screen Time.
 
 ## Something worrying?
 

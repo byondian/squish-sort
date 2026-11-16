@@ -1,7 +1,7 @@
 export default {
   meta: {
     title: 'Squish Sort: the squishy sorting game for iPhone',
-    description: 'Sort the squishies, fill the jars and squeeze the stress away. 80 soft, satisfying levels and 64 original squishies to collect. Free on iPhone.',
+    description: 'Sort the squishies, fill the jars and squeeze the stress away. 60 soft, satisfying levels, a Christmas Workshop in December and 64 original squishies to collect. Free on iPhone.',
   },
   skip: 'Skip to content',
   nav: { demo: 'Play demo', squishies: 'Squishies', parents: 'Parents', support: 'Support', language: 'Language' },
@@ -26,24 +26,24 @@ export default {
     jar: 'Jar {n}', empty: 'empty', full: 'full, with a lid', closed: 'Jar closed!',
     won: 'Squishtastic!', wonMsg: 'Solved in {n} moves. The best is {p}.',
     next: 'Next level', stars: '{n} of 3 stars',
-    allDone: 'You are a natural!', allDoneMsg: 'That was the first 4 of 80 levels. The full game has 64 squishies to collect, four worlds, a Squish Room and a daily Mystery Bag.',
+    allDone: 'You are a natural!', allDoneMsg: 'That was the first 4 of 60 levels. The full game has 64 squishies to collect, a Christmas Workshop in December, a Squish Room and a daily Mystery Bag.',
     again: 'Play again',
   },
   collect: {
     kicker: 'Collect them all', title: '64 squishies to find',
-    lede: 'Win levels to open capsules. Every squishy is earned by playing. They are never for sale.',
+    lede: 'Sort a new kind to add it to your book, and win levels to open capsules of rare squishies. Every squishy is earned by playing. They are never for sale.',
     rarity: ['Common', 'Rare', 'Ultra rare', 'Secret'],
     oddsLink: 'See the drop rates',
   },
   worlds: {
-    kicker: 'Four worlds', title: '80 levels of soft, satisfying sorting',
+    kicker: 'Three worlds and a festive one', title: '60 levels of soft, satisfying sorting',
     list: [
       ['Toy Shop', 'Where it all begins: strawberries, puppies, frogs and a very proud dinosaur.'],
       ['Sweet Factory', 'Donuts, macarons and mochi, fresh off the conveyor belt.'],
       ['Starlight Stage', 'Light sticks up! Sort the stars of the show and collect their photocards.'],
-      ['Christmas Workshop', 'Snowy squishies, cosy cocoa and a reindeer with a shiny nose.'],
+      ['Christmas Workshop', 'A festive side world with 20 extra levels, snowy squishies and an advent shelf with a little gift every day.'],
     ],
-    xmasBadge: 'Opens 18 Dec',
+    xmasBadge: 'December',
   },
   extras: {
     kicker: 'Beyond the jars', title: 'More to squish',
@@ -87,7 +87,7 @@ export default {
     title: 'Support', lede: 'Stuck on a level, lost a purchase or have an idea? Write to us. A real person reads every message, usually within two working days.',
     faqTitle: 'Quick answers',
     faq: [
-      ['I bought Remove Ads but I still see ads.', 'Open Settings in the game and tap Restore purchases. Remove Ads stops the ads that play by themselves. The optional videos you choose to watch for a reward stay available, and they only play when you tap them.'],
+      ['I bought Remove Ads but I still see ads.', 'Open Settings in the game and tap Restore purchases. Remove Ads stops the ads that play by themselves, and gives you the optional rewards (like an extra jar or double coins) with one tap, no video needed.'],
       ['How do I get a refund?', 'Purchases are handled by Apple, so refunds are too. Go to reportaproblem.apple.com, sign in, and choose the purchase.'],
       ['I am stuck on a level.', 'Every level can be solved, and there is no move limit. Tap Undo, try the hint, or add an extra jar. If you fail a few times, the level gently gets a little easier.'],
       ['How do I turn gentle mode on or off?', 'Open Settings in the game. "Set up for a child" turns it on straight away. Turning it off needs a grown-up check and the age question.'],

@@ -10,8 +10,8 @@ export const SITE = {
   // pages say "on request" rather than printing a blank.
   operator: {
     name: 'Ian Atkinson',
-    postal: '', // TODO(Ian): the address declared as DSA trader in App Store Connect
-    phone: '', // TODO(Ian): the phone number declared as DSA trader
+    postal: 'Unit 174986, PO Box 7169, Poole BH15 9EL, United Kingdom',
+    phone: '', // TODO(Ian): add once the UK number works
     country: 'Luxembourg',
   },
   email: { support: 'support@squishsort.app', privacy: 'privacy@squishsort.app' },

@@ -138,10 +138,11 @@ const waveTo = (fill, flip = false) => `<svg class="wave" viewBox="0 0 1440 80" 
 
 function landing(code) {
   const t = T[code];
-  const names = Object.fromEntries([...roster.collectibles, ...roster.squishRoomToys].map(c => [c.id, c.name]));
+  const nm = c => (c.names && c.names[L(code).html]) || c.name;
+  const names = Object.fromEntries([...roster.collectibles, ...roster.squishRoomToys].map(c => [c.id, nm(c)]));
   const all = roster.collectibles.filter(c => c.rarity !== 'secret');
   const half = Math.ceil(all.length / 2);
-  const sq = c => `<button class="sq" type="button" aria-label="${esc(c.name)}"><img src="/assets/sq/${c.id}.webp" alt="" width="118" height="118" loading="lazy"><span class="nm">${esc(c.name)}</span></button>`;
+  const sq = c => `<button class="sq" type="button" aria-label="${esc(nm(c))}"><img src="/assets/sq/${c.id}.webp" alt="" width="118" height="118" loading="lazy"><span class="nm">${esc(nm(c))}</span></button>`;
   const row = list => `<div class="ribbon"><div class="track">${list.map(sq).join('')}${list.map(sq).join('').replace(/<button /g, '<button aria-hidden="true" tabindex="-1" ')}</div></div>`;
   const demoT = { ...t.demo, names };
   const worldsImg = ['dino-rex', 'donut', 'lightstick-lamb', 'reindeer'];

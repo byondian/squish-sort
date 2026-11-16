@@ -21,7 +21,8 @@ And always:
 
 - Never in the first minute after you open the game.
 - Only after a level is won: never mid-level and never after a fail.
-- Never after a boss level that took more than one try.
+- Never after a boss level, after a level that gave a capsule, or when a win unlocks something new.
+- Watching an optional reward video resets the clock, so you get a break from ad breaks.
 - In **gentle mode**, the first ad comes at level 12 or later, and every gap is doubled.
 
 We may adjust these numbers, and if we do we'll update this page.
@@ -30,7 +31,12 @@ We may adjust these numbers, and if we do we'll update this page.
 
 ## Reward videos: always your choice
 
-Some buttons offer a reward for watching a short video: an extra jar, more moves after a fail, a bonus gift of coins, or doubling the capsule you just earned. These only play when you tap them, are the same for everyone (including Remove Ads owners), and never change capsule odds. In gentle mode they are offered quietly, never in a pop-up.
+Some buttons offer a reward for watching a short video: an extra jar or a hint when you're stuck, double coins after a first clear, one more Mystery Bag guess, or the Buddy's daily gift of coins. They:
+
+- only play when you tap them, with at most 6 a day;
+- never give capsules or squishies, and never change capsule odds;
+- are given with one tap and no video to **Remove Ads** owners;
+- in **gentle mode**, are only offered for an extra jar or a hint, and the Buddy's daily gift is free with no video.
 
 ## Which ads you see
 
@@ -44,7 +50,7 @@ Ads are served by **Google AdMob**. We block ad categories that don't suit a fam
 
 ## Apple's tracking prompt
 
-If you are old enough, the game may ask once (after you win level 5 or later) whether to "Allow" tracking. Saying **Allow** lets Google use Apple's advertising identifier to show ads more relevant to you. Saying **Ask App Not to Track** means you still see ads, just not personalised ones. Either way, the game plays exactly the same.
+If you are old enough, the game asks once, at the start of level 7 and after a one-line explanation, whether to "Allow" tracking. Saying **Allow** lets Google use Apple's advertising identifier to show ads more relevant to you. Saying **Ask App Not to Track** means you still see ads, just not personalised ones. Either way, the game plays exactly the same.
 
 ## Changing your mind
 
