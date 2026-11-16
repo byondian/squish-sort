@@ -245,3 +245,4 @@ details.faq summary::-webkit-details-marker{display:none}
 .stage .rarity-pop.show{animation:rpop 2.2s cubic-bezier(.2,1.4,.4,1) forwards}
 @keyframes rpop{0%{opacity:0;transform:translate(-50%,10px) scale(.3) rotate(-8deg)}12%{opacity:1;transform:translate(-50%,0) scale(1.12) rotate(3deg)}22%{transform:translate(-50%,0) scale(1) rotate(-2deg)}80%{opacity:1;transform:translate(-50%,0) scale(1) rotate(0)}100%{opacity:0;transform:translate(-50%,-14px) scale(.9)}}
 @media (prefers-reduced-motion:reduce){.stage .rarity-pop.show{animation:rfade 2.2s forwards}@keyframes rfade{0%,80%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,0) scale(1)}}}
+.stage .rarity-pop.secret{background:linear-gradient(90deg,#F5B83D,#FFE9A8,#F5B83D);color:#3B2A4A}

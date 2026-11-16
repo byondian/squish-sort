@@ -139,7 +139,7 @@ const waveTo = (fill, flip = false) => `<svg class="wave" viewBox="0 0 1440 80" 
 function landing(code) {
   const t = T[code];
   const nm = c => (c.names && c.names[L(code).html]) || c.name;
-  const heroTiers = ['common', 'rare', 'ultra'].reduce((o, r) => (o[r] = roster.collectibles.filter(c => c.rarity === r && c.world !== 'christmas').map(c => c.id), o), {});
+  const heroTiers = ['common', 'rare', 'ultra', 'secret'].reduce((o, r) => (o[r] = roster.collectibles.filter(c => c.rarity === r).map(c => c.id), o), {});
   const names = Object.fromEntries([...roster.collectibles, ...roster.squishRoomToys].map(c => [c.id, nm(c)]));
   const all = roster.collectibles.filter(c => c.rarity !== 'secret');
   const half = Math.ceil(all.length / 2);

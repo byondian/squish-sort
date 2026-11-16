@@ -19,7 +19,9 @@
   const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
   // The reveal ladder: a few commons, then a rare, a few more, then an ultra rare.
-  const LADDER = ['common', 'common', 'common', 'common', 'rare', 'common', 'common', 'common', 'ultra'];
+  // Every second round ends with a golden secret squishy.
+  const ROUND = ['common', 'common', 'common', 'common', 'rare', 'common', 'common', 'common', 'ultra'];
+  const LADDER = [...ROUND, ...ROUND.slice(0, -1), 'secret'];
   const bags = {}, pick = tier => { const all = tiers[tier] || []; if (!all.length) return 'strawbie'; if (!bags[tier] || !bags[tier].length) bags[tier] = shuffle(all); return bags[tier].pop(); };
   if (tiers.common) tiers.common = tiers.common.filter(id => id !== 'strawbie');
   let step = 0, current = 'strawbie', upcoming = null;
@@ -50,6 +52,7 @@
   let sx = 1, sy = 1, vsx = 0, vsy = 0, tsx = 1, tsy = 1;
   let st = 0, vst = 0, sdx = 0, sdy = -1; // stretch amount along a direction
   let lean = 0, vlean = 0, wob = 0, glow = 0, glowKind = '', fade = 1;
+  let hy = 0, vhy = 0, lastInput = -1e9, nextIdle = performance.now() + 1600, idleCount = 0; // hop height, idle show
   let held = false, ptr = null, start = null, touched = false, idleKick = performance.now() + 3500;
   let visible = true, last = performance.now(), swapAt = 0;
 
@@ -104,7 +107,7 @@
   banner.className = 'rarity-pop'; banner.setAttribute('aria-live', 'polite');
   stage.appendChild(banner);
   function announce(tier) {
-    const word = tier === 'rare' ? rarityWords[1] : rarityWords[2];
+    const word = rarityWords[{ rare: 1, ultra: 2, secret: 3 }[tier]];
     if (!word) return;
     banner.textContent = word + '!';
     banner.className = 'rarity-pop ' + tier;
@@ -116,10 +119,10 @@
   const STAR = 'M0 -9 L2.6 -2.6 9 0 2.6 2.6 0 9 -2.6 2.6 -9 0 -2.6 -2.6Z', HEART = 'M0 4 C-8 -4 -6 -10 0 -6 C6 -10 8 -4 0 4Z';
   function burst(tier) {
     if (reduce) return;
-    const n = tier === 'ultra' ? 36 : tier === 'rare' ? 24 : 12, cy = BASE - SIZE * .45;
+    const n = tier === 'ultra' || tier === 'secret' ? 36 : tier === 'rare' ? 24 : tier === 'auto' ? 6 : 12, cy = BASE - SIZE * .45;
     for (let i = 0; i < n; i++) {
       const a = Math.random() * TAU, sp = (3 + Math.random() * 5) * (tier === 'common' ? 1 : 1.4);
-      const col = tier === 'ultra' ? RAINBOW[i % 5] : tier === 'rare' ? '#FFD86B' : ['#FFD86B', '#FF7EB6', '#7FE0C4'][i % 3];
+      const col = tier === 'ultra' ? RAINBOW[i % 5] : tier === 'rare' || tier === 'secret' ? '#FFD86B' : ['#FFD86B', '#FF7EB6', '#7FE0C4'][i % 3];
       const node = i % 3 === 2 && tier === 'common'
         ? el('path', { d: HEART, fill: '#FF7EB6', stroke: '#3B2A4A', 'stroke-width': 2 }, fx)
         : i % 3 === 1 ? el('circle', { r: 5 + Math.random() * 6, fill: col, stroke: '#3B2A4A', 'stroke-width': 2.5 }, fx)
@@ -132,18 +135,30 @@
   function popNext() {
     if (!upcoming) plan();
     const { tier, id } = upcoming; step++;
+    swapTo(id, tier);
+    window.ssSound(tier === 'common' ? 'pop' : tier === 'secret' ? 'ultra' : tier);
+    plan();
+  }
+  // the idle show picks from everyone except secrets, quietly, with no banner
+  const everyone = [...(tiers.common || []), ...(tiers.rare || []), ...(tiers.ultra || []), 'strawbie'];
+  let idleBag = [];
+  function idlePop() {
+    if (!idleBag.length) idleBag = shuffle(everyone);
+    let id = idleBag.pop(); if (id === current) id = idleBag.pop() || 'strawbie';
+    const im = new Image(); im.src = ART(id);
+    tsx = 1.25; tsy = .7; setTimeout(() => { tsx = 1; tsy = 1; swapTo(id, 'auto'); }, reduce ? 0 : 110);
+  }
+  function swapTo(id, tier) {
     current = id;
     [imgA, imgB] = [imgB, imgA];
     imgA.setAttribute('href', ART(id)); fade = 0;
-    vsx -= .1; vsy += .22; vlean += (Math.random() - .5) * .25; wob = Math.max(wob, tier === 'common' ? .6 : 1);
+    vsx -= .1; vsy += .22; vlean += (Math.random() - .5) * .25; wob = Math.max(wob, tier === 'common' || tier === 'auto' ? .6 : 1);
     burst(tier);
-    if (tier !== 'common') {
-      [...rays.children].forEach((r, i) => r.setAttribute('fill', tier === 'ultra' ? RAINBOW[i % 5] : i % 2 ? '#FFD86B' : '#FFF1B8'));
+    if (tier !== 'common' && tier !== 'auto') {
+      [...rays.children].forEach((r, i) => r.setAttribute('fill', tier === 'ultra' ? RAINBOW[i % 5] : tier === 'secret' ? (i % 2 ? '#F5B83D' : '#FFE9A8') : i % 2 ? '#FFD86B' : '#FFF1B8'));
       glow = 1; glowKind = tier; announce(tier); vsy += .1;
     }
     const who = stage.querySelector('.who'); if (who) who.textContent = names[id] || '';
-    window.ssSound(tier === 'common' ? 'pop' : tier);
-    plan();
   }
   function letGo() { tsx = 1.3; tsy = .66; swapAt = performance.now() + (reduce ? 0 : 70); }
 
@@ -151,7 +166,7 @@
   const toLocal = e => { const r = svg.getBoundingClientRect(); return [(e.clientX - r.left) * (W / r.width), (e.clientY - r.top) * (H / r.height)]; };
   stage.addEventListener('pointerdown', e => {
     if (e.target.closest('.snd')) return;
-    held = true; ptr = start = toLocal(e); touched = true;
+    held = true; ptr = start = toLocal(e); touched = true; lastInput = performance.now();
     stage.setPointerCapture(e.pointerId);
     tsx = 1.16; tsy = .8; wob = Math.max(wob, .5);
     vlean += (start[0] - CX) / 2400;
@@ -161,14 +176,14 @@
   });
   stage.addEventListener('pointermove', e => { if (held) ptr = toLocal(e); });
   const release = () => {
-    if (!held) return; held = false; ptr = start = null;
+    if (!held) return; held = false; ptr = start = null; lastInput = performance.now(); nextIdle = lastInput + 4500;
     letGo();
   };
   stage.addEventListener('pointerup', release);
   stage.addEventListener('pointercancel', release);
   stage.addEventListener('keydown', e => {
     if (e.key !== 'Enter' && e.key !== ' ') return;
-    e.preventDefault(); touched = true; if (!upcoming) plan(); window.ssSound('squish'); letGo();
+    e.preventDefault(); touched = true; lastInput = nextIdle = performance.now(); nextIdle += 4500; if (!upcoming) plan(); window.ssSound('squish'); letGo();
   });
 
   // loop
@@ -186,8 +201,20 @@
     }
     vst += (tst - st) * .18 * dt; vst *= pow(.78, dt); st += vst * dt;
 
-    // idle wobble invites a poke
-    if (!touched && !reduce && now > idleKick) { idleKick = now + 3500; vsy -= .06; vsx += .03; wob = Math.max(wob, .35); }
+    // idle show: when nobody is squeezing, it hops, wiggles, squishes itself and turns into someone new
+    if (!held && !swapAt && !reduce && visible && now > nextIdle && now - lastInput > 4000) {
+      const n = idleCount++ % 6;
+      if (n === 0) { vhy = 7.5 + Math.random() * 2; tsx = 1.12; tsy = .86; setTimeout(() => { tsx = 1; tsy = 1; }, 120); } // hop
+      else if (n === 2) { vlean += .09; setTimeout(() => (vlean -= .16), 260); setTimeout(() => (vlean += .1), 520); wob = Math.max(wob, .4); } // wiggle
+      else if (n % 2 === 1) idlePop(); // squish into someone new
+      else { vsy -= .12; vsx += .07; wob = Math.max(wob, .5); } // jiggle
+      nextIdle = now + 1500 + Math.random() * 900;
+    }
+    // hop: a little gravity, with a squash on landing
+    if (hy > 0 || vhy > 0) {
+      vhy -= .55 * dt; hy += vhy * dt;
+      if (hy <= 0) { hy = 0; if (vhy < -2) { vsx += .09; vsy -= .16; wob = Math.max(wob, .45); } vhy = 0; }
+    }
 
     const breathe = reduce ? 0 : Math.sin(now / 700) * .014;
     vsx += ((tsx - breathe) - sx) * .16 * dt; vsy += ((tsy + breathe) - sy) * .16 * dt;
@@ -201,11 +228,12 @@
     const c = Math.cos(lean), s = Math.sin(lean);
     const m11 = sx * a11, m12 = sy * a12, m21 = sx * a12, m22 = sy * a22; // stretch ∘ squash
     const A = c * m11 - s * m21, B = s * m11 + c * m21, C = c * m12 - s * m22, D = s * m12 + c * m22; // then lean
-    body.setAttribute('transform', `matrix(${A} ${B} ${C} ${D} ${CX} ${BASE})`);
+    body.setAttribute('transform', `matrix(${A} ${B} ${C} ${D} ${CX} ${BASE - hy * 5})`);
     imgA.setAttribute('opacity', fade); imgB.setAttribute('opacity', 1 - fade);
     const pop = 1 - fade; imgA.setAttribute('transform', pop ? `scale(${.86 + .14 * fade})` : '');
     if (!reduce) { disp.setAttribute('scale', (wob * 22).toFixed(1)); turb.setAttribute('baseFrequency', (0.010 + 0.004 * Math.sin(now / 300)).toFixed(4)); }
-    shadow.setAttribute('rx', SIZE * .36 * sx * (1 + st * .3)); shadow.setAttribute('opacity', .1 * Math.min(1.3, sx));
+    const lift = Math.max(.55, 1 - hy * 5 / 160);
+    shadow.setAttribute('rx', SIZE * .36 * sx * (1 + st * .3) * lift); shadow.setAttribute('opacity', .1 * Math.min(1.3, sx) * lift);
 
     // rare: golden rays spin behind; ultra: a rainbow ring pulses out too
     if (glow > 0) {
@@ -213,7 +241,7 @@
       const g = ease(glow), cy = BASE - SIZE * .42;
       rays.setAttribute('opacity', g);
       rays.setAttribute('transform', `translate(${CX} ${cy}) rotate(${reduce ? 0 : now / 30 % 360}) scale(${.9 + .15 * Math.sin(now / 200)})`);
-      if (glowKind === 'ultra') { const ph = (now / 900) % 1; halo.setAttribute('r', 150 * (1 + ph * .6)); halo.setAttribute('opacity', g * (1 - ph)); }
+      if (glowKind === 'ultra' || glowKind === 'secret') { const ph = (now / 900) % 1; halo.setAttribute('r', 150 * (1 + ph * .6)); halo.setAttribute('opacity', g * (1 - ph)); }
       else halo.setAttribute('opacity', 0);
     } else { rays.setAttribute('opacity', 0); halo.setAttribute('opacity', 0); }
 
