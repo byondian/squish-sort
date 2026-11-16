@@ -6,14 +6,14 @@
   "beat": "boss",
   "capacity": 4,
   "jars": [
-    ["donut", "gumdrop", "jelly", "cupcake"],
+    ["donut", "gummy-bear", "jelly", "cupcake"],
     ["strawbie", "donut", "macaron", "cupcake"],
-    ["gumdrop", "cupcake", "macaron", "donut"],
+    ["gummy-bear", "cupcake", "macaron", "donut"],
     ["donut", "jelly", "lolly", "strawbie"],
     ["macaron", "jelly", "macaron", "strawbie"],
     ["tango", "tango", "jelly", "cupcake"],
-    ["strawbie", "lolly", "gumdrop", "lolly"],
-    ["tango", "tango", "gumdrop", "lolly"],
+    ["strawbie", "lolly", "gummy-bear", "lolly"],
+    ["tango", "tango", "gummy-bear", "lolly"],
     [],
     []
   ],

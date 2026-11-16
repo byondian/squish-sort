@@ -11,20 +11,54 @@ public struct Collectible: Codable, Hashable, Identifiable, Sendable {
     public var name: String
     public var world: String
     public var rarity: Rarity
+    /// Morph Squad: turns into another squishy from its world when squeezed.
+    public var shapeshifter: Bool
 
-    public init(id: String, name: String, world: String, rarity: Rarity) {
+    public init(id: String, name: String, world: String, rarity: Rarity, shapeshifter: Bool = false) {
         self.id = id
         self.name = name
         self.world = world
         self.rarity = rarity
+        self.shapeshifter = shapeshifter
     }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        name = try c.decode(String.self, forKey: .name)
+        world = try c.decode(String.self, forKey: .world)
+        rarity = try c.decode(Rarity.self, forKey: .rarity)
+        shapeshifter = try c.decodeIfPresent(Bool.self, forKey: .shapeshifter) ?? false
+    }
+}
+
+/// A Squish Room toy (not a collectible; starters are owned by everyone).
+public struct RoomToy: Codable, Hashable, Identifiable, Sendable {
+    public var id: String
+    public var name: String
 }
 
 public struct Roster: Codable, Sendable {
     public var collectibles: [Collectible]
+    public var squishRoomToys: [RoomToy]
 
-    public init(collectibles: [Collectible]) {
+    public init(collectibles: [Collectible], squishRoomToys: [RoomToy] = []) {
         self.collectibles = collectibles
+        self.squishRoomToys = squishRoomToys
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        collectibles = try c.decode([Collectible].self, forKey: .collectibles)
+        squishRoomToys = try c.decodeIfPresent([RoomToy].self, forKey: .squishRoomToys) ?? []
+    }
+
+    /// What a Morph Squad squishy turns into on a squeeze: another non-secret
+    /// squishy from its own world, never itself.
+    public func morphTarget<R: RandomNumberGenerator>(for id: String, using rng: inout R) -> Collectible? {
+        guard let me = collectible(id), me.shapeshifter else { return nil }
+        let pool = collectibles.filter { $0.world == me.world && $0.id != id && !$0.shapeshifter && $0.rarity != .secret }
+        return pool.randomElement(using: &rng)
     }
 
     public func world(_ world: String, _ rarity: Rarity) -> [Collectible] {

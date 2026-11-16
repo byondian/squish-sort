@@ -9,9 +9,9 @@
     ["donut", "donut", "cupcake", "macaron"],
     ["jelly", "lolly", "cupcake", "cupcake"],
     ["donut", "macaron", "macaron", "lolly"],
-    ["gumdrop", "gumdrop", "jelly", "donut"],
-    ["gumdrop", "macaron", "lolly", "lolly"],
-    ["jelly", "gumdrop", "jelly", "cupcake"],
+    ["gummy-bear", "gummy-bear", "jelly", "donut"],
+    ["gummy-bear", "macaron", "lolly", "lolly"],
+    ["jelly", "gummy-bear", "jelly", "cupcake"],
     [],
     []
   ],

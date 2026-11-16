@@ -6,10 +6,10 @@
   "beat": "calm",
   "capacity": 4,
   "jars": [
-    ["gumdrop", "gumdrop", "donut", "lolly"],
+    ["gummy-bear", "gummy-bear", "donut", "lolly"],
     ["cupcake", "lolly", "cupcake", "lolly"],
     ["macaron", "macaron", "donut", "cupcake"],
-    ["macaron", "gumdrop", "gumdrop", "cupcake"],
+    ["macaron", "gummy-bear", "gummy-bear", "cupcake"],
     ["lolly", "jelly", "donut", "jelly"],
     ["jelly", "jelly", "macaron", "donut"],
     [],

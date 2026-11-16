@@ -7,10 +7,10 @@
   "capacity": 4,
   "jars": [
     ["donut", "macaron", "cupcake", "cupcake"],
-    ["cupcake", "donut", "gumdrop", "macaron"],
-    ["macaron", "macaron", "gumdrop", "donut"],
+    ["cupcake", "donut", "gummy-bear", "macaron"],
+    ["macaron", "macaron", "gummy-bear", "donut"],
     ["jelly", "jelly", "jelly", "donut"],
-    ["jelly", "cupcake", "gumdrop", "gumdrop"],
+    ["jelly", "cupcake", "gummy-bear", "gummy-bear"],
     [],
     []
   ],

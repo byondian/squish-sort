@@ -12,9 +12,9 @@
     ["jelly", "donut", "donut", "donut"],
     ["macaron", "cupcake", "cupcake", "cupcake"],
     [],
-    ["gumdrop"],
+    ["gummy-bear"],
     ["cupcake", "jelly", "jelly", "jelly"],
-    ["strawbie", "gumdrop", "gumdrop", "gumdrop"]
+    ["strawbie", "gummy-bear", "gummy-bear", "gummy-bear"]
   ],
   "mechanics": {"hidden": [[1, 0], [2, 0]], "sticky": [], "frozen": []},
   "par": 7,

@@ -16,7 +16,7 @@ CAP = 4
 
 WORLDS = [
     ("toyshop", ["strawbie", "tango", "sunny", "minty", "blu", "grapey"], None),
-    ("sweetfactory", ["macaron", "donut", "jelly", "cupcake", "gumdrop", "lolly"], "hidden"),
+    ("sweetfactory", ["macaron", "donut", "jelly", "cupcake", "gummy-bear", "lolly"], "hidden"),
     ("starlight", ["lumi", "riff", "zuzu", "pip", "nova", "coco"], "sticky"),
     ("christmas", ["santa", "elfie", "reindeer", "snowbo", "ginger", "waddles"], "frozen"),
 ]

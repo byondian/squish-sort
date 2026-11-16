@@ -181,14 +181,31 @@ final class CapsuleTests: XCTestCase {
     }
 
     func testRosterShape() {
-        XCTAssertEqual(roster.collectibles.count, 48)
-        XCTAssertEqual(Set(roster.collectibles.map(\.id)).count, 48, "ids are unique")
+        XCTAssertEqual(roster.collectibles.count, 64)
+        XCTAssertEqual(Set(roster.collectibles.map(\.id)).count, 64, "ids are unique")
         for world in ["toyshop", "sweetfactory", "starlight", "christmas"] {
             XCTAssertEqual(roster.world(world, .common).count, 6)
-            XCTAssertEqual(roster.world(world, .rare).count, 4)
-            XCTAssertEqual(roster.world(world, .ultra).count, 1)
+            XCTAssertGreaterThanOrEqual(roster.world(world, .rare).count, 4)
+            XCTAssertGreaterThanOrEqual(roster.world(world, .ultra).count, 2)
             XCTAssertEqual(roster.world(world, .secret).count, 1)
+            XCTAssertEqual(roster.collectibles.filter { $0.world == world && $0.shapeshifter }.count, 1,
+                           "one Morph Squad member per world")
         }
+        XCTAssertEqual(Set(roster.squishRoomToys.map(\.id)), ["gloop", "tapey"])
+    }
+
+    func testMorphSquadTurnsIntoSomeoneFromItsOwnWorld() {
+        var rng = SplitMix64(seed: 7)
+        for id in roster.collectibles.filter(\.shapeshifter).map(\.id) {
+            let me = roster.collectible(id)!
+            for _ in 0..<50 {
+                let t = roster.morphTarget(for: id, using: &rng)!
+                XCTAssertEqual(t.world, me.world)
+                XCTAssertNotEqual(t.id, id)
+                XCTAssertNotEqual(t.rarity, .secret)
+            }
+        }
+        XCTAssertNil(roster.morphTarget(for: "strawbie", using: &rng))
     }
 
     func testFirstCapsuleIsPeachBun() {

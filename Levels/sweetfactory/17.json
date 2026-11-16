@@ -6,13 +6,13 @@
   "beat": "bonus",
   "capacity": 4,
   "jars": [
-    ["macaron", "gumdrop", "jelly", "cupcake"],
-    ["strawbie", "cupcake", "gumdrop", "jelly"],
+    ["macaron", "gummy-bear", "jelly", "cupcake"],
+    ["strawbie", "cupcake", "gummy-bear", "jelly"],
     ["lolly", "macaron", "lolly", "jelly"],
     ["strawbie", "donut", "lolly", "cupcake"],
     ["strawbie", "strawbie", "cupcake", "lolly"],
     ["donut", "macaron", "macaron", "donut"],
-    ["gumdrop", "jelly", "donut", "gumdrop"],
+    ["gummy-bear", "jelly", "donut", "gummy-bear"],
     [],
     []
   ],

@@ -61,10 +61,41 @@
       "rarity": "rare"
     },
     {
+      "id": "spike",
+      "name": "Spike",
+      "world": "toyshop",
+      "rarity": "rare"
+    },
+    {
+      "id": "snooze",
+      "name": "Snooze",
+      "world": "toyshop",
+      "rarity": "rare"
+    },
+    {
+      "id": "buzzy",
+      "name": "Buzzy",
+      "world": "toyshop",
+      "rarity": "rare"
+    },
+    {
       "id": "sparkle-unicorn",
       "name": "Sparkle",
       "world": "toyshop",
       "rarity": "ultra"
+    },
+    {
+      "id": "blaze-dragon",
+      "name": "Blaze",
+      "world": "toyshop",
+      "rarity": "ultra"
+    },
+    {
+      "id": "morphy",
+      "name": "Morphy",
+      "world": "toyshop",
+      "rarity": "ultra",
+      "shapeshifter": true
     },
     {
       "id": "golden-shop-cat",
@@ -97,8 +128,8 @@
       "rarity": "common"
     },
     {
-      "id": "gumdrop",
-      "name": "Gumdrop",
+      "id": "gummy-bear",
+      "name": "Gummy Bear",
       "world": "sweetfactory",
       "rarity": "common"
     },
@@ -121,8 +152,8 @@
       "rarity": "rare"
     },
     {
-      "id": "choco-bat",
-      "name": "Choco Bat",
+      "id": "butter-bar",
+      "name": "Butter Bar",
       "world": "sweetfactory",
       "rarity": "rare"
     },
@@ -133,14 +164,45 @@
       "rarity": "rare"
     },
     {
+      "id": "cream-puff",
+      "name": "Cream Puff",
+      "world": "sweetfactory",
+      "rarity": "rare"
+    },
+    {
+      "id": "taffy-snake",
+      "name": "Taffy Snake",
+      "world": "sweetfactory",
+      "rarity": "rare"
+    },
+    {
+      "id": "choco-bat",
+      "name": "Choco Bat",
+      "world": "sweetfactory",
+      "rarity": "rare"
+    },
+    {
       "id": "birthday-cake",
       "name": "Birthday Cake",
       "world": "sweetfactory",
       "rarity": "ultra"
     },
     {
-      "id": "golden-gumdrop",
-      "name": "Golden Gumdrop",
+      "id": "rainbow-toast",
+      "name": "Rainbow Toast",
+      "world": "sweetfactory",
+      "rarity": "ultra"
+    },
+    {
+      "id": "swirl",
+      "name": "Swirl",
+      "world": "sweetfactory",
+      "rarity": "ultra",
+      "shapeshifter": true
+    },
+    {
+      "id": "golden-gummy",
+      "name": "Golden Gummy",
       "world": "sweetfactory",
       "rarity": "secret"
     },
@@ -205,10 +267,41 @@
       "rarity": "rare"
     },
     {
+      "id": "chomp",
+      "name": "Chomp",
+      "world": "starlight",
+      "rarity": "rare"
+    },
+    {
+      "id": "mushie",
+      "name": "Mushie",
+      "world": "starlight",
+      "rarity": "rare"
+    },
+    {
+      "id": "sleepy-moon",
+      "name": "Sleepy Moon",
+      "world": "starlight",
+      "rarity": "rare"
+    },
+    {
       "id": "centre-star",
       "name": "Centre Star",
       "world": "starlight",
       "rarity": "ultra"
+    },
+    {
+      "id": "star-narwhal",
+      "name": "Starlight Narwhal",
+      "world": "starlight",
+      "rarity": "ultra"
+    },
+    {
+      "id": "glimmer",
+      "name": "Glimmer",
+      "world": "starlight",
+      "rarity": "ultra",
+      "shapeshifter": true
     },
     {
       "id": "golden-mic",
@@ -283,10 +376,27 @@
       "rarity": "ultra"
     },
     {
+      "id": "flurry",
+      "name": "Flurry",
+      "world": "christmas",
+      "rarity": "ultra",
+      "shapeshifter": true
+    },
+    {
       "id": "golden-bell",
       "name": "Golden Bell",
       "world": "christmas",
       "rarity": "secret"
+    }
+  ],
+  "squishRoomToys": [
+    {
+      "id": "gloop",
+      "name": "Gloop"
+    },
+    {
+      "id": "tapey",
+      "name": "Tapey"
     }
   ]
 }

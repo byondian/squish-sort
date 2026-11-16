@@ -34,7 +34,7 @@ struct SquishyStyle {
         "donut": .init(color: UIColor(hex: 0xC98A5A), shape: .bun, feature: .hat),
         "jelly": .init(color: UIColor(hex: 0x3FD0BE), shape: .drop, feature: .none),
         "cupcake": .init(color: UIColor(hex: 0xC9A7FF), shape: .blob, feature: .leaf),
-        "gumdrop": .init(color: UIColor(hex: 0xB8E05A), shape: .star, feature: .none),
+        "gummy-bear": .init(color: UIColor(hex: 0xB8E05A), shape: .star, feature: .none),
         "lolly": .init(color: UIColor(hex: 0x6EC6FF), shape: .heart, feature: .antenna),
         // Starlight Stage
         "lumi": .init(color: UIColor(hex: 0xFF8FC8), shape: .bun, feature: .ears),

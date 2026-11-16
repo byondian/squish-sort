@@ -6,14 +6,14 @@
   "beat": "tension",
   "capacity": 4,
   "jars": [
-    ["tango", "tango", "strawbie", "gumdrop"],
-    ["donut", "jelly", "gumdrop", "macaron"],
+    ["tango", "tango", "strawbie", "gummy-bear"],
+    ["donut", "jelly", "gummy-bear", "macaron"],
     ["strawbie", "cupcake", "lolly", "donut"],
     ["jelly", "macaron", "jelly", "cupcake"],
     ["lolly", "cupcake", "tango", "macaron"],
     ["strawbie", "lolly", "macaron", "jelly"],
-    ["cupcake", "gumdrop", "lolly", "tango"],
-    ["donut", "strawbie", "donut", "gumdrop"],
+    ["cupcake", "gummy-bear", "lolly", "tango"],
+    ["donut", "strawbie", "donut", "gummy-bear"],
     [],
     []
   ],
