@@ -69,6 +69,8 @@ final class AppModel: ObservableObject {
     @Published var buddySays: String?
     /// Goes up each time the daily gift is opened, so the home screen can throw the coins.
     @Published var giftsOpened = 0
+    /// A treat or gift bought in the shop, on its way to the Buddy.
+    @Published var buddyDelivery: Coins.Item?
     private var ultraJustOpened = false
     private var squeezeAfterCapsule: String?
     @Published var buddyAsksMood = false
@@ -548,10 +550,28 @@ final class AppModel: ObservableObject {
     /// Treats and gifts bought with coins are given straight away.
     func buyForBuddy(_ item: Coins.Item) {
         guard buddyActive, item == .treat || item == .gift, spend(item) else { return }
+        giveBuddy(item)
+    }
+
+    /// Bought in the shop: paid for here, then given on the home screen, where the Buddy can be seen enjoying it.
+    func buyForBuddyFromShop(_ item: Coins.Item) {
+        guard buddyActive, buddyDelivery == nil, item == .treat || item == .gift, spend(item) else { return }
+        buddyDelivery = item
+        screen = homeScreen
+    }
+
+    /// The home screen calls this when the bought treat or gift reaches the Buddy.
+    func deliverToBuddy() {
+        guard let item = buddyDelivery else { return }
+        buddyDelivery = nil
+        giveBuddy(item)
+    }
+
+    private func giveBuddy(_ item: Coins.Item) {
         let before = progress.buddy.hearts
         update { $0.buddy.give(item); if item == .treat { $0.buddy.lastTreatAt = Date().timeIntervalSince1970 } }
         haptics.complete()
-        if item == .gift { sounds.play("heart") } else { sounds.play("buddy_yum", or: "buddy_munch") }
+        if item == .gift { sounds.play("gift_open", or: "heart") } else { sounds.play("buddy_yum", or: "buddy_munch") }
         heartsChanged(from: before)
     }
 

@@ -70,7 +70,7 @@ struct ShopView: View {
     }
 
     private func buddyItem(_ item: Coins.Item, _ title: LocalizedStringKey, _ icon: String) -> some View {
-        Button { model.buyForBuddy(item) } label: {
+        Button { model.buyForBuddyFromShop(item) } label: {
             VStack(spacing: 4) {
                 Label(title, systemImage: icon)
                 // Says what it gives: hearts fill the ring towards the Buddy's next trick.
