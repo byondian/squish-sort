@@ -316,8 +316,18 @@ final class BoardScene: SKScene {
     override func update(_ currentTime: TimeInterval) {
         let dt = lastUpdate == 0 ? 1.0 / 60 : min(0.05, max(0, currentTime - lastUpdate))
         lastUpdate = currentTime
-        for jar in pieces {
-            for node in jar { node.advance(dt) }
+        for (j, jar) in pieces.enumerated() {
+            for (i, node) in jar.enumerated() {
+                node.advance(dt)
+                // A squishy that is not travelling, held up or hopping sits exactly in its place.
+                // Whatever interrupted it, it can never be left part way.
+                if node.action(forKey: "travel") == nil, node.action(forKey: "wobble") == nil,
+                   node.action(forKey: "hop") == nil, j < geometry.centers.count {
+                    let home = slot(j, i)
+                    if node.position != home { node.position = home }
+                    if node.zRotation != 0 { node.zRotation = 0 }
+                }
+            }
         }
     }
 
@@ -341,6 +351,7 @@ final class BoardScene: SKScene {
         let n = board.runLength(at: j)
         for (k, node) in pieces[j].suffix(n).enumerated() {
             node.removeAction(forKey: "wobble")
+            node.removeAction(forKey: "travel")
             node.zPosition = 10
             let rise = SKAction.move(to: liftPoint(j, k), duration: 0.12)
             rise.timingMode = .easeOut
@@ -365,14 +376,15 @@ final class BoardScene: SKScene {
             let drop = Double(node.position.y - target.y) / Double(max(geometry.piece, 1))
             guard drop > 0.05 else {
                 // Already home, or as good as: make sure it sits exactly in its slot.
-                node.removeAction(forKey: "settle")
+                node.removeAction(forKey: "travel")
                 node.position = target
                 continue
             }
             node.run(.sequence([.move(to: target, duration: 0.12), .run { [weak self, weak node] in
                 guard let self, let node else { return }
+                node.position = target
                 self.land(node, jar: j, index: i, speed: drop / 0.12)
-            }]))
+            }]), withKey: "travel")
         }
     }
 
@@ -399,7 +411,7 @@ final class BoardScene: SKScene {
             node.removeAction(forKey: "wobble")
             node.zRotation = 0
             node.zPosition = 5
-            node.run(.move(to: slot(from, i), duration: 0.12))
+            node.run(.move(to: slot(from, i), duration: 0.12), withKey: "travel")
         }
         let hop = 0.18, stagger = 0.04
         let spread = stagger * Double(max(0, k - 1))
@@ -425,9 +437,10 @@ final class BoardScene: SKScene {
                 .run { [weak self, weak node] in
                     guard let self, let node else { return }
                     node.zPosition = 5
+                    node.position = target
                     self.land(node, jar: to, index: index, speed: fall / (hop / 2))
                 },
-            ]))
+            ]), withKey: "travel")
         }
         pieces[to].append(contentsOf: moving)
         run(.sequence([

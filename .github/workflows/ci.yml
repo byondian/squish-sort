@@ -24,6 +24,10 @@ jobs:
         run: swift test --package-path Packages/SquishKit
       - name: Gate 2 — re-solve every level and check par
         run: swift run -c release --package-path Packages/SquishKit squish-levels check Levels
+      - name: Squishy pictures sit evenly in a jar
+        run: |
+          sudo apt-get install -y -q python3-pil
+          python3 scripts/check_seating.py
 
   golden-path:
     name: App build and golden path UI test (gate 3)
