@@ -70,6 +70,28 @@
         }
       }
     },
+    "%lld more hearts to the next trick": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "つぎの芸まで ハートあと%lldこ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다음 재주까지 하트 %lld개"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再 %lld 顆愛心學會新把戲"
+          }
+        }
+      }
+    },
     "%lld more levels to a capsule": {
       "localizations": {
         "ja": {
@@ -981,6 +1003,50 @@
         }
       }
     },
+    "Double tap for a trick!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ダブルタップで芸をするよ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "두 번 탭하면 재주를 부려!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "點兩下看把戲！"
+          }
+        }
+      }
+    },
+    "Double tap your Buddy at home to see it.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ホームでバディをダブルタップすると見られるよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "홈에서 버디를 두 번 탭하면 볼 수 있어."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在主畫面點兩下夥伴就能看到。"
+          }
+        }
+      }
+    },
     "Ears": {
       "localizations": {
         "ja": {
@@ -1439,6 +1505,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "提示"
+          }
+        }
+      }
+    },
+    "I grew!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大きくなったよ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "나 컸어!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "我長大了！"
           }
         }
       }
@@ -1989,6 +2077,72 @@
           "stringUnit": {
             "state": "translated",
             "value": "新增"
+          }
+        }
+      }
+    },
+    "New trick: Dance!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新しい芸：ダンス！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "새 재주: 댄스!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新把戲：跳舞！"
+          }
+        }
+      }
+    },
+    "New trick: Flip!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新しい芸：フリップ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "새 재주: 공중제비!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新把戲：翻跟斗！"
+          }
+        }
+      }
+    },
+    "New trick: Spin!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新しい芸：スピン！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "새 재주: 빙글!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新把戲：轉圈！"
           }
         }
       }
@@ -4145,6 +4299,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "架子滿了"
+          }
+        }
+      }
+    },
+    "Yum!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "おいしい！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "냠냠!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "好吃！"
           }
         }
       }

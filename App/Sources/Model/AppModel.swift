@@ -44,11 +44,14 @@ final class AppModel: ObservableObject {
     enum News: Identifiable, Equatable {
         case unlocked(Extra)
         case worldComplete(world: String, next: String?)
+        /// The Buddy learned its first, second or third trick.
+        case trick(Int)
 
         var id: String {
             switch self {
             case .unlocked(let extra): return "extra-\(extra.rawValue)"
             case .worldComplete(let world, _): return "world-\(world)"
+            case .trick(let number): return "trick-\(number)"
             }
         }
     }
@@ -469,19 +472,36 @@ final class AppModel: ObservableObject {
 
     func feedBuddy() {
         guard buddyActive, progress.buddy.treats > 0 else { return }
+        let before = progress.buddy.hearts
         update { _ = $0.buddy.feedStoredTreat() }
         haptics.complete()
-        sounds.play("buddy_munch")
-        buddySays = buddyLine("treat")
+        sounds.play("buddy_yum", or: "buddy_munch")
+        heartsChanged(from: before)
+    }
+
+    /// Hearts only ever add up: every 10 teach a trick, and the Buddy grows a little up to 50.
+    private func heartsChanged(from before: Int) {
+        let now = progress.buddy.hearts
+        if BuddyState.tricksKnown(hearts: now) > BuddyState.tricksKnown(hearts: before) {
+            sounds.play("trick", or: "unlock_new")
+            buddySays = String(localized: "I grew!")
+            if showingNews == nil { showingNews = .trick(BuddyState.tricksKnown(hearts: now)) }
+        } else if BuddyState.growthSteps(hearts: now) > BuddyState.growthSteps(hearts: before) {
+            sounds.play("grow", or: "heart")
+            buddySays = String(localized: "I grew!")
+        } else {
+            buddySays = String(localized: "Yum!")
+        }
     }
 
     /// Treats and gifts bought with coins are given straight away.
     func buyForBuddy(_ item: Coins.Item) {
         guard buddyActive, item == .treat || item == .gift, spend(item) else { return }
+        let before = progress.buddy.hearts
         update { $0.buddy.give(item) }
         haptics.complete()
-        sounds.play(item == .gift ? "heart" : "buddy_munch")
-        buddySays = buddyLine("treat")
+        if item == .gift { sounds.play("heart") } else { sounds.play("buddy_yum", or: "buddy_munch") }
+        heartsChanged(from: before)
     }
 
     // MARK: - The Buddy's daily gift

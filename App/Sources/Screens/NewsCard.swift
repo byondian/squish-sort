@@ -24,7 +24,11 @@ struct NewsCard: View {
                 picture
                 Text(title).font(Theme.title(28)).foregroundStyle(Theme.plum).multilineTextAlignment(.center)
                 Text(detail).font(Theme.body(16)).foregroundStyle(Theme.plum.opacity(0.75)).multilineTextAlignment(.center)
-                if case .unlocked = news {
+                if case .trick = news {
+                    Button { model.newsRead() } label: { Text("Yay!").frame(maxWidth: .infinity) }
+                        .buttonStyle(SquishButtonStyle())
+                        .accessibilityIdentifier("news-next")
+                } else if case .unlocked = news {
                     Button { model.newsRead(open: true) } label: {
                         Label("Try it now", systemImage: "sparkles").frame(maxWidth: .infinity)
                     }
@@ -54,6 +58,12 @@ struct NewsCard: View {
         switch news {
         case .worldComplete:
             Text(verbatim: "🏆").font(.system(size: 70))
+        case .trick:
+            if let ref = model.progress.buddy.squishy {
+                SquishRefView(ref: ref).frame(width: 120, height: 120)
+            } else {
+                Text(verbatim: "🎪").font(.system(size: 70))
+            }
         case .unlocked(let extra):
             Image(systemName: extra == .mysteryBag ? "bag.fill" : "paintbrush.fill")
                 .font(.system(size: 44, weight: .bold)).foregroundStyle(.white)
@@ -74,6 +84,12 @@ struct NewsCard: View {
             }
         case .unlocked(let extra):
             return extra == .mysteryBag ? "New: Mystery Bag!" : "New: Squishy Maker!"
+        case .trick(let number):
+            switch number {
+            case 1: return "New trick: Spin!"
+            case 2: return "New trick: Flip!"
+            default: return "New trick: Dance!"
+            }
         }
     }
 
@@ -85,6 +101,8 @@ struct NewsCard: View {
             case "starlight": return "You sorted every jar. Starlight Stage is open!"
             default: return "You sorted every jar. What a star!"
             }
+        case .trick:
+            return "Double tap your Buddy at home to see it."
         case .unlocked(let extra):
             return extra == .mysteryBag
                 ? "Poke the bag and guess who's inside. A new bag every day, on your shelf at home."

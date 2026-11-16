@@ -908,4 +908,24 @@ final class ExtrasTests: XCTestCase {
         }
         XCTAssertEqual(rush.coins, plain.coins * 2)
     }
+
+    func testBuddyHeartsOpenTricksAndGrowth() {
+        var b = BuddyState()
+        XCTAssertEqual(b.tricksUnlocked, 0)
+        XCTAssertEqual(b.heartsToNextTrick, 10)
+        XCTAssertEqual(b.growth, 0)
+        b.hearts = 7
+        XCTAssertEqual(b.heartsToNextTrick, 3)
+        XCTAssertEqual(b.trickProgress, 0.7, accuracy: 1e-9)
+        b.hearts = 10
+        XCTAssertEqual(b.tricksUnlocked, 1)
+        XCTAssertEqual(b.growth, 0.05, accuracy: 1e-9)
+        XCTAssertEqual(b.heartsToNextTrick, 10)
+        b.hearts = 30
+        XCTAssertEqual(b.tricksUnlocked, 3)
+        XCTAssertNil(b.heartsToNextTrick)
+        XCTAssertEqual(b.trickProgress, 1)
+        b.hearts = 500
+        XCTAssertEqual(b.growth, 0.25, accuracy: 1e-9, "growth stops at a quarter bigger")
+    }
 }

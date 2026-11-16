@@ -274,6 +274,12 @@ struct BuddyHomeView: View {
     @State private var picking = false
     @State private var pokes = 0
     @State private var confirmTreat = false
+    @State private var feeding = false
+    @State private var heartUp = false
+    @State private var spin = 0.0
+    @State private var flip = 0.0
+    @State private var sway: CGFloat = 0
+    @State private var trickTurn = 0
 
     private let moods: [(id: String, face: String, label: LocalizedStringKey)] = [
         ("happy", "😊", "Happy"), ("okay", "🙂", "Okay"), ("sleepy", "😴", "Sleepy"), ("grumpy", "😠", "Grumpy"),
@@ -300,10 +306,29 @@ struct BuddyHomeView: View {
                 }
                 // Poke and squeeze only, no throwing.
                 SoftSquishy(toy: ref, look: ref, feel: model.feel(for: ref), pokes: pokes,
-                            onTouch: { withAnimation { model.pokeBuddy() } }) {
+                            onTouch: { withAnimation { model.pokeBuddy() } }, onDoubleTap: { playTrick() }) {
                     SquishRefView(ref: ref)
                 }
-                .frame(width: 190, height: 190)
+                .frame(width: 170, height: 170)
+                // Tricks: spin, flip and dance. Then the little growth from hearts, which never goes back.
+                .rotationEffect(.degrees(spin))
+                .rotation3DEffect(.degrees(flip), axis: (x: 1, y: 0, z: 0))
+                .offset(x: sway)
+                .scaleEffect(1 + model.progress.buddy.growth, anchor: .bottom)
+                .padding(.top, 170 * model.progress.buddy.growth)
+                .overlay {
+                    // A treat flies up to the Buddy, and a heart floats off it.
+                    if feeding {
+                        Text(verbatim: "🧁").font(.system(size: 34))
+                            .transition(.asymmetric(insertion: .offset(x: -70, y: 150).combined(with: .opacity),
+                                                    removal: .scale(scale: 0.1).combined(with: .opacity)))
+                    }
+                    if heartUp {
+                        Image(systemName: "heart.fill").font(.system(size: 26)).foregroundStyle(Theme.bubblegum)
+                            .transition(.asymmetric(insertion: .scale(scale: 0.3).combined(with: .opacity),
+                                                    removal: .offset(x: 50, y: -120).combined(with: .opacity)))
+                    }
+                }
                 .accessibilityElement()
                 .accessibilityLabel(Text(verbatim: model.progress.buddy.name))
                 .accessibilityAddTraits(.isButton)
@@ -311,10 +336,24 @@ struct BuddyHomeView: View {
                 .accessibilityIdentifier("buddy")
                 HStack(spacing: 8) {
                     Text(verbatim: model.progress.buddy.name).font(Theme.title(22))
-                    Label("\(model.progress.buddy.hearts)", systemImage: "heart.fill")
-                        .font(Theme.body(15)).foregroundStyle(Theme.bubblegum)
+                    // The heart ring fills towards the next trick.
+                    ZStack {
+                        Circle().stroke(Theme.bubblegum.opacity(0.2), lineWidth: 4)
+                        Circle().trim(from: 0, to: model.progress.buddy.trickProgress)
+                            .stroke(Theme.bubblegum, style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                            .rotationEffect(.degrees(-90))
+                        Image(systemName: "heart.fill").font(.system(size: 12)).foregroundStyle(Theme.bubblegum)
+                    }
+                    .frame(width: 30, height: 30)
+                    .animation(.spring(response: 0.4, dampingFraction: 0.6), value: model.progress.buddy.hearts)
+                    Text(verbatim: "\(model.progress.buddy.hearts)").font(Theme.body(15)).foregroundStyle(Theme.bubblegum)
                 }
                 .foregroundStyle(Theme.plum)
+                if let toGo = model.progress.buddy.heartsToNextTrick {
+                    Text("\(toGo) more hearts to the next trick").font(Theme.body(12)).foregroundStyle(Theme.plum.opacity(0.6))
+                } else {
+                    Text("Double tap for a trick!").font(Theme.body(12)).foregroundStyle(Theme.plum.opacity(0.6))
+                }
                 if model.dailyGiftReady {
                     // The Buddy's daily gift: coins by opt-in ad, or free in gentle mode.
                     Button { withAnimation { model.takeDailyGift() }; squish() } label: {
@@ -325,7 +364,7 @@ struct BuddyHomeView: View {
                 }
                 HStack(spacing: 10) {
                     if model.progress.buddy.treats > 0 {
-                        Button { withAnimation { model.feedBuddy() }; squish() } label: {
+                        Button { feed { model.feedBuddy() } } label: {
                             Label("Treat ×\(model.progress.buddy.treats)", systemImage: "birthday.cake.fill")
                         }
                         .buttonStyle(SquishButtonStyle(fill: Theme.butter, text: Theme.plum))
@@ -335,8 +374,7 @@ struct BuddyHomeView: View {
                         Button {
                             if confirmTreat {
                                 confirmTreat = false
-                                withAnimation { model.buyForBuddy(.treat) }
-                                squish()
+                                feed { model.buyForBuddy(.treat) }
                             } else {
                                 withAnimation { confirmTreat = true }
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 3) { withAnimation { confirmTreat = false } }
@@ -380,6 +418,44 @@ struct BuddyHomeView: View {
 
     private func squish() {
         pokes += 1
+    }
+
+    /// The treat flies in, the Buddy chomps twice, then a heart floats up.
+    private func feed(_ give: @escaping () -> Void) {
+        guard !feeding else { return }
+        withAnimation(.easeOut(duration: 0.3)) { feeding = true }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.32) {
+            withAnimation(.easeIn(duration: 0.15)) { feeding = false }
+            squish()
+            withAnimation { give() }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+            squish()
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { heartUp = true }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.95) {
+            withAnimation(.easeIn(duration: 0.5)) { heartUp = false }
+        }
+    }
+
+    /// A double tap plays a trick the Buddy knows: spin, flip or dance.
+    private func playTrick() {
+        let known = model.progress.buddy.tricksUnlocked
+        guard known > 0, spin == 0, flip == 0, sway == 0 else { return }
+        trickTurn += 1
+        model.sounds.play("trick", or: "buddy_giggle")
+        model.haptics.complete()
+        switch trickTurn % known {
+        case 0:
+            withAnimation(.easeInOut(duration: 0.6)) { spin = 360 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) { spin = 0 }
+        case 1:
+            withAnimation(.easeInOut(duration: 0.6)) { flip = 360 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) { flip = 0 }
+        default:
+            withAnimation(.easeInOut(duration: 0.15).repeatCount(6, autoreverses: true)) { sway = 14 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.95) { withAnimation(.easeOut(duration: 0.1)) { sway = 0 } }
+        }
     }
 }
 

@@ -390,8 +390,25 @@ public struct BuddyState: Codable, Equatable, Sendable {
     }
 
     /// Tricks open every 10 hearts. Cosmetic only.
-    public var tricksUnlocked: Int { min(BuddyState.tricks, hearts / 10) }
+    public var tricksUnlocked: Int { BuddyState.tricksKnown(hearts: hearts) }
     public static let tricks = 3
+    public static let heartsPerTrick = 10
+
+    public static func tricksKnown(hearts: Int) -> Int { min(tricks, max(0, hearts) / heartsPerTrick) }
+
+    /// Hearts still needed for the next trick, or nil when every trick is known.
+    public var heartsToNextTrick: Int? {
+        tricksUnlocked < BuddyState.tricks ? BuddyState.heartsPerTrick - hearts % BuddyState.heartsPerTrick : nil
+    }
+
+    /// How far round the heart ring is, 0 to 1. Full once every trick is known.
+    public var trickProgress: Double {
+        heartsToNextTrick == nil ? 1 : Double(hearts % BuddyState.heartsPerTrick) / Double(BuddyState.heartsPerTrick)
+    }
+
+    /// The Buddy grows a little at 10, 20, 30, 40 and 50 hearts: 5% a step, to 25%. It never shrinks.
+    public static func growthSteps(hearts: Int) -> Int { min(5, max(0, hearts) / 10) }
+    public var growth: Double { Double(BuddyState.growthSteps(hearts: hearts)) * 0.05 }
 }
 
 public struct BuddyLine: Codable, Equatable, Sendable {
