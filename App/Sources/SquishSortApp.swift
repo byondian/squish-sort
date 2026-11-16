@@ -43,6 +43,12 @@ struct RootView: View {
                 ShopView()
             }
         }
+        .overlay {
+            if let news = model.showingNews {
+                NewsCard(news: news).id(news.id).transition(.opacity)
+            }
+        }
+        .animation(.easeOut(duration: 0.2), value: model.showingNews)
         .fullScreenCover(item: $model.capsule, onDismiss: { model.capsuleDismissed() }) { c in
             CapsuleView(collectible: c) { model.capsuleClosed() }
                 .environmentObject(model)

@@ -148,9 +148,10 @@ public struct LevelPot: Equatable, Sendable {
     private var paidKinds: Set<Int> = []
     private var lastJarAt: Double?
 
-    public init(firstClear: Bool, jars: Int, luckyKind: Int? = nil, rules: CoinRules = CoinRules()) {
+    /// `jarMultiplier` is 2 on a bonus level (Coin Rush): every finished jar throws double.
+    public init(firstClear: Bool, jars: Int, luckyKind: Int? = nil, jarMultiplier: Int = 1, rules: CoinRules = CoinRules()) {
         paysCoins = firstClear
-        shares = Coins.jarShares(jars: jars, rules: rules)
+        shares = Coins.jarShares(jars: jars, rules: rules).map { $0 * max(1, jarMultiplier) }
         self.luckyKind = firstClear ? luckyKind : nil
         self.rules = rules
     }
@@ -173,6 +174,64 @@ public struct LevelPot: Equatable, Sendable {
         }
         coins += out.coins
         return out
+    }
+
+    /// Coins for a squishy streak word. Each word pays once an attempt, and only on a first clear.
+    @discardableResult
+    public mutating func streakWord(_ word: SortChain.Word) -> Int {
+        guard paysCoins, !paidWords.contains(word) else { return 0 }
+        paidWords.insert(word)
+        coins += word.coins
+        return word.coins
+    }
+
+    private var paidWords: Set<SortChain.Word> = []
+}
+
+/// Squishy streak (fix list B3): a chain of moves that each land on a matching squishy
+/// within a few seconds of the last. A move into an empty jar keeps the chain alive but
+/// adds nothing. Undo, a hint or a long pause ends it, and nothing is ever shown when it ends.
+/// In gentle mode there is no time limit at all.
+public struct SortChain: Equatable, Sendable {
+    public enum Word: Int, CaseIterable, Sendable {
+        case nice = 1, streak, onARoll, unstoppable
+
+        /// The chain length that earns this word.
+        public var length: Int {
+            switch self {
+            case .nice: return 3
+            case .streak: return 5
+            case .onARoll: return 8
+            case .unstoppable: return 12
+            }
+        }
+
+        /// Added to the level pot on a first clear.
+        public var coins: Int { rawValue * 5 }
+    }
+
+    public static let seconds = 4.0
+    public private(set) var count = 0
+    private var lastAt: Double?
+    /// Nil for under-13s: speed is never rewarded there, so a chain is just matching moves in a row.
+    private let window: Double?
+
+    public init(timed: Bool = true) {
+        window = timed ? SortChain.seconds : nil
+    }
+
+    /// A move landed `seconds` into the attempt. Returns the word it earned, if it reached one.
+    public mutating func move(ontoMatch: Bool, at seconds: Double) -> Word? {
+        if let window, let last = lastAt, seconds - last > window { count = 0 }
+        lastAt = seconds
+        guard ontoMatch else { return nil }
+        count += 1
+        return Word.allCases.first { $0.length == count }
+    }
+
+    public mutating func end() {
+        count = 0
+        lastAt = nil
     }
 }
 

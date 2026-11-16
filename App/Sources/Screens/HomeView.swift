@@ -31,31 +31,11 @@ struct HomeView: View {
             if model.adventDoors > 0 { AdventShelf() }
             shelf
             Spacer(minLength: 0)
-            HStack(alignment: .center, spacing: 4) {
-                VStack {
-                    if model.isExtraUnlocked(.squishRoom) {
-                        object("Squish Room", "hand.tap.fill", Theme.bubblegum.opacity(0.35), extra: .squishRoom) { model.open(.squishRoom) }
-                    }
-                }
-                .frame(width: 76)
-                if model.isExtraUnlocked(.buddy) {
-                    BuddyHomeView()
-                } else {
-                    SquishyView(id: model.progress.favouriteSquishy ?? "peach-bun", rarity: .rare)
-                        .frame(width: 170, height: 170)
-                }
-                VStack(spacing: 12) {
-                    if model.isExtraUnlocked(.maker) {
-                        object("Maker", "paintbrush.fill", Theme.mint, extra: .maker) { model.open(.maker) }
-                    }
-                    // The festive door: a side world. No countdown anywhere.
-                    if model.showsFestiveDoor {
-                        object(AppModel.christmasWorldName, "door.left.hand.closed", Color(red: 0.9, green: 0.25, blue: 0.3),
-                               tint: .white) { model.openFestiveDoor() }
-                            .accessibilityIdentifier("festive-door")
-                    }
-                }
-                .frame(width: 76)
+            if model.isExtraUnlocked(.buddy) {
+                BuddyHomeView()
+            } else {
+                SquishyView(id: model.progress.favouriteSquishy ?? "peach-bun", rarity: .rare)
+                    .frame(width: 170, height: 170)
             }
             Spacer(minLength: 0)
             Button { model.screen = .level(model.progress.highestUnlocked) } label: {
@@ -96,10 +76,32 @@ struct HomeView: View {
                 }
             }
             .padding(.horizontal, 8)
+            .background(alignment: .bottom) { plank }
+            // A second shelf for the places that open later, so nothing floats beside the Buddy.
+            if model.isExtraUnlocked(.squishRoom) || model.isExtraUnlocked(.maker) || model.showsFestiveDoor {
+                HStack(alignment: .bottom, spacing: 18) {
+                    if model.isExtraUnlocked(.squishRoom) {
+                        object("Squish Room", "hand.tap.fill", Theme.bubblegum.opacity(0.35), extra: .squishRoom) { model.open(.squishRoom) }
+                    }
+                    if model.isExtraUnlocked(.maker) {
+                        object("Maker", "paintbrush.fill", Theme.mint, extra: .maker) { model.open(.maker) }
+                    }
+                    // The festive door: a side world. No countdown anywhere.
+                    if model.showsFestiveDoor {
+                        object(AppModel.christmasWorldName, "door.left.hand.closed", Color(red: 0.9, green: 0.25, blue: 0.3),
+                               tint: .white) { model.openFestiveDoor() }
+                            .accessibilityIdentifier("festive-door")
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 8)
+                .background(alignment: .bottom) { plank }
+            }
         }
-        .background(alignment: .bottom) {
-            Capsule().fill(Color(red: 0.87, green: 0.72, blue: 0.53)).frame(height: 10).offset(y: -22)
-        }
+    }
+
+    private var plank: some View {
+        Capsule().fill(Color(red: 0.87, green: 0.72, blue: 0.53)).frame(height: 10).offset(y: -22)
     }
 
     private var ownedCount: Int {
@@ -271,6 +273,7 @@ struct BuddyHomeView: View {
     @EnvironmentObject var model: AppModel
     @State private var picking = false
     @State private var pokes = 0
+    @State private var confirmTreat = false
 
     private let moods: [(id: String, face: String, label: LocalizedStringKey)] = [
         ("happy", "😊", "Happy"), ("okay", "🙂", "Okay"), ("sleepy", "😴", "Sleepy"), ("grumpy", "😠", "Grumpy"),
@@ -321,12 +324,37 @@ struct BuddyHomeView: View {
                     .accessibilityIdentifier("daily-gift")
                 }
                 HStack(spacing: 10) {
-                    Button { withAnimation { model.feedBuddy() }; squish() } label: {
-                        Label("Treat ×\(model.progress.buddy.treats)", systemImage: "birthday.cake.fill")
+                    if model.progress.buddy.treats > 0 {
+                        Button { withAnimation { model.feedBuddy() }; squish() } label: {
+                            Label("Treat ×\(model.progress.buddy.treats)", systemImage: "birthday.cake.fill")
+                        }
+                        .buttonStyle(SquishButtonStyle(fill: Theme.butter, text: Theme.plum))
+                    } else if !model.isGentleMode && model.progress.wallet.canAfford(.treat) {
+                        // Out of free treats: one more for coins, given straight away.
+                        // Two taps, so a poke meant for the Buddy never spends coins.
+                        Button {
+                            if confirmTreat {
+                                confirmTreat = false
+                                withAnimation { model.buyForBuddy(.treat) }
+                                squish()
+                            } else {
+                                withAnimation { confirmTreat = true }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { withAnimation { confirmTreat = false } }
+                            }
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: "birthday.cake.fill")
+                                Text(confirmTreat ? LocalizedStringKey("Tap again") : LocalizedStringKey("Treat"))
+                                Label("\(Coins.Item.treat.price)", systemImage: "circle.hexagongrid.fill").font(Theme.body(14))
+                            }
+                        }
+                        .buttonStyle(SquishButtonStyle(fill: confirmTreat ? Theme.mint : Theme.butter, text: Theme.plum))
+                        .accessibilityIdentifier("buy-treat")
+                    } else {
+                        // No treats and no coins: say where treats come from.
+                        Label("Win a level for a treat", systemImage: "birthday.cake.fill")
+                            .font(Theme.body(14)).foregroundStyle(Theme.plum.opacity(0.6))
                     }
-                    .buttonStyle(SquishButtonStyle(fill: Theme.butter, text: Theme.plum))
-                    .disabled(model.progress.buddy.treats == 0)
-                    .opacity(model.progress.buddy.treats == 0 ? 0.5 : 1)
                     Button { picking = true } label: { Image(systemName: "pencil") }
                         .buttonStyle(SquishButtonStyle(fill: .white, text: Theme.plum))
                         .accessibilityLabel(Text("Change Buddy"))

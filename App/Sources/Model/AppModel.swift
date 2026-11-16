@@ -35,6 +35,32 @@ final class AppModel: ObservableObject {
     @Published private(set) var lastWin = WinSummary()
     /// A short line at the top of the screen that fades by itself.
     @Published var toast: String?
+    /// Good news earned by the last win (a new place to play, a finished world), told
+    /// one card at a time when the player moves on from the win card.
+    @Published var news: [News] = []
+    @Published var showingNews: News?
+    private var afterNews: Int?
+
+    enum News: Identifiable, Equatable {
+        case unlocked(Extra)
+        case worldComplete(world: String, next: String?)
+
+        var id: String {
+            switch self {
+            case .unlocked(let extra): return "extra-\(extra.rawValue)"
+            case .worldComplete(let world, _): return "world-\(world)"
+            }
+        }
+    }
+
+    nonisolated static func worldName(_ id: String) -> LocalizedStringKey {
+        switch id {
+        case "toyshop": return "Toy Shop"
+        case "sweetfactory": return "Sweet Factory"
+        case "starlight": return "Starlight Stage"
+        default: return christmasWorldName
+        }
+    }
     @Published var storefront = ""
     /// The Buddy's speech bubble on the home screen. Never shown during a level.
     @Published var buddySays: String?
@@ -495,6 +521,9 @@ final class AppModel: ObservableObject {
         var doubled = false
         /// The one soft Remove Ads line (after the 3rd interstitial ever, 13 and over).
         var offersRemoveAds = false
+        /// The Buddy's free treat for this win: true = one more in the jar, false = the jar was full, nil = no Buddy yet.
+        var treat: Bool?
+        var buddyName = ""
         var total: Int { pot * (doubled ? 2 : 1) + starBonus + streakBonus + dailyBonus + stampCoins }
     }
 
@@ -507,6 +536,7 @@ final class AppModel: ObservableObject {
         let previousBest = progress.stars[level.id]
         let firstClear = previousBest == nil
         let extrasBefore = Extra.allCases.filter { isExtraUnlocked($0) }
+        let worldWasComplete = isWorldComplete(level.file.world)
         var summary = WinSummary()
         summary.firstClear = firstClear
         summary.pot = firstClear ? pot : 0
@@ -532,6 +562,10 @@ final class AppModel: ObservableObject {
             case .capsuleStep: stampFillsBar = true
             }
         }
+        if buddyActive {
+            summary.treat = progress.buddy.treats < BuddyState.maxStoredTreats
+            summary.buddyName = progress.buddy.name
+        }
         let side = isSideLevel(index)
         var barFull = false
         update { p in
@@ -556,6 +590,16 @@ final class AppModel: ObservableObject {
         let unlockedExtra = Extra.allCases.filter { isExtraUnlocked($0) } != extrasBefore
         lastWinHadReward = (firstClear && level.file.capsule) || unlockedExtra || barFull
         if unlockedExtra { sounds.play("unlock_new") }
+        // Told when the player moves on from the win card. The Squish Room and the Buddy
+        // arrive with the first capsule, which introduces them itself.
+        if !worldWasComplete, isWorldComplete(level.file.world) {
+            let order = LevelCatalog.worlds
+            let next = order.firstIndex(of: level.file.world).flatMap { $0 + 1 < order.count ? order[$0 + 1] : nil }
+            news.append(.worldComplete(world: level.file.world, next: next))
+        }
+        for extra in [Extra.mysteryBag, .maker] where isExtraUnlocked(extra) && !extrasBefore.contains(extra) {
+            news.append(.unlocked(extra))
+        }
         // A full capsule bar opens its capsule after the level's own, never on top of it.
         if barFull {
             let world = mysteryCapsuleWorld
@@ -772,7 +816,37 @@ final class AppModel: ObservableObject {
 
     /// After a win: maybe an interstitial (never after a fail, never mid-level), then continue.
     func continueAfterWin(index: Int, attempts: Int) {
+        // Good news comes first, and no ad ever follows it.
+        if !news.isEmpty {
+            afterNews = index
+            sounds.play("win_boss")
+            haptics.win()
+            showingNews = news.removeFirst()
+            return
+        }
         showInterstitialThenNext(index: index, attempts: attempts)
+    }
+
+    /// The player has read a news card. `open` goes straight to the new place.
+    func newsRead(open: Bool = false) {
+        let read = showingNews
+        if open, case .unlocked(let extra) = read {
+            news = []
+            showingNews = nil
+            afterNews = nil
+            levelCheer = nil
+            self.open(extra)
+            return
+        }
+        if !news.isEmpty {
+            showingNews = news.removeFirst()
+            return
+        }
+        showingNews = nil
+        if let index = afterNews {
+            afterNews = nil
+            next(after: index)
+        }
     }
 
     private func showInterstitialThenNext(index: Int, attempts: Int) {

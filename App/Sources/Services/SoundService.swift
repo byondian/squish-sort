@@ -53,6 +53,11 @@ final class SoundService {
         play("lid")
     }
 
+    /// Plays `name`, or `fallback` while `name` has not been recorded yet.
+    func play(_ name: String, or fallback: String) {
+        play(Bundle.main.url(forResource: name, withExtension: "wav") != nil ? name : fallback)
+    }
+
     func coin() {
         coinStep = coinStep % 3 + 1
         play("coin_\(coinStep)")

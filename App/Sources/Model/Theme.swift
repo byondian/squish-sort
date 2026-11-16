@@ -43,3 +43,12 @@ struct SquishButtonStyle: ButtonStyle {
             .animation(.spring(response: 0.25, dampingFraction: 0.45), value: configuration.isPressed)
     }
 }
+
+/// The press squish alone, for buttons that draw their own shape.
+struct PressSquish: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(x: configuration.isPressed ? 1.06 : 1, y: configuration.isPressed ? 0.92 : 1)
+            .animation(.spring(response: 0.25, dampingFraction: 0.45), value: configuration.isPressed)
+    }
+}

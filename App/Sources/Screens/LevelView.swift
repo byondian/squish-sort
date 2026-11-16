@@ -23,6 +23,11 @@ final class LevelController: ObservableObject {
     /// Coins the jars have thrown on this attempt. Banked on the win; a retry empties it.
     @Published private(set) var pot: LevelPot
     private var jarsDone = 0
+    /// Squishy streak: moves that land on a match, one soon after another.
+    private var chain: SortChain
+    private var landsOnMatch = false
+    /// Bonus levels are Coin Rush: every finished jar throws double on a first clear.
+    private var jarMultiplier: Int { level.file.beat == .bonus ? 2 : 1 }
     /// The hint search is running.
     @Published private(set) var thinking = false
     /// The hint search found no way to win from here. Nothing is charged for that.
@@ -41,9 +46,10 @@ final class LevelController: ObservableObject {
         level = model.levels[index]
         session = GameSession(board: level.board, par: level.par, undoLimit: model.undoLimit)
         scene = BoardScene(board: level.board, kinds: level.kinds)
+        chain = SortChain(timed: !model.isGentleMode)
         let lucky = model.luckyKind(index: index)
         pot = LevelPot(firstClear: model.progress.stars[level.id] == nil, jars: level.kinds.count,
-                       luckyKind: lucky, rules: model.config.coins)
+                       luckyKind: lucky, jarMultiplier: level.file.beat == .bonus ? 2 : 1, rules: model.config.coins)
         scene.luckyKind = lucky.map { UInt8($0) }
         scene.onPlay = { [weak self] move in self?.play(move) }
         scene.onLift = { [weak model] in
@@ -56,6 +62,7 @@ final class LevelController: ObservableObject {
         }
         scene.onLand = { [weak self, weak model] result in
             model?.sounds.move(run: result.count)
+            self?.landed()
             if !result.thawedJars.isEmpty { model?.sounds.play("thaw") }
             if let jar = result.completedJar {
                 model?.haptics.complete()
@@ -73,9 +80,37 @@ final class LevelController: ObservableObject {
     }
 
     private func play(_ move: Move) -> (MoveResult, Board)? {
+        let ontoMatch = session.board.jars.indices.contains(move.to) && !session.board.jars[move.to].isEmpty
         guard let result = session.play(move) else { return nil }
+        landsOnMatch = ontoMatch
         noWayThrough = false; hintGaveUp = false
         return (result, session.board)
+    }
+
+    /// A move has landed: it may earn a squishy streak word. Nothing shows when a streak ends.
+    private func landed() {
+        guard let model, let word = chain.move(ontoMatch: landsOnMatch, at: Date().timeIntervalSince(started)) else { return }
+        let text: String
+        switch word {
+        case .nice: text = String(localized: "Nice!")
+        case .streak: text = String(localized: "Squishy streak!")
+        case .onARoll: text = String(localized: "On a roll!")
+        case .unstoppable: text = String(localized: "Unstoppable!")
+        }
+        scene.popWord(text, size: 0.7 + 0.1 * CGFloat(word.rawValue))
+        model.sounds.play("combo_\(word.rawValue)", or: "run_x3")
+        // A stronger tap each step.
+        switch word {
+        case .nice: model.haptics.land()
+        case .streak: model.haptics.complete()
+        case .onARoll, .unstoppable: model.haptics.win()
+        }
+        // On a first clear the word adds to the level pot.
+        let coins = pot.streakWord(word)
+        if coins > 0 {
+            scene.throwCoins(fromJar: 0, count: 2 + word.rawValue)
+            model.sounds.coin()
+        }
     }
 
     /// Commons join the book the first time a jar of them is completed.
@@ -104,8 +139,9 @@ final class LevelController: ObservableObject {
     private func newPot() {
         guard let model else { return }
         pot = LevelPot(firstClear: model.progress.stars[level.id] == nil, jars: level.kinds.count,
-                       luckyKind: model.luckyKind(index: index), rules: model.config.coins)
+                       luckyKind: model.luckyKind(index: index), jarMultiplier: jarMultiplier, rules: model.config.coins)
         jarsDone = 0
+        chain = SortChain(timed: !model.isGentleMode)
     }
 
     private func checkOutcome() {
@@ -130,6 +166,7 @@ final class LevelController: ObservableObject {
 
     func undo() {
         guard session.undo() else { return }
+        chain.end()
         noWayThrough = false; hintGaveUp = false
         outcome = nil
         scene.reload(session.board)
@@ -177,6 +214,7 @@ final class LevelController: ObservableObject {
     /// (free hint, coins or an ad) when there is a move to show.
     func hint() {
         guard !thinking, outcome == nil else { return }
+        chain.end()
         thinking = true
         let board = session.board
         Task {
@@ -291,6 +329,10 @@ struct LevelView: View {
                 case .won(let stars):
                     WinCard(stars: stars, showpiece: controller.level.file.beat == .showpiece,
                             summary: model.lastWin,
+                            perfect: controller.session.moveCount <= controller.level.par,
+                            threeStarMoves: Stars.moveLimit(forStars: 3, par: controller.level.par),
+                            // Not while good news is waiting behind the win card: that is told first.
+                            retry: controller.index < 2 || !model.news.isEmpty ? nil : { controller.retry() },
                             toCapsule: model.levelsToNextCapsule(after: controller.index),
                             // The first two levels roll straight on after the celebration.
                             autoAdvance: controller.index < 2,
@@ -362,26 +404,44 @@ struct LevelView: View {
         HStack {
             if model.showsCornerButtons {
                 IconButton(system: "house.fill") { model.screen = .home }
+                // Straight to the level map, without going by home.
+                IconButton(system: "circle.grid.3x3.fill") { model.screen = .map }
+                    .accessibilityLabel(Text("Levels"))
             }
             Spacer()
             VStack(spacing: 2) {
                 Text("Level \(number)").font(Theme.title(22))
                 if controller.level.file.beat == .boss {
                     Text("BOSS 👑").font(Theme.body(13))
+                } else if controller.level.file.beat == .bonus {
+                    // Coin Rush: every finished jar throws double coins the first time through.
+                    Text("BONUS x2").font(Theme.body(13)).foregroundStyle(Theme.plum)
+                        .padding(.horizontal, 8).padding(.vertical, 1)
+                        .background(Capsule().fill(Theme.butter))
                 } else if controller.level.file.beat == .showpiece {
+                    // Looks big, solves fast: not "hard".
+                    Text("BIG ONE").font(Theme.body(13)).foregroundStyle(Theme.bubblegum)
+                } else if controller.level.file.beat == .tension {
                     Text("HARD").font(Theme.body(13)).foregroundStyle(Theme.bubblegum)
                 }
-                // Three stars that dim as the move count passes each limit.
+                // The stars still to be won, and the moves left before the next one goes.
+                // Empty outlines before the first move, so nothing looks won already.
                 HStack(spacing: 4) {
-                    let lit = Stars.rating(moves: controller.session.moveCount, par: controller.level.par)
+                    let moves = controller.session.moveCount
+                    let lit = Stars.rating(moves: moves, par: controller.level.par)
                     ForEach(0..<3, id: \.self) { i in
-                        Image(systemName: "star.fill")
+                        Image(systemName: i < lit && moves > 0 ? "star.fill" : "star")
                             .font(.system(size: 15, weight: .bold))
                             .foregroundStyle(i < lit ? Theme.butter : Theme.plum.opacity(0.18))
                             .scaleEffect(i < lit ? 1 : 0.8)
                     }
-                    Text("\(controller.session.moveCount)").font(Theme.body(14)).opacity(0.7)
-                        .accessibilityIdentifier("move-count")
+                    if let limit = Stars.moveLimit(forStars: lit, par: controller.level.par) {
+                        Text(verbatim: "\(moves)/\(limit)").font(Theme.body(14)).opacity(0.7)
+                            .accessibilityIdentifier("move-count")
+                    } else {
+                        Text(verbatim: "\(moves)").font(Theme.body(14)).opacity(0.7)
+                            .accessibilityIdentifier("move-count")
+                    }
                 }
                 .animation(.spring(response: 0.3, dampingFraction: 0.5), value: controller.session.moveCount)
                 // The level pot: coins thrown by finished jars, banked on the win.
@@ -407,30 +467,38 @@ struct LevelView: View {
 
     // Undo appears after level 2, Hint after 4, Extra jar after 7 (game design doc).
     private var helpers: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 8) {
             if pathNumber >= 2 {
-                Button { controller.undo() } label: {
-                    Label(undoLabel, systemImage: "arrow.uturn.backward")
-                }
-                .buttonStyle(SquishButtonStyle(fill: .white, text: Theme.plum))
-                .disabled(!controller.session.canUndo)
+                helper(undoLabel, "arrow.uturn.backward", .white, enabled: controller.session.canUndo) { controller.undo() }
             }
             if pathNumber >= 7 {
-                Button { controller.extraJar() } label: { Label("Extra jar", systemImage: "plus") }
-                    .buttonStyle(SquishButtonStyle(fill: Theme.mint, text: Theme.plum))
-                    .disabled(!controller.canExtraJar)
+                helper(String(localized: "Extra jar"), "plus", Theme.mint, enabled: controller.canExtraJar) { controller.extraJar() }
             }
             if pathNumber >= 4 {
-                Button { controller.hint() } label: { Label("Hint", systemImage: "lightbulb.fill") }
-                    .buttonStyle(SquishButtonStyle(fill: Theme.butter, text: Theme.plum))
-                    .disabled(!controller.canHint)
+                helper(String(localized: "Hint"), "lightbulb.fill", Theme.butter, enabled: controller.canHint) { controller.hint() }
             }
-            Button { controller.retry() } label: { Image(systemName: "arrow.clockwise") }
-                .buttonStyle(SquishButtonStyle(fill: .white, text: Theme.plum))
+            helper(String(localized: "Restart"), "arrow.clockwise", .white, enabled: true) { controller.retry() }
         }
-        .labelStyle(.titleAndIcon)
-        .font(Theme.body(15))
         .padding(.bottom, 8)
+    }
+
+    /// Every helper is the same size, with its picture over its name, so the row lines up in any language.
+    private func helper(_ title: String, _ icon: String, _ fill: Color, enabled: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 3) {
+                Image(systemName: icon).font(.system(size: 18, weight: .bold))
+                Text(verbatim: title).font(Theme.body(13)).lineLimit(1).minimumScaleFactor(0.6)
+            }
+            .foregroundStyle(Theme.plum)
+            .frame(maxWidth: .infinity, minHeight: 54)
+            .padding(.horizontal, 4)
+            .background(RoundedRectangle(cornerRadius: 18).fill(fill))
+            .overlay(RoundedRectangle(cornerRadius: 18).stroke(Theme.plum.opacity(0.15), lineWidth: 2))
+            .opacity(enabled ? 1 : 0.45)
+        }
+        .buttonStyle(PressSquish())
+        .disabled(!enabled)
+        .accessibilityLabel(Text(verbatim: title))
     }
 
     /// Invisible-ish jar buttons so UI tests can play without pixel maths.
@@ -517,6 +585,12 @@ struct WinCard: View {
     let showpiece: Bool
     let summary: AppModel.WinSummary
     /// Levels still to win before the next capsule (0 = the next level has one).
+    /// Won in the fewest moves possible.
+    var perfect = false
+    /// The most moves that still earn three stars, for the line under a win with fewer.
+    var threeStarMoves: Int?
+    /// "Go for 3 stars": play the level again. Nil where it isn't offered.
+    var retry: (() -> Void)?
     var toCapsule: Int?
     var autoAdvance = false
     var haptics: Haptics?
@@ -542,6 +616,16 @@ struct WinCard: View {
                         .scaleEffect(i < shown ? 1 : 0.7)
                         .rotationEffect(.degrees(i < shown ? 0 : -25))
                 }
+            }
+            if perfect && shown >= 3 {
+                Text("Perfect!").font(Theme.title(20)).foregroundStyle(.white)
+                    .padding(.horizontal, 14).padding(.vertical, 4)
+                    .background(Capsule().fill(Theme.bubblegum))
+                    .rotationEffect(.degrees(-6))
+                    .transition(.scale(scale: 2.2).combined(with: .opacity))
+                    .accessibilityIdentifier("win-perfect")
+            } else if stars < 3, let threeStarMoves {
+                Text("3 stars: \(threeStarMoves) moves or fewer").font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.7))
             }
             if summary.total > 0 {
                 HStack(spacing: 10) {
@@ -572,6 +656,15 @@ struct WinCard: View {
                 .font(Theme.body(12)).foregroundStyle(Theme.plum.opacity(0.7))
                 .accessibilityElement(children: .combine)
             }
+            if let treat = summary.treat {
+                // Where the Buddy's treats come from: one for every win, three to a jar.
+                Label {
+                    if treat { Text("+1 treat for \(summary.buddyName)") } else { Text("Treat jar full") }
+                } icon: {
+                    Image(systemName: "birthday.cake.fill")
+                }
+                .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.75))
+            }
             if let toCapsule {
                 Label {
                     if toCapsule == 0 { Text("Capsule next level!") } else { Text("Next capsule: \(toCapsule + 1) more") }
@@ -588,6 +681,13 @@ struct WinCard: View {
             }
             Button("Next") { go() }.buttonStyle(SquishButtonStyle()).font(Theme.title(22))
                 .accessibilityIdentifier("win-next")
+            if stars < 3, let retry {
+                Button { guard !left else { return }; left = true; retry() } label: {
+                    Label("Go for 3 stars", systemImage: "star.fill")
+                }
+                .font(Theme.body(15)).foregroundStyle(Theme.plum.opacity(0.75))
+                .accessibilityIdentifier("win-retry")
+            }
             if let removeAds {
                 Button("Like playing without breaks? Remove Ads is in the shop.", action: removeAds)
                     .font(Theme.body(12)).foregroundStyle(Theme.plum.opacity(0.6))

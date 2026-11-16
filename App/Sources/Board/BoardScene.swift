@@ -199,6 +199,36 @@ final class BoardScene: SKScene {
     }
 
     /// A short word that pops above a jar ("Double pop!", "Lucky!").
+    /// A big bouncy word over the middle of the board for about a second (squishy streak).
+    func popWord(_ text: String, size scale: CGFloat) {
+        guard size.width > 0 else { return }
+        let label = SKLabelNode(text: text)
+        label.fontName = "AvenirNext-Heavy"
+        label.fontSize = min(geometry.piece * scale, size.width / CGFloat(max(6, text.count)) * 1.5)
+        label.fontColor = UIColor(hex: 0xFF7EB6)
+        label.verticalAlignmentMode = .center
+        label.position = CGPoint(x: size.width / 2, y: size.height * 0.62)
+        label.zPosition = 48
+        label.zRotation = -0.08
+        label.setScale(0.2)
+        // A white copy behind, a little bigger, so the word reads on any board.
+        let back = SKLabelNode(text: text)
+        back.fontName = label.fontName
+        back.fontSize = label.fontSize
+        back.fontColor = .white
+        back.verticalAlignmentMode = .center
+        back.position = CGPoint(x: 0, y: -label.fontSize * 0.06)
+        back.zPosition = -1
+        label.addChild(back)
+        addChild(label)
+        label.run(.sequence([
+            .scale(to: 1.3, duration: 0.14), .scale(to: 0.95, duration: 0.08), .scale(to: 1.05, duration: 0.07),
+            .wait(forDuration: 0.5),
+            .group([.moveBy(x: 0, y: geometry.piece * 0.7, duration: 0.3), .fadeOut(withDuration: 0.3)]),
+            .removeFromParent(),
+        ]))
+    }
+
     func popLabel(_ text: String, atJar j: Int) {
         guard j < geometry.centers.count else { return }
         let label = SKLabelNode(text: text)

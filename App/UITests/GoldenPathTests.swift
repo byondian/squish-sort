@@ -171,9 +171,12 @@ final class GoldenPathTests: XCTestCase {
 
     func testChoosingAnAdultYearLeavesGentleModeOff() {
         playFirstThreeAndOpenCapsule()
-        let picker = app.pickerWheels.firstMatch
-        XCTAssertTrue(picker.waitForExistence(timeout: 8))
-        picker.adjust(toPickerWheelValue: "1990")
+        let decade = app.buttons["decade-1990"]
+        XCTAssertTrue(decade.waitForExistence(timeout: 8))
+        decade.tap()
+        let year = app.buttons["year-1990"]
+        XCTAssertTrue(year.waitForExistence(timeout: 5))
+        year.tap()
         app.buttons["Continue"].tap()
         waitForAgeQuestionToClose()
         nextLevel("Level 4")

@@ -182,10 +182,17 @@ final class SessionTests: XCTestCase {
     }
 
     func testStarsAgainstPar() {
+        // Par is a perfect game, so three stars leave a little room.
         XCTAssertEqual(Stars.rating(moves: 10, par: 10), 3)
+        XCTAssertEqual(Stars.rating(moves: 12, par: 10), 3)
         XCTAssertEqual(Stars.rating(moves: 13, par: 10), 2)
-        XCTAssertEqual(Stars.rating(moves: 14, par: 10), 1)
-        XCTAssertEqual(Stars.rating(moves: 2, par: 3), 3)
+        XCTAssertEqual(Stars.rating(moves: 14, par: 10), 2)
+        XCTAssertEqual(Stars.rating(moves: 15, par: 10), 1, "a win over the two-star limit is one star")
+        XCTAssertEqual(Stars.rating(moves: 32, par: 24), 2)
+        XCTAssertEqual(Stars.rating(moves: 33, par: 24), 1)
+        XCTAssertEqual(Stars.rating(moves: 5, par: 3), 3)
+        XCTAssertEqual(Stars.rating(moves: 29, par: 24), 2)
+        XCTAssertEqual(Stars.rating(moves: 28, par: 24), 3)
     }
 
     func testWinAndStatus() {

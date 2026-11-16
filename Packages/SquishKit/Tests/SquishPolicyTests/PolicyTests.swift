@@ -848,4 +848,64 @@ final class ExtrasTests: XCTestCase {
         XCTAssertEqual(visit(asked: true, roll: 0.3), .quiet, "the mood question comes at most once a day")
         XCTAssertEqual(visit(roll: 0.9), .quiet)
     }
+
+    // MARK: - Squishy streak and Coin Rush
+
+    func testSquishyStreakWords() {
+        var chain = SortChain()
+        var words: [SortChain.Word] = []
+        var t = 0.0
+        for _ in 1...12 {
+            t += 1
+            if let word = chain.move(ontoMatch: true, at: t) { words.append(word) }
+        }
+        XCTAssertEqual(words, [.nice, .streak, .onARoll, .unstoppable])
+        XCTAssertEqual(words.map(\.coins), [5, 10, 15, 20])
+
+        // A move into an empty jar keeps the chain alive but adds nothing.
+        chain = SortChain()
+        XCTAssertNil(chain.move(ontoMatch: true, at: 1))
+        XCTAssertNil(chain.move(ontoMatch: false, at: 2))
+        XCTAssertNil(chain.move(ontoMatch: true, at: 3))
+        XCTAssertEqual(chain.move(ontoMatch: true, at: 6.9), .nice)
+
+        // More than four seconds between moves starts again, silently.
+        chain = SortChain()
+        _ = chain.move(ontoMatch: true, at: 1)
+        _ = chain.move(ontoMatch: true, at: 2)
+        XCTAssertNil(chain.move(ontoMatch: true, at: 6.5))
+        XCTAssertEqual(chain.count, 1)
+
+        // Gentle mode: no time limit, so taking your time never costs anything.
+        var gentle = SortChain(timed: false)
+        _ = gentle.move(ontoMatch: true, at: 1)
+        _ = gentle.move(ontoMatch: true, at: 60)
+        XCTAssertEqual(gentle.move(ontoMatch: true, at: 600), .nice)
+
+        // Undo or a hint ends it.
+        chain.end()
+        XCTAssertEqual(chain.count, 0)
+    }
+
+    func testStreakWordsPayOnceAndOnlyOnAFirstClear() {
+        var pot = LevelPot(firstClear: true, jars: 4)
+        XCTAssertEqual(pot.streakWord(.nice), 5)
+        XCTAssertEqual(pot.streakWord(.nice), 0, "the same word pays once an attempt")
+        XCTAssertEqual(pot.streakWord(.streak), 10)
+        XCTAssertEqual(pot.coins, 15)
+        var replay = LevelPot(firstClear: false, jars: 4)
+        XCTAssertEqual(replay.streakWord(.unstoppable), 0)
+        XCTAssertEqual(replay.coins, 0)
+    }
+
+    func testCoinRushDoublesTheJars() {
+        var plain = LevelPot(firstClear: true, jars: 4)
+        var rush = LevelPot(firstClear: true, jars: 4, jarMultiplier: 2)
+        for kind in 0..<4 {
+            let a = plain.jarCompleted(kind: kind, at: Double(kind) * 60)
+            let b = rush.jarCompleted(kind: kind, at: Double(kind) * 60)
+            XCTAssertEqual(b.coins, a.coins * 2)
+        }
+        XCTAssertEqual(rush.coins, plain.coins * 2)
+    }
 }

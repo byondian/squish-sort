@@ -120,6 +120,28 @@
         }
       }
     },
+    "+1 treat for %@": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@におやつ +1"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@에게 간식 +1"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 的點心 +1"
+          }
+        }
+      }
+    },
     "1 more level to a capsule": {
       "localizations": {
         "ja": {
@@ -138,6 +160,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "再 1 關就有扭蛋"
+          }
+        }
+      }
+    },
+    "3 stars: %lld moves or fewer": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "星3つ：%lld手以内"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "별 3개: %lld번 이하"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3 顆星：%lld 步以內"
           }
         }
       }
@@ -163,6 +207,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "聖誕扭蛋！"
+          }
+        }
+      }
+    },
+    "A deep squeak. A very rare one!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "低い音。とてもレアな子！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "낮은 소리. 아주 희귀한 친구!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "低沉的聲音。超稀有款！"
           }
         }
       }
@@ -273,6 +339,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "請問問大人"
+          }
+        }
+      }
+    },
+    "BIG ONE": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "おおもの"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "큰 판"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大場面"
+          }
+        }
+      }
+    },
+    "BONUS x2": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ボーナス x2"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "보너스 x2"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "獎勵 x2"
           }
         }
       }
@@ -959,6 +1069,28 @@
         }
       }
     },
+    "Finishing Toy Shop opened the Maker. Make your very own squishy and give it a name.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "おもちゃ屋さんをクリアして、メーカーがオープン！じぶんだけのスクイーズを作って、名前をつけよう。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "장난감 가게를 다 깨서 메이커가 열렸어! 나만의 스퀴시를 만들고 이름을 지어 줘."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完成玩具店，製作所開放了！做一個專屬於你的捏捏樂，幫它取名字。"
+          }
+        }
+      }
+    },
     "First win today: +%lld": {
       "localizations": {
         "ja": {
@@ -1135,6 +1267,28 @@
         }
       }
     },
+    "Go for 3 stars": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "星3つをめざす"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "별 3개 도전"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "挑戰 3 顆星"
+          }
+        }
+      }
+    },
     "Grumpy": {
       "localizations": {
         "ja": {
@@ -1245,28 +1399,6 @@
         }
       }
     },
-    "High squeak": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "たかい音"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "높은 소리"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "高音"
-          }
-        }
-      }
-    },
     "Hint": {
       "localizations": {
         "ja": {
@@ -1329,6 +1461,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "是%@。"
+          }
+        }
+      }
+    },
+    "Keep playing": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "つづける"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "계속하기"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "繼續玩"
           }
         }
       }
@@ -1421,28 +1575,6 @@
         }
       }
     },
-    "Low squeak": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ひくい音"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "낮은 소리"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "低音"
-          }
-        }
-      }
-    },
     "Lucky!": {
       "localizations": {
         "ja": {
@@ -1483,28 +1615,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "製作所"
-          }
-        }
-      }
-    },
-    "Middle squeak": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ふつうの音"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "중간 소리"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "中音"
           }
         }
       }
@@ -1795,6 +1905,50 @@
         }
       }
     },
+    "New: Mystery Bag!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新登場：ミステリーバッグ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "새로운 놀이: 미스터리 백!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新登場：神秘袋！"
+          }
+        }
+      }
+    },
+    "New: Squishy Maker!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新登場：スクイーズメーカー！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "새로운 놀이: 스퀴시 메이커!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新登場：捏捏樂製作所！"
+          }
+        }
+      }
+    },
     "Next": {
       "localizations": {
         "ja": {
@@ -1861,6 +2015,28 @@
         }
       }
     },
+    "Nice!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ナイス！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "좋아!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不錯！"
+          }
+        }
+      }
+    },
     "Night": {
       "localizations": {
         "ja": {
@@ -1923,6 +2099,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "這樣走不通喔，退回幾步試試。"
+          }
+        }
+      }
+    },
+    "Not high, not low. A rare one": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高くも低くもない。レアな子"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "높지도 낮지도 않아. 레어 친구"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不高不低。稀有款"
           }
         }
       }
@@ -2037,6 +2235,28 @@
         }
       }
     },
+    "On a roll!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ノリノリ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "신났다!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "勢如破竹！"
+          }
+        }
+      }
+    },
     "One more guess": {
       "localizations": {
         "ja": {
@@ -2125,6 +2345,28 @@
         }
       }
     },
+    "Perfect!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "パーフェクト！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "퍼펙트!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完美！"
+          }
+        }
+      }
+    },
     "Play": {
       "localizations": {
         "ja": {
@@ -2143,6 +2385,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "開始遊戲"
+          }
+        }
+      }
+    },
+    "Poke the bag and guess who's inside. A new bag every day, on your shelf at home.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バッグをつついて、中の子を当てよう。毎日あたらしいバッグがホームのたなに届くよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가방을 콕 찔러 보고 누가 들었는지 맞혀 봐. 매일 새 가방이 홈 선반에 와."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "戳戳袋子，猜猜裡面是誰。每天都有新袋子，就在主畫面的架子上。"
           }
         }
       }
@@ -2275,6 +2539,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "移除廣告後不再出現強制廣告。軟軟絕不販售。"
+          }
+        }
+      }
+    },
+    "Restart": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "やりなおす"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다시 하기"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新開始"
           }
         }
       }
@@ -2609,6 +2895,28 @@
         }
       }
     },
+    "Squeaky! A common one": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高い音！ふつうの子"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "높은 소리! 흔한 친구"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "吱吱高音！普通款"
+          }
+        }
+      }
+    },
     "Squeeze me!": {
       "localizations": {
         "ja": {
@@ -2671,6 +2979,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "捏捏樂製作所"
+          }
+        }
+      }
+    },
+    "Squishy streak!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ぷにぷに連続！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "말랑 연속!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "捏捏連擊！"
           }
         }
       }
@@ -2741,6 +3071,28 @@
         }
       }
     },
+    "Starlight Stage complete!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スターライトステージ クリア！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스타라이트 스테이지 완료!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "星光舞台完成！"
+          }
+        }
+      }
+    },
     "Support": {
       "localizations": {
         "ja": {
@@ -2803,6 +3155,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "糖果工廠"
+          }
+        }
+      }
+    },
+    "Sweet Factory complete!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "おかし工場 クリア！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "과자 공장 완료!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "糖果工廠完成！"
+          }
+        }
+      }
+    },
+    "Tap again": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "もう一度タップ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "한 번 더 탭"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再點一次"
           }
         }
       }
@@ -2917,6 +3313,28 @@
         }
       }
     },
+    "Toy Shop complete!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "おもちゃ屋さん クリア！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "장난감 가게 완료!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "玩具店完成！"
+          }
+        }
+      }
+    },
     "Treat": {
       "localizations": {
         "ja": {
@@ -2935,6 +3353,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "點心"
+          }
+        }
+      }
+    },
+    "Treat jar full": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "おやつビンはいっぱい"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "간식 병이 가득 찼어"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "點心罐滿了"
           }
         }
       }
@@ -3001,6 +3441,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "換一個名字試試"
+          }
+        }
+      }
+    },
+    "Try it now": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "やってみる"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "지금 해 보기"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "馬上試試"
           }
         }
       }
@@ -3089,6 +3551,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "復原 %lld"
+          }
+        }
+      }
+    },
+    "Unstoppable!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "とまらない！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "멈출 수 없어!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停不下來！"
           }
         }
       }
@@ -3247,6 +3731,28 @@
         }
       }
     },
+    "Win a level for a treat": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "レベルをクリアするとおやつがもらえるよ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "레벨을 깨면 간식을 받아"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "過關就能拿到點心"
+          }
+        }
+      }
+    },
     "Win levels to earn coins too: 50 a win, 100 with three stars.": {
       "localizations": {
         "ja": {
@@ -3265,6 +3771,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "過關也能得到金幣：每關 50，三星 100。"
+          }
+        }
+      }
+    },
+    "World complete!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ワールド クリア！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "월드 완료!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "世界完成！"
+          }
+        }
+      }
+    },
+    "Yay!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "やったー！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "야호!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "太棒了！"
           }
         }
       }
@@ -3353,6 +3903,72 @@
           "stringUnit": {
             "state": "translated",
             "value": "你有 %lld 金幣"
+          }
+        }
+      }
+    },
+    "You sorted every jar. Starlight Stage is open!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ぜんぶのビンをそろえたよ。スターライトステージがオープン！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모든 병을 정리했어. 스타라이트 스테이지가 열렸어!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你整理好所有罐子了。星光舞台開放了！"
+          }
+        }
+      }
+    },
+    "You sorted every jar. Sweet Factory is open!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ぜんぶのビンをそろえたよ。おかし工場がオープン！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모든 병을 정리했어. 과자 공장이 열렸어!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你整理好所有罐子了。糖果工廠開放了！"
+          }
+        }
+      }
+    },
+    "You sorted every jar. What a star!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ぜんぶのビンをそろえたよ。すごい！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모든 병을 정리했어. 정말 대단해!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你整理好所有罐子了。太厲害了！"
           }
         }
       }

@@ -79,7 +79,10 @@ struct MysteryBagView: View {
 
     private func play(_ bag: MysteryBag) -> some View {
         VStack(spacing: 16) {
-            bagShape
+            // The bag itself can be poked: each poke gives the next clue.
+            Button { if let next = (0..<3).first(where: { !poked.contains($0) }) { poke(next) } else { poke(nil) } } label: { bagShape }
+                .buttonStyle(PressSquish())
+                .accessibilityIdentifier("mystery-bag")
             Text("Poke the bag, then guess who's inside!").font(Theme.body(17)).foregroundStyle(Theme.plum)
             HStack(spacing: 10) {
                 pokeButton(0, "Shape", "hand.point.up.left.fill")
@@ -96,9 +99,10 @@ struct MysteryBagView: View {
                     clue("Squeak") {
                         VStack(spacing: 2) {
                             Image(systemName: "speaker.wave.2.fill").font(.system(size: 26))
-                            Text(squeakText(bag.squeak)).font(Theme.body(14))
+                            Text(squeakText(bag.squeak)).font(Theme.body(12))
+                                .multilineTextAlignment(.center).lineLimit(3).minimumScaleFactor(0.7)
                         }
-                        .foregroundStyle(Theme.plum).frame(width: 84, height: 84)
+                        .foregroundStyle(Theme.plum).frame(width: 96, height: 84)
                     }
                 }
                 if poked.contains(2) {
@@ -159,16 +163,21 @@ struct MysteryBagView: View {
     }
 
     private func pokeButton(_ index: Int, _ title: LocalizedStringKey, _ icon: String) -> some View {
-        Button {
-            model.haptics.land()
-            model.sounds.play("mystery_poke")
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { _ = poked.insert(index) }
-            withAnimation(.easeInOut(duration: 0.08).repeatCount(4, autoreverses: true)) { jiggle.toggle() }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { jiggle = false }
-        } label: {
+        Button { poke(index) } label: {
             Label(title, systemImage: icon).font(Theme.body(14))
         }
         .buttonStyle(SquishButtonStyle(fill: poked.contains(index) ? Theme.mint : .white, text: Theme.plum))
+    }
+
+    /// A poke jiggles the bag and shows a clue (nil: all three are already out).
+    private func poke(_ index: Int?) {
+        model.haptics.land()
+        model.sounds.play("mystery_poke")
+        if let index {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { _ = poked.insert(index) }
+        }
+        withAnimation(.easeInOut(duration: 0.08).repeatCount(4, autoreverses: true)) { jiggle.toggle() }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { jiggle = false }
     }
 
     private func clue<Content: View>(_ title: LocalizedStringKey, @ViewBuilder _ content: () -> Content) -> some View {
@@ -183,9 +192,10 @@ struct MysteryBagView: View {
 
     private func squeakText(_ squeak: MysteryBag.Squeak) -> LocalizedStringKey {
         switch squeak {
-        case .high: return "High squeak"
-        case .middle: return "Middle squeak"
-        case .low: return "Low squeak"
+        // Rarer squishies squeak lower, so the clue says what that means.
+        case .high: return "Squeaky! A common one"
+        case .middle: return "Not high, not low. A rare one"
+        case .low: return "A deep squeak. A very rare one!"
         }
     }
 
