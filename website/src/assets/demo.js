@@ -1,20 +1,24 @@
-// Playable browser demo: the first four real levels of the Toy Shop.
+// Playable browser demo: two levels from each of the first three worlds.
 // Rules match the app: jars hold 4, tap a jar then another to pour, the
 // same-kind run on top pours together, a full jar of one kind gets a lid.
 (() => {
   const root = document.getElementById('demo');
   if (!root) return;
   const T = JSON.parse(root.dataset.t);
+  // Two levels from each of the first three worlds, solver-checked pars.
   const LEVELS = [
-    { jars: [['strawbie', 'strawbie', 'strawbie'], ['tango', 'tango', 'tango', 'strawbie'], ['tango']], par: 2 },
-    { jars: [['strawbie', 'strawbie', 'tango', 'tango'], ['tango', 'tango', 'strawbie', 'strawbie'], []], par: 3 },
-    { jars: [['strawbie', 'sunny', 'sunny', 'blu'], ['sunny', 'blu', 'blu', 'strawbie'], ['blu', 'strawbie', 'strawbie', 'sunny'], [], []], par: 7 },
-    { jars: [['sunny', 'sunny', 'sunny', 'tango'], ['tango', 'minty', 'strawbie', 'tango'], ['tango', 'minty', 'minty', 'strawbie'], ['minty', 'strawbie', 'strawbie', 'sunny'], [], []], par: 10 },
+    { w: 0, jars: [['strawbie', 'strawbie', 'strawbie'], ['tango', 'tango', 'tango', 'strawbie'], ['tango']], par: 2 },
+    { w: 0, jars: [['strawbie', 'sunny', 'sunny', 'blu'], ['sunny', 'blu', 'blu', 'strawbie'], ['blu', 'strawbie', 'strawbie', 'sunny'], [], []], par: 7 },
+    { w: 1, jars: [['macaron', 'macaron', 'gummy-bear', 'gummy-bear'], ['gummy-bear', 'macaron', 'donut', 'donut'], ['donut', 'cupcake', 'gummy-bear', 'cupcake'], ['donut', 'cupcake', 'cupcake', 'macaron'], [], []], par: 10 },
+    { w: 1, jars: [['macaron', 'lolly', 'jelly', 'macaron'], ['jelly', 'donut', 'lolly', 'donut'], ['lolly', 'jelly', 'lolly', 'donut'], ['jelly', 'macaron', 'macaron', 'donut'], [], []], par: 12 },
+    { w: 2, jars: [['riff', 'zuzu', 'zuzu', 'nova'], ['nova', 'lumi', 'riff', 'lumi'], ['lumi', 'nova', 'nova', 'riff'], ['lumi', 'zuzu', 'zuzu', 'riff'], [], []], par: 11 },
+    { w: 2, jars: [['nova', 'nova', 'coco', 'riff'], ['pip', 'nova', 'nova', 'coco'], ['pip', 'coco', 'pip', 'lumi'], ['riff', 'lumi', 'lumi', 'riff'], ['riff', 'lumi', 'coco', 'pip'], [], []], par: 14 },
   ];
+  const WORLD_IDS = ['toyshop', 'sweetfactory', 'starlight'];
   const CAP = 4;
   const $ = s => root.querySelector(s);
   const jarsEl = $('.jars'), movesEl = $('.moves b'), lvlEl = $('.lvl'), undoBtn = $('.undo'), resetBtn = $('.reset');
-  const win = $('.win'), steps = [...root.querySelectorAll('.steps li')];
+  const win = $('.win'), steps = [...root.querySelectorAll('.steps li')], worldEls = [...root.querySelectorAll('.dworlds > li')], board = $('.board-wrap');
   let level = 0, jars, sel = -1, moves = 0, history = [], ids = 0, pieceEls = new Map();
   const say = msg => { const live = $('.live'); if (live) live.textContent = msg; };
 
@@ -22,7 +26,11 @@
     level = n; sel = -1; moves = 0; history = [];
     jars = LEVELS[n].jars.map(j => j.map(kind => ({ id: ++ids, kind })));
     win.classList.remove('show');
-    lvlEl.textContent = T.level.replace('{n}', n + 1);
+    const w = LEVELS[n].w, first = LEVELS.findIndex(l => l.w === w);
+    lvlEl.textContent = T.worlds[w] + ' · ' + T.level.replace('{n}', n - first + 1);
+    board.dataset.w = WORLD_IDS[w];
+    worldEls.forEach((e, i) => e.classList.toggle('on', i === w));
+    if (n === first && n > 0) { board.classList.remove('arrive'); void board.offsetWidth; board.classList.add('arrive'); }
     steps.forEach((s, i) => { s.className = i < n ? 'ok' : i === n ? 'on' : ''; });
     build(); render();
   }
@@ -105,6 +113,8 @@
     win.querySelector('h3').textContent = last ? T.allDone : T.won;
     win.querySelector('.msg').textContent = last ? T.allDoneMsg : T.wonMsg.replace('{n}', moves).replace('{p}', par);
     win.querySelector('.next').hidden = last;
+    const nextW = last ? -1 : LEVELS[level + 1].w;
+    win.querySelector('.next').textContent = nextW >= 0 && nextW !== LEVELS[level].w ? '▶ ' + T.worlds[nextW] : T.next + ' →';
     win.querySelector('.final-cta').hidden = !last;
     win.classList.add('show');
     window.ssSound && window.ssSound('win');

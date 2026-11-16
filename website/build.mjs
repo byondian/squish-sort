@@ -96,7 +96,8 @@ function landing(code) {
   const half = Math.ceil(all.length / 2);
   const sq = c => `<button class="sq" type="button" aria-label="${esc(nm(c))}"><img src="/assets/sq/${c.id}.webp" alt="" width="118" height="118" loading="lazy"><span class="nm">${esc(nm(c))}</span></button>`;
   const row = list => `<div class="ribbon"><div class="track">${list.map(sq).join('')}${list.map(sq).join('').replace(/<button /g, '<button aria-hidden="true" tabindex="-1" ')}</div></div>`;
-  const demoT = { ...t.demo, names };
+  const demoT = { ...t.demo, names, worlds: t.worlds.list.slice(0, 3).map(w => w[0]) };
+  const demoWorlds = [['toyshop', 'dino-rex'], ['sweetfactory', 'donut'], ['starlight', 'lightstick-lamb']];
   const worldsImg = ['dino-rex', 'donut', 'lightstick-lamb', 'reindeer'];
   const worldsCol = ['#FFE3EF', '#FFF0C2', '#EEE7FF', '#DDF7EE'];
   const pile = ['strawbie', 'capy', 'axo', 'sparkle-unicorn', 'peach-bun', 'panda-dumpling', 'gummy-bear', 'snowbo', 'tango'];
@@ -134,7 +135,8 @@ ${waveTo('#FFE3EF')}
         <div class="final-cta cta-row" hidden style="justify-content:center">${storeCta(code, 'demo', true)}<button class="btn soft again" type="button">${esc(t.demo.again)}</button></div>
       </div>
     </div>
-    <div class="side"><h3>${esc(t.demo.sideTitle)}</h3><ol class="steps">${[1, 2, 3, 4].map(n => `<li>${n}</li>`).join('')}</ol>
+    <div class="side"><h3>${esc(t.demo.sideTitle)}</h3>
+      <ul class="dworlds">${demoWorlds.map(([w, img], i) => `<li data-w="${w}"><img src="/assets/sq/${img}.webp" alt="" width="44" height="44"><span>${esc(demoT.worlds[i])}</span><ol class="steps">${[1, 2].map(n => `<li>${i * 2 + n}</li>`).join('')}</ol></li>`).join('')}</ul>
       <p class="lede">${esc(t.demo.lede)}</p><ul class="howto">${t.demo.howto.map(h => `<li>${esc(h)}</li>`).join('')}</ul></div>
   </div>
 </section>
