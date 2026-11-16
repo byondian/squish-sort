@@ -164,6 +164,45 @@ final class AppModel: ObservableObject {
         isSideLevel(index) ? levels[index].file.index : index + 1
     }
 
+    // MARK: - Tester tools (TestFlight and debug builds only)
+
+    /// True in debug builds and in TestFlight (sandbox receipt). The tools still stay
+    /// hidden until the version line in Settings is tapped seven times.
+    static var isTesterBuild: Bool {
+        #if DEBUG
+        return true
+        #else
+        return Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
+        #endif
+    }
+
+    /// Opens the main path up to the first level of a world and goes there. Earlier levels
+    /// that were not played count as won with one star, so the extras they open are there too.
+    func testerStart(world: String) {
+        guard AppModel.isTesterBuild,
+              let first = levels.indices.first(where: { levels[$0].file.world == world && !isSideLevel($0) }) else { return }
+        update { p in
+            for i in 0..<first where !isSideLevel(i) && p.stars[levels[i].id] == nil { p.stars[levels[i].id] = 1 }
+            p.highestUnlocked = max(p.highestUnlocked, first)
+        }
+        news = []
+        showingNews = nil
+        afterNews = nil
+        levelCheer = nil
+        screen = .level(first)
+    }
+
+    /// Back to a brand new player.
+    func testerReset() {
+        guard AppModel.isTesterBuild else { return }
+        update { $0 = PlayerProgress() }
+        news = []
+        showingNews = nil
+        afterNews = nil
+        levelCheer = nil
+        screen = .level(0)
+    }
+
     func isUnlocked(_ index: Int) -> Bool {
         guard levels.indices.contains(index) else { return false }
         if isSideLevel(index) {
