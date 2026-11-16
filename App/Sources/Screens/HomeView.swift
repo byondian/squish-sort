@@ -123,6 +123,19 @@ struct HomeView: View {
             }
             .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.75))
         }
+        // The stamp card: one stamp for the first win of each day. Nothing is lost on a missed day.
+        HStack(spacing: 5) {
+            ForEach(0..<StampCard.size, id: \.self) { i in
+                Image(systemName: i < model.progress.stampCard.stamps ? "seal.fill" : "circle.dotted")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(i < model.progress.stampCard.stamps ? Theme.bubblegum : Theme.plum.opacity(0.3))
+            }
+            Text(model.progress.stampCard.canStamp(today: model.today) ? LocalizedStringKey("Win a level for today's stamp")
+                 : LocalizedStringKey("Stamped today!"))
+                .font(Theme.body(12)).foregroundStyle(Theme.plum.opacity(0.65))
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("stamp-card")
     }
 
     /// One object in the scene: a picture with its name under it, and a "new!" tag until first opened.

@@ -17,6 +17,8 @@ public struct CoinRules: Codable, Equatable, Sendable {
     public var streakCap = 50
     public var dailyGift = 200
     public var adventCoins = 100
+    /// Stamps 1 to 6 of the stamp card.
+    public var stampCoins = 50
 
     public init() {}
 
@@ -37,6 +39,7 @@ public struct CoinRules: Codable, Equatable, Sendable {
         streakCap = int(.streakCap, d.streakCap)
         dailyGift = int(.dailyGift, d.dailyGift)
         adventCoins = int(.adventCoins, d.adventCoins)
+        stampCoins = int(.stampCoins, d.stampCoins)
     }
 }
 
@@ -170,6 +173,38 @@ public struct LevelPot: Equatable, Sendable {
         }
         coins += out.coins
         return out
+    }
+}
+
+/// Stamp card (Ian, 16 Nov 2026): the first win of a day earns one stamp.
+/// Stamps 1 to 6 give coins, stamp 7 moves the capsule bar one step, then a
+/// new card starts. A missed day just means no stamp: nothing is ever lost.
+public struct StampCard: Codable, Equatable, Sendable {
+    public static let size = 7
+
+    public enum Reward: Equatable, Sendable {
+        case coins(Int)
+        case capsuleStep
+    }
+
+    /// Stamps on the current card, 0 to 6 (a full card starts again at 0).
+    public var stamps = 0
+    public var lastStampDay: String?
+
+    public init() {}
+
+    public func canStamp(today: String) -> Bool { lastStampDay != today }
+
+    /// One stamp a day. Nil when today's stamp is already on the card.
+    public mutating func stamp(today: String, rules: CoinRules = CoinRules()) -> Reward? {
+        guard canStamp(today: today) else { return nil }
+        lastStampDay = today
+        stamps += 1
+        if stamps >= StampCard.size {
+            stamps = 0
+            return .capsuleStep
+        }
+        return .coins(rules.stampCoins)
     }
 }
 

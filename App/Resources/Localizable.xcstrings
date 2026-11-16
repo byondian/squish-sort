@@ -453,6 +453,28 @@
         }
       }
     },
+    "Card full! Capsule bar +1": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "カードがいっぱい！カプセルバー+1"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "카드 완성! 캡슐 바 +1"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "集滿了！扭蛋進度 +1"
+          }
+        }
+      }
+    },
     "Change Buddy": {
       "localizations": {
         "ja": {
@@ -2609,6 +2631,28 @@
         }
       }
     },
+    "Stamped today!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今日のスタンプ、ゲット！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오늘 스탬프 완료!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今天蓋好了！"
+          }
+        }
+      }
+    },
     "Starlight Stage": {
       "localizations": {
         "ja": {
@@ -2803,6 +2847,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "為了準備你的收藏冊，你是哪一年出生的？"
+          }
+        }
+      }
+    },
+    "Today's stamp": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今日のスタンプ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오늘의 스탬프"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今日印章"
           }
         }
       }
@@ -3133,6 +3199,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "贏得扭蛋來填滿軟軟房間"
+          }
+        }
+      }
+    },
+    "Win a level for today's stamp": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1レベルクリアで今日のスタンプ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "레벨을 깨면 오늘의 스탬프"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "過一關就能蓋今日印章"
           }
         }
       }

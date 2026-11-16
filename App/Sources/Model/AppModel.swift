@@ -477,11 +477,16 @@ final class AppModel: ObservableObject {
         var streak = 0
         var streakBonus = 0
         var dailyBonus = 0
+        /// Coins from today's stamp (stamps 1 to 6).
+        var stampCoins = 0
+        /// Today's stamp went on the card with this win; `stamps` is the card after it (0 = card just filled).
+        var stamped = false
+        var stamps = 0
         var firstClear = false
         var doubled = false
         /// The one soft Remove Ads line (after the 3rd interstitial ever, 13 and over).
         var offersRemoveAds = false
-        var total: Int { pot * (doubled ? 2 : 1) + starBonus + streakBonus + dailyBonus }
+        var total: Int { pot * (doubled ? 2 : 1) + starBonus + streakBonus + dailyBonus + stampCoins }
     }
 
     /// `pot` is what the level's jars threw on this attempt (0 on a replay).
@@ -505,8 +510,22 @@ final class AppModel: ObservableObject {
         summary.dailyBonus = progress.lastWinDay == today ? 0 : rules.firstWinOfDay
         summary.offersRemoveAds = RemoveAdsOffer.shouldShow(interstitialsShown: progress.cadence.interstitialsShown, group: ageGroup,
                                                             alreadyShown: progress.removeAdsOfferShown, ownsRemoveAds: ownsRemoveAds)
+        // The first win of a day puts a stamp on the stamp card.
+        var card = progress.stampCard
+        var stampFillsBar = false
+        if let reward = card.stamp(today: today, rules: rules) {
+            summary.stamped = true
+            summary.stamps = card.stamps
+            switch reward {
+            case .coins(let amount): summary.stampCoins = amount
+            case .capsuleStep: stampFillsBar = true
+            }
+        }
         let side = isSideLevel(index)
+        var barFull = false
         update { p in
+            p.stampCard = card
+            if stampFillsBar { barFull = p.mystery.addStep() }
             p.wallet.earn(summary.total)
             p.winStreak = streak
             p.lastWinDay = today
@@ -526,10 +545,17 @@ final class AppModel: ObservableObject {
         let unlockedExtra = Extra.allCases.filter { isExtraUnlocked($0) } != extrasBefore
         lastWinHadReward = (firstClear && level.file.capsule) || unlockedExtra
         if unlockedExtra { sounds.play("unlock_new") }
+        // A full capsule bar opens its capsule after the level's own, never on top of it.
+        if barFull { pendingCapsules.append(mysteryCapsuleWorld) }
         if firstClear && level.file.capsule {
             openCapsule(world: level.file.world)
+        } else if !pendingCapsules.isEmpty {
+            openCapsule(world: pendingCapsules.removeFirst())
         }
     }
+
+    /// Capsules waiting for the one on screen to close.
+    private var pendingCapsules: [String] = []
 
     /// "x2 coins" on the win card of a first clear: doubles the banked pot only.
     var offersDoubleCoins: Bool {
@@ -611,7 +637,11 @@ final class AppModel: ObservableObject {
 
     /// Called by the capsule cover's onDismiss.
     func capsuleDismissed() {
-        if progress.age == nil { askAge = true }
+        if progress.age == nil {
+            askAge = true
+        } else if !pendingCapsules.isEmpty {
+            openCapsule(world: pendingCapsules.removeFirst())
+        }
     }
 
     func rerollSpares(world: String) -> Collectible? {

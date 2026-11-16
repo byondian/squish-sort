@@ -44,6 +44,7 @@ struct PlayerProgress: Codable, Equatable {
     /// yyyy-MM-dd the Buddy's daily gift was last taken.
     var dailyGiftDay: String?
     var optInAds = OptInAdState()
+    var stampCard = StampCard()
     /// The one soft Remove Ads line on the win card has been shown.
     var removeAdsOfferShown = false
     var buddy = BuddyState()
@@ -89,6 +90,7 @@ struct PlayerProgress: Codable, Equatable {
         lastWinDay = (try? c.decodeIfPresent(String.self, forKey: .lastWinDay)) ?? nil
         dailyGiftDay = (try? c.decodeIfPresent(String.self, forKey: .dailyGiftDay)) ?? nil
         optInAds = v(.optInAds, d.optInAds)
+        stampCard = v(.stampCard, d.stampCard)
         removeAdsOfferShown = v(.removeAdsOfferShown, d.removeAdsOfferShown)
         buddy = v(.buddy, d.buddy)
         mystery = v(.mystery, d.mystery)

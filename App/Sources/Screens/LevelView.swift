@@ -557,6 +557,21 @@ struct WinCard: View {
                     Text("First win today: +\(summary.dailyBonus)").font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.7))
                 }
             }
+            if summary.stamped {
+                // Today's stamp: one for the first win of each day, seven to a card.
+                HStack(spacing: 5) {
+                    let filled = summary.stamps == 0 ? StampCard.size : summary.stamps
+                    ForEach(0..<StampCard.size, id: \.self) { i in
+                        Image(systemName: i < filled ? "seal.fill" : "circle.dotted")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundStyle(i < filled ? Theme.bubblegum : Theme.plum.opacity(0.3))
+                            .scaleEffect(i == filled - 1 && shown > 0 ? 1.35 : 1)
+                    }
+                    Text(summary.stamps == 0 ? LocalizedStringKey("Card full! Capsule bar +1") : LocalizedStringKey("Today's stamp"))
+                        .font(Theme.body(12)).foregroundStyle(Theme.plum.opacity(0.7))
+                }
+                .accessibilityElement(children: .combine)
+            }
             if let toCapsule {
                 Label {
                     if toCapsule == 0 { Text("Capsule next level!") } else { Text("Next capsule: \(toCapsule + 1) more") }
