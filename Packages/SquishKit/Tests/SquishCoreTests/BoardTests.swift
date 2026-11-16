@@ -163,6 +163,17 @@ final class SessionTests: XCTestCase {
         XCTAssertFalse(s.canUndo, "undo cannot go back past a shake-up")
     }
 
+    func testAShuffleKeepsMovesAndTheStarLimitAndBlocksUndo() {
+        let board = Board(capacity: 2, jars: [[Piece(kind: 0), Piece(kind: 1)], [Piece(kind: 1), Piece(kind: 0)], []])
+        var s = GameSession(board: board, par: 3)
+        XCTAssertNotNil(s.play(Move(from: 0, to: 2)))
+        var rng = SystemRandomNumberGenerator()
+        s.shuffle(to: s.board.shakenUp(using: &rng))
+        XCTAssertEqual(s.moveCount, 1)
+        XCTAssertEqual(s.par, 3, "a shuffle is not a way to three stars")
+        XCTAssertFalse(s.canUndo, "undo cannot go back past a shuffle")
+    }
+
     func testShakeUpLeavesFinishedJarsAlone() {
         let done = [Piece(kind: 2), Piece(kind: 2)]
         let board = Board(capacity: 2, jars: [done, [Piece(kind: 0), Piece(kind: 1)], [Piece(kind: 1), Piece(kind: 0)], []])

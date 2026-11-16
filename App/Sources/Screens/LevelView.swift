@@ -37,6 +37,10 @@ final class LevelController: ObservableObject {
     /// Shake-up: the move count at which the pieces are shuffled. Nil when there is none (left).
     @Published private(set) var shakeAt: Int?
     @Published private(set) var shaking = false
+    /// Shuffles used on this try: the first is free, the rest cost coins.
+    @Published private(set) var shufflesUsed = 0
+    /// A paid shuffle was tapped without enough coins.
+    @Published private(set) var shuffleShort = false
     /// Moves left before the shake-up.
     var shakeIn: Int? { shakeAt.map { max(0, $0 - session.history.count) } }
     /// Bonus levels are Coin Rush: every finished jar throws double on a first clear.
@@ -209,8 +213,33 @@ final class LevelController: ObservableObject {
     /// The pieces in unfinished jars land in new spots. The new layout is always one that can be
     /// solved, and the star limit starts again from it, so a shake-up never costs stars.
     private func shakeUpIfDue() {
-        guard let model, let at = shakeAt, session.history.count >= at, session.status == .playing, !shaking else { return }
+        guard let at = shakeAt, session.history.count >= at, session.status == .playing, !shaking else { return }
         shakeAt = nil
+        shake(word: String(localized: "Shake-up!"), keepsStarLimit: false) { _ in }
+    }
+
+    /// The Shuffle button: the first shuffle on a level is free, later ones cost coins. The moves so far
+    /// stay counted and the star limit does not move. Nothing is charged when no new layout is found.
+    func shuffle() {
+        guard let model, session.status == .playing, !shaking, outcome == nil else { return }
+        let paid = shufflesUsed > 0
+        if paid && !model.progress.wallet.canAfford(.shuffle) {
+            // No shop offer from the board: just say what is in the purse.
+            shuffleShort = true
+            model.haptics.reject()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) { [weak self] in self?.shuffleShort = false }
+            return
+        }
+        shake(word: String(localized: "Shuffle!"), keepsStarLimit: true) { [weak self] done in
+            guard let self, done else { return }
+            if paid { _ = model.spend(.shuffle) }
+            self.shufflesUsed += 1
+        }
+    }
+
+    /// Everything trembles, then the pieces in unfinished jars fly to new spots.
+    private func shake(word: String, keepsStarLimit: Bool, then: @escaping (Bool) -> Void) {
+        guard let model else { return }
         shaking = true
         chain.end()
         feverLeft = 0
@@ -224,11 +253,14 @@ final class LevelController: ObservableObject {
         Task {
             let found: (board: Board, best: Int)? = await Task.detached(priority: .userInitiated) { () -> (board: Board, best: Int)? in
                 var rng = SystemRandomNumberGenerator()
+                // Never hold the board for long: stop looking after about a second and a half.
+                let deadline = Date().addingTimeInterval(1.5)
                 for _ in 0..<14 {
+                    if Date() > deadline { break }
                     let next = board.shakenUp(using: &rng)
                     if next == board || next.isWon || next.isStuck { continue }
                     if next.jars.indices.contains(where: { next.isComplete($0) && !board.isComplete($0) }) { continue }
-                    if let result = Solver.solve(next, maxStates: 120_000), result.moves.count >= 2 {
+                    if let result = Solver.solve(next, maxStates: 60_000), result.moves.count >= 2 {
                         return (next, result.moves.count)
                     }
                 }
@@ -236,14 +268,15 @@ final class LevelController: ObservableObject {
             }.value
             try? await Task.sleep(nanoseconds: 1_100_000_000)
             shaking = false
-            guard let found, session.board == board, outcome == nil else { return }
-            session.shakeUp(to: found.board, bestFromHere: found.best)
+            guard let found, session.board == board, outcome == nil else { then(false); return }
+            if keepsStarLimit { session.shuffle(to: found.board) } else { session.shakeUp(to: found.board, bestFromHere: found.best) }
             foundHint = nil
             noWayThrough = false; hintGaveUp = false
             scene.reload(session.board, dropIn: true)
-            scene.popWord(String(localized: "Shake-up!"), size: 0.95)
+            scene.popWord(word, size: 0.95)
             model.sounds.play("splat", or: "land_soft")
             model.haptics.win()
+            then(true)
         }
     }
 
@@ -309,7 +342,7 @@ final class LevelController: ObservableObject {
             switch item {
             case .hint: self?.showHint()
             case .extraJar: self?.addJar()
-            case .theme, .treat, .gift: break
+            case .theme, .treat, .gift, .shuffle: break
             }
         }
         if withAd {
@@ -371,6 +404,7 @@ final class LevelController: ObservableObject {
         // Real walls soften: one extra jar after enough fails.
         if let soften = level.file.softenAfterFails, attempts > soften { session.addExtraJar() }
         extraJarUsed = false
+        shufflesUsed = 0
         noWayThrough = false; hintGaveUp = false
         outcome = nil
         scene.reload(session.board)
@@ -634,6 +668,14 @@ struct LevelView: View {
             if pathNumber >= 4 {
                 helper(String(localized: "Hint"), "lightbulb.fill", Theme.butter, enabled: controller.canHint) { controller.hint() }
             }
+            if pathNumber >= 8 {
+                // One free shuffle a level, then coins. Too few coins: the price fades and a tap says what you have.
+                let paid = controller.shufflesUsed > 0
+                helper(String(localized: "Shuffle"), "shuffle", Theme.sky, enabled: !controller.shaking,
+                       tag: paid ? "\(Coins.Item.shuffle.price)" : String(localized: "Free"),
+                       tagFaded: paid && !model.progress.wallet.canAfford(.shuffle)) { controller.shuffle() }
+                    .accessibilityIdentifier("helper-shuffle")
+            }
             if starsSlipped {
                 // A nudge, never a loss: the level can still be finished as it is.
                 helper(String(localized: "Go for 3 stars"), "star.fill", Theme.butter, enabled: true) { controller.retry() }
@@ -646,11 +688,22 @@ struct LevelView: View {
             }
         }
         .padding(.bottom, 8)
+        .overlay(alignment: .top) {
+            if controller.shuffleShort {
+                Label { Text("You have \(model.progress.wallet.balance) coins") } icon: { CoinIcon() }
+                    .font(Theme.body(14)).foregroundStyle(Theme.plum)
+                    .padding(.horizontal, 12).padding(.vertical, 7)
+                    .background(Capsule().fill(.white))
+                    .offset(y: -40)
+                    .transition(.scale.combined(with: .opacity))
+            }
+        }
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: controller.shuffleShort)
     }
 
     /// Every helper is the same size, with its picture over its name, so the row lines up in any language.
     private func helper(_ title: String, _ icon: String, _ fill: Color, enabled: Bool, badge: Int? = nil,
-                        action: @escaping () -> Void) -> some View {
+                        tag: String? = nil, tagFaded: Bool = false, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(spacing: 3) {
                 Image(systemName: icon).font(.system(size: 18, weight: .bold))
@@ -668,19 +721,27 @@ struct LevelView: View {
                         .background(Capsule().fill(badge > 0 ? Theme.grape : Theme.plum.opacity(0.4)))
                         .overlay(Capsule().stroke(.white, lineWidth: 2))
                         .offset(x: 4, y: -6)
+                } else if let tag {
+                    Text(verbatim: tag).font(Theme.body(11)).monospacedDigit().foregroundStyle(.white)
+                        .padding(.horizontal, 6).frame(minHeight: 20)
+                        .background(Capsule().fill(Theme.grape))
+                        .overlay(Capsule().stroke(.white, lineWidth: 2))
+                        .opacity(tagFaded ? 0.45 : 1)
+                        .offset(x: 4, y: -6)
                 }
             }
         }
         .buttonStyle(JellyButtonStyle(colors: [fill, fill], rim: jellyRim(fill), radius: 22))
         .opacity(enabled ? 1 : 0.6)
         .disabled(!enabled)
-        .accessibilityLabel(Text(verbatim: badge.map { "\(title) \($0)" } ?? title))
+        .accessibilityLabel(Text(verbatim: badge.map { "\(title) \($0)" } ?? tag.map { "\(title) \($0)" } ?? title))
     }
 
     /// The darker lip under a jelly button of this colour.
     private func jellyRim(_ fill: Color) -> Color {
         if fill == Theme.mint { return Color(hex: 0x4FBF9F) }
         if fill == Theme.butter { return Color(hex: 0xE0B13A) }
+        if fill == Theme.sky { return Color(hex: 0x6FA9D6) }
         return Color(hex: 0xD9C9D6)
     }
 

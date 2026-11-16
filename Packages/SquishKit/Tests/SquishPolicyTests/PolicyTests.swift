@@ -501,7 +501,7 @@ final class CoinTests: XCTestCase {
     }
 
     func testNothingInTheShopIsASquishy() {
-        XCTAssertEqual(Set(Coins.Item.allCases), [.hint, .extraJar, .theme, .treat, .gift])
+        XCTAssertEqual(Set(Coins.Item.allCases), [.hint, .extraJar, .theme, .treat, .gift, .shuffle])
     }
 
     func testALevelPaysOnceSoReplaysCannotBeFarmed() {
@@ -517,7 +517,7 @@ final class CoinTests: XCTestCase {
     }
 
     func testPricesAreTenTimesTheOldOnes() {
-        XCTAssertEqual(Coins.Item.allCases.map(\.price), [250, 400, 1500, 100, 600])
+        XCTAssertEqual(Coins.Item.allCases.map(\.price), [250, 400, 1500, 100, 600, 150])
         XCTAssertEqual(CoinRules().dailyGift, 200)
     }
 

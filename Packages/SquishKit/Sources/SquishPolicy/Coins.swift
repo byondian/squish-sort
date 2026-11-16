@@ -101,6 +101,8 @@ public enum Coins {
         case hint, extraJar, theme
         /// Buddy items. Cosmetic fun only: hearts never affect squishies, capsules, odds or level help.
         case treat, gift
+        /// A second or later shuffle on a level. The first one each level is free.
+        case shuffle
 
         public var price: Int {
             switch self {
@@ -109,6 +111,7 @@ public enum Coins {
             case .theme: return 1500
             case .treat: return 100
             case .gift: return 600
+            case .shuffle: return 150
             }
         }
     }

@@ -58,6 +58,16 @@ public struct GameSession: Sendable {
         par = movesBefore + max(0, bestFromHere)
     }
 
+    /// Shuffle button: the pieces land in new spots, the moves made so far stay counted and the
+    /// star limit does not move, so a shuffle gets a player unstuck without being a way to three stars.
+    /// Undo cannot go back past it.
+    public mutating func shuffle(to newBoard: Board) {
+        movesBefore = moveCount
+        history = []
+        free = []
+        board = newBoard
+    }
+
     public var canUndo: Bool {
         guard !history.isEmpty else { return false }
         if let left = undosLeft { return left > 0 }
