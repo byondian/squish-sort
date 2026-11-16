@@ -932,6 +932,9 @@ final class ExtrasTests: XCTestCase {
         XCTAssertEqual(b.puff(at: 1000 + 43_200), 0.05, accuracy: 1e-9)
         XCTAssertEqual(b.puff(at: 1000 + 200_000), 0)
         XCTAssertEqual(b.puff(at: 500), 0, "a clock set back gives no puff")
+        // Gentle mode: gone within a minute, so there is nothing to come back for.
+        XCTAssertEqual(b.puff(at: 1030, lasting: BuddyState.puffSecondsGentle), 0.05, accuracy: 1e-9)
+        XCTAssertEqual(b.puff(at: 1061, lasting: BuddyState.puffSecondsGentle), 0)
         XCTAssertEqual(b.growth, 0.25, accuracy: 1e-9)
     }
 }

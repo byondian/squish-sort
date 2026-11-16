@@ -561,7 +561,7 @@ struct BuddyHomeView: View {
 
     /// Growth earned for good, plus the puff from a recent treat.
     private var buddySize: Double {
-        model.progress.buddy.growth + model.progress.buddy.puff(at: Date().timeIntervalSince1970)
+        model.progress.buddy.growth + model.progress.buddy.puff(at: Date().timeIntervalSince1970, lasting: model.puffSeconds)
     }
 
     /// The treat flies in, the Buddy chomps twice, then a heart floats up.

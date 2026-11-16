@@ -418,9 +418,11 @@ public struct BuddyState: Codable, Equatable, Sendable {
     /// earned for good. Nothing earned is ever lost, and nothing is shown when the puff is gone.
     public static let puffSize = 0.10
     public static let puffSeconds = 86_400.0
-    public func puff(at now: Double) -> Double {
-        guard let fed = lastTreatAt, now >= fed else { return 0 }
-        return BuddyState.puffSize * max(0, 1 - (now - fed) / BuddyState.puffSeconds)
+    /// Gentle mode: a short happy reaction, never something to come back in time for.
+    public static let puffSecondsGentle = 60.0
+    public func puff(at now: Double, lasting seconds: Double = BuddyState.puffSeconds) -> Double {
+        guard let fed = lastTreatAt, now >= fed, seconds > 0 else { return 0 }
+        return BuddyState.puffSize * max(0, 1 - (now - fed) / seconds)
     }
 }
 

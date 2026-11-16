@@ -71,6 +71,7 @@ final class AppModel: ObservableObject {
     @Published var giftsOpened = 0
     /// A treat or gift bought in the shop, on its way to the Buddy.
     @Published var buddyDelivery: Coins.Item?
+    private var heartsBeforeDelivery = 0
     private var ultraJustOpened = false
     private var squeezeAfterCapsule: String?
     @Published var buddyAsksMood = false
@@ -553,27 +554,42 @@ final class AppModel: ObservableObject {
         giveBuddy(item)
     }
 
-    /// Bought in the shop: paid for here, then given on the home screen, where the Buddy can be seen enjoying it.
+    /// Bought in the shop: paid for and saved here in one go, so nothing can be lost. The home screen
+    /// then plays the arrival, where the Buddy can be seen enjoying it.
     func buyForBuddyFromShop(_ item: Coins.Item) {
         guard buddyActive, buddyDelivery == nil, item == .treat || item == .gift, spend(item) else { return }
+        heartsBeforeDelivery = progress.buddy.hearts
+        applyToBuddy(item)
         buddyDelivery = item
         screen = homeScreen
     }
 
-    /// The home screen calls this when the bought treat or gift reaches the Buddy.
+    /// The home screen calls this when the bought treat or gift reaches the Buddy: only the celebration is left to do.
     func deliverToBuddy() {
         guard let item = buddyDelivery else { return }
         buddyDelivery = nil
-        giveBuddy(item)
+        celebrate(item, heartsBefore: heartsBeforeDelivery)
     }
 
     private func giveBuddy(_ item: Coins.Item) {
         let before = progress.buddy.hearts
+        applyToBuddy(item)
+        celebrate(item, heartsBefore: before)
+    }
+
+    private func applyToBuddy(_ item: Coins.Item) {
         update { $0.buddy.give(item); if item == .treat { $0.buddy.lastTreatAt = Date().timeIntervalSince1970 } }
+    }
+
+    private func celebrate(_ item: Coins.Item, heartsBefore before: Int) {
         haptics.complete()
         if item == .gift { sounds.play("gift_open", or: "heart") } else { sounds.play("buddy_yum", or: "buddy_munch") }
         heartsChanged(from: before)
     }
+
+    /// How long a treat's puff lasts: a day for players of 13 and over. In gentle mode it is a short
+    /// happy reaction, so nothing asks a child to come back in time.
+    var puffSeconds: Double { isGentleMode ? BuddyState.puffSecondsGentle : BuddyState.puffSeconds }
 
     // MARK: - The Buddy's daily gift
 
