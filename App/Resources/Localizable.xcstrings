@@ -290,6 +290,28 @@
         }
       }
     },
+    "%lld more levels. Opens after Starlight Stage.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あと%lldレベル。スターライトステージのあとにひらくよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "레벨 %lld개 더. 스타라이트 스테이지 다음에 열려요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "還有 %lld 關。完成星光舞台後開放。"
+          }
+        }
+      }
+    },
     "%lld more swaps for a new one": {
       "localizations": {
         "ja": {
