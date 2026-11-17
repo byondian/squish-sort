@@ -1817,6 +1817,50 @@
         }
       }
     },
+    "Double tap your Buddy": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バディをダブルタップ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "버디를 두 번 탭해요"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "點兩下夥伴"
+          }
+        }
+      }
+    },
+    "Draw a circle round your Buddy": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バディのまわりに円をかこう"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "버디 둘레에 원을 그려요"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在夥伴周圍畫一個圈"
+          }
+        }
+      }
+    },
     "Duet! They move together. Land the bottom one on its own kind and they let go.": {
       "localizations": {
         "ja": {
@@ -2565,6 +2609,28 @@
         }
       }
     },
+    "Home": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ホーム"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "홈"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "首頁"
+          }
+        }
+      }
+    },
     "How this works": {
       "localizations": {
         "ja": {
@@ -3291,6 +3357,28 @@
         }
       }
     },
+    "NEW TRICK": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新しい芸"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "새로운 재주"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新把戲"
+          }
+        }
+      }
+    },
     "NEW!": {
       "localizations": {
         "ja": {
@@ -3551,6 +3639,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "再 %lld 關就有扭蛋"
+          }
+        }
+      }
+    },
+    "Next trick": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "つぎの芸"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다음 재주"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下一個把戲"
           }
         }
       }
@@ -5447,6 +5557,28 @@
         }
       }
     },
+    "Swipe up on your Buddy": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バディを上にスワイプ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "버디를 위로 쓸어 올려요"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在夥伴身上往上滑"
+          }
+        }
+      }
+    },
     "Tap again": {
       "localizations": {
         "ja": {
@@ -5711,6 +5843,28 @@
         }
       }
     },
+    "Tricks": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "芸"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "재주"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "把戲"
+          }
+        }
+      }
+    },
     "Try again": {
       "localizations": {
         "ja": {
@@ -5795,6 +5949,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "馬上試試"
+          }
+        }
+      }
+    },
+    "Try it now!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "やってみよう！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "지금 해 봐요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "現在試試看！"
           }
         }
       }

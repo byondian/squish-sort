@@ -34,7 +34,8 @@ public struct GameSession: Sendable {
 
     public var status: Status {
         if board.isWon { return .won(stars: Stars.rating(moves: moveCount, par: par, slack: starSlack)) }
-        if board.isStuck { return .stuck }
+        // Stuck is also a board whose last few moves lead nowhere: say so now, not one move later.
+        if board.isStuck || board.isDeadEnd() { return .stuck }
         return .playing
     }
 

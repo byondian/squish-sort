@@ -995,3 +995,38 @@ final class ExtrasTests: XCTestCase {
         XCTAssertEqual(b.growth, BuddyState.maxGrowth, accuracy: 1e-9)
     }
 }
+
+final class TrickGestureTests: XCTestCase {
+    private let centre = (x: 150.0, y: 100.0)
+
+    private func ring(turns: Double, radius: Double = 80, backwards: Bool = false) -> [(x: Double, y: Double)] {
+        (0...40).map { i in
+            let a = Double(i) / 40 * turns * 2 * Double.pi * (backwards ? -1 : 1)
+            return (x: centre.x + cos(a) * radius, y: centre.y + sin(a) * radius)
+        }
+    }
+
+    func testCircleRoundTheBuddyEitherWay() {
+        XCTAssertEqual(TrickGesture.classify(points: ring(turns: 1), seconds: 1.2, centre: centre, size: 160), .circle)
+        XCTAssertEqual(TrickGesture.classify(points: ring(turns: 0.9, backwards: true), seconds: 2, centre: centre, size: 160), .circle)
+        // Half way round is not a circle.
+        XCTAssertNil(TrickGesture.classify(points: ring(turns: 0.5), seconds: 1, centre: centre, size: 160))
+    }
+
+    func testQuickSwipeUp() {
+        let up = (0...8).map { (x: 150.0 + Double($0), y: 150.0 - Double($0) * 12) }
+        XCTAssertEqual(TrickGesture.classify(points: up, seconds: 0.2, centre: centre, size: 160), .swipeUp)
+        // A slow pull up is a stretch, not a trick.
+        XCTAssertNil(TrickGesture.classify(points: up, seconds: 1.5, centre: centre, size: 160))
+        // Down and sideways are nothing.
+        XCTAssertNil(TrickGesture.classify(points: up.reversed(), seconds: 0.2, centre: centre, size: 160))
+        let side = (0...8).map { (x: 100.0 + Double($0) * 12, y: 100.0 - Double($0)) }
+        XCTAssertNil(TrickGesture.classify(points: side, seconds: 0.2, centre: centre, size: 160))
+    }
+
+    func testTapAndKneadAreNotTricks() {
+        XCTAssertNil(TrickGesture.classify(points: [(x: 150, y: 100)], seconds: 0.1, centre: centre, size: 160))
+        // Rubbing little circles on the Buddy's middle.
+        XCTAssertNil(TrickGesture.classify(points: ring(turns: 3, radius: 15), seconds: 2, centre: centre, size: 160))
+    }
+}

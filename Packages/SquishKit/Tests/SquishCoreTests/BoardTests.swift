@@ -139,6 +139,21 @@ final class BoardTests: XCTestCase {
         XCTAssertFalse(board(["ABAB", "BABA", ""]).isStuck)
     }
 
+    func testDeadEndIsSeenBeforeTheLastMove() {
+        // The two Cs can still pair up, but after that nothing moves and the board is not won.
+        let dead = board(["AB", "BA", "C", "C"], capacity: 2)
+        XCTAssertFalse(dead.isStuck)
+        XCTAssertTrue(dead.isDeadEnd())
+        XCTAssertEqual(GameSession(board: dead, par: 5).status, .stuck)
+        // Few moves open, but they lead to a win: alive.
+        let alive = board(["AB", "B", "A"], capacity: 2)
+        XCTAssertFalse(alive.isDeadEnd())
+        XCTAssertEqual(GameSession(board: alive, par: 2).status, .playing)
+        // Won boards and boards with no move at all are not this.
+        XCTAssertFalse(board(["AAAA", ""]).isDeadEnd())
+        XCTAssertFalse(board(["ABAB", "BABA"]).isDeadEnd())
+    }
+
     func testLayoutRows() {
         XCTAssertEqual(BoardLayout.rows(jarCount: 5), [[0, 1, 2, 3, 4]])
         XCTAssertEqual(BoardLayout.rows(jarCount: 9), [[0, 1, 2, 3, 4], [5, 6, 7, 8]])

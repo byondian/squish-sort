@@ -1,6 +1,7 @@
 import SwiftUI
 import SpriteKit
 import SquishSoft
+import SquishPolicy
 
 /// A squishy that is soft all the way through: a finger makes a dent where it
 /// touches and the rest gives way around it. Used in the Squish Room, for the
@@ -25,6 +26,7 @@ struct SoftSquishy<Art: View>: View {
     var onTouch: (() -> Void)?
     var onLetGo: ((Double) -> Void)?
     var onDoubleTap: (() -> Void)?
+    var onGesture: ((TrickGesture) -> Bool)?
     @ViewBuilder var art: () -> Art
     @StateObject private var holder = Holder()
 
@@ -61,6 +63,7 @@ struct SoftSquishy<Art: View>: View {
         scene.onTouch = onTouch
         scene.onLetGo = onLetGo
         scene.onDoubleTap = onDoubleTap
+        scene.onGesture = onGesture
     }
 
     private func picture() -> UIImage? {

@@ -79,6 +79,8 @@ final class AppModel: ObservableObject {
     @Published var buddySays: String?
     /// A trick the Buddy should do now on Home (1 spin, 2 flip, 3 dance). Home clears it.
     @Published var trickToShow: Int?
+    /// The trick Home is teaching right now: everything else dims until the player has done it once.
+    @Published var trickTeaching: Int?
     /// The trigger of the line being said ("joke", "fact", "poke", ...).
     private(set) var buddySaysKind = ""
     /// Goes up each time the daily gift is opened, so the home screen can throw the coins.

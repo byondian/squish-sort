@@ -96,6 +96,36 @@ public struct Board: Hashable, Sendable {
     /// No legal move left and not won: the board sighs and the fail screen shows.
     public var isStuck: Bool { !isWon && legalMoves.isEmpty }
 
+    /// Moves are left, but none of them leads anywhere: every path from here runs out (or only goes
+    /// round in circles) without a win. Only looked for when few moves are open, and only as far as
+    /// `budget` positions; past that the board is taken to be alive.
+    public func isDeadEnd(maxOpenMoves: Int = 4, budget: Int = 300) -> Bool {
+        if isWon { return false }
+        let open = legalMoves
+        guard !open.isEmpty, open.count <= maxOpenMoves else { return false }
+        // Only real level boards are judged: every kind there fills whole jars.
+        var counts: [UInt8: Int] = [:]
+        for jar in jars { for piece in jar { counts[piece.kind, default: 0] += 1 } }
+        guard counts.values.allSatisfy({ $0 % capacity == 0 }) else { return false }
+        var seen: Set<Board> = [self]
+        var queue = [self]
+        var at = 0
+        while at < queue.count {
+            let board = queue[at]
+            at += 1
+            for move in board.legalMoves {
+                var next = board
+                guard next.apply(move) != nil else { continue }
+                if next.isWon { return false }
+                if seen.insert(next).inserted {
+                    if seen.count > budget { return false }
+                    queue.append(next)
+                }
+            }
+        }
+        return true
+    }
+
     @discardableResult
     public mutating func apply(_ move: Move) -> MoveResult? {
         let k = piecesToMove(move)

@@ -168,8 +168,23 @@ def staircase(rng, names):
     return jars
 
 
+def killing_first_moves(b):
+    """How many opening moves leave the board with no way to win (Ian, level 42: one move in and
+    the level was already lost). Levels are picked so that there are none."""
+    dead = 0
+    for (f, t) in b.moves():
+        nb = b.apply(f, t)
+        if nb.won():
+            continue
+        sol, _ = solve(nb, 40_000, weight=3)
+        if sol is None:
+            dead += 1
+    return dead
+
+
 def choose(rng, level, names, empties, mech, mcount, target, mix_hidden=0):
-    """Best solvable random candidate by distance to target par (lowest par if no target)."""
+    """Best solvable random candidate: first one whose every opening move can still be won from,
+    then by distance to target par (lowest par if no target)."""
     best = None
     for _ in range(80):
         cand = random_board(rng, names, empties, mech, mcount, mix_hidden)
@@ -181,11 +196,14 @@ def choose(rng, level, names, empties, mech, mcount, target, mix_hidden=0):
         if sol is None:
             continue
         score = abs(len(sol) - target) if target else len(sol)
-        if best is None or score < best[0]:
-            best = (score, jars_c, mech_c)
-        if target and score <= 1:
+        if best is not None and best[0][0] == 0 and score >= best[0][1]:
+            continue
+        rank = (killing_first_moves(b), score)
+        if best is None or rank < best[0]:
+            best = (rank, jars_c, mech_c)
+        if target and best[0][0] == 0 and best[0][1] <= 1:
             break
-        if not target and best and _ >= 20:
+        if not target and best[0][0] == 0 and _ >= 20:
             break
     if best is None:
         raise SystemExit(f"{level['id']}: no solvable candidate")
