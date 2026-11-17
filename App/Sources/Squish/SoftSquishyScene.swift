@@ -447,8 +447,12 @@ final class SoftSquishyScene: SKScene {
         let m = body.metric
         if let onPulse {
             let c = body.centre(), held = !touchTimes.isEmpty
+            // The moves are drawn from the middle of the picture, which is not the middle of the
+            // body when the art is lopsided (Cream Puff's base is only its lower half).
+            let ox: Double = (0.5 - body.c0.x) * side, oy: Double = (0.5 - body.c0.y) * side
+            let ct: Double = cos(body.theta), st: Double = sin(body.theta)
             onPulse(SquishPulse(squeeze: min(1, max(m.D / 0.15, held ? 0.35 : 0)), held: held,
-                                x: c.x, y: c.y, side: side, angle: body.theta))
+                                x: c.x + ct * ox - st * oy, y: c.y + st * ox + ct * oy, side: side, angle: body.theta))
         }
         let busy = !touchTimes.isEmpty || pokeEnds != nil || m.air || m.speed > 0.02 || m.Z > 0.01 || abs(m.rate) > 0.01
         stillFor = busy ? 0 : stillFor + dt

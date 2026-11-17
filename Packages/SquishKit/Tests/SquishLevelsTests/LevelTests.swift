@@ -145,6 +145,44 @@ final class SolverTests: XCTestCase {
         }
     }
 
+    func testNoBoardOnTheWayToAWinIsCalledADeadEnd() throws {
+        // Every level, every board along its answer: a win is still ahead, so none is a dead end.
+        for file in try LevelCatalog.loadFiles(root: levelsRoot) {
+            let level = try Level(file: file)
+            var session = GameSession(board: level.board, par: level.solution.count)
+            XCTAssertFalse(session.isDeadEnd, "\(file.id) start")
+            for (n, move) in level.solution.enumerated() {
+                XCTAssertNotNil(session.play(move), "\(file.id) move \(n + 1)")
+                XCTAssertFalse(session.isDeadEnd, "\(file.id) after move \(n + 1)")
+                XCTAssertNotEqual(session.status, .stuck, "\(file.id) after move \(n + 1)")
+            }
+            XCTAssertTrue(session.board.isWon, file.id)
+        }
+    }
+
+    func testADeadEndReallyHasNoWayToWin() throws {
+        // Wander off the answer on every level. Wherever the dead end note would show, the full
+        // search must agree that no win is left.
+        var rng = SystemRandomNumberGenerator()
+        var seen = 0
+        for file in try LevelCatalog.loadFiles(root: levelsRoot) {
+            let start = try Level(file: file).board
+            for _ in 0..<6 {
+                var board = start
+                for _ in 0..<60 {
+                    guard let move = board.legalMoves.randomElement(using: &rng), board.apply(move) != nil else { break }
+                    if board.isWon { break }
+                    if board.isDeadEnd() {
+                        seen += 1
+                        XCTAssertNil(Solver.solve(board, maxStates: 200_000), "\(file.id): called a dead end, but it can be won")
+                        break
+                    }
+                }
+            }
+        }
+        XCTAssertGreaterThan(seen, 0)
+    }
+
     func testRunningOutOfRoomIsNotCalledUnwinnable() throws {
         let file = try LevelCatalog.loadFiles(root: levelsRoot).first { $0.id == "toyshop-08" }!
         XCTAssertEqual(Solver.hint(try Level(file: file).board, maxStates: 1, maxNodes: 1), .gaveUp)

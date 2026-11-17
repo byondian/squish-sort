@@ -167,7 +167,8 @@ final class LevelController: ObservableObject {
         lastMoveWasFever = free
         if free { feverLeft -= 1 }
         landsOnMatch = ontoMatch
-        noWayThrough = false; hintGaveUp = false
+        // Moves are left but none can win: a small note, and play goes on. Never the stuck card.
+        noWayThrough = session.isDeadEnd; hintGaveUp = false
         return (result, session.board)
     }
 
@@ -406,7 +407,7 @@ final class LevelController: ObservableObject {
             feverLeft = before
             scene.setFever(before > 0)
         }
-        noWayThrough = false; hintGaveUp = false
+        noWayThrough = session.isDeadEnd; hintGaveUp = false
         outcome = nil
         scene.reload(session.board)
     }
@@ -572,7 +573,7 @@ struct LevelView: View {
             }
             if (controller.noWayThrough || controller.hintGaveUp) && controller.outcome == nil {
                 VStack {
-                    Text(controller.noWayThrough ? LocalizedStringKey("No way through from here. Undo a few moves.")
+                    Text(controller.noWayThrough ? LocalizedStringKey("No way through from here. Undo or shuffle.")
                          : LocalizedStringKey("This one is tricky! Try a move, then ask me again."))
                         .font(Theme.body(15)).foregroundStyle(Theme.plum)
                         .padding(.horizontal, 16).padding(.vertical, 10)

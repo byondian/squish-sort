@@ -243,7 +243,15 @@ final class AppModel: ObservableObject {
         case "book":
             screen = .book
         default:
-            screen = .home
+            // "room:<id>" opens the Squish Room on one squishy, for the pictures the checks keep.
+            if shot.hasPrefix("room:") {
+                let id = String(shot.dropFirst(5))
+                update { p in p.collection.owned[id] = 1 }
+                roomStart = id
+                screen = .room
+            } else {
+                screen = .home
+            }
         }
     }
     #endif

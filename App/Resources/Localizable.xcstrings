@@ -4171,24 +4171,24 @@
         }
       }
     },
-    "No way through from here. Undo a few moves.": {
+    "No way through from here. Undo or shuffle.": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "ここからはクリアできないよ。少しもどしてみよう。"
+            "value": "ここからはクリアできないよ。もどすかシャッフルしてみよう。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "여기서는 더 갈 수 없어. 몇 수 되돌려 봐."
+            "value": "여기서는 더 갈 수 없어. 되돌리거나 섞어 봐."
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "這樣走不通喔，退回幾步試試。"
+            "value": "這樣走不通喔，退回或洗牌試試。"
           }
         }
       }
