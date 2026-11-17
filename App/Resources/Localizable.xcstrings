@@ -2213,24 +2213,24 @@
         }
       }
     },
-    "Every win drops bonus coins in. It never empties. Break it open from %lld coins.": {
+    "Every win drops bonus coins in. It never loses coins. Break it open from %lld coins.": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "クリアするたびにボーナスコインが入ります。なくなりません。%lldまいからあけられます。"
+            "value": "クリアするたびにボーナスコインが入ります。コインはへりません。%lldまいからあけられます。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "이길 때마다 보너스 코인이 들어가요. 사라지지 않아요. %lld개부터 열 수 있어요."
+            "value": "이길 때마다 보너스 코인이 들어가요. 코인은 줄어들지 않아요. %lld개부터 열 수 있어요."
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "每次過關都會存入獎勵金幣，永遠不會消失。存到 %lld 金幣就能打開。"
+            "value": "每次過關都會存入獎勵金幣，金幣不會減少。存到 %lld 金幣就能打開。"
           }
         }
       }

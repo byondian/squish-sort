@@ -56,6 +56,12 @@ struct ShopView: View {
                     }
                     Text("Coins buy hints, shuffles and themes. Squishies are earned by playing and are never for sale.")
                         .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.6))
+                    if model.storefront.uppercased() == "KOR" || model.language == "ko" {
+                        // Korea: a minor can cancel a purchase made without a guardian's consent, and the shop says so.
+                        Text(verbatim: "미성년자가 법정대리인의 동의 없이 결제한 경우 본인 또는 법정대리인이 취소할 수 있습니다.")
+                            .font(Theme.body(12)).foregroundStyle(Theme.plum.opacity(0.6))
+                            .accessibilityIdentifier("shop-korea-minors")
+                    }
                 }
                 .padding(16)
             }
@@ -102,7 +108,7 @@ struct ShopView: View {
                     Spacer(minLength: 4)
                 }
                 PiggyBar(fill: bank.fill)
-                Text("Every win drops bonus coins in. It never empties. Break it open from \(PiggyBank.ready) coins.")
+                Text("Every win drops bonus coins in. It never loses coins. Break it open from \(PiggyBank.ready) coins.")
                     .font(Theme.body(13)).opacity(0.7)
                 if bank.isReady {
                     Button { Task { await purchases.buyExtra(piggy) } } label: {

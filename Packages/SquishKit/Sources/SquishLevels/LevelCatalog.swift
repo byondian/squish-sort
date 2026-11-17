@@ -30,7 +30,7 @@ public enum LevelCatalog {
     public static func isCapsuleLevel(index: Int, world: String) -> Bool {
         // Keep Squishing: every fifth level.
         if world == endless { return index % 5 == 0 }
-        index % 3 == 0 || index == levelCount(in: world)
+        return index % 3 == 0 || index == levelCount(in: world)
     }
 
     /// Reads every Levels/<world>/<nn>.json under `root`, in play order.
