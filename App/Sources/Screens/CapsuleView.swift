@@ -42,6 +42,10 @@ struct CapsuleView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Theme.marshmallow.ignoresSafeArea())
+        .overlay(alignment: .topTrailing) {
+            // A rare find is worth showing off: six seconds of it, squishes and all.
+            if opened, rarity != .common { ClipControl(clips: model.clips).padding(.trailing, 14).padding(.top, 6) }
+        }
         .overlay {
             // One soft flash in the rarity's colour as the top comes off. No strobe.
             if flash { tint.opacity(0.55).ignoresSafeArea().transition(.opacity).allowsHitTesting(false) }

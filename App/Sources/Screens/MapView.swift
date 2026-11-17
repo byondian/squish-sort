@@ -43,6 +43,7 @@ struct MapView: View {
                                 Spacer()
                                 starJar(world.id)
                             }
+                            ShowPoster(world: world.id)
                             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 5), spacing: 10) {
                                 ForEach(model.levels.indices.filter { model.levels[$0].file.world == world.id }, id: \.self) { i in
                                     levelBubble(i)

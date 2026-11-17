@@ -75,6 +75,11 @@ struct PlayerProgress: Codable, Equatable {
     var bossSplashSeen = false
     /// Board rules whose demo has been shown (wrapped, duet, frozen).
     var rulesShown: Set<String> = []
+    /// Sneak peeks of a world's big show already watched, by world: 0 up to the number it has.
+    var teasersSeen: [String: Int] = [:]
+    /// Worlds whose big show has been watched to the end (or skipped), and the keepsakes they gave.
+    var finalesSeen: Set<String> = []
+    var keepsakes: Set<String> = []
 
     init() {}
 
@@ -159,6 +164,9 @@ struct PlayerProgress: Codable, Equatable {
         setGoalsClaimed = v(.setGoalsClaimed, d.setGoalsClaimed)
         bossSplashSeen = v(.bossSplashSeen, d.bossSplashSeen)
         rulesShown = v(.rulesShown, d.rulesShown)
+        teasersSeen = v(.teasersSeen, d.teasersSeen)
+        finalesSeen = v(.finalesSeen, d.finalesSeen)
+        keepsakes = v(.keepsakes, d.keepsakes)
     }
 
     static func today(_ date: Date = Date()) -> String {

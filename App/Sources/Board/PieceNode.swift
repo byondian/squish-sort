@@ -609,3 +609,74 @@ final class CurtainNode: SKNode {
         run(.sequence([.wait(forDuration: 0.45), .fadeOut(withDuration: 0.25), .removeFromParent()]))
     }
 }
+
+/// The show around a Starlight board: six stage lamps along the top, one switched on by each
+/// finished jar in that jar's colour, and a front row of fans with lightsticks along the bottom
+/// who sway all the time and cheer when a jar is finished. No flashing, and still with Reduce Motion.
+final class StageShowNode: SKNode {
+    private var lamps: [SKShapeNode] = []
+    private var sticks: [SKShapeNode] = []
+    private var lit = 0
+    private let calm: Bool
+
+    init(size: CGSize, calm: Bool) {
+        self.calm = calm
+        super.init()
+        let count = 6
+        for i in 0..<count {
+            let lamp = SKShapeNode(circleOfRadius: 6)
+            lamp.fillColor = UIColor.white.withAlphaComponent(0.18)
+            lamp.strokeColor = UIColor.white.withAlphaComponent(0.35)
+            lamp.lineWidth = 1.5
+            lamp.position = CGPoint(x: size.width * (CGFloat(i) + 0.5) / CGFloat(count), y: size.height - 9)
+            addChild(lamp)
+            lamps.append(lamp)
+        }
+        let fans = 9
+        let colours: [UIColor] = [UIColor(named: "Bubblegum"), UIColor(named: "Butter"), UIColor(named: "Mint"),
+                                  UIColor(named: "Sky"), UIColor(named: "Grape")].map { $0 ?? .white }
+        for i in 0..<fans {
+            let x = size.width * (CGFloat(i) + 0.5) / CGFloat(fans)
+            let fan = SKShapeNode(rect: CGRect(x: -9, y: -10, width: 18, height: 20), cornerRadius: 8)
+            fan.fillColor = UIColor.black.withAlphaComponent(0.35)
+            fan.strokeColor = .clear
+            fan.position = CGPoint(x: x, y: 2)
+            addChild(fan)
+            let stick = SKShapeNode(rect: CGRect(x: -1.5, y: 0, width: 3, height: 11), cornerRadius: 1.5)
+            stick.fillColor = colours[i % colours.count]
+            stick.strokeColor = .clear
+            stick.position = CGPoint(x: x + 7, y: 8)
+            addChild(stick)
+            sticks.append(stick)
+            if !calm {
+                let sway = SKAction.sequence([.rotate(toAngle: 0.22, duration: 0.7), .rotate(toAngle: -0.22, duration: 0.7)])
+                stick.run(.sequence([.wait(forDuration: 0.11 * Double(i)), .repeatForever(sway)]), withKey: "sway")
+            }
+        }
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) is not used") }
+
+    /// The next lamp comes on in the finished jar's colour.
+    func lightLamp(_ colour: UIColor, animated: Bool) {
+        guard lit < lamps.count else { return }
+        let lamp = lamps[lit]
+        lit += 1
+        lamp.fillColor = colour
+        lamp.strokeColor = .white
+        lamp.glowWidth = 3
+        guard animated else { return }
+        lamp.setScale(0.4)
+        lamp.run(.sequence([.scale(to: 1.5, duration: 0.2), .scale(to: 1, duration: 0.2)]))
+    }
+
+    /// Lightsticks up!
+    func cheer() {
+        guard !calm else { return }
+        for (i, stick) in sticks.enumerated() {
+            let up = SKAction.moveBy(x: 0, y: 7, duration: 0.12)
+            up.timingMode = .easeOut
+            stick.run(.sequence([.wait(forDuration: 0.03 * Double(i)), up, up.reversed(), up, up.reversed()]), withKey: "cheer")
+        }
+    }
+}

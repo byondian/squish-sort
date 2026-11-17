@@ -8,11 +8,15 @@ import SquishPolicy
 /// flags for the player's age group (tech design, ads stack).
 @MainActor
 final class AdsService: NSObject, ObservableObject, FullScreenContentDelegate {
-    /// Google's public test units until the AdMob account is verified.
-    /// Release ids replace these through AdUnits before submission.
+    /// The ad units come from the build (Info.plist, set by project.yml and the TestFlight workflow).
+    /// Without them, Google's public test units.
     enum AdUnits {
-        static let interstitial = "ca-app-pub-3940256099942544/4411468910"
-        static let rewarded = "ca-app-pub-3940256099942544/1712485313"
+        private static func unit(_ key: String, _ test: String) -> String {
+            guard let value = Bundle.main.object(forInfoDictionaryKey: key) as? String, value.hasPrefix("ca-app-pub-") else { return test }
+            return value
+        }
+        static let interstitial = unit("AdMobInterstitialUnit", "ca-app-pub-3940256099942544/4411468910")
+        static let rewarded = unit("AdMobRewardedUnit", "ca-app-pub-3940256099942544/1712485313")
     }
 
     @Published private(set) var rewardedReady = false

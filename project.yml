@@ -16,6 +16,13 @@ settings:
     ENABLE_USER_SCRIPT_SANDBOXING: YES
     LOCALIZATION_PREFERS_STRING_CATALOGS: YES
     SWIFT_EMIT_LOC_STRINGS: YES
+    # Google's public test ids. The TestFlight workflow passes the real ones from repo secrets
+    # (ADMOB_APP_ID, ADMOB_INTERSTITIAL, ADMOB_REWARDED) once the AdMob account is verified.
+    ADMOB_APP_ID: ca-app-pub-3940256099942544~1458002511
+    ADMOB_INTERSTITIAL: ca-app-pub-3940256099942544/4411468910
+    ADMOB_REWARDED: ca-app-pub-3940256099942544/1712485313
+    # Set to TESTER by the TestFlight workflow for builds that keep the tester tools.
+    TESTER_FLAG: ""
 packages:
   SquishKit:
     path: Packages/SquishKit
@@ -71,9 +78,12 @@ targets:
         UIRequiresFullScreen: true
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UIApplicationSupportsIndirectInputEvents: true
-        # Google's public test app id until the AdMob account is verified.
+        # Google's public test app id until the AdMob account is verified (see ADMOB_APP_ID above).
+        AdMobInterstitialUnit: $(ADMOB_INTERSTITIAL)
+        AdMobRewardedUnit: $(ADMOB_REWARDED)
+        NSPhotoLibraryAddUsageDescription: Squish Sort saves a clip to your photos only when you choose Save Video after tapping Share.
         NSUserTrackingUsageDescription: Squish Sort uses this to show ads that suit you better. You can still play everything if you say no.
-        GADApplicationIdentifier: ca-app-pub-3940256099942544~1458002511
+        GADApplicationIdentifier: $(ADMOB_APP_ID)
         GADDelayAppMeasurementInit: true
         SKAdNetworkItems:
           - SKAdNetworkIdentifier: cstr6suwn9.skadnetwork
@@ -129,6 +139,7 @@ targets:
         ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: YES
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: Bubblegum
         CODE_SIGN_STYLE: Automatic
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: $(inherited) $(TESTER_FLAG)
     scheme:
       storeKitConfiguration: App/SquishSort.storekit
       testTargets:

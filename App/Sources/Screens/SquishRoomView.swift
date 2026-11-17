@@ -32,11 +32,27 @@ struct SquishRoomView: View {
                 .accessibilityElement()
                 .accessibilityLabel(Text(verbatim: model.displayName(for: id)))
                 .accessibilityIdentifier("room-squishy")
+                .overlay(alignment: .topTrailing) { ClipControl(clips: model.clips, seconds: 8).padding(12) }
                 Text(verbatim: model.displayName(for: id)).font(Theme.title(22))
                     .foregroundStyle(mood == 1 ? Color.white : Theme.plum)
                     .padding(.bottom, 10)
             } else {
                 Spacer()
+            }
+            // Keepsakes from the worlds' big shows: tap one to watch its show again.
+            if !model.progress.keepsakes.isEmpty {
+                HStack(spacing: 12) {
+                    ForEach(ShowPlan.worlds.filter { model.progress.finalesSeen.contains($0) }, id: \.self) { world in
+                        Button { model.showingNews = .finale(world: world) } label: {
+                            Text(verbatim: ShowPlan.load(world)?.keepsakeGlyph ?? "🎤").font(.system(size: 30))
+                                .frame(width: 52, height: 52)
+                                .background(Circle().fill(Color.white.opacity(0.8)))
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(Text(ShowPlan.title(world)))
+                    }
+                }
+                .padding(.bottom, 8)
             }
             Picker("Mood", selection: $mood) {
                 ForEach(moods.indices, id: \.self) { i in Text(moods[i].0).tag(i) }

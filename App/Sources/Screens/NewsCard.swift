@@ -59,6 +59,8 @@ struct NewsCard: View {
 
     @ViewBuilder private var picture: some View {
         switch news {
+        case .teaser, .finale:
+            EmptyView()
         case .worldComplete:
             Text(verbatim: "🏆").font(.system(size: 70))
         case .trick:
@@ -127,6 +129,8 @@ struct NewsCard: View {
             case .squishRoom: return "You unlocked the Squish Room!"
             case .buddy: return "You have a Buddy!"
             }
+        case .teaser, .finale:
+            return ""
         case .starJar:
             return "Star jar prize!"
         case .trick(let number):
@@ -152,6 +156,8 @@ struct NewsCard: View {
             case 2: return "You won a capsule for your stars."
             default: return "Every star in this world! You won a golden capsule."
             }
+        case .teaser, .finale:
+            return ""
         case .trick:
             return "Tap the trick under your Buddy at home to see it again."
         case .unlocked(let extra):

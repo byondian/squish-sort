@@ -44,6 +44,8 @@ final class BoardScene: SKScene {
     var onCurtainDrum: (() -> Void)?
     var onCurtainUp: (() -> Void)?
     private var curtainNodes: [Int: CurtainNode] = [:]
+    /// Starlight Stage: lamps along the top and a little crowd along the bottom.
+    private var stage: StageShowNode?
 
     init(board: Board, kinds: [String]) {
         self.board = board
@@ -217,6 +219,16 @@ final class BoardScene: SKScene {
             }
             pieces.append(nodes)
             if board.isComplete(j) { jar.putLid(animated: false, tint: nodes.first.map { SquishyStyle.forID($0.kindID).color }) }
+        }
+        stage = nil
+        if world == "starlight" {
+            let show = StageShowNode(size: size, calm: UIAccessibility.isReduceMotionEnabled)
+            show.zPosition = -4
+            addChild(show)
+            stage = show
+            for j in 0..<board.jarCount where board.isComplete(j) {
+                show.lightLamp(pieces[j].first.map { SquishyStyle.forID($0.kindID).color } ?? .white, animated: false)
+            }
         }
         // Curtain Call jars: a velvet curtain hangs in front of the jar and everything in it.
         curtainNodes = [:]
@@ -576,6 +588,8 @@ final class BoardScene: SKScene {
                 for node in self.pieces[done] { node.squeezeAndRelease() }
             }, onTwist: { [weak self] in self?.onLidTwist?() })
             sparkle(at: geometry.centers[done])
+            stage?.lightLamp(tint ?? .white, animated: !calm)
+            stage?.cheer()
             let word = JarNode.word(for: world)
             run(.sequence([.wait(forDuration: 0.6), .run { [weak self] in
                 guard let self, done < self.pieces.count, done < self.geometry.centers.count else { return }

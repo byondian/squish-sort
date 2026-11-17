@@ -292,6 +292,15 @@ def make_level(world_idx, pos):
             except SystemExit:
                 if n == len(tries) - 1:
                     raise
+        if mech == "curtain":
+            # A curtain and a single spare jar leave openings that lose on the spot. Rather than
+            # ship one, the level gets a second spare jar.
+            b0, _ = board_from_level(dict(level, jars=jars, mechanics=mechanics))
+            if killing_first_moves(b0) > 0:
+                jars2, mech2 = choose(rng, level, names, em + 1, mech, mc, target, mix_hidden)
+                b2, _ = board_from_level(dict(level, jars=jars2, mechanics=mech2))
+                if killing_first_moves(b2) == 0:
+                    jars, mechanics = jars2, mech2
     level["jars"] = jars
     level["mechanics"] = {"hidden": mechanics.get("hidden", []),
                           "sticky": mechanics.get("sticky", []),

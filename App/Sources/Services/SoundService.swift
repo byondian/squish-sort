@@ -69,6 +69,14 @@ final class SoundService {
         play("lid")
     }
 
+    /// Cuts a long sound short (a show's music when the show is skipped).
+    func stop(_ name: String) {
+        for player in pools[name] ?? [] where player.isPlaying {
+            player.stop()
+            player.currentTime = 0
+        }
+    }
+
     /// Plays `name`, or `fallback` while `name` has not been recorded yet.
     func play(_ name: String, or fallback: String) {
         play(Bundle.main.url(forResource: name, withExtension: "wav") != nil ? name : fallback)

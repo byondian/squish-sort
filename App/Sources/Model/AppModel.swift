@@ -55,6 +55,16 @@ final class AppModel: ObservableObject {
         case trick(Int)
         /// A world's star jar reached its first, second or third prize.
         case starJar(world: String, prize: Int)
+        /// A three-second sneak peek of the world's big show, and the show itself after the boss.
+        case teaser(world: String, number: Int)
+        case finale(world: String)
+
+        var isShow: Bool {
+            switch self {
+            case .teaser, .finale: return true
+            default: return false
+            }
+        }
 
         var id: String {
             switch self {
@@ -62,6 +72,8 @@ final class AppModel: ObservableObject {
             case .worldComplete(let world, _): return "world-\(world)"
             case .trick(let number): return "trick-\(number)"
             case .starJar(let world, let prize): return "starjar-\(world)-\(prize)"
+            case .teaser(let world, let number): return "teaser-\(world)-\(number)"
+            case .finale(let world): return "finale-\(world)"
             }
         }
     }
@@ -103,6 +115,7 @@ final class AppModel: ObservableObject {
     let haptics = Haptics()
     let sounds = SoundService()
     let ads = AdsService()
+    let clips = ClipRecorder()
     private let store = ProgressStore()
     private var rng = SystemRandomNumberGenerator()
     private var sessionStart = Date()
@@ -237,15 +250,18 @@ final class AppModel: ObservableObject {
         isSideLevel(index) ? levels[index].file.index : index + 1
     }
 
-    // MARK: - Tester tools (TestFlight and debug builds only)
+    // MARK: - Tester tools (tester and debug builds only)
 
-    /// True in debug builds and in TestFlight (sandbox receipt). The tools still stay
-    /// hidden until the version line in Settings is tapped seven times.
+    /// True in debug builds, and in TestFlight builds made with the tester tools (the TESTER flag
+    /// and a sandbox receipt). The build that goes to App Review is made without the flag, so the
+    /// tools are not in it at all. They stay hidden until the version line in Settings is tapped seven times.
     static var isTesterBuild: Bool {
         #if DEBUG
         return true
-        #else
+        #elseif TESTER
         return Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
+        #else
+        return false
         #endif
     }
 
@@ -805,6 +821,8 @@ final class AppModel: ObservableObject {
     /// Re-derived from the current storefront every time (unknown storefront = strictest).
     var ageGroup: AgeGroup { AgePolicy.group(of: progress.age, storefront: storefront) }
     var isGentleMode: Bool { ageGroup == .child }
+    /// Sharing a clip of a big moment: 13 and over only (14 in Korea), never before the age step.
+    var canShareClips: Bool { progress.age != nil && !isGentleMode && !AppModel.isUITesting && clips.available }
     var ownsRemoveAds: Bool { purchases.ownsRemoveAds }
 
     func update(_ change: (inout PlayerProgress) -> Void) {
@@ -906,6 +924,14 @@ final class AppModel: ObservableObject {
             let next = order.firstIndex(of: level.file.world).flatMap { $0 + 1 < order.count ? order[$0 + 1] : nil }
             news.append(.worldComplete(world: level.file.world, next: next))
             update { $0.wallet.earn(config.coins.worldComplete) }
+            // The world's big show follows its WORLD COMPLETE card.
+            if !AppModel.isUITesting, ShowPlan.load(level.file.world) != nil { news.append(.finale(world: level.file.world)) }
+        }
+        // A sneak peek of the big show on a few levels along the way, each one once.
+        if !AppModel.isUITesting, let plan = ShowPlan.load(level.file.world),
+           let spot = plan.teaserLevels.firstIndex(of: level.file.index),
+           spot + 1 > (progress.teasersSeen[level.file.world] ?? 0) {
+            news.append(.teaser(world: level.file.world, number: spot + 1))
         }
         awardStarJars()
         // The Buddy is met in the first capsule itself ("Is this your Buddy?"), so it has no card.
@@ -1276,7 +1302,7 @@ final class AppModel: ObservableObject {
             afterNews = index
             let first = news.removeFirst()
             // The world complete screen brings its own fanfare.
-            if case .worldComplete = first {} else { sounds.play("win_boss"); haptics.win() }
+            if case .worldComplete = first {} else if !first.isShow { sounds.play("win_boss"); haptics.win() }
             showingNews = first
             return
         }
@@ -1289,6 +1315,15 @@ final class AppModel: ObservableObject {
         // A trick just learned is done straight away, as soon as its card is closed.
         if case .trick(let number) = read { trickToShow = number }
         if case .worldComplete = read { maybeAskForRating(at: .worldComplete) }
+        if case .teaser(let world, let number) = read {
+            update { $0.teasersSeen[world] = max($0.teasersSeen[world] ?? 0, number) }
+        }
+        if case .finale(let world) = read, let plan = ShowPlan.load(world) {
+            update {
+                $0.finalesSeen.insert(world)
+                $0.keepsakes.insert(plan.keepsake)
+            }
+        }
         if open, case .unlocked(let extra) = read {
             news = []
             showingNews = nil
@@ -1298,8 +1333,9 @@ final class AppModel: ObservableObject {
             return
         }
         if !news.isEmpty {
-            showingNews = news.removeFirst()
-            sounds.play("unlock_new")
+            let following = news.removeFirst()
+            showingNews = following
+            if !following.isShow { sounds.play("unlock_new") }
             return
         }
         showingNews = nil
