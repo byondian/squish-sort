@@ -340,6 +340,8 @@ final class SoftSquishyScene: SKScene {
             let at = point(touch), id = ObjectIdentifier(touch).hashValue
             var held = at
             if onGesture != nil { paths[id] = ([at], touch.timestamp) }
+            // A double tap counts wherever it lands in the toy's own space, not only right on its body.
+            if touch.tapCount == 2 { onDoubleTap?() }
             if mode == .room {
                 guard body.grab(id, x: at.x, y: at.y) else { continue }
             } else {
@@ -358,7 +360,6 @@ final class SoftSquishyScene: SKScene {
             touchStarts[id] = (held.x, held.y, Double(touch.majorRadius))
             waitsForPop = false
             onTouch?()
-            if touch.tapCount == 2 { onDoubleTap?() }
         }
     }
 

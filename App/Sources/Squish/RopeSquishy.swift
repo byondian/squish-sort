@@ -1,10 +1,12 @@
 import SwiftUI
+import SquishPolicy
 import UIKit
 import SquishSoft
 
 /// Catches every finger on its own, so two hands can pull the two ends of a rope.
 struct FingerPad: UIViewRepresentable {
-    var began: (Int, CGPoint) -> Void
+    /// Finger id, where it went down, and the tap count (2 for the second tap of a double tap).
+    var began: (Int, CGPoint, Int) -> Void
     var moved: (Int, CGPoint) -> Void
     var ended: (Int) -> Void
 
@@ -22,12 +24,12 @@ struct FingerPad: UIViewRepresentable {
     }
 
     final class Pad: UIView {
-        var began: ((Int, CGPoint) -> Void)?
+        var began: ((Int, CGPoint, Int) -> Void)?
         var moved: ((Int, CGPoint) -> Void)?
         var ended: ((Int) -> Void)?
 
         override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-            for touch in touches { began?(ObjectIdentifier(touch).hashValue, touch.location(in: self)) }
+            for touch in touches { began?(ObjectIdentifier(touch).hashValue, touch.location(in: self), touch.tapCount) }
         }
         override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
             for touch in touches { moved?(ObjectIdentifier(touch).hashValue, touch.location(in: self)) }
@@ -50,6 +52,9 @@ struct RopeSquishy: View {
     var room = false
     var onTouch: (() -> Void)?
     var onLetGo: ((Double) -> Void)?
+    /// The Buddy's tricks: a double tap, and a finger path read as a circle or a swipe up.
+    var onDoubleTap: (() -> Void)?
+    var onGesture: ((TrickGesture) -> Bool)?
     @StateObject private var holder = Holder()
 
     final class Holder: ObservableObject {
@@ -60,6 +65,9 @@ struct RopeSquishy: View {
         var band = 0
         var quiet = 0.0
         var head = (x: 0.0, y: 0.0)
+        var side = 0.0
+        /// Each finger's path since it went down, on or beside him, and when it began.
+        var paths: [Int: (points: [(x: Double, y: Double)], began: Date)] = [:]
         @Published var awake = true
     }
 
@@ -78,15 +86,26 @@ struct RopeSquishy: View {
                     draw(&ctx)
                 }
             }
-            FingerPad(began: { id, at in
+            FingerPad(began: { id, at, taps in
+                if onGesture != nil { holder.paths[id] = ([(Double(at.x), Double(at.y))], Date()) }
+                if taps == 2 { onDoubleTap?() }
                 guard let rope = holder.rope, rope.grab(id, x: at.x, y: at.y) else { return }
                 if !holder.awake { holder.awake = true }
                 model.haptics.lift()
                 model.sounds.play("pop", volume: 0.3)
                 onTouch?()
             }, moved: { id, at in
+                if let n = holder.paths[id]?.points.count, n < 600 { holder.paths[id]?.points.append((Double(at.x), Double(at.y))) }
                 holder.rope?.move(id, x: at.x, y: at.y)
             }, ended: { id in
+                if let path = holder.paths.removeValue(forKey: id), let onGesture, holder.side > 0 {
+                    // Read round the middle of where he rests, so a pull on his head does not shift the circle.
+                    let centre = (x: Double(holder.size.width) / 2, y: holder.world.floor - holder.side * 0.36)
+                    if let gesture = TrickGesture.classify(points: path.points, seconds: Date().timeIntervalSince(path.began),
+                                                           centre: centre, size: holder.side) {
+                        _ = onGesture(gesture)
+                    }
+                }
                 guard let rope = holder.rope, rope.isHeld else { return }
                 let depth = max(rope.metric.D, rope.metric.unravel)
                 rope.release(id)
@@ -103,6 +122,7 @@ struct RopeSquishy: View {
         let roomy: Double = max(120, min(w * 0.70, (floor - 20) * 0.62, 340))
         let side: Double = room ? roomy : min(w, h) * 0.84
         holder.size = size
+        holder.side = side
         holder.world = SquishRope.World(floor: floor, left: 6, right: w - 6)
         holder.rope = SquishRope(cubics: RopeSquishy.cubics, n: 30, size: side, x: w / 2, y: floor - side * 0.36,
                                  radius: 15.5, headR: 22, material: .taffy)

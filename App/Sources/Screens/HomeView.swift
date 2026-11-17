@@ -470,6 +470,8 @@ struct BuddyHomeView: View {
     /// The pointing hand's loop while a trick is taught, and the cheer once it is done.
     @State private var handMoves = false
     @State private var cheer = false
+    /// The trick just done, named over the Buddy for a moment so it is clear the movement was read.
+    @State private var trickWord: Int?
 
     static let trickNames: [LocalizedStringKey] = ["Spin", "Flip", "Dance"]
     static let trickHows: [LocalizedStringKey] = ["Draw a circle round your Buddy", "Swipe up on your Buddy", "Double tap your Buddy"]
@@ -682,6 +684,17 @@ struct BuddyHomeView: View {
             }
         }
         .overlay(alignment: .top) {
+            if let n = trickWord, (1...3).contains(n) {
+                Text(BuddyHomeView.trickNames[n - 1]).font(Theme.title(24)).foregroundStyle(.white)
+                    .padding(.horizontal, 16).padding(.vertical, 5)
+                    .background(Capsule().fill(Theme.grape))
+                    .rotationEffect(.degrees(4))
+                    .transition(.scale(scale: 0.3).combined(with: .opacity))
+                    .allowsHitTesting(false)
+                    .accessibilityIdentifier("trick-word")
+            }
+        }
+        .overlay(alignment: .top) {
             if biggerPop {
                 Text("Bigger!").font(Theme.title(22)).foregroundStyle(.white)
                     .padding(.horizontal, 14).padding(.vertical, 4)
@@ -859,6 +872,8 @@ struct BuddyHomeView: View {
         guard spin == 0, flip == 0, sway == 0, hop == 0 else { return false }
         model.sounds.play("trick", or: "buddy_giggle")
         model.haptics.complete()
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { trickWord = number }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.1) { withAnimation { if trickWord == number { trickWord = nil } } }
         if reduceMotion {
             withAnimation(.easeOut(duration: 0.2)) { hop = -16 }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) { withAnimation(.easeIn(duration: 0.2)) { hop = 0 } }

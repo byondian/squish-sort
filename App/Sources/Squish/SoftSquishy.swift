@@ -51,7 +51,7 @@ struct SoftSquishy<Art: View>: View {
     var body: some View {
         if look == toy, SignatureMoves.shared.isRope(toy) {
             // A long squishy is a rope, not a blob: pull it out straight and it coils back.
-            RopeSquishy(room: mode == .room, onTouch: onTouch, onLetGo: onLetGo)
+            RopeSquishy(room: mode == .room, onTouch: onTouch, onLetGo: onLetGo, onDoubleTap: onDoubleTap, onGesture: onGesture)
         } else {
             soft
         }
