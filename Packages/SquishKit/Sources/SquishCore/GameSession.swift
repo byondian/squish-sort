@@ -37,10 +37,14 @@ public struct GameSession: Sendable {
 
     public var status: Status {
         if board.isWon { return .won(stars: Stars.rating(moves: moveCount, par: par, slack: starSlack)) }
-        // Stuck is also a board whose last few moves lead nowhere: say so now, not one move later.
-        if board.isStuck || deadEnd { return .stuck }
+        // Stuck means no move at all. A board with moves left is never called stuck, even when
+        // none of them can win: the player can see those moves, so the game only points it out.
+        if board.isStuck { return .stuck }
         return .playing
     }
+
+    /// Moves are left but none of them leads to a win. The level shows a gentle note; play goes on.
+    public var isDeadEnd: Bool { deadEnd && !board.isWon && !board.isStuck }
 
     @discardableResult
     public mutating func play(_ move: Move, free isFree: Bool = false) -> MoveResult? {

@@ -75,6 +75,20 @@ final class GoldenPathTests: XCTestCase {
         print("GOLDEN-PATH screen:\n\(app.debugDescription)")
     }
 
+    /// Squishies whose signature move brings its own part (a top, a hat, a lid): a picture of each at
+    /// rest in the Squish Room, so a part that sits in the wrong place is seen without a phone.
+    func testPartsSitOnTheirSquishies() {
+        for id in ["cream-puff", "cupcake", "macaron", "capy", "mushie", "axo"] {
+            let app = XCUIApplication()
+            app.launchArguments = ["-uiTesting", "-storeShot", "room:\(id)"]
+            app.launch()
+            XCTAssertTrue(app.otherElements["room-squishy"].waitForExistence(timeout: 20), id)
+            Thread.sleep(forTimeInterval: 3)
+            keep(app.screenshot(), as: "squishy-room-\(id)")
+            app.terminate()
+        }
+    }
+
     /// Pictures of the soft squishy at rest, just after a squeeze and held down hard, kept with the test results so the
     /// light and the dent can be looked at without a phone. Nothing here can fail the test.
     private func squeezeForThePicture() {

@@ -173,11 +173,16 @@ final class BoardTests: XCTestCase {
         let dead = board(["AB", "ABB", "A"], capacity: 3)
         XCTAssertFalse(dead.isStuck)
         XCTAssertTrue(dead.isDeadEnd())
-        XCTAssertEqual(GameSession(board: dead, par: 5).status, .stuck)
+        // Moves are left, so it is not called stuck: the level only points the dead end out.
+        var session = GameSession(board: dead, par: 5)
+        XCTAssertEqual(session.status, .playing)
+        XCTAssertTrue(session.isDeadEnd)
+        XCTAssertNotNil(session.play(dead.legalMoves[0]))
         // Few moves open, but they lead to a win: alive.
         let alive = board(["AB", "B", "A"], capacity: 2)
         XCTAssertFalse(alive.isDeadEnd())
         XCTAssertEqual(GameSession(board: alive, par: 2).status, .playing)
+        XCTAssertFalse(GameSession(board: alive, par: 2).isDeadEnd)
         // Won boards and boards with no move at all are not this.
         XCTAssertFalse(board(["AAAA", ""]).isDeadEnd())
         XCTAssertFalse(board(["ABAB", "BABA"]).isDeadEnd())
