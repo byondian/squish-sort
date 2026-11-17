@@ -78,7 +78,7 @@ final class GoldenPathTests: XCTestCase {
     /// Squishies whose signature move brings its own part (a top, a hat, a lid): a picture of each at
     /// rest in the Squish Room, so a part that sits in the wrong place is seen without a phone.
     func testPartsSitOnTheirSquishies() {
-        for id in ["cream-puff", "cupcake", "macaron", "capy", "mushie", "santa"] {
+        for id in ["cream-puff", "cupcake", "macaron", "capy", "mushie", "axo"] {
             let app = XCUIApplication()
             app.launchArguments = ["-uiTesting", "-storeShot", "room:\(id)"]
             app.launch()
