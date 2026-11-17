@@ -48,6 +48,8 @@ struct BossSplash: View {
         case "toyshop": return Color(hex: 0xC2417F)
         case "sweetfactory": return Color(hex: 0x2F9E86)
         case "starlight": return Color(hex: 0x4B3A8C)
+        case "bubblebath": return Color(hex: 0x2E86B0)
+        case "junglejam": return Color(hex: 0x2F7D46)
         default: return Color(hex: 0xB03A48)
         }
     }

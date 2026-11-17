@@ -24,12 +24,16 @@ public struct LevelFile: Codable, Equatable, Sendable {
         public var frozen: [[Int]]?
         /// Jars that start behind a closed curtain.
         public var curtains: [Int]?
+        /// [jar, tag]: jars tied shut by a vine until `tag` jars have been finished (1 or 2).
+        public var vines: [[Int]]?
 
-        public init(hidden: [[Int]]? = nil, sticky: [[Int]]? = nil, frozen: [[Int]]? = nil, curtains: [Int]? = nil) {
+        public init(hidden: [[Int]]? = nil, sticky: [[Int]]? = nil, frozen: [[Int]]? = nil, curtains: [Int]? = nil,
+                    vines: [[Int]]? = nil) {
             self.hidden = hidden
             self.sticky = sticky
             self.frozen = frozen
             self.curtains = curtains
+            self.vines = vines
         }
     }
 
@@ -121,6 +125,13 @@ public struct Level: Sendable {
         for j in m.curtains ?? [] where !file.jars.indices.contains(j) {
             throw LevelError.invalid("\(file.id): curtain jar \(j) is not on the board")
         }
-        self.board = Board(capacity: file.capacity, jars: jars, curtains: m.curtains ?? [])
+        var vines: [Int: Int] = [:]
+        for v in m.vines ?? [] {
+            guard v.count == 2, file.jars.indices.contains(v[0]), (1...2).contains(v[1]), vines[v[0]] == nil else {
+                throw LevelError.invalid("\(file.id): vine \(v) must be [jar, 1 or 2], one per jar")
+            }
+            vines[v[0]] = v[1]
+        }
+        self.board = Board(capacity: file.capacity, jars: jars, curtains: m.curtains ?? [], vines: vines)
     }
 }

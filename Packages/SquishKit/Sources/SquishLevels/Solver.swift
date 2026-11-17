@@ -48,7 +48,7 @@ public enum Solver {
 
         while let entry = heap.pop() {
             let current = boards[entry.node]
-            let free = canonical && current.curtains.isEmpty
+            let free = canonical && current.curtains.isEmpty && !current.hasVines
             if let known = best[key(current, canonical: canonical)], known < entry.g { continue }
             if current.isWon {
                 var path: [Move] = []
@@ -116,11 +116,14 @@ public enum Solver {
 
     static func key(_ b: Board, canonical: Bool) -> [UInt8] {
         var parts = b.jars.map { jar in jar.map(\.code) }
-        if canonical && b.curtains.isEmpty { parts.sort { $0.lexicographicallyPrecedes($1) } }
+        // While a curtain is closed or a vine is tied, which jar is which matters.
+        let tied = b.hasVines
+        if canonical && b.curtains.isEmpty && !tied { parts.sort { $0.lexicographicallyPrecedes($1) } }
         var out: [UInt8] = []
         out.reserveCapacity(b.jars.count * (b.capacity + 1) + 3)
         out.append(UInt8(b.curtains.count))
         for j in b.curtains { out.append(UInt8(j)) }
+        if tied { out.append(contentsOf: b.vines) }
         for p in parts {
             out.append(UInt8(p.count))
             out.append(contentsOf: p)

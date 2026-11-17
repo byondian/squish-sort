@@ -10,6 +10,9 @@
 /// - Win when every jar is empty or complete.
 /// - A curtain jar (Starlight Stage) is closed: nothing goes in or comes out until a jar next to
 ///   it is finished. Then the curtain goes up for good and it is an ordinary jar.
+/// - A vine jar (Jungle Jam) is tied shut with a tag showing a number. Nothing goes in or comes
+///   out. Every jar finished anywhere lowers each tag by one; at zero the vine snaps and it is an
+///   ordinary jar. A shut jar is not a finished jar.
 public struct Board: Hashable, Sendable {
     public let capacity: Int
     public private(set) var jars: [[Piece]]
@@ -18,12 +21,17 @@ public struct Board: Hashable, Sendable {
     public let layoutJarCount: Int
     /// Jars still behind a closed curtain, in order.
     public private(set) var curtains: [Int]
+    /// The number on each jar's vine tag, one entry per jar; 0 means no vine.
+    public private(set) var vines: [UInt8]
 
-    public init(capacity: Int, jars: [[Piece]], curtains: [Int] = []) {
+    public init(capacity: Int, jars: [[Piece]], curtains: [Int] = [], vines: [Int: Int] = [:]) {
         self.capacity = capacity
         self.jars = jars
         self.layoutJarCount = jars.count
         self.curtains = Set(curtains).filter { jars.indices.contains($0) }.sorted()
+        var tags = [UInt8](repeating: 0, count: jars.count)
+        for (j, n) in vines where jars.indices.contains(j) && n > 0 { tags[j] = UInt8(clamping: n) }
+        self.vines = tags
         for j in self.jars.indices {
             revealTop(j)
             if isComplete(j) { settle(j) }
@@ -33,6 +41,12 @@ public struct Board: Hashable, Sendable {
     public var jarCount: Int { jars.count }
 
     public func isCurtained(_ j: Int) -> Bool { curtains.contains(j) }
+
+    /// The number left on jar `j`'s vine tag; 0 when it has no vine or the vine has snapped.
+    public func vineTag(_ j: Int) -> Int { vines.indices.contains(j) ? Int(vines[j]) : 0 }
+    public var hasVines: Bool { vines.contains { $0 > 0 } }
+    /// Behind a curtain or tied by a vine: nothing goes in or comes out.
+    public func isShut(_ j: Int) -> Bool { isCurtained(j) || vineTag(j) > 0 }
 
     public func isComplete(_ j: Int) -> Bool {
         let jar = jars[j]
@@ -47,7 +61,7 @@ public struct Board: Hashable, Sendable {
     /// Pieces that would leave jar `j` if there were unlimited room.
     public func runLength(at j: Int) -> Int {
         let jar = jars[j]
-        guard let top = jar.last, !isComplete(j), !top.hidden, !top.isFrozen, !isCurtained(j) else { return 0 }
+        guard let top = jar.last, !isComplete(j), !top.hidden, !top.isFrozen, !isShut(j) else { return 0 }
         if Board.duetOnTop(jar) {
             // A duet on top moves as a pair, and only as a pair.
             let low = jar[jar.count - 2]
@@ -70,7 +84,7 @@ public struct Board: Hashable, Sendable {
         let (f, t) = (move.from, move.to)
         guard f != t, jars.indices.contains(f), jars.indices.contains(t) else { return 0 }
         let n = runLength(at: f)
-        guard n > 0, !isComplete(t), !isCurtained(t) else { return 0 }
+        guard n > 0, !isComplete(t), !isShut(t) else { return 0 }
         let dest = jars[t]
         let room = capacity - dest.count
         guard room > 0 else { return 0 }
@@ -164,8 +178,17 @@ public struct Board: Hashable, Sendable {
 
         let completed = isComplete(t)
         var raised: [Int] = []
+        var snapped: [Int] = []
         if completed {
             settle(t)
+            // Every finished jar lowers each vine tag by one; at zero the vine snaps.
+            for j in vines.indices where vines[j] > 0 {
+                vines[j] -= 1
+                if vines[j] == 0 {
+                    revealTop(j)
+                    snapped.append(j)
+                }
+            }
             // A finished jar raises the curtain on the jars next to it.
             if t < layoutJarCount {
                 for nb in BoardLayout.neighbours(of: t, jarCount: layoutJarCount) where isCurtained(nb) {
@@ -177,13 +200,14 @@ public struct Board: Hashable, Sendable {
         }
         return MoveResult(move: move, count: k, revealedSourceTop: revealed,
                           completedJar: completed ? t : nil, thawedJars: thawed, duetLetGo: letGo,
-                          raisedCurtains: raised)
+                          raisedCurtains: raised, snappedVines: snapped)
     }
 
     /// Adds one empty jar (softening after fails). The rows shift to make room, so "next door"
     /// would no longer mean what it did: any curtain still closed goes up with it.
     public mutating func addEmptyJar() {
         jars.append([])
+        vines.append(0)
         for j in curtains { revealTop(j) }
         curtains = []
     }
@@ -221,10 +245,10 @@ public struct Board: Hashable, Sendable {
 public extension Board {
     /// Shake-up: every piece in an unfinished jar lands in a new spot. Finished jars stay as they
     /// are, each jar keeps the number of pieces it had, and wrappers, ice and duets fall away.
-    /// A jar behind a closed curtain is left alone. The caller checks the result can still be solved.
+    /// A jar behind a closed curtain or tied by a vine is left alone. The caller checks the result can still be solved.
     func shakenUp<R: RandomNumberGenerator>(using rng: inout R) -> Board {
         var next = jars
-        let open = next.indices.filter { !isComplete($0) && !isCurtained($0) }
+        let open = next.indices.filter { !isComplete($0) && !isShut($0) }
         var pool: [Piece] = []
         for j in open { for piece in next[j] { pool.append(Piece(kind: piece.kind)) } }
         pool.shuffle(using: &rng)
@@ -233,6 +257,8 @@ public extension Board {
             next[j] = Array(pool.prefix(n))
             pool.removeFirst(n)
         }
-        return Board(capacity: capacity, jars: next, curtains: curtains)
+        var tags: [Int: Int] = [:]
+        for j in vines.indices where vines[j] > 0 { tags[j] = Int(vines[j]) }
+        return Board(capacity: capacity, jars: next, curtains: curtains, vines: tags)
     }
 }

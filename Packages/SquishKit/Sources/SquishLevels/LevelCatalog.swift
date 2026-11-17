@@ -3,7 +3,7 @@ import Foundation
 /// The worlds in play order (main path first, then side worlds) and where their level files live.
 public enum LevelCatalog {
     /// The main path, in play order.
-    public static let worlds = ["toyshop", "sweetfactory", "starlight"]
+    public static let worlds = ["toyshop", "sweetfactory", "starlight", "bubblebath", "junglejam"]
     /// Side worlds have their own level numbers and are not on the map's main path.
     public static let sideWorlds = ["christmas"]
     public static var allWorlds: [String] { worlds + sideWorlds }
@@ -22,7 +22,7 @@ public enum LevelCatalog {
         return endlessLooks[((max(1, index) - 1) / 10) % endlessLooks.count]
     }
     /// How many levels each world has. Worlds grow as the game goes on; this table is the one place that says so.
-    public static let lengths: [String: Int] = ["toyshop": 15, "sweetfactory": 20, "starlight": 25, "christmas": 20, endless: 240]
+    public static let lengths: [String: Int] = ["toyshop": 15, "sweetfactory": 20, "starlight": 25, "bubblebath": 30, "junglejam": 35, "christmas": 20, endless: 240]
     public static func levelCount(in world: String) -> Int { lengths[world] ?? 20 }
     public static var mainLevelCount: Int { worlds.reduce(0) { $0 + levelCount(in: $1) } }
 

@@ -1,5 +1,5 @@
 {
- "note": "One-line bios for the Collection card and new-find reveal. Keys are roster ids. en, ja, ko, zh-Hant. Written 17 Nov 2026 by the design thread; bios for Bubble Bath and Jungle Jam come with those worlds. Secrets: each world's secret squishy is the prize for finding every other squishy in that world (riddles say so).",
+ "note": "One-line bios for the Collection card and new-find reveal. Keys are roster ids. en, ja, ko, zh-Hant. Written 17 Nov 2026 by the design thread; Bubble Bath and Jungle Jam bios were added with those worlds (17 Nov). Secrets: each world's secret squishy is the prize for finding every other squishy in that world (riddles say so).",
  "bios": {
   "strawbie": {
    "en": "Smells like summer and blushes when you say hello.",
@@ -384,6 +384,210 @@
    "ja": "一年にいちど、いちばん楽しい夜だけ鳴る。",
    "ko": "일 년에 한 번, 가장 즐거운 밤에만 울려요.",
    "zh-Hant": "一年只響一次，在最快樂的那個夜晚。"
+  },
+  "quacky": {
+   "en": "Too cool for the pool. Never takes the shades off.",
+   "ja": "プールよりクール。サングラスはぜったいはずさない。",
+   "ko": "수영장보다 쿨해요. 선글라스는 절대 안 벗어요.",
+   "zh-Hant": "比泳池還酷，墨鏡從來不摘。"
+  },
+  "soapy": {
+   "en": "Smells like roses and leaves everything squeaky clean.",
+   "ja": "バラのかおりで、なんでもピカピカにしちゃう。",
+   "ko": "장미 향이 나고, 뭐든 뽀득뽀득 깨끗하게 해요.",
+   "zh-Hant": "有玫瑰香，把什麼都洗得亮晶晶。"
+  },
+  "bubbly": {
+   "en": "A little cloud of foam that giggles when it pops.",
+   "ja": "ふわふわのあわ。はじけるとクスクス笑うよ。",
+   "ko": "작은 거품 구름. 터질 때 키득키득 웃어요.",
+   "zh-Hant": "一小朵泡泡雲，破掉時會咯咯笑。"
+  },
+  "starla": {
+   "en": "Waves with all five arms at once.",
+   "ja": "5本のうでで、いっぺんに手をふるよ。",
+   "ko": "다섯 팔로 한꺼번에 손을 흔들어요.",
+   "zh-Hant": "五隻手一起跟你揮揮。"
+  },
+  "shelly": {
+   "en": "Keeps a tiny secret inside. Won't say what.",
+   "ja": "中に小さなヒミツがあるよ。なにかは内緒。",
+   "ko": "안에 작은 비밀이 있어요. 뭔지는 안 알려 줘요.",
+   "zh-Hant": "裡面藏著小秘密，就是不說。"
+  },
+  "fizzy": {
+   "en": "Drops in, fizzes like mad, turns the water rainbow.",
+   "ja": "ポチャンと入って、シュワシュワ。お湯がにじ色に。",
+   "ko": "퐁당 들어가 보글보글, 물을 무지개색으로 바꿔요.",
+   "zh-Hant": "撲通跳進去，嘶嘶冒泡，把水變成彩虹色。"
+  },
+  "floaty-otter": {
+   "en": "Has floated in the same ring all day. No plans to stop.",
+   "ja": "一日じゅう同じうきわでぷかぷか。やめる気はないよ。",
+   "ko": "하루 종일 같은 튜브에서 둥둥. 그만둘 생각 없어요.",
+   "zh-Hant": "整天漂在同一個泳圈上，沒有要停的意思。"
+  },
+  "shower-cap-cat": {
+   "en": "Hates getting wet. Loves the hat.",
+   "ja": "ぬれるのは大きらい。でもキャップは大すき。",
+   "ko": "물은 싫지만 샤워캡은 정말 좋아해요.",
+   "zh-Hant": "討厭弄濕，但超愛這頂浴帽。"
+  },
+  "towel-bear": {
+   "en": "Warm, fluffy and always fresh from the dryer.",
+   "ja": "ぽかぽかふわふわ。いつもかんそうきから出たて。",
+   "ko": "따끈하고 폭신해요. 늘 건조기에서 막 나왔어요.",
+   "zh-Hant": "暖暖蓬蓬的，永遠像剛從烘衣機出來。"
+  },
+  "bath-turtle": {
+   "en": "Slow in the race, fast in the bath.",
+   "ja": "かけっこはおそいけど、おふろでは速いよ。",
+   "ko": "달리기는 느려도 욕조에서는 빨라요.",
+   "zh-Hant": "賽跑很慢，洗澡很快。"
+  },
+  "bubble-seal": {
+   "en": "Can balance a bubble on its nose for a whole minute.",
+   "ja": "鼻の上にあわを1分間のせていられるよ。",
+   "ko": "코 위에 비눗방울을 1분이나 올려둘 수 있어요.",
+   "zh-Hant": "能把泡泡頂在鼻子上整整一分鐘。"
+  },
+  "tub-hippo": {
+   "en": "Takes up the whole tub. Shares the bubbles.",
+   "ja": "おふろをひとりじめ。でも、あわは分けてくれる。",
+   "ko": "욕조를 다 차지하지만 거품은 나눠 줘요.",
+   "zh-Hant": "一個人佔滿浴缸，但泡泡會分給你。"
+  },
+  "scrubby-crab": {
+   "en": "Scrubs sideways. Gets every corner.",
+   "ja": "横歩きでゴシゴシ。すみっこまでピカピカ。",
+   "ko": "옆으로 걸으며 쓱싹쓱싹. 구석구석 다 닦아요.",
+   "zh-Hant": "橫著刷刷刷，每個角落都不放過。"
+  },
+  "mer-kitty": {
+   "en": "Half kitten, half mermaid, all splash.",
+   "ja": "半分こねこ、半分にんぎょ。ぜんぶバシャバシャ。",
+   "ko": "반은 고양이, 반은 인어. 온통 첨벙첨벙.",
+   "zh-Hant": "一半小貓，一半美人魚，全身都是水花。"
+  },
+  "prisma": {
+   "en": "The biggest bubble in the bath. Please don't pop.",
+   "ja": "おふろでいちばん大きなあわ。われないでね。",
+   "ko": "욕조에서 제일 큰 비눗방울. 터지면 안 돼요.",
+   "zh-Hant": "浴室裡最大的泡泡，拜託不要破。"
+  },
+  "splash": {
+   "en": "Never the same shape twice. Always a bit damp.",
+   "ja": "同じ形は二度とないよ。いつもちょっとしっとり。",
+   "ko": "같은 모양은 두 번 없어요. 늘 조금 촉촉해요.",
+   "zh-Hant": "從來不會變同一個形狀，永遠有點濕濕的。"
+  },
+  "golden-ducky": {
+   "en": "The star of the tub. Even the bubbles ask for a photo.",
+   "ja": "おふろのスター。あわたちも写真をほしがるよ。",
+   "ko": "욕조의 스타. 거품들도 사진을 찍고 싶어 해요.",
+   "zh-Hant": "浴缸裡的大明星，連泡泡都想合照。"
+  },
+  "bongo": {
+   "en": "Drums on everything. Tables, tummies, coconuts.",
+   "ja": "なんでもたたいちゃう。つくえも、おなかも、ココナッツも。",
+   "ko": "뭐든 두드려요. 책상도, 배도, 코코넛도.",
+   "zh-Hant": "什麼都拿來敲：桌子、肚子、椰子。"
+  },
+  "tuki": {
+   "en": "That beak is for fruit and for telling secrets.",
+   "ja": "このくちばしは、フルーツとないしょ話のため。",
+   "ko": "이 부리는 과일 먹고 비밀 얘기할 때 써요.",
+   "zh-Hant": "這張大嘴用來吃水果，也用來說悄悄話。"
+  },
+  "pina": {
+   "en": "Spiky on top, sweet all the way through.",
+   "ja": "頭はツンツン、中身はずっとあまいよ。",
+   "ko": "머리는 뾰족뾰족, 속은 끝까지 달콤해요.",
+   "zh-Hant": "頭上刺刺的，裡面從頭甜到尾。"
+  },
+  "leafy": {
+   "en": "Catches the first raindrop every morning.",
+   "ja": "毎朝、いちばん最初の雨つぶをキャッチするよ。",
+   "ko": "매일 아침 첫 빗방울을 받아요.",
+   "zh-Hant": "每天早上接住第一滴雨。"
+  },
+  "dotty": {
+   "en": "Counts her spots every night. Still seven.",
+   "ja": "毎ばん、水玉をかぞえるよ。やっぱり7つ。",
+   "ko": "매일 밤 점을 세어요. 여전히 일곱 개.",
+   "zh-Hant": "每晚數自己的點點，還是七個。"
+  },
+  "nana": {
+   "en": "Always smiling. It's just the shape.",
+   "ja": "いつもにっこり。そういう形なんだ。",
+   "ko": "늘 웃고 있어요. 원래 그런 모양이에요.",
+   "zh-Hant": "永遠在微笑，因為形狀就是這樣。"
+  },
+  "snoozy-sloth": {
+   "en": "Fell asleep mid-yawn. Still hanging on.",
+   "ja": "あくびのとちゅうでねちゃった。まだぶらさがってる。",
+   "ko": "하품하다 잠들었어요. 아직도 매달려 있어요.",
+   "zh-Hant": "打哈欠打到一半睡著了，還掛在樹上。"
+  },
+  "kami": {
+   "en": "Changes colour when it's shy. So, all the time.",
+   "ja": "はずかしいと色がかわるよ。つまり、いつも。",
+   "ko": "부끄러우면 색이 바뀌어요. 그러니까 늘 그래요.",
+   "zh-Hant": "害羞就會變色，所以一直在變。"
+  },
+  "tiger-cub": {
+   "en": "Practising a roar. So far it's a squeak.",
+   "ja": "ガオーのれんしゅう中。今のところ、キュッ。",
+   "ko": "어흥 연습 중이에요. 아직은 삑 소리만 나요.",
+   "zh-Hant": "正在練習吼叫，目前只會吱一聲。"
+  },
+  "polly": {
+   "en": "Repeats everything you say, but cuter.",
+   "ja": "きみの言葉をまねするよ。もっとかわいくね。",
+   "ko": "네가 한 말을 따라 해요. 더 귀엽게요.",
+   "zh-Hant": "會學你說話，而且更可愛。"
+  },
+  "red-panda": {
+   "en": "Naps in trees and wakes up for snacks.",
+   "ja": "木の上でおひるね。おやつの時間だけ起きるよ。",
+   "ko": "나무에서 낮잠 자다가 간식 시간에만 일어나요.",
+   "zh-Hant": "在樹上午睡，只為點心醒來。"
+  },
+  "hummy": {
+   "en": "Wings so fast you only hear the hum.",
+   "ja": "はねが速すぎて、ブーンとしか聞こえないよ。",
+   "ko": "날개가 너무 빨라서 윙 소리만 들려요.",
+   "zh-Hant": "翅膀快到只聽得見嗡嗡聲。"
+  },
+  "pango": {
+   "en": "Rolls into a ball when surprised. Rolls back for hugs.",
+   "ja": "びっくりするとまるくなる。ハグのときは元どおり。",
+   "ko": "놀라면 공처럼 말려요. 안아 주면 다시 펴져요.",
+   "zh-Hant": "嚇到就捲成一顆球，要抱抱才會打開。"
+  },
+  "blossom-ellie": {
+   "en": "Never forgets a friend, or where the flowers grow.",
+   "ja": "友だちも、花がさく場所も、ぜったいわすれない。",
+   "ko": "친구도, 꽃 피는 곳도 절대 잊지 않아요.",
+   "zh-Hant": "永遠記得朋友，也記得花開在哪裡。"
+  },
+  "glowbug": {
+   "en": "The jungle's night light. Glows brighter when happy.",
+   "ja": "ジャングルのナイトライト。うれしいともっと光るよ。",
+   "ko": "정글의 무드등. 기쁘면 더 밝게 빛나요.",
+   "zh-Hant": "叢林的小夜燈，開心時會更亮。"
+  },
+  "vinny": {
+   "en": "Never the same shape twice. Grows a new leaf each time.",
+   "ja": "同じ形は二度とないよ。そのたびに新しい葉っぱが出る。",
+   "ko": "같은 모양은 두 번 없어요. 변할 때마다 새 잎이 나요.",
+   "zh-Hant": "從來不會變同一個形狀，每次都長一片新葉子。"
+  },
+  "golden-nana": {
+   "en": "The ripest banana in the jungle. Shines like the sun.",
+   "ja": "ジャングルでいちばん熟したバナナ。おひさまみたいに光るよ。",
+   "ko": "정글에서 가장 잘 익은 바나나. 해처럼 빛나요.",
+   "zh-Hant": "叢林裡最熟的香蕉，像太陽一樣閃亮。"
   }
  },
  "riddles": {
@@ -410,6 +614,18 @@
    "ja": "グロットのほかの子をぜんぶ見つけたら、きみのために鳴るよ。",
    "ko": "그로토의 다른 친구들을 모두 찾으면 당신을 위해 울릴게요.",
    "zh-Hant": "找到聖誕小屋其他所有軟軟，我就會為你響起。"
+  },
+  "golden-ducky": {
+   "en": "Find every other Bubble Bath squishy and I'll float on over.",
+   "ja": "バブルバスのほかの子をぜんぶ見つけたら、ぷかぷか行くよ。",
+   "ko": "보글보글 욕실의 다른 친구들을 모두 찾으면 둥둥 떠서 갈게요.",
+   "zh-Hant": "找到泡泡浴室其他所有軟軟，我就會漂過來。"
+  },
+  "golden-nana": {
+   "en": "Find every other Jungle Jam squishy and I'll drop from the tree.",
+   "ja": "ジャングルジャムのほかの子をぜんぶ見つけたら、木からおりてくるよ。",
+   "ko": "정글 잼의 다른 친구들을 모두 찾으면 나무에서 내려올게요.",
+   "zh-Hant": "找到叢林果醬其他所有軟軟，我就會從樹上掉下來。"
   }
  },
  "stats": {
@@ -796,6 +1012,210 @@
    "bounce": 89,
    "stretch": 99,
    "charm": 73
+  },
+  "quacky": {
+   "squish": 78,
+   "bounce": 44,
+   "stretch": 47,
+   "charm": 44
+  },
+  "soapy": {
+   "squish": 60,
+   "bounce": 55,
+   "stretch": 64,
+   "charm": 37
+  },
+  "bubbly": {
+   "squish": 48,
+   "bounce": 58,
+   "stretch": 53,
+   "charm": 58
+  },
+  "starla": {
+   "squish": 47,
+   "bounce": 74,
+   "stretch": 60,
+   "charm": 33
+  },
+  "shelly": {
+   "squish": 41,
+   "bounce": 60,
+   "stretch": 56,
+   "charm": 53
+  },
+  "fizzy": {
+   "squish": 39,
+   "bounce": 73,
+   "stretch": 53,
+   "charm": 44
+  },
+  "floaty-otter": {
+   "squish": 68,
+   "bounce": 72,
+   "stretch": 85,
+   "charm": 48
+  },
+  "shower-cap-cat": {
+   "squish": 73,
+   "bounce": 99,
+   "stretch": 47,
+   "charm": 51
+  },
+  "towel-bear": {
+   "squish": 65,
+   "bounce": 48,
+   "stretch": 94,
+   "charm": 69
+  },
+  "bath-turtle": {
+   "squish": 63,
+   "bounce": 61,
+   "stretch": 94,
+   "charm": 52
+  },
+  "bubble-seal": {
+   "squish": 52,
+   "bounce": 60,
+   "stretch": 89,
+   "charm": 70
+  },
+  "tub-hippo": {
+   "squish": 56,
+   "bounce": 61,
+   "stretch": 98,
+   "charm": 59
+  },
+  "scrubby-crab": {
+   "squish": 55,
+   "bounce": 78,
+   "stretch": 93,
+   "charm": 45
+  },
+  "mer-kitty": {
+   "squish": 69,
+   "bounce": 99,
+   "stretch": 75,
+   "charm": 68
+  },
+  "prisma": {
+   "squish": 90,
+   "bounce": 55,
+   "stretch": 74,
+   "charm": 97
+  },
+  "splash": {
+   "squish": 91,
+   "bounce": 56,
+   "stretch": 88,
+   "charm": 81
+  },
+  "golden-ducky": {
+   "squish": 99,
+   "bounce": 67,
+   "stretch": 99,
+   "charm": 69
+  },
+  "bongo": {
+   "squish": 42,
+   "bounce": 60,
+   "stretch": 58,
+   "charm": 61
+  },
+  "tuki": {
+   "squish": 40,
+   "bounce": 44,
+   "stretch": 79,
+   "charm": 49
+  },
+  "pina": {
+   "squish": 63,
+   "bounce": 44,
+   "stretch": 73,
+   "charm": 40
+  },
+  "leafy": {
+   "squish": 41,
+   "bounce": 70,
+   "stretch": 69,
+   "charm": 41
+  },
+  "dotty": {
+   "squish": 43,
+   "bounce": 42,
+   "stretch": 65,
+   "charm": 59
+  },
+  "nana": {
+   "squish": 40,
+   "bounce": 81,
+   "stretch": 44,
+   "charm": 54
+  },
+  "snoozy-sloth": {
+   "squish": 61,
+   "bounce": 88,
+   "stretch": 65,
+   "charm": 64
+  },
+  "kami": {
+   "squish": 66,
+   "bounce": 65,
+   "stretch": 58,
+   "charm": 85
+  },
+  "tiger-cub": {
+   "squish": 74,
+   "bounce": 52,
+   "stretch": 99,
+   "charm": 45
+  },
+  "polly": {
+   "squish": 94,
+   "bounce": 81,
+   "stretch": 43,
+   "charm": 52
+  },
+  "red-panda": {
+   "squish": 75,
+   "bounce": 78,
+   "stretch": 60,
+   "charm": 63
+  },
+  "hummy": {
+   "squish": 66,
+   "bounce": 99,
+   "stretch": 47,
+   "charm": 49
+  },
+  "pango": {
+   "squish": 94,
+   "bounce": 72,
+   "stretch": 42,
+   "charm": 59
+  },
+  "blossom-ellie": {
+   "squish": 44,
+   "bounce": 83,
+   "stretch": 80,
+   "charm": 99
+  },
+  "glowbug": {
+   "squish": 78,
+   "bounce": 82,
+   "stretch": 99,
+   "charm": 49
+  },
+  "vinny": {
+   "squish": 91,
+   "bounce": 95,
+   "stretch": 63,
+   "charm": 62
+  },
+  "golden-nana": {
+   "squish": 64,
+   "bounce": 98,
+   "stretch": 73,
+   "charm": 99
   }
  },
  "statsNote": "Squish card stats, 1 to 99: Squish (how soft), Bounce, Stretch, Charm. Rarer squishies have higher totals, each has one standout stat, feel nudges them (foam squishier, jelly bouncier, gel and mochi stretchier). Shown on the squishy card in 1.0; used for the friend face-offs (Squish Slam) in January. Generated deterministically from the id; edit by hand freely."

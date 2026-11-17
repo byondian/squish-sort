@@ -10,6 +10,7 @@ import glob, os, sys
 from PIL import Image
 
 N = 64
+CRESCENTS = {"nana": 0.11}
 problems, rows = [], []
 for folder in sorted(glob.glob("App/Resources/Squishies.xcassets/squishy-*.imageset")):
     name = os.path.basename(folder)[len("squishy-"):-len(".imageset")]
@@ -33,7 +34,8 @@ for folder in sorted(glob.glob("App/Resources/Squishies.xcassets/squishy-*.image
         problems.append(f"{name}: fills only {wide:.2f} x {tall:.2f} of its slot")
     if max(wide, tall) < 0.9:
         problems.append(f"{name}: too small in its slot ({wide:.2f} x {tall:.2f})")
-    if abs(lean) > 0.07:
+    # A banana is a crescent: its weight sits to one side of its box by nature.
+    if abs(lean) > CRESCENTS.get(name, 0.07):
         problems.append(f"{name}: sits off centre by {lean:+.2f} of its width")
 
 print(f"{len(rows)} pictures checked")

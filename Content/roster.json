@@ -616,6 +616,416 @@
    "feel": "jelly"
   },
   {
+   "id": "quacky",
+   "name": "Quacky",
+   "world": "bubblebath",
+   "rarity": "common",
+   "names": {
+    "ja": "クワッキー",
+    "ko": "꽥꽥이",
+    "zh-Hant": "呱呱"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "soapy",
+   "name": "Soapy",
+   "world": "bubblebath",
+   "rarity": "common",
+   "names": {
+    "ja": "ソーピー",
+    "ko": "비누롱",
+    "zh-Hant": "肥皂皂"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "bubbly",
+   "name": "Bubbly",
+   "world": "bubblebath",
+   "rarity": "common",
+   "names": {
+    "ja": "バブリー",
+    "ko": "보글이",
+    "zh-Hant": "泡泡雲"
+   },
+   "feel": "gel"
+  },
+  {
+   "id": "starla",
+   "name": "Starla",
+   "world": "bubblebath",
+   "rarity": "common",
+   "names": {
+    "ja": "スターラ",
+    "ko": "별가사리",
+    "zh-Hant": "小海星"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "shelly",
+   "name": "Shelly",
+   "world": "bubblebath",
+   "rarity": "common",
+   "names": {
+    "ja": "シェリー",
+    "ko": "조개롱",
+    "zh-Hant": "貝貝"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "fizzy",
+   "name": "Fizzy",
+   "world": "bubblebath",
+   "rarity": "common",
+   "names": {
+    "ja": "シュワリン",
+    "ko": "뽀글볼",
+    "zh-Hant": "氣泡球"
+   },
+   "feel": "foam"
+  },
+  {
+   "id": "floaty-otter",
+   "name": "Floaty Otter",
+   "world": "bubblebath",
+   "rarity": "rare",
+   "names": {
+    "ja": "うきわラッコ",
+    "ko": "튜브 수달",
+    "zh-Hant": "泳圈水獺"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "shower-cap-cat",
+   "name": "Shower Cap Cat",
+   "world": "bubblebath",
+   "rarity": "rare",
+   "names": {
+    "ja": "シャワーキャップねこ",
+    "ko": "샤워캡 고양이",
+    "zh-Hant": "浴帽貓"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "towel-bear",
+   "name": "Towel Bear",
+   "world": "bubblebath",
+   "rarity": "rare",
+   "names": {
+    "ja": "タオルくま",
+    "ko": "수건 곰",
+    "zh-Hant": "毛巾熊"
+   },
+   "feel": "foam"
+  },
+  {
+   "id": "bath-turtle",
+   "name": "Sponge Turtle",
+   "world": "bubblebath",
+   "rarity": "rare",
+   "names": {
+    "ja": "スポンジがめ",
+    "ko": "스펀지 거북",
+    "zh-Hant": "海綿龜"
+   },
+   "feel": "foam"
+  },
+  {
+   "id": "bubble-seal",
+   "name": "Bubble Seal",
+   "world": "bubblebath",
+   "rarity": "rare",
+   "names": {
+    "ja": "あわアザラシ",
+    "ko": "방울 물범",
+    "zh-Hant": "泡泡海豹"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "tub-hippo",
+   "name": "Tub Hippo",
+   "world": "bubblebath",
+   "rarity": "rare",
+   "names": {
+    "ja": "おふろカバ",
+    "ko": "욕조 하마",
+    "zh-Hant": "浴缸河馬"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "scrubby-crab",
+   "name": "Scrubby Crab",
+   "world": "bubblebath",
+   "rarity": "rare",
+   "names": {
+    "ja": "あわカニ",
+    "ko": "거품 꽃게",
+    "zh-Hant": "泡泡蟹"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "mer-kitty",
+   "name": "Mer-kitty",
+   "world": "bubblebath",
+   "rarity": "ultra",
+   "names": {
+    "ja": "マーキティ",
+    "ko": "인어냥",
+    "zh-Hant": "人魚貓"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "prisma",
+   "name": "Prisma",
+   "world": "bubblebath",
+   "rarity": "ultra",
+   "names": {
+    "ja": "プリズマ",
+    "ko": "프리즈마",
+    "zh-Hant": "彩虹泡"
+   },
+   "feel": "gel"
+  },
+  {
+   "id": "splash",
+   "name": "Splash",
+   "world": "bubblebath",
+   "rarity": "ultra",
+   "shapeshifter": true,
+   "names": {
+    "ja": "へんしんスプラッシュ",
+    "ko": "변신 첨벙이",
+    "zh-Hant": "變變水花"
+   },
+   "feel": "gel"
+  },
+  {
+   "id": "golden-ducky",
+   "name": "Golden Ducky",
+   "world": "bubblebath",
+   "rarity": "secret",
+   "names": {
+    "ja": "ゴールドダッキー",
+    "ko": "황금 꽥꽥이",
+    "zh-Hant": "黃金小鴨"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "bongo",
+   "name": "Bongo",
+   "world": "junglejam",
+   "rarity": "common",
+   "names": {
+    "ja": "ボンゴ",
+    "ko": "봉고",
+    "zh-Hant": "邦哥"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "tuki",
+   "name": "Tuki",
+   "world": "junglejam",
+   "rarity": "common",
+   "names": {
+    "ja": "トゥキ",
+    "ko": "투키",
+    "zh-Hant": "大嘴嘟"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "pina",
+   "name": "Pina",
+   "world": "junglejam",
+   "rarity": "common",
+   "names": {
+    "ja": "ピーニャ",
+    "ko": "파인이",
+    "zh-Hant": "鳳梨梨"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "leafy",
+   "name": "Leafy",
+   "world": "junglejam",
+   "rarity": "common",
+   "names": {
+    "ja": "リーフィ",
+    "ko": "잎새",
+    "zh-Hant": "葉葉"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "dotty",
+   "name": "Dotty",
+   "world": "junglejam",
+   "rarity": "common",
+   "names": {
+    "ja": "ドッティ",
+    "ko": "점박이",
+    "zh-Hant": "點點"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "nana",
+   "name": "Nana",
+   "world": "junglejam",
+   "rarity": "common",
+   "names": {
+    "ja": "ナナ",
+    "ko": "바나",
+    "zh-Hant": "蕉蕉"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "snoozy-sloth",
+   "name": "Snoozy Sloth",
+   "world": "junglejam",
+   "rarity": "rare",
+   "names": {
+    "ja": "ねむねむナマケモノ",
+    "ko": "졸린 나무늘보",
+    "zh-Hant": "瞌睡樹懶"
+   },
+   "feel": "mochi"
+  },
+  {
+   "id": "kami",
+   "name": "Kami",
+   "world": "junglejam",
+   "rarity": "rare",
+   "names": {
+    "ja": "カミ",
+    "ko": "카미",
+    "zh-Hant": "變色卡米"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "tiger-cub",
+   "name": "Tiger Cub",
+   "world": "junglejam",
+   "rarity": "rare",
+   "names": {
+    "ja": "こトラ",
+    "ko": "아기 호랑이",
+    "zh-Hant": "小老虎"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "polly",
+   "name": "Polly",
+   "world": "junglejam",
+   "rarity": "rare",
+   "names": {
+    "ja": "ポリー",
+    "ko": "폴리",
+    "zh-Hant": "鸚鸚"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "red-panda",
+   "name": "Red Panda",
+   "world": "junglejam",
+   "rarity": "rare",
+   "names": {
+    "ja": "レッサーパンダ",
+    "ko": "레서판다",
+    "zh-Hant": "小貓熊"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "hummy",
+   "name": "Hummy",
+   "world": "junglejam",
+   "rarity": "rare",
+   "names": {
+    "ja": "ハミー",
+    "ko": "허미",
+    "zh-Hant": "蜂鳥咪"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "pango",
+   "name": "Pango",
+   "world": "junglejam",
+   "rarity": "rare",
+   "names": {
+    "ja": "パンゴ",
+    "ko": "판고",
+    "zh-Hant": "穿山寶"
+   },
+   "feel": "foam"
+  },
+  {
+   "id": "blossom-ellie",
+   "name": "Blossom Ellie",
+   "world": "junglejam",
+   "rarity": "ultra",
+   "names": {
+    "ja": "はなぞうエリー",
+    "ko": "꽃코끼리 엘리",
+    "zh-Hant": "花朵象艾莉"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "glowbug",
+   "name": "Glowbug",
+   "world": "junglejam",
+   "rarity": "ultra",
+   "names": {
+    "ja": "ひかりむし",
+    "ko": "반딧불이",
+    "zh-Hant": "螢光蟲"
+   },
+   "feel": "gel"
+  },
+  {
+   "id": "vinny",
+   "name": "Vinny",
+   "world": "junglejam",
+   "rarity": "ultra",
+   "shapeshifter": true,
+   "names": {
+    "ja": "へんしんヴィニー",
+    "ko": "변신 덩굴이",
+    "zh-Hant": "變變藤藤"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "golden-nana",
+   "name": "Golden Nana",
+   "world": "junglejam",
+   "rarity": "secret",
+   "names": {
+    "ja": "ゴールドナナ",
+    "ko": "황금 바나",
+    "zh-Hant": "黃金蕉蕉"
+   },
+   "feel": "jelly"
+  },
+  {
    "id": "santa",
    "name": "Santa Squish",
    "world": "christmas",

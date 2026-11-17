@@ -15,6 +15,8 @@ struct WorldBackdrop: View {
                 switch world {
                 case "sweetfactory": sweetFactory(w, h)
                 case "starlight": starlight(w, h)
+                case "bubblebath": bubbleBath(w, h)
+                case "junglejam": jungle(w, h)
                 case "christmas": grotto(w, h)
                 default: toyShop(w, h)
                 }
@@ -95,6 +97,48 @@ struct WorldBackdrop: View {
             }
         }
         .position(x: w / 2, y: h * 0.795)
+    }
+
+    /// Pale blue tiles, drifting bubbles and the white edge of the bath.
+    @ViewBuilder private func bubbleBath(_ w: CGFloat, _ h: CGFloat) -> some View {
+        Color(hex: 0xDFF6FF)
+        stripes(w, Color.white.opacity(0.7), width: 3, gap: 41)
+        VStack(spacing: 41) {
+            ForEach(0..<Int(h / 44) + 2, id: \.self) { _ in Rectangle().fill(Color.white.opacity(0.7)).frame(height: 3) }
+        }
+        .frame(width: w, height: h, alignment: .top)
+        .clipped()
+        ForEach(0..<14, id: \.self) { i in
+            let x = CGFloat((i * 67 + 23) % 100) / 100, y = CGFloat((i * 43 + 11) % 72) / 100
+            let d: CGFloat = 14 + CGFloat(i % 4) * 9
+            Circle().fill(Color.white.opacity(0.35))
+                .overlay(Circle().stroke(i % 3 == 0 ? Color(hex: 0xFFC9DE) : Color.white, lineWidth: 2))
+                .frame(width: d, height: d)
+                .position(x: x * w, y: y * h)
+        }
+        shelf(w, h, top: Color.white, front: Color(hex: 0xFFC9DE))
+    }
+
+    /// Leafy green, hanging vines and a wooden plank.
+    @ViewBuilder private func jungle(_ w: CGFloat, _ h: CGFloat) -> some View {
+        Color(hex: 0xE3F5D8)
+        ForEach(0..<8, id: \.self) { i in
+            let x = CGFloat((i * 59 + 9) % 100) / 100, y = CGFloat((i * 37 + 5) % 60) / 100
+            Ellipse().fill(Color(hex: 0xB8EBA8).opacity(0.7))
+                .frame(width: 120, height: 54)
+                .rotationEffect(.degrees(Double(i * 47 % 140) - 70))
+                .position(x: x * w, y: y * h)
+        }
+        ForEach(0..<5, id: \.self) { i in
+            let long: CGFloat = h * (0.1 + 0.04 * CGFloat(i % 3))
+            Capsule().fill(Color(hex: 0x7CCB6B).opacity(0.75))
+                .frame(width: 6, height: long)
+                .position(x: w * (0.08 + 0.21 * CGFloat(i)), y: long / 2 - 4)
+            Ellipse().fill(Color(hex: 0xFFE066).opacity(0.8))
+                .frame(width: 13, height: 9)
+                .position(x: w * (0.08 + 0.21 * CGFloat(i)), y: long)
+        }
+        shelf(w, h, top: Color(hex: 0xC99A66), front: Color(hex: 0x9C6E42))
     }
 
     /// Warm red and cream, fairy lights, snow on the shelf.

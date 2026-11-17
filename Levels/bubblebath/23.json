@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "id": "bubblebath-23",
+  "world": "bubblebath",
+  "index": 23,
+  "beat": "easy",
+  "capacity": 4,
+  "jars": [
+    ["quacky", "starla", "soapy", "minty"],
+    ["starla", "bubbly", "strawbie", "fizzy"],
+    ["fizzy", "soapy", "minty", "starla"],
+    ["quacky", "minty", "bubbly", "soapy"],
+    ["shelly", "bubbly", "shelly", "shelly"],
+    ["minty", "shelly", "fizzy", "strawbie"],
+    ["quacky", "bubbly", "fizzy", "starla"],
+    ["soapy", "quacky", "strawbie", "strawbie"],
+    [],
+    []
+  ],
+  "mechanics": {"hidden": [[0, 1], [4, 0], [7, 1]], "sticky": [], "frozen": [[0, 0], [4, 1], [5, 2]]},
+  "par": 24,
+  "solution": [[5, 8], [1, 5], [1, 8], [7, 8], [1, 9], [2, 1], [0, 2], [3, 0], [3, 9], [2, 3], [0, 2], [0, 1], [6, 1], [7, 0], [2, 7], [6, 2], [5, 2], [4, 5], [4, 6], [5, 4], [3, 5], [0, 3], [6, 9], [3, 6]],
+  "capsule": false,
+  "softenAfterFails": null
+}

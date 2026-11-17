@@ -109,6 +109,11 @@ final class LevelController: ObservableObject {
             model?.sounds.play("star_2", volume: 0.7)
             model?.haptics.star()
         }
+        scene.onVineSnap = { [weak model] in
+            model?.sounds.play("vine_snap")
+            model?.haptics.star()
+        }
+        let bubbles = level.look == "bubblebath"
         scene.onReject = { [weak model] in
             model?.haptics.reject()
             model?.sounds.play("reject")
@@ -116,7 +121,7 @@ final class LevelController: ObservableObject {
         scene.onLand = { [weak self, weak model] result in
             model?.sounds.move(run: result.count)
             self?.landed()
-            if !result.thawedJars.isEmpty { model?.sounds.play("thaw") }
+            if !result.thawedJars.isEmpty { model?.sounds.play(bubbles ? "bubble_pop" : "thaw") }
             if result.duetLetGo { self?.duetLetGo(atJar: result.move.to) }
             if let jar = result.completedJar {
                 model?.haptics.complete()
@@ -500,7 +505,7 @@ struct LevelView: View {
     }
 
     /// The twists on this board, for the "?" that replays their demos.
-    private var rules: [BoardRule] { BoardRule.rules(on: controller.level.board) }
+    private var rules: [BoardRule] { BoardRule.rules(on: controller.level.board, look: controller.level.look) }
 
     /// The first rule on this board the player has not been shown yet.
     private func showNewRule() {
