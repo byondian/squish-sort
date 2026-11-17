@@ -31,6 +31,15 @@ struct HomeView: View {
                             .frame(width: 170, height: 170)
                     }
                     Spacer(minLength: 0)
+                    if let banner = model.eventBanner {
+                        // A light event from the website's config. No countdown.
+                        Text(verbatim: banner).font(Theme.body(13)).foregroundStyle(Theme.plum)
+                            .lineLimit(1).minimumScaleFactor(0.7)
+                            .padding(.horizontal, 12).padding(.vertical, 4)
+                            .background(Capsule().fill(Theme.butter))
+                            .dimmed(teaching)
+                    }
+                    if model.dailyJarOpen { dailyJarButton.dimmed(teaching) }
                     playButton(height: compact ? 84 : 104).dimmed(teaching)
                     HStack(spacing: 12) {
                         collectionButton(height: compact ? 76 : 88)
@@ -120,6 +129,31 @@ struct HomeView: View {
             }
             IconButton(system: "gearshape.fill") { model.screen = .settings }
         }
+    }
+
+    /// Daily Jar: one board a day. Once it is won it just says so until tomorrow; nothing counts down.
+    private var dailyJarButton: some View {
+        let done = model.dailyJarDone
+        return Button { model.playDailyJar() } label: {
+            HStack(spacing: 8) {
+                Image(systemName: done ? "checkmark.circle.fill" : "sun.max.fill").font(.system(size: 17, weight: .bold))
+                    .foregroundStyle(done ? Theme.mint : Theme.butter)
+                Text("Daily Jar").font(Theme.title(17))
+                Spacer(minLength: 0)
+                if done {
+                    Text("Done today").font(Theme.body(14)).opacity(0.7)
+                } else {
+                    Label { Text(verbatim: "+\(model.dailyJarCoins)") } icon: { CoinIcon() }.font(Theme.body(15))
+                }
+            }
+            .foregroundStyle(Theme.plum)
+            .padding(.horizontal, 16).frame(height: 44)
+            .background(Capsule().fill(.white))
+            .overlay(Capsule().stroke(Theme.plum.opacity(0.12), lineWidth: 2))
+        }
+        .buttonStyle(PressSquish())
+        .disabled(done)
+        .accessibilityIdentifier("home-daily-jar")
     }
 
     /// The main button: straight into the level to play next, with how close the next capsule is.

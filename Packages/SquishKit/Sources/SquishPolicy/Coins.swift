@@ -367,6 +367,25 @@ public struct CoinWallet: Codable, Equatable, Sendable {
         return true
     }
 
+    /// Coins from a purchase that isn't a fixed pack (the starter pack, the piggy bank). Once per transaction.
+    @discardableResult
+    public mutating func credit(coins: Int, transactionID: UInt64) -> Bool {
+        guard !creditedTransactions.contains(transactionID) else { return false }
+        creditedTransactions.insert(transactionID)
+        balance += max(0, coins)
+        return true
+    }
+
+    public func hasCredited(_ transactionID: UInt64) -> Bool { creditedTransactions.contains(transactionID) }
+
+    /// Spends a plain amount (a Maker place). False, and nothing spent, when there isn't enough.
+    @discardableResult
+    public mutating func spend(_ amount: Int) -> Bool {
+        guard amount >= 0, balance >= amount else { return false }
+        balance -= amount
+        return true
+    }
+
     public func canAfford(_ item: Coins.Item) -> Bool { balance >= item.price }
 
     @discardableResult

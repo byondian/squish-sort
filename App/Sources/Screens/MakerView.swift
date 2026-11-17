@@ -12,7 +12,7 @@ struct MakerView: View {
 
     private var worlds: Int { model.worldsCompleted }
     private var isSaved: Bool { model.progress.made.contains { $0.id == draft.id } }
-    private var shelfFull: Bool { !isSaved && model.progress.made.count >= MakerParts.maxMade }
+    private var shelfFull: Bool { !isSaved && model.progress.made.count >= min(model.progress.makerSlots, MakerParts.maxMade) }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -35,9 +35,31 @@ struct MakerView: View {
                             if new.count > NameFilter.maxLength { draft.name = String(new.prefix(NameFilter.maxLength)) }
                             problem = false
                         }
-                    if problem {
-                        Text(shelfFull ? LocalizedStringKey("Your shelf is full") : LocalizedStringKey("Try another name"))
-                            .font(Theme.body(14)).foregroundStyle(Theme.bubblegum)
+                    if problem && !shelfFull {
+                        Text("Try another name").font(Theme.body(14)).foregroundStyle(Theme.bubblegum)
+                    }
+                    if shelfFull {
+                        // The first place on the shelf is free; each further one is bought with coins won by playing.
+                        if model.canBuyMakerSlot {
+                            let enough = model.progress.wallet.balance >= MakerSlots.price
+                            Button { if model.buyMakerSlot() { problem = false } } label: {
+                                HStack {
+                                    Label("One more place on your shelf", systemImage: "plus.circle.fill")
+                                    Spacer()
+                                    Label { Text(verbatim: "\(MakerSlots.price)") } icon: { CoinIcon() }
+                                }
+                            }
+                            .buttonStyle(SquishButtonStyle(fill: Theme.butter, text: Theme.plum))
+                            .disabled(!enough)
+                            .opacity(enough ? 1 : 0.6)
+                            .accessibilityIdentifier("maker-slot")
+                            if !enough {
+                                Text("You have \(model.progress.wallet.balance) coins. Win levels to earn more.")
+                                    .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.6))
+                            }
+                        } else {
+                            Text("Your shelf is full").font(Theme.body(14)).foregroundStyle(Theme.bubblegum)
+                        }
                     }
                     row("Shape", MadeSquishy.Shape.allCases, unlocked: MakerParts.shapes(worldsCompleted: worlds),
                         isOn: { draft.shape == $0 }) { $0.shape = $1 }

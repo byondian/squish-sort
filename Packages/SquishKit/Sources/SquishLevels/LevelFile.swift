@@ -73,6 +73,8 @@ public struct Level: Sendable {
     public let board: Board
 
     public var id: String { file.id }
+    /// The world this level looks like (Keep Squishing borrows the story worlds in turn).
+    public var look: String { LevelCatalog.look(world: file.world, index: file.index) }
     public var par: Int { file.par ?? 0 }
 
     public var solution: [Move] {

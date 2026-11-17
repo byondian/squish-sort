@@ -17,11 +17,17 @@ final class LevelTests: XCTestCase {
         let all = try files()
         XCTAssertEqual(LevelCatalog.worlds.map(LevelCatalog.levelCount(in:)), [15, 20, 25])
         XCTAssertEqual(LevelCatalog.mainLevelCount, 60)
-        XCTAssertEqual(all.count, 80)
+        XCTAssertEqual(all.count, 320)
         XCTAssertEqual(Array(all.prefix(60)).map(\.world),
                        LevelCatalog.worlds.flatMap { Array(repeating: $0, count: LevelCatalog.levelCount(in: $0)) },
                        "the main path comes first, in play order")
-        for world in LevelCatalog.allWorlds {
+        XCTAssertEqual(Array(all[60..<300]).map(\.world), Array(repeating: LevelCatalog.endless, count: 240),
+                       "Keep Squishing follows the story worlds")
+        XCTAssertEqual(LevelCatalog.look(world: LevelCatalog.endless, index: 1), "sweetfactory")
+        XCTAssertEqual(LevelCatalog.look(world: LevelCatalog.endless, index: 11), "starlight")
+        XCTAssertEqual(LevelCatalog.look(world: "toyshop", index: 11), "toyshop")
+        XCTAssertEqual((1...20).filter { LevelCatalog.isCapsuleLevel(index: $0, world: LevelCatalog.endless) }, [5, 10, 15, 20])
+        for world in LevelCatalog.fileWorlds {
             let inWorld = all.filter { $0.world == world }
             XCTAssertEqual(inWorld.map(\.index), Array(1...LevelCatalog.levelCount(in: world)), world)
             XCTAssertEqual(inWorld.last?.beat, .boss, "\(world) ends on a boss")

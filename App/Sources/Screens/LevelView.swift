@@ -69,11 +69,11 @@ final class LevelController: ObservableObject {
         starSlack = model.starSlack(index: index)
         session = GameSession(board: level.board, par: level.par, undoLimit: model.undoLimit, starSlack: starSlack)
         scene = BoardScene(board: level.board, kinds: level.kinds)
-        scene.world = level.file.world
+        scene.world = level.look
         scene.goldRims = level.file.beat == .boss
         chain = SortChain(timed: !model.isGentleMode)
         let lucky = model.luckyKind(index: index)
-        pot = LevelPot(firstClear: model.progress.stars[level.id] == nil, jars: level.kinds.count,
+        pot = LevelPot(firstClear: !model.playingDaily && model.progress.stars[level.id] == nil, jars: level.kinds.count,
                        luckyKind: lucky, jarMultiplier: level.file.beat == .bonus ? 2 : 1, rules: model.config.coins)
         scene.luckyKind = lucky.map { UInt8($0) }
         scene.onPlay = { [weak self] move in self?.play(move) }
@@ -84,6 +84,24 @@ final class LevelController: ObservableObject {
         scene.onLidTwist = { [weak model] in
             model?.sounds.play("capsule_click")
             model?.haptics.land()
+        }
+        // Each kind of move has its own sound when a finished jar shows off.
+        scene.onSignature = { [weak model] effect, sound in
+            guard let model else { return }
+            if let sound, Bundle.main.url(forResource: sound, withExtension: "wav") != nil { model.sounds.play(sound, volume: 0.8); return }
+            let name: String
+            switch effect {
+            case "BURST": name = "pop"
+            case "VORTEX": name = "combo_3"
+            case "GLOW": name = "star_2"
+            case "PUFF": name = "grow"
+            case "MELT": name = "splat"
+            case "LIFT", "SPLIT": name = "hop"
+            case "LIMB", "ROPE": name = "squeak_high"
+            case "SOUND": name = "squeak_low"
+            default: name = "trick"
+            }
+            model.sounds.play(name, volume: 0.7)
         }
         scene.onCurtainDrum = { [weak model] in model?.sounds.play("drumroll", volume: 0.6) }
         scene.onCurtainUp = { [weak model] in
@@ -352,7 +370,7 @@ final class LevelController: ObservableObject {
 
     private func newPot() {
         guard let model else { return }
-        pot = LevelPot(firstClear: model.progress.stars[level.id] == nil, jars: level.kinds.count,
+        pot = LevelPot(firstClear: !model.playingDaily && model.progress.stars[level.id] == nil, jars: level.kinds.count,
                        luckyKind: model.luckyKind(index: index), jarMultiplier: jarMultiplier, rules: model.config.coins)
         jarsDone = 0
         chain = SortChain(timed: !model.isGentleMode)
@@ -525,7 +543,7 @@ struct LevelView: View {
             if isFinale {
                 // The giant peeks over the top corner and reacts.
                 VStack {
-                    HStack { Spacer(); BossPeek(world: controller.level.file.world, mood: controller.bossMood) }
+                    HStack { Spacer(); BossPeek(world: controller.level.look, mood: controller.bossMood) }
                         .padding(.top, 84)
                     Spacer()
                 }
@@ -587,8 +605,8 @@ struct LevelView: View {
                             perfect: controller.session.moveCount <= controller.session.par,
                             threeStarMoves: Stars.moveLimit(forStars: 3, par: controller.session.par, slack: controller.starSlack),
                             // Not while good news is waiting behind the win card: that is told first.
-                            retry: controller.index < 2 || !model.news.isEmpty ? nil : { controller.retry() },
-                            toCapsule: model.levelsToNextCapsule(after: controller.index),
+                            retry: controller.index < 2 || !model.news.isEmpty || model.lastWin.dailyJar ? nil : { controller.retry() },
+                            toCapsule: model.lastWin.dailyJar ? nil : model.levelsToNextCapsule(after: controller.index),
                             // The first two levels roll straight on after the celebration.
                             autoAdvance: controller.index < 2,
                             haptics: model.haptics, sounds: model.sounds,
@@ -612,7 +630,7 @@ struct LevelView: View {
             ZStack {
                 // The plain theme shows the world's own room; a bought theme paints over it.
                 if model.boardTheme == .cream {
-                    WorldBackdrop(world: controller.level.file.world)
+                    WorldBackdrop(world: controller.level.look)
                 } else {
                     LinearGradient(colors: model.boardTheme.colors, startPoint: .top, endPoint: .bottom).ignoresSafeArea()
                 }
@@ -626,7 +644,7 @@ struct LevelView: View {
         }
         .overlay {
             if bossSplash {
-                BossSplash(world: controller.level.file.world, finale: isFinale, canSkip: model.progress.bossSplashSeen) {
+                BossSplash(world: controller.level.look, finale: isFinale, canSkip: model.progress.bossSplashSeen) {
                     bossSplash = false
                     model.bossSplashShown()
                     model.sounds.startMusic("boss_loop")
@@ -639,7 +657,7 @@ struct LevelView: View {
             if let rule = ruleDemo {
                 ZStack {
                     Color.black.opacity(0.3).ignoresSafeArea()
-                    RuleDemo(rule: rule, world: controller.level.file.world) { closeRuleDemo() }
+                    RuleDemo(rule: rule, world: controller.level.look) { closeRuleDemo() }
                         .id(rule)
                 }
                 .transition(.opacity)
@@ -729,6 +747,8 @@ struct LevelView: View {
                     if isBoss {
                         Image("boss-crown").resizable().scaledToFit().frame(height: 18)
                         Text("BOSS")
+                    } else if model.playingDaily {
+                        Text("Daily Jar")
                     } else {
                         Text("Level \(number)")
                     }
@@ -742,7 +762,8 @@ struct LevelView: View {
                             Capsule().fill(Color.white.opacity(0.35)).frame(height: 8).padding(.horizontal, 10).padding(.top, 3)
                         }
                     }
-                Text(controller.level.file.world == "christmas" ? AppModel.christmasWorldName : AppModel.worldName(controller.level.file.world))
+                Text(model.playingDaily ? LocalizedStringKey("One a day")
+                     : controller.level.file.world == "christmas" ? AppModel.christmasWorldName : AppModel.worldName(controller.level.file.world))
                     .font(Theme.body(13)).foregroundStyle(darkRoom ? Color.white.opacity(0.9) : Theme.plum.opacity(0.75))
                 if controller.level.file.beat == .bonus {
                     // Coin Rush: every finished jar throws double coins the first time through.
@@ -792,7 +813,7 @@ struct LevelView: View {
     /// A night scene behind the jars: they glow, and loose words turn white.
     private var darkRoom: Bool {
         model.boardTheme == .night || isBoss
-            || (model.boardTheme == .cream && WorldBackdrop.isDark(controller.level.file.world))
+            || (model.boardTheme == .cream && WorldBackdrop.isDark(controller.level.look))
     }
 
     /// Three stars are out of reach on this try. Players of 13 and over get a nudge to start again;
@@ -1025,7 +1046,7 @@ struct WinCard: View {
 
     var body: some View {
         VStack(spacing: 14) {
-            Text(showpiece ? "Genius!" : "Sorted!").font(Theme.title(34)).foregroundStyle(Theme.plum)
+            Text(summary.dailyJar ? LocalizedStringKey("Daily Jar done!") : showpiece ? LocalizedStringKey("Genius!") : LocalizedStringKey("Sorted!")).font(Theme.title(34)).foregroundStyle(Theme.plum)
             HStack(spacing: 10) {
                 ForEach(0..<3) { i in
                     Image(systemName: i < shown ? "star.fill" : "star")
@@ -1089,6 +1110,16 @@ struct WinCard: View {
                     Image(systemName: "birthday.cake.fill")
                 }
                 .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.75))
+            }
+            if let fill = summary.piggyFill {
+                // The piggy bank fills a little with every win. A bar only: it is opened in the shop.
+                HStack(spacing: 8) {
+                    Text(verbatim: "🐷").font(.system(size: 16))
+                    PiggyBar(fill: fill).frame(width: 120)
+                    if fill >= 1 { Text("Piggy bank full!").font(Theme.body(12)).foregroundStyle(Theme.plum.opacity(0.7)) }
+                }
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel(Text("Piggy bank"))
             }
             if let toCapsule {
                 Label {

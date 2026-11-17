@@ -1,0 +1,57 @@
+name: Store screenshots
+
+# Manual only: runs the app on the biggest iPhone simulator in four languages, takes the six
+# App Store pictures, puts the captions on and keeps them as a download (store-screenshots).
+on:
+  workflow_dispatch:
+
+jobs:
+  screenshots:
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - name: Select the newest Xcode
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
+      - name: Generate the Xcode project
+        run: |
+          brew install xcodegen
+          xcodegen generate
+      - name: Take the pictures
+        run: |
+          set -o pipefail
+          # The 6.9 inch iPhone: the one size the App Store asks for.
+          UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; print(next(x['udid'] for k,v in sorted(d.items(), reverse=True) if 'iOS' in k for x in v if 'Pro Max' in x['name']))")
+          echo "Simulator $UDID"
+          xcrun simctl boot "$UDID" || true
+          # A tidy status bar: 9:41, full battery, full signal.
+          xcrun simctl status_bar "$UDID" override --time "9:41" --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3 || true
+          xcodebuild test -project SquishSort.xcodeproj -scheme SquishSort -resultBundlePath shots.xcresult \
+            -destination "id=$UDID" -only-testing:SquishSortUITests/StoreShotTests CODE_SIGNING_ALLOWED=NO \
+            | tee test.log | grep -E "Test Case|error:|TEST" || true
+          xcrun xcresulttool export attachments --path shots.xcresult --output-path raw
+          grep -q "TEST SUCCEEDED" test.log || { grep -E "error:|failed" test.log | head -40; exit 1; }
+      - name: Put the captions on
+        run: |
+          python3 -m pip install --quiet --user --break-system-packages pillow==10.4.0
+          python3 scripts/store_shots.py raw store
+      - name: Keep the screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: store-screenshots
+          path: store
+          retention-days: 30
+      - name: Print small copies in the log
+        if: always()
+        continue-on-error: true
+        run: |
+          python3 - <<'PY'
+          import base64, glob, subprocess
+          for src in sorted(glob.glob("store/*/*.png")):
+              out = "/tmp/small.jpg"
+              subprocess.run(["sips", "-Z", "700", "-s", "format", "jpeg", "-s", "formatOptions", "55", src, "--out", out], check=False, capture_output=True)
+              data = base64.b64encode(open(out, "rb").read()).decode()
+              print("PICTURE-BEGIN " + src)
+              for i in range(0, len(data), 4000): print("PICTURE " + data[i:i + 4000])
+              print("PICTURE-END")
+          PY

@@ -14,7 +14,7 @@ public enum LevelValidator {
         if file.schema != LevelFile.currentSchema { p.append("\(id): schema \(file.schema), expected \(LevelFile.currentSchema)") }
         let expectedID = file.world + "-" + String(format: "%02d", file.index)
         if file.id != expectedID { p.append("\(id): id should be \(expectedID)") }
-        if !LevelCatalog.allWorlds.contains(file.world) { p.append("\(id): unknown world \(file.world)") }
+        if !LevelCatalog.fileWorlds.contains(file.world) { p.append("\(id): unknown world \(file.world)") }
         if !(1...LevelCatalog.levelCount(in: file.world)).contains(file.index) { p.append("\(id): index out of range") }
         if file.capacity != launchCapacity { p.append("\(id): capacity \(file.capacity), launch levels use \(launchCapacity)") }
         if !(2...BoardLayout.maxJars).contains(file.jars.count) { p.append("\(id): \(file.jars.count) jars, allowed 2 to \(BoardLayout.maxJars)") }

@@ -203,9 +203,9 @@ final class CadenceTests: XCTestCase {
         }
     }
 
-    func testFirstAdAfterLevelSevenOnceFourMinutesPlayed() {
-        XCTAssertFalse(AdCadence.shouldShowInterstitial(after: win(7), state: played(200, levels: 7), group: .adult, ownsRemoveAds: false))
-        XCTAssertTrue(AdCadence.shouldShowInterstitial(after: win(7), state: played(240, levels: 7), group: .adult, ownsRemoveAds: false))
+    func testFirstAdAfterLevelSevenOnceEnoughPlayed() {
+        XCTAssertFalse(AdCadence.shouldShowInterstitial(after: win(7), state: played(140, levels: 7), group: .adult, ownsRemoveAds: false))
+        XCTAssertTrue(AdCadence.shouldShowInterstitial(after: win(7), state: played(150, levels: 7), group: .adult, ownsRemoveAds: false))
     }
 
     func testRemoveAdsMeansNoInterstitials() {
@@ -242,9 +242,12 @@ final class CadenceTests: XCTestCase {
     }
 
     func testTiersRampUp() {
-        let s3 = played(180, levels: 3, shown: 1)
-        XCTAssertFalse(AdCadence.shouldShowInterstitial(after: win(12), state: s3, group: .adult, ownsRemoveAds: false), "7–15 waits 4 levels")
-        XCTAssertTrue(AdCadence.shouldShowInterstitial(after: win(20), state: s3, group: .adult, ownsRemoveAds: false), "16–30 every 3 levels / 3 min")
+        let s2 = played(150, levels: 2, shown: 1)
+        XCTAssertFalse(AdCadence.shouldShowInterstitial(after: win(12), state: s2, group: .adult, ownsRemoveAds: false), "7–20 waits 3 levels")
+        XCTAssertTrue(AdCadence.shouldShowInterstitial(after: win(12), state: played(150, levels: 3, shown: 1), group: .adult, ownsRemoveAds: false))
+        XCTAssertTrue(AdCadence.shouldShowInterstitial(after: win(21), state: s2, group: .adult, ownsRemoveAds: false), "21 on: every 2 levels and 90 s")
+        XCTAssertFalse(AdCadence.shouldShowInterstitial(after: win(35), state: played(80, levels: 2, shown: 4), group: .adult, ownsRemoveAds: false),
+                       "never two close together")
         XCTAssertTrue(AdCadence.shouldShowInterstitial(after: win(35), state: played(90, levels: 2, shown: 4), group: .adult, ownsRemoveAds: false))
     }
 
@@ -469,7 +472,9 @@ final class ConfigTests: XCTestCase {
         let json = #"{"adCadence": {"sessionGraceSeconds": 90}, "christmasOpenFrom": "2026-12-05", "coins": {"lucky": 150}}"#
         let c = GameConfig.decodeOrDefault(Data(json.utf8))
         XCTAssertEqual(c.adCadence.sessionGraceSeconds, 90)
-        XCTAssertEqual(c.adCadence.tiers.count, 3)
+        XCTAssertEqual(c.adCadence.tiers.count, 2)
+        XCTAssertEqual(c.adCadence.childTiers.count, 3, "gentle mode keeps its slower pacing")
+        XCTAssertNil(c.event)
         XCTAssertEqual(c.christmasOpenFrom, "2026-12-05")
         XCTAssertEqual(c.christmasOpenUntil, "2027-01-06")
         XCTAssertEqual(c.coins.lucky, 150)
@@ -1069,5 +1074,66 @@ final class TrickGestureTests: XCTestCase {
         XCTAssertNil(TrickGesture.classify(points: [(x: 150, y: 100)], seconds: 0.1, centre: centre, size: 160))
         // Rubbing little circles on the Buddy's middle.
         XCTAssertNil(TrickGesture.classify(points: ring(turns: 3, radius: 15), seconds: 2, centre: centre, size: 160))
+    }
+}
+
+final class OffersTests: XCTestCase {
+    func testOffersAreForKnownTeensAndAdultsOnly() {
+        XCTAssertFalse(Offers.allowed(group: .child, ageKnown: true))
+        XCTAssertFalse(Offers.allowed(group: .adult, ageKnown: false), "an unknown age sees no offers")
+        XCTAssertTrue(Offers.allowed(group: .teen, ageKnown: true))
+        XCTAssertTrue(Offers.allowed(group: .adult, ageKnown: true))
+    }
+
+    func testPiggyBankFillsStopsWhenFullAndNeverLosesCoins() {
+        var piggy = PiggyBank()
+        XCTAssertEqual(piggy.add(forWin: 100), 50)
+        XCTAssertFalse(piggy.isReady)
+        for _ in 0..<200 { piggy.add(forWin: 100) }
+        XCTAssertEqual(piggy.coins, PiggyBank.full)
+        XCTAssertTrue(piggy.isFull)
+        XCTAssertEqual(piggy.add(forWin: 100), 0, "a full piggy takes no more")
+        let copy = try! JSONDecoder().decode(PiggyBank.self, from: JSONEncoder().encode(piggy))
+        XCTAssertEqual(copy, piggy)
+        XCTAssertEqual(piggy.take(), PiggyBank.full)
+        XCTAssertEqual(piggy.coins, 0)
+    }
+
+    func testWalletCreditsAPurchaseOnceAndSpendsPlainAmounts() {
+        var wallet = CoinWallet()
+        XCTAssertTrue(wallet.credit(coins: StarterPack.coins, transactionID: 7))
+        XCTAssertFalse(wallet.credit(coins: StarterPack.coins, transactionID: 7))
+        XCTAssertEqual(wallet.balance, 2500)
+        XCTAssertFalse(wallet.spend(MakerSlots.price + 1))
+        XCTAssertTrue(wallet.spend(MakerSlots.price))
+        XCTAssertEqual(wallet.balance, 0)
+    }
+
+    func testMakerPlacesStartWithWhatWasAlreadyMade() {
+        XCTAssertEqual(MakerSlots.starting(alreadyMade: 0), 1)
+        XCTAssertEqual(MakerSlots.starting(alreadyMade: 3), 3)
+        XCTAssertEqual(MakerSlots.starting(alreadyMade: 99), MakerParts.maxMade)
+    }
+
+    func testDailyJarIsTheSameBoardAllDayAndChangesWithTheDate() {
+        XCTAssertNil(DailyJar.board(day: "2026-12-01", count: 0))
+        let a = DailyJar.board(day: "2026-12-01", count: 240)
+        XCTAssertEqual(a, DailyJar.board(day: "2026-12-01", count: 240))
+        let days = (1...28).map { DailyJar.board(day: "2026-12-" + ($0 < 10 ? "0" : "") + "\($0)", count: 240)! }
+        XCTAssertGreaterThan(Set(days).count, 20, "the days spread across the boards")
+        XCTAssertTrue(days.allSatisfy { (0..<240).contains($0) })
+    }
+
+    func testAnEventRunsBetweenItsDatesAndABrokenOneIsIgnored() {
+        let json = #"{"event": {"from": "2027-01-15", "until": "2027-01-17", "kind": "doubleCoins", "banner": {"en": "Double coin weekend!", "ja": "コイン2倍！"}}}"#
+        let c = GameConfig.decodeOrDefault(Data(json.utf8))
+        XCTAssertEqual(c.event?.kind, .doubleCoins)
+        XCTAssertEqual(c.event?.isOn(today: "2027-01-16"), true)
+        XCTAssertEqual(c.event?.isOn(today: "2027-01-18"), false)
+        XCTAssertEqual(c.event?.text(language: "ja"), "コイン2倍！")
+        XCTAssertEqual(c.event?.text(language: "ko"), "Double coin weekend!")
+        let broken = GameConfig.decodeOrDefault(Data(#"{"event": {"kind": "raffle"}, "optInAdsPerDay": 4}"#.utf8))
+        XCTAssertNil(broken.event)
+        XCTAssertEqual(broken.optInAdsPerDay, 4, "the rest of the config still loads")
     }
 }

@@ -23,6 +23,11 @@ public struct GameConfig: Codable, Equatable, Sendable {
     public var buddyEnabled = true
     /// The link to the website's Squishy Shop (affiliate listings of real toys).
     public var squishyShopEnabled = true
+    /// The paid extras for 13 and over (starter pack, piggy bank) and the Daily Jar can be switched off.
+    public var offersEnabled = true
+    public var dailyJarEnabled = true
+    /// One light event, or none.
+    public var event: GameEvent?
 
     public init() {}
 
@@ -45,6 +50,10 @@ public struct GameConfig: Codable, Equatable, Sendable {
         makerEnabled = try c.decodeIfPresent(Bool.self, forKey: .makerEnabled) ?? d.makerEnabled
         buddyEnabled = try c.decodeIfPresent(Bool.self, forKey: .buddyEnabled) ?? d.buddyEnabled
         squishyShopEnabled = try c.decodeIfPresent(Bool.self, forKey: .squishyShopEnabled) ?? d.squishyShopEnabled
+        offersEnabled = try c.decodeIfPresent(Bool.self, forKey: .offersEnabled) ?? d.offersEnabled
+        dailyJarEnabled = try c.decodeIfPresent(Bool.self, forKey: .dailyJarEnabled) ?? d.dailyJarEnabled
+        // A broken event never breaks the rest of the config.
+        event = (try? c.decodeIfPresent(GameEvent.self, forKey: .event)) ?? nil
     }
 
     /// Unknown or broken remote JSON falls back to the bundled defaults.

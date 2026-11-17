@@ -80,6 +80,18 @@ struct PlayerProgress: Codable, Equatable {
     /// Worlds whose big show has been watched to the end (or skipped), and the keepsakes they gave.
     var finalesSeen: Set<String> = []
     var keepsakes: Set<String> = []
+    /// Times Keep Squishing has been played all the way through.
+    var endlessLaps = 0
+    /// yyyy-MM-dd of the last Daily Jar won.
+    var dailyJarDay: String?
+    /// Places on the Maker shelf: the first is free, more are bought with coins.
+    var makerSlots = MakerSlots.free
+    var piggy = PiggyBank()
+    var starterPackOwned = false
+    /// The one soft starter pack card (after the first world) has been shown.
+    var starterCardShown = false
+    /// Hints from the starter pack, used when there is no free one.
+    var hintTokens = 0
 
     init() {}
 
@@ -167,6 +179,14 @@ struct PlayerProgress: Codable, Equatable {
         teasersSeen = v(.teasersSeen, d.teasersSeen)
         finalesSeen = v(.finalesSeen, d.finalesSeen)
         keepsakes = v(.keepsakes, d.keepsakes)
+        endlessLaps = max(0, v(.endlessLaps, d.endlessLaps))
+        dailyJarDay = (try? c.decodeIfPresent(String.self, forKey: .dailyJarDay)) ?? nil
+        // A save from before places had a price keeps a place for everything it already made.
+        makerSlots = v(.makerSlots, MakerSlots.starting(alreadyMade: made.count))
+        piggy = v(.piggy, d.piggy)
+        starterPackOwned = v(.starterPackOwned, d.starterPackOwned)
+        starterCardShown = v(.starterCardShown, d.starterCardShown)
+        hintTokens = max(0, v(.hintTokens, d.hintTokens))
     }
 
     static func today(_ date: Date = Date()) -> String {
@@ -181,6 +201,11 @@ struct PlayerProgress: Codable, Equatable {
 /// Cosmetic board backgrounds, bought with coins.
 enum BoardTheme: String, CaseIterable, Identifiable {
     case cream, mint, sky, bubblegum, night
+    /// Only in the starter pack: never sold for coins.
+    case gold
+
+    /// Themes the shop sells for coins.
+    static var forCoins: [BoardTheme] { allCases.filter { $0 != .gold } }
 
     var id: String { rawValue }
 
@@ -191,6 +216,7 @@ enum BoardTheme: String, CaseIterable, Identifiable {
         case .sky: return [Color(red: 0.87, green: 0.94, blue: 1), Color(red: 0.74, green: 0.87, blue: 1)]
         case .bubblegum: return [Color(red: 1, green: 0.9, blue: 0.95), Color(red: 1, green: 0.78, blue: 0.88)]
         case .night: return [Color(red: 0.25, green: 0.2, blue: 0.38), Color(red: 0.14, green: 0.11, blue: 0.24)]
+        case .gold: return [Color(red: 1, green: 0.95, blue: 0.74), Color(red: 1, green: 0.82, blue: 0.45)]
         }
     }
 
@@ -201,6 +227,7 @@ enum BoardTheme: String, CaseIterable, Identifiable {
         case .sky: return "Blue Sky"
         case .bubblegum: return "Bubblegum"
         case .night: return "Night"
+        case .gold: return "Golden Hour"
         }
     }
 }

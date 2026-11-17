@@ -37,10 +37,13 @@ struct ShopView: View {
                     }
                     Text("Win levels to earn coins too: 50 a win, 100 with three stars.")
                         .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.6))
+                    if model.offersAllowed { extras }
 
                     Text("Board themes").font(Theme.title(20)).foregroundStyle(Theme.plum)
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                        ForEach(BoardTheme.allCases) { theme in themeCard(theme) }
+                        ForEach(BoardTheme.allCases.filter { $0 != .gold || model.progress.ownedThemes.contains($0.rawValue) }) { theme in
+                            themeCard(theme)
+                        }
                     }
                     if model.buddyActive {
                         Text("For your Buddy").font(Theme.title(20)).foregroundStyle(Theme.plum)
@@ -66,6 +69,57 @@ struct ShopView: View {
             }
         }) { product in
             ParentalGate(onPass: { passedProduct = product; gateProduct = nil }, onCancel: { gateProduct = nil })
+        }
+    }
+
+    /// The starter pack (once) and the piggy bank. Players of 13 and over only; no timers, nothing expires.
+    @ViewBuilder private var extras: some View {
+        if let starter = purchases.starterProduct, !model.progress.starterPackOwned {
+            Button { Task { await purchases.buyExtra(starter) } } label: {
+                HStack(spacing: 12) {
+                    Text(verbatim: "🎁").font(.system(size: 34))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Starter pack").font(Theme.title(18))
+                        Text("\(StarterPack.coins) coins, \(StarterPack.hints) hints and the Golden Hour board. Once only.")
+                            .font(Theme.body(13)).opacity(0.75).multilineTextAlignment(.leading)
+                    }
+                    Spacer(minLength: 4)
+                    Text(starter.displayPrice).font(Theme.title(17))
+                }
+            }
+            .buttonStyle(SquishButtonStyle(fill: Theme.butter, text: Theme.plum))
+            .accessibilityIdentifier("shop-starter")
+        }
+        if let piggy = purchases.piggyProduct {
+            let bank = model.progress.piggy
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 12) {
+                    Text(verbatim: "🐷").font(.system(size: 34))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Piggy bank").font(Theme.title(18))
+                        Text("\(bank.coins) of \(PiggyBank.full) coins").font(Theme.body(14)).opacity(0.8)
+                    }
+                    Spacer(minLength: 4)
+                }
+                PiggyBar(fill: bank.fill)
+                Text("Every win drops bonus coins in. It never empties. Break it open from \(PiggyBank.ready) coins.")
+                    .font(Theme.body(13)).opacity(0.7)
+                if bank.isReady {
+                    Button { Task { await purchases.buyExtra(piggy) } } label: {
+                        HStack {
+                            Text("Break it open: \(bank.coins) coins")
+                            Spacer()
+                            Text(piggy.displayPrice)
+                        }
+                    }
+                    .buttonStyle(SquishButtonStyle(fill: Theme.bubblegum))
+                    .accessibilityIdentifier("shop-piggy")
+                }
+            }
+            .foregroundStyle(Theme.plum)
+            .padding(14)
+            .background(RoundedRectangle(cornerRadius: 20).fill(.white))
+            .overlay(RoundedRectangle(cornerRadius: 20).stroke(Theme.plum.opacity(0.12), lineWidth: 2))
         }
     }
 
@@ -98,6 +152,8 @@ struct ShopView: View {
                 Text(theme.name).font(Theme.body(15))
                 if owned {
                     Text(selected ? "In use" : "Use").font(Theme.body(13)).opacity(0.7)
+                } else if theme == .gold {
+                    Text("Starter pack").font(Theme.body(13)).opacity(0.7)
                 } else {
                     Text("\(Coins.Item.theme.price) coins").font(Theme.body(13)).opacity(0.7)
                 }
@@ -114,3 +170,20 @@ struct ShopView: View {
 }
 
 extension Product: @retroactive Identifiable {}
+
+/// How full the piggy bank is. Only a bar: no price and no button outside the shop.
+struct PiggyBar: View {
+    let fill: Double
+
+    var body: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                Capsule().fill(Theme.plum.opacity(0.12))
+                Capsule().fill(LinearGradient(colors: [Theme.butter, Theme.bubblegum], startPoint: .leading, endPoint: .trailing))
+                    .frame(width: max(10, geo.size.width * CGFloat(min(1, max(0, fill)))))
+            }
+        }
+        .frame(height: 10)
+        .accessibilityHidden(true)
+    }
+}

@@ -31,6 +31,14 @@ struct NewsCard: View {
                     Button { model.newsRead() } label: { Text("Yay!").frame(maxWidth: .infinity) }
                         .buttonStyle(SquishButtonStyle())
                         .accessibilityIdentifier("news-next")
+                } else if case .starterPack = news {
+                    Button { model.newsRead(open: true) } label: {
+                        Label("See it in the shop", systemImage: "bag.fill").frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(SquishButtonStyle(fill: Theme.grape))
+                    Button("Later") { model.newsRead() }
+                        .font(Theme.body(16)).foregroundStyle(Theme.plum.opacity(0.7))
+                        .accessibilityIdentifier("news-next")
                 } else if case .unlocked = news {
                     Button { model.newsRead(open: true) } label: {
                         Label("Try it", systemImage: "sparkles").frame(maxWidth: .infinity)
@@ -63,6 +71,8 @@ struct NewsCard: View {
             EmptyView()
         case .worldComplete:
             Text(verbatim: "🏆").font(.system(size: 70))
+        case .starterPack:
+            Text(verbatim: "🎁").font(.system(size: 70))
         case .trick:
             if let ref = model.progress.buddy.squishy {
                 // The Buddy does its new trick right here, again and again while the card is open.
@@ -131,6 +141,8 @@ struct NewsCard: View {
             }
         case .teaser, .finale:
             return ""
+        case .starterPack:
+            return "Starter pack"
         case .starJar:
             return "Star jar prize!"
         case .trick(let number):
@@ -158,6 +170,8 @@ struct NewsCard: View {
             }
         case .teaser, .finale:
             return ""
+        case .starterPack:
+            return "\(StarterPack.coins) coins, \(StarterPack.hints) hints and the Golden Hour board. It is in the shop whenever you like."
         case .trick:
             return "Tap the trick under your Buddy at home to see it again."
         case .unlocked(let extra):

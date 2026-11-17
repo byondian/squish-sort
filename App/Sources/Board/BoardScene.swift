@@ -40,6 +40,8 @@ final class BoardScene: SKScene {
     var darkBackground = false { didSet { if oldValue != darkBackground, size.width > 0, view != nil { rebuild() } } }
     /// The lid twists shut (a click and a tick).
     var onLidTwist: (() -> Void)?
+    /// A finished jar's squishies do their signature move: the effect's name and its sound, if it has one.
+    var onSignature: ((String, String?) -> Void)?
     /// A curtain is about to go up (the drumroll), and then goes up (the swish and the sting).
     var onCurtainDrum: (() -> Void)?
     var onCurtainUp: (() -> Void)?
@@ -586,7 +588,10 @@ final class BoardScene: SKScene {
             jar.putLid(animated: true, tint: tint, reduceMotion: calm, onLand: { [weak self] in
                 guard let self, done < self.pieces.count else { return }
                 for node in self.pieces[done] { node.squeezeAndRelease() }
-            }, onTwist: { [weak self] in self?.onLidTwist?() })
+            }, onTwist: { [weak self] in
+                self?.onLidTwist?()
+                self?.signatureMove(jar: done)
+            })
             sparkle(at: geometry.centers[done])
             stage?.lightLamp(tint ?? .white, animated: !calm)
             stage?.cheer()
@@ -643,6 +648,104 @@ final class BoardScene: SKScene {
                 }]))
             },
         ]))
+    }
+
+    /// The finished jar's squishies do their own thing for a beat (benchmark: the best clip moment
+    /// belongs inside the puzzle). Under a second, for show only, and it never holds up the next move.
+    private func signatureMove(jar j: Int) {
+        guard j < pieces.count, j < geometry.centers.count, let first = pieces[j].first,
+              let spec = SignatureMoves.shared.moves(for: first.kindID).first else { return }
+        onSignature?(spec.effect, spec.str("sound"))
+        guard !UIAccessibility.isReduceMotionEnabled else { return }
+        let nodes = pieces[j]
+        let side: CGFloat = geometry.piece
+        let centre = geometry.centers[j]
+        let tint: UIColor = SquishyStyle.forID(first.kindID).color
+        func each(_ make: (Int) -> SKAction) {
+            for (i, node) in nodes.enumerated() where node.action(forKey: "signature") == nil {
+                node.run(.sequence([.wait(forDuration: 0.04 * Double(i)), make(i)]), withKey: "signature")
+            }
+        }
+        func eased(_ action: SKAction) -> SKAction {
+            action.timingMode = .easeInEaseOut
+            return action
+        }
+        switch spec.effect {
+        case "BURST", "VORTEX":
+            // Its own little things fly out of the jar, in its own colours.
+            let colors: [UIColor] = spec.strings("colors").compactMap { css in
+                guard css.hasPrefix("#"), let v = UInt32(css.dropFirst(), radix: 16) else { return nil }
+                return UIColor(hex: v)
+            }
+            let palette: [UIColor] = colors.isEmpty ? [tint, .white] : colors
+            let count = 14
+            for i in 0..<count {
+                let dot = SKShapeNode(circleOfRadius: side * (i % 2 == 0 ? 0.07 : 0.05))
+                dot.fillColor = palette[i % palette.count]
+                dot.strokeColor = UIColor(hex: 0x3B2A4A).withAlphaComponent(0.5)
+                dot.lineWidth = 1
+                dot.position = CGPoint(x: centre.x, y: centre.y + geometry.jarSize.height * 0.15)
+                dot.zPosition = 32
+                addChild(dot)
+                let angle: CGFloat = CGFloat(i) / CGFloat(count) * .pi * 2
+                let reach: CGFloat = side * (1.1 + CGFloat(i % 3) * 0.35)
+                let out = SKAction.moveBy(x: cos(angle) * reach, y: sin(angle) * reach + side * 0.4, duration: 0.32)
+                out.timingMode = .easeOut
+                let fall = SKAction.moveBy(x: cos(angle) * side * 0.2, y: -side * 0.9, duration: 0.4)
+                fall.timingMode = .easeIn
+                let spin = SKAction.rotate(byAngle: spec.effect == "VORTEX" ? .pi * 2 : .pi, duration: 0.7)
+                dot.run(.sequence([.group([.sequence([out, .group([fall, .fadeOut(withDuration: 0.4)])]), spin]), .removeFromParent()]))
+            }
+        case "GLOW":
+            let glow = SKShapeNode(ellipseOf: CGSize(width: geometry.jarSize.width * 1.6, height: geometry.jarSize.height * 1.2))
+            var color: UIColor = tint
+            if let css = spec.str("color"), css.hasPrefix("#"), let v = UInt32(css.dropFirst(), radix: 16) { color = UIColor(hex: v) }
+            glow.fillColor = color.withAlphaComponent(0.55)
+            glow.strokeColor = .clear
+            glow.position = centre
+            glow.zPosition = -1
+            glow.alpha = 0
+            glow.setScale(0.6)
+            addChild(glow)
+            let swell = SKAction.group([.fadeIn(withDuration: 0.18), eased(.scale(to: 1.1, duration: 0.3))])
+            glow.run(.sequence([swell, .wait(forDuration: 0.15), .group([.fadeOut(withDuration: 0.4), .scale(to: 1.3, duration: 0.4)]),
+                                .removeFromParent()]))
+        case "PUFF":
+            each { _ in .sequence([eased(.scale(to: 1.22, duration: 0.16)), eased(.scale(to: 0.94, duration: 0.14)), eased(.scale(to: 1, duration: 0.14))]) }
+        case "MELT":
+            each { _ in
+                .sequence([eased(.group([.scaleX(to: 1.28, duration: 0.22), .scaleY(to: 0.62, duration: 0.22)])),
+                           .wait(forDuration: 0.12),
+                           eased(.group([.scaleX(to: 1, duration: 0.28), .scaleY(to: 1, duration: 0.28)]))])
+            }
+        case "LIFT", "SPLIT":
+            // A hop with a twirl, top squishy highest.
+            each { i in
+                let rise: CGFloat = side * (0.18 + 0.05 * CGFloat(i))
+                let up = SKAction.moveBy(x: 0, y: rise, duration: 0.16)
+                up.timingMode = .easeOut
+                let down = SKAction.moveBy(x: 0, y: -rise, duration: 0.18)
+                down.timingMode = .easeIn
+                return .sequence([up, down])
+            }
+            if let top = nodes.last {
+                top.run(.sequence([eased(.rotate(byAngle: .pi * 2, duration: 0.42)), .rotate(toAngle: 0, duration: 0)]), withKey: "twirl")
+            }
+        case "LIMB", "ROPE":
+            // A wag from side to side.
+            each { i in
+                let lean: CGFloat = (i % 2 == 0 ? 1 : -1) * 0.22
+                return .sequence([eased(.rotate(toAngle: lean, duration: 0.12)), eased(.rotate(toAngle: -lean, duration: 0.18)),
+                                  eased(.rotate(toAngle: lean * 0.5, duration: 0.14)), eased(.rotate(toAngle: 0, duration: 0.12))])
+            }
+        default:
+            // TRICK, SOUND and the rest: a quick shimmy in time with the sound.
+            each { _ in
+                let step: CGFloat = side * 0.07
+                return .sequence([.moveBy(x: step, y: 0, duration: 0.05), .moveBy(x: -step * 2, y: 0, duration: 0.09),
+                                  .moveBy(x: step * 2, y: 0, duration: 0.09), .moveBy(x: -step, y: 0, duration: 0.05)])
+            }
+        }
     }
 
     private func sparkle(at p: CGPoint) {
