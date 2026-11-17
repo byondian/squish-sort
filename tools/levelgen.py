@@ -390,7 +390,7 @@ def make_level(world_idx, pos, salt=0):
     level["par"] = len(sol)
     level["solution"] = [list(m) for m in sol]
     level["capsule"] = capsule_level(pos, last)
-    level["softenAfterFails"] = 3 if beat in ("tension", "boss") else None
+    level["softenAfterFails"] = 2 if beat in ("tension", "boss") else None
     return level
 
 
@@ -483,7 +483,7 @@ def make_endless_once(pos, salt):
     level["par"] = len(sol)
     level["solution"] = [list(m) for m in sol]
     level["capsule"] = endless_capsule(pos)
-    level["softenAfterFails"] = 3 if beat in ("tension", "boss") else None
+    level["softenAfterFails"] = 2 if beat in ("tension", "boss") else None
     return level
 
 

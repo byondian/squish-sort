@@ -393,6 +393,8 @@ public struct BuddyState: Codable, Equatable, Sendable {
     public var moodAskedDay: String?
     /// Seconds since 1970 of the last treat, for the puff that eases back.
     public var lastTreatAt: Double?
+    /// How big the puff was just after the last treat or gift. Missing in older saves: one treat's worth.
+    public var puffBase: Double?
 
     public static let maxStoredTreats = 3
     public static let heartsPerTreat = 1
@@ -405,6 +407,7 @@ public struct BuddyState: Codable, Equatable, Sendable {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         squishy = try c.decodeIfPresent(String.self, forKey: .squishy)
         lastTreatAt = try? c.decodeIfPresent(Double.self, forKey: .lastTreatAt)
+        puffBase = try? c.decodeIfPresent(Double.self, forKey: .puffBase)
         name = try c.decodeIfPresent(String.self, forKey: .name) ?? ""
         treats = try c.decodeIfPresent(Int.self, forKey: .treats) ?? 0
         hearts = try c.decodeIfPresent(Int.self, forKey: .hearts) ?? 0
@@ -460,13 +463,25 @@ public struct BuddyState: Codable, Equatable, Sendable {
 
     /// A treat also puffs the Buddy up by 15% on top, easing back over a day to the size it has
     /// earned for good. Nothing earned is ever lost, and nothing is shown when the puff is gone.
+    /// Treats stack: each one adds to whatever puff is left, so the Buddy visibly grows on every
+    /// treat even when it is fully grown, up to `maxPuff`. A gift fills the puff in one go.
     public static let puffSize = 0.15
+    public static let puffStep = 0.05
+    public static let maxPuff = 0.25
     public static let puffSeconds = 86_400.0
     /// Gentle mode: a short happy reaction, never something to come back in time for.
     public static let puffSecondsGentle = 60.0
     public func puff(at now: Double, lasting seconds: Double = BuddyState.puffSeconds) -> Double {
         guard let fed = lastTreatAt, now >= fed, seconds > 0 else { return 0 }
-        return BuddyState.puffSize * max(0, 1 - (now - fed) / seconds)
+        return (puffBase ?? BuddyState.puffSize) * max(0, 1 - (now - fed) / seconds)
+    }
+
+    /// A treat or gift has just been eaten: the puff grows from where it is now.
+    public mutating func puffUp(_ item: Coins.Item = .treat, at now: Double, lasting seconds: Double = BuddyState.puffSeconds) {
+        let left = puff(at: now, lasting: seconds)
+        let next = item == .gift ? BuddyState.maxPuff : max(BuddyState.puffSize, left + BuddyState.puffStep)
+        puffBase = min(BuddyState.maxPuff, next)
+        lastTreatAt = now
     }
 }
 

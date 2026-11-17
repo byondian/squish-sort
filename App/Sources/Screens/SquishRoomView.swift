@@ -72,7 +72,7 @@ struct SquishRoomView: View {
                 .padding(16)
             }
         }
-        .background(moods[mood].1.ignoresSafeArea())
+        .background(RoomMood(mood: mood, colour: moods[mood].1).ignoresSafeArea())
         .onAppear {
             // Came here from a "Squeeze me" button: start with that squishy.
             if let start = model.roomStart {
@@ -92,5 +92,77 @@ struct SquishRoomView: View {
     private func tickle() {
         model.haptics.reject()
         wiggles += 1
+    }
+}
+
+/// The room's mood behind the squishy: plain cream, a night sky with stars and a moon, or a
+/// daytime sky with clouds drifting by. Nothing here can be touched.
+struct RoomMood: View {
+    let mood: Int
+    let colour: Color
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var drift = false
+
+    /// Fixed spots, so the sky is the same every visit: (x, y, size) as fractions of the room.
+    private static let clouds: [(CGFloat, CGFloat, CGFloat)] = [
+        (0.18, 0.14, 1.0), (0.74, 0.22, 0.8), (0.40, 0.36, 0.6), (0.86, 0.50, 0.9), (0.12, 0.60, 0.75), (0.58, 0.74, 1.0),
+    ]
+    private static let stars: [(CGFloat, CGFloat, CGFloat)] = [
+        (0.10, 0.10, 5), (0.30, 0.18, 3), (0.52, 0.08, 4), (0.90, 0.30, 5), (0.16, 0.34, 3), (0.42, 0.28, 3),
+        (0.64, 0.40, 4), (0.08, 0.52, 4), (0.84, 0.56, 3), (0.28, 0.66, 5), (0.72, 0.72, 3), (0.50, 0.58, 3),
+    ]
+
+    var body: some View {
+        GeometryReader { geo in
+            let w = geo.size.width, h = geo.size.height
+            ZStack {
+                switch mood {
+                case 2:
+                    LinearGradient(colors: [Color(red: 0.62, green: 0.82, blue: 1), colour], startPoint: .top, endPoint: .bottom)
+                    ForEach(Self.clouds.indices, id: \.self) { i in
+                        let c = Self.clouds[i]
+                        let reach: CGFloat = w * (i % 2 == 0 ? 0.10 : -0.07)
+                        let shift: CGFloat = drift ? reach : -reach
+                        cloud(width: w * 0.42 * c.2)
+                            .position(x: w * c.0, y: h * c.1)
+                            .offset(x: shift)
+                            .animation(reduceMotion ? nil : .easeInOut(duration: 9 + Double(i) * 1.7).repeatForever(autoreverses: true), value: drift)
+                    }
+                case 1:
+                    colour
+                    ForEach(Self.stars.indices, id: \.self) { i in
+                        let s = Self.stars[i]
+                        Circle().fill(Color.white)
+                            .frame(width: s.2, height: s.2)
+                            .opacity((drift && i % 2 == 0) ? 0.35 : 0.9)
+                            .position(x: w * s.0, y: h * s.1)
+                            .animation(reduceMotion ? nil : .easeInOut(duration: 1.6 + Double(i % 4) * 0.5).repeatForever(autoreverses: true), value: drift)
+                    }
+                    Circle().fill(Color(red: 1, green: 0.95, blue: 0.75)).frame(width: 54, height: 54)
+                        .overlay(Circle().fill(colour).frame(width: 46, height: 46).offset(x: 14, y: -8))
+                        .position(x: w * 0.82, y: h * 0.13)
+                default:
+                    colour
+                }
+            }
+            .frame(width: w, height: h)
+            .clipped()
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+        .onAppear { drift = true }
+    }
+
+    /// A soft cloud from three bumps on a flat base.
+    private func cloud(width: CGFloat) -> some View {
+        let h = width * 0.42
+        return ZStack {
+            Capsule().frame(width: width, height: h * 0.62).offset(y: h * 0.19)
+            Circle().frame(width: h * 0.78, height: h * 0.78).offset(x: -width * 0.20, y: -h * 0.02)
+            Circle().frame(width: h, height: h).offset(x: width * 0.04, y: -h * 0.16)
+            Circle().frame(width: h * 0.66, height: h * 0.66).offset(x: width * 0.26, y: h * 0.04)
+        }
+        .foregroundStyle(Color.white.opacity(0.92))
+        .frame(width: width, height: h * 1.3)
     }
 }

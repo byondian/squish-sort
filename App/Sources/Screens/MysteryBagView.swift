@@ -31,7 +31,7 @@ struct MysteryBagView: View {
                     if let bag {
                         if let right = guessedRight {
                             result(bag, right: right)
-                        } else if model.progress.mystery.canPlay(today: model.today) {
+                        } else if model.progress.mystery.canPlay(today: model.mysteryDay) {
                             play(bag)
                         } else {
                             comeBack

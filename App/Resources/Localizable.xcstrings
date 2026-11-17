@@ -783,28 +783,6 @@
         }
       }
     },
-    "A shuffle gets things moving again.": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "シャッフルすれば、また動かせるよ。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "섞으면 다시 움직일 수 있어요."
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "洗牌一下就能繼續了。"
-          }
-        }
-      }
-    },
     "Add to shelf": {
       "localizations": {
         "ja": {
@@ -1241,6 +1219,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "圖鑑 %1$lld/%2$lld"
+          }
+        }
+      }
+    },
+    "Boss beaten!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ボスをたおした！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "보스를 이겼어요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打敗魔王了！"
           }
         }
       }
@@ -4281,24 +4281,24 @@
         }
       }
     },
-    "No moves left": {
+    "No squishy has a jar it can go to. A shuffle gets things moving again.": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "もう動かせない"
+            "value": "どのスクイーズも行けるびんがないよ。シャッフルすれば、また動かせるよ。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "더 이상 움직일 수 없어요"
+            "value": "어느 스퀴시도 갈 수 있는 병이 없어요. 섞으면 다시 움직일 수 있어요."
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "沒有步可以走了"
+            "value": "每個軟軟都沒有罐子可以去。洗牌一下就能繼續了。"
           }
         }
       }
@@ -4409,6 +4409,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "不對喔，再試一次。"
+          }
+        }
+      }
+    },
+    "Nothing can move": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "どれも動かせない"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "움직일 수 있는 게 없어요"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "沒有能動的了"
           }
         }
       }
@@ -7577,6 +7599,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "你有夥伴了！"
+          }
+        }
+      }
+    },
+    "You out-sorted the boss. On to the next jars!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ボスよりうまくならべたね。つぎのびんへ進もう！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "보스보다 더 잘 정리했어요. 다음 병으로 가요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你比魔王更會分類。前進下一批罐子吧！"
           }
         }
       }

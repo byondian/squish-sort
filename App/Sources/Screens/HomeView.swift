@@ -249,7 +249,7 @@ struct HomeView: View {
     /// The Mystery Bag: a bag with a big question mark. Before it opens, it says when it will.
     private func mysteryButton(height: CGFloat) -> some View {
         let open = model.isExtraUnlocked(.mysteryBag)
-        let ready = open && model.progress.mystery.canPlay(today: model.today)
+        let ready = open && model.progress.mystery.canPlay(today: model.mysteryDay)
         return Button { if open { model.open(.mysteryBag) } } label: {
             VStack(spacing: 3) {
                 Text(verbatim: "?").font(Theme.title(height * 0.24)).foregroundStyle(.white)
@@ -525,39 +525,6 @@ struct BuddyHomeView: View {
                 if let teaching = model.trickTeaching {
                     trickCard(teaching)
                         .transition(.scale(scale: 0.6, anchor: .bottom).combined(with: .opacity))
-                } else if let says = model.buddySays {
-                    // A comic bubble; the mood question and its faces sit in the same bubble.
-                    BuddyBubble(text: says, kind: model.buddySaysKind,
-                                asker: model.buddyAsksMood ? model.progress.buddy.name : nil, sounds: model.sounds) {
-                        if model.buddyAsksMood {
-                            HStack(spacing: 10) {
-                                ForEach(Array(moods.enumerated()), id: \.element.id) { i, mood in
-                                    Button { withAnimation { model.answerMood(mood.id) } } label: {
-                                        Text(verbatim: mood.face).font(.system(size: 26))
-                                            .frame(width: 46, height: 42)
-                                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                                .fill([Theme.butter, Theme.mint, Theme.sky, Theme.bubblegum][i % 4].opacity(0.7)))
-                                            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                                .stroke(Theme.plum.opacity(0.5), lineWidth: 2))
-                                    }
-                                    .buttonStyle(PressSquish())
-                                    .accessibilityLabel(Text(mood.label))
-                                }
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 24)
-                    .onTapGesture { withAnimation { model.buddySays = nil } }
-                    .transition(.scale(scale: 0.6, anchor: .bottom).combined(with: .opacity))
-                    // It fades by itself after about four seconds, unless it is waiting for an answer.
-                    .task(id: says) {
-                        talk()
-                        guard !model.buddyAsksMood, !AppModel.isUITesting else { return }
-                        try? await Task.sleep(nanoseconds: UInt64((2.5 + Double(says.count) * 0.06) * 1_000_000_000))
-                        if !Task.isCancelled, model.buddySays == says, !model.buddyAsksMood {
-                            withAnimation { model.buddySays = nil }
-                        }
-                    }
                 }
                 ZStack(alignment: .bottomTrailing) {
                     toy(ref)
@@ -583,6 +550,45 @@ struct BuddyHomeView: View {
                         .accessibilityIdentifier("treat")
                         .padding(.trailing, 30)
                         .transition(.scale(scale: 0.4).combined(with: .opacity))
+                    }
+                }
+                // What the Buddy says floats above its head and takes no room of its own, so the
+                // screen never has to make space for it and then close up again.
+                .overlay(alignment: .top) {
+                    if model.trickTeaching == nil, let says = model.buddySays {
+                            // A comic bubble; the mood question and its faces sit in the same bubble.
+                            BuddyBubble(text: says, kind: model.buddySaysKind,
+                                        asker: model.buddyAsksMood ? model.progress.buddy.name : nil, sounds: model.sounds) {
+                                if model.buddyAsksMood {
+                                    HStack(spacing: 10) {
+                                        ForEach(Array(moods.enumerated()), id: \.element.id) { i, mood in
+                                            Button { withAnimation { model.answerMood(mood.id) } } label: {
+                                                Text(verbatim: mood.face).font(.system(size: 26))
+                                                    .frame(width: 46, height: 42)
+                                                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                                        .fill([Theme.butter, Theme.mint, Theme.sky, Theme.bubblegum][i % 4].opacity(0.7)))
+                                                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                                        .stroke(Theme.plum.opacity(0.5), lineWidth: 2))
+                                            }
+                                            .buttonStyle(PressSquish())
+                                            .accessibilityLabel(Text(mood.label))
+                                        }
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 24)
+                            .onTapGesture { withAnimation { model.buddySays = nil } }
+                            .transition(.scale(scale: 0.6, anchor: .bottom).combined(with: .opacity))
+                            // It fades by itself after about four seconds, unless it is waiting for an answer.
+                            .task(id: says) {
+                                talk()
+                                guard !model.buddyAsksMood, !AppModel.isUITesting else { return }
+                                try? await Task.sleep(nanoseconds: UInt64((2.5 + Double(says.count) * 0.06) * 1_000_000_000))
+                                if !Task.isCancelled, model.buddySays == says, !model.buddyAsksMood {
+                                    withAnimation { model.buddySays = nil }
+                                }
+                            }
+                        .alignmentGuide(.top) { $0[.bottom] - 6 }
                     }
                 }
                 // The name row opens the Buddy's own page: friendship, tricks, change Buddy.
@@ -678,10 +684,9 @@ struct BuddyHomeView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                 withAnimation(.spring(response: 0.45, dampingFraction: 0.35)) { gulp = false }
             }
-            if model.progress.buddy.growth < BuddyState.maxGrowth || old < Int(BuddyState.maxGrowth / BuddyState.growthPerHeart) {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { biggerPop = true }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.3) { withAnimation { biggerPop = false } }
-            }
+            // Every treat and gift makes the Buddy bigger, fully grown or not, and says so.
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { biggerPop = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.3) { withAnimation { biggerPop = false } }
         }
         .overlay(alignment: .top) {
             if let n = trickWord, (1...3).contains(n) {
