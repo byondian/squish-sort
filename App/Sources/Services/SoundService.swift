@@ -5,7 +5,12 @@ import AVFoundation
 /// replace them later under the same names.
 @MainActor
 final class SoundService {
-    var enabled = true { didSet { if !enabled { squish.rest() } } }
+    var enabled = true {
+        didSet {
+            if !enabled { squish.rest() }
+            music?.setVolume(enabled ? musicLevel * 0.6 : 0, fadeDuration: 0.2)
+        }
+    }
     /// The Sounds slider, 0 to 1.
     var level: Float = 1 { didSet { squish.level = level } }
     /// The close squish sounds of a soft squishy.
@@ -14,6 +19,10 @@ final class SoundService {
     var buddyVoice = true
     /// The sounds that follow a soft squishy.
     let squish = SquishSound()
+    /// The Music slider, 0 to 1. Zero is off.
+    var musicLevel: Float = 1 { didSet { music?.setVolume(enabled ? musicLevel * 0.6 : 0, fadeDuration: 0.2) } }
+    private var music: AVAudioPlayer?
+    private var musicName: String?
     private var pools: [String: [AVAudioPlayer]] = [:]
     private var moveStep = 0
     private var lastMoveAt = Date.distantPast
@@ -60,6 +69,14 @@ final class SoundService {
         play("lid")
     }
 
+    /// Cuts a long sound short (a show's music when the show is skipped).
+    func stop(_ name: String) {
+        for player in pools[name] ?? [] where player.isPlaying {
+            player.stop()
+            player.currentTime = 0
+        }
+    }
+
     /// Plays `name`, or `fallback` while `name` has not been recorded yet.
     func play(_ name: String, or fallback: String) {
         play(Bundle.main.url(forResource: name, withExtension: "wav") != nil ? name : fallback)
@@ -71,4 +88,27 @@ final class SoundService {
     }
 
     func star(_ number: Int) { play("star_\(min(3, max(1, number)))") }
+
+    /// Starts a seamless music loop, fading in. Nothing plays while the Music slider is at zero.
+    func startMusic(_ name: String) {
+        guard musicName != name else { return }
+        stopMusic(fade: 0)
+        guard let url = Bundle.main.url(forResource: name, withExtension: "wav"),
+              let player = try? AVAudioPlayer(contentsOf: url) else { return }
+        player.numberOfLoops = -1
+        player.volume = 0
+        player.play()
+        player.setVolume(enabled ? musicLevel * 0.6 : 0, fadeDuration: 0.8)
+        music = player
+        musicName = name
+    }
+
+    func stopMusic(fade: TimeInterval = 0.8) {
+        guard let player = music else { return }
+        music = nil
+        musicName = nil
+        if fade <= 0 { player.stop(); return }
+        player.setVolume(0, fadeDuration: fade)
+        DispatchQueue.main.asyncAfter(deadline: .now() + fade + 0.05) { player.stop() }
+    }
 }

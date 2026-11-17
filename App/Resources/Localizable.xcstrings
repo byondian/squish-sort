@@ -92,6 +92,50 @@
         }
       }
     },
+    "%lld coins, %lld hints and the Golden Hour board. It is in the shop whenever you like.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コイン%1$lldまい、ヒント%2$lldこ、ボード「ゴールデンアワー」のセット。いつでもショップにあります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "코인 %1$lld개, 힌트 %2$lld개, 골든 아워 보드 세트. 언제든 상점에 있어요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld 金幣、%2$lld 個提示和「黃金時刻」棋盤。隨時都在商店裡。"
+          }
+        }
+      }
+    },
+    "%lld coins, %lld hints and the Golden Hour board. Once only.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コイン%1$lldまい、ヒント%2$lldこ、ボード「ゴールデンアワー」。1回かぎり。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "코인 %1$lld개, 힌트 %2$lld개, 골든 아워 보드. 한 번만 살 수 있어요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld 金幣、%2$lld 個提示和「黃金時刻」棋盤。限購一次。"
+          }
+        }
+      }
+    },
     "%lld free moves": {
       "localizations": {
         "ja": {
@@ -356,6 +400,28 @@
         }
       }
     },
+    "%lld of %lld coins": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コイン %1$lld / %2$lld"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "코인 %1$lld / %2$lld"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "金幣 %1$lld / %2$lld"
+          }
+        }
+      }
+    },
     "%lld of %lld commons": {
       "localizations": {
         "ja": {
@@ -462,6 +528,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "星星 %1$lld / %2$lld"
+          }
+        }
+      }
+    },
+    "%lld to the boss!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ボスまであと%lld！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "보스까지 %lld판!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "距離魔王還有%lld關！"
           }
         }
       }
@@ -651,6 +739,50 @@
         }
       }
     },
+    "A keepsake for your Squish Room!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スクイッシュルームに記念品が届いたよ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스퀴시 룸에 둘 기념품이에요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "送你一個放在捏捏房間的紀念品！"
+          }
+        }
+      }
+    },
+    "A shuffle gets things moving again.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "シャッフルすれば、また動かせるよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "섞으면 다시 움직일 수 있어요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "洗牌一下就能繼續了。"
+          }
+        }
+      }
+    },
     "Add to shelf": {
       "localizations": {
         "ja": {
@@ -783,28 +915,6 @@
         }
       }
     },
-    "An extra jar gives you room to keep going.": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ビンを追加すると、続けられます。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "병을 추가하면 계속할 수 있어요."
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "多一個罐子就能繼續玩。"
-          }
-        }
-      }
-    },
     "Answer": {
       "localizations": {
         "ja": {
@@ -893,24 +1003,68 @@
         }
       }
     },
-    "BOSS 👑": {
+    "BOSS": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "ボス 👑"
+            "value": "ボス"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "보스 👑"
+            "value": "보스"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "魔王關 👑"
+            "value": "魔王"
+          }
+        }
+      }
+    },
+    "BOSS LEVEL!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ボスレベル！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "보스 레벨!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "魔王關卡！"
+          }
+        }
+      }
+    },
+    "BOSS!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ボス！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "보스!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "魔王！"
           }
         }
       }
@@ -933,6 +1087,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "明天再來"
+          }
+        }
+      }
+    },
+    "Big show after the last level!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "さいごのレベルのあとに大きなショー！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마지막 레벨 뒤에 큰 쇼가 있어요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最後一關之後有大表演！"
+          }
+        }
+      }
+    },
+    "Bigger!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "おおきくなった！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "더 커졌다!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "變大了！"
           }
         }
       }
@@ -1043,6 +1241,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "彈跳"
+          }
+        }
+      }
+    },
+    "Break it open: %lld coins": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あける：コイン%lldまい"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "열기: 코인 %lld개"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打開：%lld 金幣"
           }
         }
       }
@@ -1399,24 +1619,24 @@
         }
       }
     },
-    "Coins buy hints, extra jars and themes. Squishies are earned by playing and are never for sale.": {
+    "Coins buy hints, shuffles and themes. Squishies are earned by playing and are never for sale.": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "コインはヒント、ビン追加、テーマに使えます。スクイーズはプレイでもらえるもので、販売はしていません。"
+            "value": "コインはヒント、シャッフル、テーマに使えます。スクイーズはプレイでもらえるもので、販売はしていません。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "코인으로 힌트, 병 추가, 테마를 살 수 있어요. 스퀴시는 플레이로만 얻으며 판매하지 않아요."
+            "value": "코인으로 힌트, 섞기, 테마를 살 수 있어요. 스퀴시는 플레이로 얻는 것이며 판매하지 않아요."
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "金幣可買提示、多一個罐子和主題。軟軟只能靠遊玩獲得，絕不販售。"
+            "value": "金幣可以買提示、洗牌和主題。軟軟只能靠玩遊戲獲得，絕不販售。"
           }
         }
       }
@@ -1575,6 +1795,72 @@
         }
       }
     },
+    "DUET": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "デュエット"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "듀엣"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "二重唱"
+          }
+        }
+      }
+    },
+    "Daily Jar": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "きょうのジャー"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오늘의 병"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每日一罐"
+          }
+        }
+      }
+    },
+    "Daily Jar done!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "きょうのジャー クリア！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오늘의 병 완료!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每日一罐完成！"
+          }
+        }
+      }
+    },
     "Daily gift": {
       "localizations": {
         "ja": {
@@ -1637,6 +1923,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "刪除"
+          }
+        }
+      }
+    },
+    "Done today": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "きょうはクリア"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오늘은 완료"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今天完成了"
           }
         }
       }
@@ -1707,6 +2015,94 @@
         }
       }
     },
+    "Double tap your Buddy": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バディをダブルタップ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "버디를 두 번 탭해요"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "點兩下夥伴"
+          }
+        }
+      }
+    },
+    "Draw a circle round your Buddy": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バディのまわりに円をかこう"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "버디 둘레에 원을 그려요"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在夥伴周圍畫一個圈"
+          }
+        }
+      }
+    },
+    "Duet! They move together. Land the bottom one on its own kind and they let go.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "デュエット！ふたりはいっしょに動くよ。下の子を同じなかまの上におくと、手をはなすよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "듀엣! 둘은 함께 움직여요. 아래 친구를 같은 종류 위에 놓으면 손을 놓아요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "二重唱！它們一起移動。把下面那個放到同類上，它們就會放手。"
+          }
+        }
+      }
+    },
+    "EVERY %@ SQUISHY FOUND": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@のスクイーズをぜんぶ発見"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@의 스퀴시를 모두 찾았어요"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@的捏捏樂全部找到了"
+          }
+        }
+      }
+    },
     "Ears": {
       "localizations": {
         "ja": {
@@ -1725,6 +2121,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "耳朵"
+          }
+        }
+      }
+    },
+    "Encore Concert": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アンコールコンサート"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앙코르 콘서트"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安可演唱會"
           }
         }
       }
@@ -1795,24 +2213,24 @@
         }
       }
     },
-    "Extra jar": {
+    "Every win drops bonus coins in. It never loses coins. Break it open from %lld coins.": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "ビンを追加"
+            "value": "クリアするたびにボーナスコインが入ります。コインはへりません。%lldまいからあけられます。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "병 추가"
+            "value": "이길 때마다 보너스 코인이 들어가요. 코인은 줄어들지 않아요. %lld개부터 열 수 있어요."
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "多一個罐子"
+            "value": "每次過關都會存入獎勵金幣，金幣不會減少。存到 %lld 金幣就能打開。"
           }
         }
       }
@@ -1879,6 +2297,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "手感"
+          }
+        }
+      }
+    },
+    "Finish the jar next door to raise the curtain!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "となりのびんを完成させて、カーテンを上げよう！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "옆 병을 완성하면 커튼이 올라가요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完成旁邊的罐子，布幕就會升起！"
           }
         }
       }
@@ -2011,6 +2451,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "免費"
+          }
+        }
+      }
+    },
+    "Free shuffle": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無料シャッフル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "무료 섞기"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "免費洗牌"
+          }
+        }
+      }
+    },
+    "Frozen! Moves next to it melt the ice.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "こおってる！となりで動かすと氷がとけるよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "꽁꽁! 옆에서 움직이면 얼음이 녹아요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "結冰了！在旁邊移動就能融化冰塊。"
           }
         }
       }
@@ -2191,6 +2675,72 @@
         }
       }
     },
+    "Golden Hour": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ゴールデンアワー"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "골든 아워"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "黃金時刻"
+          }
+        }
+      }
+    },
+    "Got it!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "わかった！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "알겠어요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "知道了！"
+          }
+        }
+      }
+    },
+    "Grand Bake-Off": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "おかしづくり大会"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "베이킹 대회"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "烘焙大賽"
+          }
+        }
+      }
+    },
     "Grumpy": {
       "localizations": {
         "ja": {
@@ -2323,6 +2873,28 @@
         }
       }
     },
+    "Hidden! Move the one above to unwrap it.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "かくれてる！上の子を動かすと出てくるよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "숨어 있어요! 위에 있는 친구를 옮기면 나타나요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "藏起來了！移開上面那個就能拆開。"
+          }
+        }
+      }
+    },
     "Hint": {
       "localizations": {
         "ja": {
@@ -2363,6 +2935,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "呵呵！"
+          }
+        }
+      }
+    },
+    "Home": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ホーム"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "홈"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "首頁"
+          }
+        }
+      }
+    },
+    "How this works": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あそびかた"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "방법 보기"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "玩法說明"
           }
         }
       }
@@ -2433,6 +3049,28 @@
         }
       }
     },
+    "It never runs out. A capsule every fifth level.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "おわりはありません。5レベルごとにカプセル。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "끝이 없어요. 5레벨마다 캡슐이 나와요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "永遠玩不完。每五關一顆扭蛋。"
+          }
+        }
+      }
+    },
     "It was %@.": {
       "localizations": {
         "ja": {
@@ -2473,6 +3111,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "果凍"
+          }
+        }
+      }
+    },
+    "Keep Squishing": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ずっとスクイーズ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "계속 말랑말랑"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一直捏捏"
           }
         }
       }
@@ -2807,6 +3467,28 @@
         }
       }
     },
+    "Midnight Toy Parade": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "まよなかのおもちゃパレード"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "한밤의 장난감 퍼레이드"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "午夜玩具遊行"
+          }
+        }
+      }
+    },
     "Mint Fizz": {
       "localizations": {
         "ja": {
@@ -3071,6 +3753,28 @@
         }
       }
     },
+    "NEW TRICK": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新しい芸"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "새로운 재주"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新把戲"
+          }
+        }
+      }
+    },
     "NEW!": {
       "localizations": {
         "ja": {
@@ -3111,28 +3815,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "名字"
-          }
-        }
-      }
-    },
-    "Need one more jar?": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "びんがもう1つほしい？"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "병이 하나 더 필요해?"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "需要多一個罐子嗎？"
           }
         }
       }
@@ -3353,6 +4035,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "再 %lld 關就有扭蛋"
+          }
+        }
+      }
+    },
+    "Next trick": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "つぎの芸"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다음 재주"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下一個把戲"
           }
         }
       }
@@ -3621,6 +4325,28 @@
         }
       }
     },
+    "One a day": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1日1かい"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "하루에 하나"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每天一關"
+          }
+        }
+      }
+    },
     "One more guess": {
       "localizations": {
         "ja": {
@@ -3643,6 +4369,28 @@
         }
       }
     },
+    "One more place on your shelf": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "たなをもう1つふやす"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "선반 자리 하나 더"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "書架多一個位置"
+          }
+        }
+      }
+    },
     "One step closer to a capsule!": {
       "localizations": {
         "ja": {
@@ -3661,6 +4409,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "離扭蛋又近一步！"
+          }
+        }
+      }
+    },
+    "Only what fits moves!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "入るぶんだけ動くよ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "들어갈 만큼만 움직여요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "放得下的才會移動！"
           }
         }
       }
@@ -3749,6 +4519,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "完美！"
+          }
+        }
+      }
+    },
+    "Piggy bank": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ちょきんばこ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "돼지 저금통"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "小豬撲滿"
+          }
+        }
+      }
+    },
+    "Piggy bank full!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ちょきんばこ まんたん！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "저금통이 가득 찼어요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "撲滿存滿了！"
           }
         }
       }
@@ -4017,6 +4831,28 @@
         }
       }
     },
+    "Rehearsal %lld of %lld": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "リハーサル %1$lld／%2$lld"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "리허설 %1$lld/%2$lld"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "彩排 %1$lld／%2$lld"
+          }
+        }
+      }
+    },
     "Remove Ads": {
       "localizations": {
         "ja": {
@@ -4281,6 +5117,28 @@
         }
       }
     },
+    "See it in the shop": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ショップで見る"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "상점에서 보기"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "到商店看看"
+          }
+        }
+      }
+    },
     "Set complete!": {
       "localizations": {
         "ja": {
@@ -4409,6 +5267,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "形狀"
+          }
+        }
+      }
+    },
+    "Share": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "シェア"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "공유"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分享"
           }
         }
       }
@@ -4545,6 +5425,28 @@
         }
       }
     },
+    "Sleigh Night": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "そりの夜"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "썰매의 밤"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雪橇之夜"
+          }
+        }
+      }
+    },
     "Slow-rise foam": {
       "localizations": {
         "ja": {
@@ -4567,6 +5469,28 @@
         }
       }
     },
+    "Sneak peek %lld of %lld": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ちょい見せ %1$lld／%2$lld"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "미리 보기 %1$lld/%2$lld"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搶先看 %1$lld／%2$lld"
+          }
+        }
+      }
+    },
     "So close!": {
       "localizations": {
         "ja": {
@@ -4585,6 +5509,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "好可惜！"
+          }
+        }
+      }
+    },
+    "So close! Rematch?": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "おしい！もういちど？"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "아깝다! 다시 한 판?"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "差一點！再來一次？"
           }
         }
       }
@@ -5073,6 +6019,28 @@
         }
       }
     },
+    "Starter pack": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スターターパック"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스타터 팩"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新手禮包"
+          }
+        }
+      }
+    },
     "Stretch": {
       "localizations": {
         "ja": {
@@ -5205,6 +6173,28 @@
         }
       }
     },
+    "Swipe up on your Buddy": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バディを上にスワイプ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "버디를 위로 쓸어 올려요"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在夥伴身上往上滑"
+          }
+        }
+      }
+    },
     "Tap again": {
       "localizations": {
         "ja": {
@@ -5227,6 +6217,28 @@
         }
       }
     },
+    "Tap again!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "もういちどタップ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "한 번 더 탭!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再點一下！"
+          }
+        }
+      }
+    },
     "Tap the trick under your Buddy at home to see it again.": {
       "localizations": {
         "ja": {
@@ -5245,6 +6257,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "在主畫面點夥伴下方的特技，就能再看一次。"
+          }
+        }
+      }
+    },
+    "Tap to open!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "タップしてあけよう！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "탭해서 열어요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "點一下打開！"
+          }
+        }
+      }
+    },
+    "Thanks for coming to the show!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ショーに来てくれてありがとう！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "쇼에 와 줘서 고마워요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "謝謝你來看表演！"
           }
         }
       }
@@ -5469,6 +6525,28 @@
         }
       }
     },
+    "Tricks": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "芸"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "재주"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "把戲"
+          }
+        }
+      }
+    },
     "Try again": {
       "localizations": {
         "ja": {
@@ -5553,6 +6631,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "馬上試試"
+          }
+        }
+      }
+    },
+    "Try it now!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "やってみよう！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "지금 해 봐요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "現在試試看！"
           }
         }
       }
@@ -5777,6 +6877,28 @@
         }
       }
     },
+    "Watch a video to shuffle": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "動画を見てシャッフル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "영상 보고 섞기"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "看影片洗牌"
+          }
+        }
+      }
+    },
     "Watch an ad": {
       "localizations": {
         "ja": {
@@ -5975,6 +7097,28 @@
         }
       }
     },
+    "World finale": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ワールドのフィナーレ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "월드 피날레"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "世界最終關"
+          }
+        }
+      }
+    },
     "Yay!": {
       "localizations": {
         "ja": {
@@ -6063,6 +7207,28 @@
         }
       }
     },
+    "You finished every world! Keep Squishing carries on from here, and it never runs out.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ぜんぶのワールドをクリア！ここからは「ずっとスクイーズ」。おわりはありません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모든 월드를 클리어했어요! 이제 '계속 말랑말랑'이 이어져요. 끝이 없답니다."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有世界都過關了！接下來是「一直捏捏」，永遠玩不完。"
+          }
+        }
+      }
+    },
     "You finished every world! More are on the way.": {
       "localizations": {
         "ja": {
@@ -6125,6 +7291,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "你有 %lld 金幣"
+          }
+        }
+      }
+    },
+    "You have %lld coins. Win levels to earn more.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コインは%lldまい。レベルをクリアしてためよう。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "코인이 %lld개 있어요. 레벨을 깨고 더 모아요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你有 %lld 金幣。過關可以賺更多。"
           }
         }
       }
@@ -6213,6 +7401,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "你整理好所有罐子了。太厲害了！"
+          }
+        }
+      }
+    },
+    "You squished them all! Round %lld starts.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ぜんぶクリア！%lldしゅうめ スタート！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모두 클리어! %lld바퀴째 시작!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部過關！第 %lld 輪開始！"
           }
         }
       }

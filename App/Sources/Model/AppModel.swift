@@ -30,7 +30,12 @@ final class AppModel: ObservableObject {
     private let stats: [String: [String: Int]]
     /// A duplicate just came out of a capsule or a swap: the spares it made, for "+1 spare".
     @Published private(set) var capsuleSpares: Int?
-    @Published var screen: Screen = .level(0)
+    @Published var screen: Screen = .level(0) {
+        // The Daily Jar ends when its board is left.
+        didSet { if case .level = screen {} else { playingDaily = false } }
+    }
+    /// The level on screen is today's Daily Jar, not a level of the path.
+    private(set) var playingDaily = false
     @Published private(set) var progress: PlayerProgress
     @Published var capsule: Collectible?
     @Published var askAge = false
@@ -55,6 +60,18 @@ final class AppModel: ObservableObject {
         case trick(Int)
         /// A world's star jar reached its first, second or third prize.
         case starJar(world: String, prize: Int)
+        /// A three-second sneak peek of the world's big show, and the show itself after the boss.
+        case teaser(world: String, number: Int)
+        case finale(world: String)
+        /// The one soft card that says the starter pack is in the shop (13 and over).
+        case starterPack
+
+        var isShow: Bool {
+            switch self {
+            case .teaser, .finale: return true
+            default: return false
+            }
+        }
 
         var id: String {
             switch self {
@@ -62,6 +79,9 @@ final class AppModel: ObservableObject {
             case .worldComplete(let world, _): return "world-\(world)"
             case .trick(let number): return "trick-\(number)"
             case .starJar(let world, let prize): return "starjar-\(world)-\(prize)"
+            case .teaser(let world, let number): return "teaser-\(world)-\(number)"
+            case .finale(let world): return "finale-\(world)"
+            case .starterPack: return "starter-pack"
             }
         }
     }
@@ -71,6 +91,7 @@ final class AppModel: ObservableObject {
         case "toyshop": return "Toy Shop"
         case "sweetfactory": return "Sweet Factory"
         case "starlight": return "Starlight Stage"
+        case LevelCatalog.endless: return "Keep Squishing"
         default: return christmasWorldName
         }
     }
@@ -79,6 +100,8 @@ final class AppModel: ObservableObject {
     @Published var buddySays: String?
     /// A trick the Buddy should do now on Home (1 spin, 2 flip, 3 dance). Home clears it.
     @Published var trickToShow: Int?
+    /// The trick Home is teaching right now: everything else dims until the player has done it once.
+    @Published var trickTeaching: Int?
     /// The trigger of the line being said ("joke", "fact", "poke", ...).
     private(set) var buddySaysKind = ""
     /// Goes up each time the daily gift is opened, so the home screen can throw the coins.
@@ -101,6 +124,7 @@ final class AppModel: ObservableObject {
     let haptics = Haptics()
     let sounds = SoundService()
     let ads = AdsService()
+    let clips = ClipRecorder()
     private let store = ProgressStore()
     private var rng = SystemRandomNumberGenerator()
     private var sessionStart = Date()
@@ -108,6 +132,7 @@ final class AppModel: ObservableObject {
     private var thankedForAdThisSession = false
     /// The last win opened a capsule or unlocked an extra, so no forced ad follows it.
     private var lastWinHadReward = false
+    private var endlessLapJustDone = false
     /// Whether the capsule on screen is a squishy the player didn't have yet.
     @Published private(set) var capsuleIsNew = false
 
@@ -135,12 +160,26 @@ final class AppModel: ObservableObject {
         sounds.level = Float(loaded.soundLevel)
         sounds.squishOn = loaded.squishSoundsOn
         sounds.buddyVoice = loaded.buddyVoiceOn
+        sounds.musicLevel = loaded.musicOn ? Float(loaded.musicLevel) : 0
         // New players land straight on Level 1; the home screen arrives with the first capsule.
         screen = loaded.highestUnlocked >= 3 ? .home : .level(min(loaded.highestUnlocked, max(0, levels.count - 1)))
+        // A save that already holds every other squishy of a world is owed that world's secret.
+        for world in LevelCatalog.worlds + [ChristmasWorld.id] { queueSecretIfWon(world: world) }
+        repairBuddyName()
+        // A save that had already won every story level walks on into Keep Squishing.
+        let story = storyLevelCount
+        if story > 0, story < mainLevelCount, progress.highestUnlocked == story - 1, progress.stars[levels[story - 1].id] != nil {
+            update { $0.highestUnlocked = story }
+        }
+        purchases.onStarter = { [weak self] transactionID in self?.starterPackBought(transactionID) }
+        purchases.onPiggy = { [weak self] transactionID in self?.piggyBroken(transactionID) }
         purchases.onChange = { [weak self] owns in self?.update { $0.ownsRemoveAds = owns } }
         purchases.onCoins = { [weak self] pack, transactionID in
             self?.update { $0.wallet.credit(pack: pack, transactionID: transactionID) }
         }
+        #if DEBUG
+        if let shot = AppModel.storeShot { stage(shot) }
+        #endif
         Task {
             storefront = await Storefront.current?.countryCode ?? ""
             await purchases.start()
@@ -155,6 +194,59 @@ final class AppModel: ObservableObject {
             if let fresh = await RemoteConfig.fetch() { config = fresh }
         }
     }
+
+    #if DEBUG
+    // MARK: - Store screenshots (debug builds only; see .github/workflows/screenshots.yml)
+
+    /// "-storeShot <name>" opens the app on a staged save, for the App Store pictures.
+    static var storeShot: String? {
+        let args = ProcessInfo.processInfo.arguments
+        guard let i = args.firstIndex(of: "-storeShot"), i + 1 < args.count else { return nil }
+        return args[i + 1]
+    }
+
+    private func stage(_ shot: String) {
+        let reach = min(74, mainLevelCount - 1)
+        update { p in
+            p.age = AgeProfile(group: .adult, source: .birthYear, storefront: "GBR", lowerBound: 18)
+            p.highestUnlocked = reach
+            for i in 0..<reach { p.stars[levels[i].id] = i % 4 == 1 ? 2 : 3 }
+            for (n, squishy) in roster.collectibles.enumerated()
+            where squishy.world != ChristmasWorld.id && squishy.rarity != .secret && n % 6 != 4 {
+                p.collection.owned[squishy.id] = 1
+            }
+            p.collection.owned["taffy-snake"] = 1
+            p.seenCards = Set(p.collection.owned.keys)
+            p.wallet.earn(4250)
+            p.buddy.squishy = "peach-bun"
+            p.buddy.name = "Peach"
+            p.buddy.hearts = 14
+            p.seenExtras = Set(Extra.allCases.map(\.rawValue))
+            p.rulesShown = Set(BoardRule.allCases.map(\.rawValue))
+            p.bossSplashSeen = true
+            p.trackingAsked = true
+            p.freeHintUsed = true
+            p.stampCard.stamps = 3
+        }
+        switch shot {
+        case "puzzle":
+            screen = .level(min(22, mainLevelCount - 1))
+        case "reveal":
+            screen = .home
+            capsuleIsNew = true
+            capsule = roster.collectibles.first { $0.id == "star-narwhal" } ?? roster.collectibles.first { $0.rarity == .ultra }
+        case "room":
+            roomStart = "taffy-snake"
+            screen = .room
+        case "map":
+            screen = .map
+        case "book":
+            screen = .book
+        default:
+            screen = .home
+        }
+    }
+    #endif
 
     // MARK: - Content
 
@@ -220,26 +312,34 @@ final class AppModel: ObservableObject {
     var today: String { PlayerProgress.today() }
 
     /// Levels on the main path come first in `levels`; side-world levels follow.
-    var mainLevelCount: Int { levels.filter { LevelCatalog.worlds.contains($0.file.world) }.count }
+    var mainLevelCount: Int { levels.filter { LevelCatalog.path.contains($0.file.world) }.count }
+    /// The story worlds only: where Keep Squishing begins.
+    var storyLevelCount: Int { levels.filter { LevelCatalog.worlds.contains($0.file.world) }.count }
+    var endlessCount: Int { mainLevelCount - storyLevelCount }
 
     func isSideLevel(_ index: Int) -> Bool {
-        levels.indices.contains(index) && !LevelCatalog.worlds.contains(levels[index].file.world)
+        levels.indices.contains(index) && !LevelCatalog.path.contains(levels[index].file.world)
     }
 
     /// The number on the board: 1 to 60 on the main path, 1 to 20 in a side world.
     func levelNumber(_ index: Int) -> Int {
-        isSideLevel(index) ? levels[index].file.index : index + 1
+        if isSideLevel(index) { return levels[index].file.index }
+        // Keep Squishing counts on through every lap.
+        return index + 1 + (index >= storyLevelCount ? progress.endlessLaps * endlessCount : 0)
     }
 
-    // MARK: - Tester tools (TestFlight and debug builds only)
+    // MARK: - Tester tools (tester and debug builds only)
 
-    /// True in debug builds and in TestFlight (sandbox receipt). The tools still stay
-    /// hidden until the version line in Settings is tapped seven times.
+    /// True in debug builds, and in TestFlight builds made with the tester tools (the TESTER flag
+    /// and a sandbox receipt). The build that goes to App Review is made without the flag, so the
+    /// tools are not in it at all. They stay hidden until the version line in Settings is tapped seven times.
     static var isTesterBuild: Bool {
         #if DEBUG
         return true
-        #else
+        #elseif TESTER
         return Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
+        #else
+        return false
         #endif
     }
 
@@ -376,7 +476,7 @@ final class AppModel: ObservableObject {
             slack = 1
         } else {
             let number = index + 1
-            let worldNumber = LevelCatalog.worlds.firstIndex(of: level.file.world) ?? 0
+            let worldNumber = LevelCatalog.path.firstIndex(of: level.file.world) ?? 0
             if number <= 5 {
                 slack = 2
             } else if worldNumber == 0 {
@@ -393,7 +493,7 @@ final class AppModel: ObservableObject {
     func shakeUpMove(index: Int) -> Int? {
         guard levels.indices.contains(index), !isSideLevel(index), !AppModel.isUITesting else { return nil }
         let level = levels[index]
-        guard level.file.beat == .boss, (LevelCatalog.worlds.firstIndex(of: level.file.world) ?? 0) >= 1 else { return nil }
+        guard level.file.beat == .boss, (LevelCatalog.path.firstIndex(of: level.file.world) ?? 0) >= 1 else { return nil }
         return max(4, level.par / 2)
     }
 
@@ -503,18 +603,31 @@ final class AppModel: ObservableObject {
     }
 
     var mysteryBag: MysteryBag? {
-        MysteryBag.daily(day: today, playerSeed: progress.installID, roster: roster, worlds: openWorlds)
+        MysteryBag.daily(day: today, playerSeed: progress.installID, roster: roster, worlds: openWorlds,
+                         shapes: AppModel.shapes,
+                         seen: Set(roster.collectibles.filter { progress.collection.owns($0.id) }.map(\.id)),
+                         easy: progress.mystery.isLearning(today: today))
     }
 
+    /// Body shape groups, so the Mystery Bag's choices can look alike.
+    private static let shapes: [String: String] = {
+        guard let url = Bundle.main.url(forResource: "shapes", withExtension: "json", subdirectory: "Content"),
+              let data = try? Data(contentsOf: url),
+              let file = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return [:] }
+        return file["shapes"] as? [String: String] ?? [:]
+    }()
+
     /// One guess a day. A right guess moves the capsule bar on; a full bar is a free capsule.
-    func guessMystery(_ id: String) -> Bool {
+    /// Fewer clues used, bigger prize: every guess pays.
+    @discardableResult
+    func guessMystery(_ id: String, clues: Int = 3) -> Bool {
         guard let bag = mysteryBag, progress.mystery.canPlay(today: today) else { return false }
         let correct = bag.answer.id == id
         var earned = false
         update {
             earned = $0.mystery.recordGuess(correct: correct, today: today)
-            // Any guess pays, right or wrong.
-            $0.wallet.earn(config.coins.mysteryGuess)
+            // Any guess pays, right or wrong; a wrong one pays the smallest prize.
+            $0.wallet.earn(MysteryBag.prize(cluesUsed: clues, correct: correct))
         }
         sounds.play(correct ? "mystery_right" : "mystery_close")
         if earned {
@@ -565,10 +678,122 @@ final class AppModel: ObservableObject {
         if let i = progress.made.firstIndex(where: { $0.id == made.id }) {
             update { $0.made[i] = made }
         } else {
-            guard progress.made.count < MakerParts.maxMade else { return false }
+            guard progress.made.count < min(progress.makerSlots, MakerParts.maxMade) else { return false }
             update { $0.made.append(made) }
         }
         return true
+    }
+
+    /// One more place on the Maker shelf, for coins. The first place is free.
+    var canBuyMakerSlot: Bool { progress.makerSlots < MakerParts.maxMade }
+
+    @discardableResult
+    func buyMakerSlot() -> Bool {
+        guard canBuyMakerSlot, progress.wallet.balance >= MakerSlots.price else { return false }
+        update { p in
+            if p.wallet.spend(MakerSlots.price) { p.makerSlots += 1 }
+        }
+        sounds.play("unlock_new")
+        return true
+    }
+
+    // MARK: - Paid extras for 13 and over
+
+    /// The starter pack and the piggy bank: never in gentle mode, never before the age is known.
+    var offersAllowed: Bool {
+        config.offersEnabled && Offers.allowed(group: ageGroup, ageKnown: progress.age != nil)
+    }
+
+    private func starterPackBought(_ transactionID: UInt64) {
+        update { p in
+            guard p.wallet.credit(coins: StarterPack.coins, transactionID: transactionID) else { return }
+            p.starterPackOwned = true
+            p.hintTokens += StarterPack.hints
+            p.ownedThemes.insert(StarterPack.theme)
+        }
+    }
+
+    private func piggyBroken(_ transactionID: UInt64) {
+        update { p in
+            guard !p.wallet.hasCredited(transactionID) else { return }
+            let inside = p.piggy.take()
+            p.wallet.credit(coins: inside, transactionID: transactionID)
+        }
+        sounds.play("coin_shower")
+    }
+
+    // MARK: - Daily Jar and events
+
+    /// The light event running today, if the website's config has one.
+    var event: GameEvent? {
+        guard let event = config.event, event.isOn(today: today) else { return nil }
+        return event
+    }
+
+    var eventBanner: String? { event?.text(language: language) }
+
+    /// Today's Daily Jar board: one of the Keep Squishing boards, picked by the date.
+    private var dailyJarIndex: Int? {
+        guard let pick = DailyJar.board(day: today, count: endlessCount) else { return nil }
+        let index = storyLevelCount + pick
+        // Never a boss board: the one before a boss is a calm one.
+        return levels[index].file.beat == .boss ? index - 1 : index
+    }
+
+    /// The Daily Jar shows on Home after level 10.
+    var dailyJarOpen: Bool {
+        config.dailyJarEnabled && progress.highestUnlocked >= DailyJar.opensAfterLevel && dailyJarIndex != nil
+    }
+
+    var dailyJarDone: Bool { progress.dailyJarDay == today }
+
+    var dailyJarCoins: Int { DailyJar.coins * (event?.kind == .dailyJarBonus ? 2 : 1) }
+
+    func playDailyJar() {
+        guard dailyJarOpen, !dailyJarDone, let index = dailyJarIndex else { return }
+        playingDaily = true
+        screen = .level(index)
+        // Setting the screen is what clears the flag for other screens; a level keeps it.
+        playingDaily = true
+    }
+
+    /// Today's Daily Jar is won: coins, a treat for the Buddy and the day's stamp. No streak, nothing to lose.
+    private func wonDailyJar(playSeconds: Double) {
+        var summary = WinSummary()
+        summary.dailyJar = true
+        summary.firstClear = true
+        summary.pot = dailyJarCoins
+        var card = progress.stampCard
+        var stampFillsBar = false
+        if let reward = card.stamp(today: today, rules: config.coins) {
+            summary.stamped = true
+            summary.stamps = card.stamps
+            switch reward {
+            case .coins(let amount): summary.stampCoins = amount
+            case .capsuleStep: stampFillsBar = true
+            }
+        }
+        if buddyActive {
+            summary.treat = progress.buddy.treats < BuddyState.maxStoredTreats
+            summary.buddyName = progress.buddy.name
+        }
+        var barFull = false
+        update { p in
+            p.dailyJarDay = today
+            p.stampCard = card
+            if stampFillsBar { barFull = p.mystery.addStep() }
+            p.wallet.earn(summary.total)
+            p.buddy.earnTreatForWin()
+            AdCadence.recordPlayTime(playSeconds, &p.cadence)
+        }
+        lastWin = summary
+        lastWinHadReward = true
+        levelCheer = buddyLine("win")
+        if barFull {
+            let world = mysteryCapsuleWorld
+            update { $0.pendingCapsules.append(world) }
+            openPendingCapsule()
+        }
     }
 
     func deleteMade(_ id: String) {
@@ -618,12 +843,28 @@ final class AppModel: ObservableObject {
         open(.squishRoom)
     }
 
+    /// True when `name` is the roster name (in any language) of a squishy other than `ref`.
+    private func isAnotherSquishysName(_ name: String, than ref: String) -> Bool {
+        roster.collectibles.contains { c in
+            c.id != ref && (c.name == name || c.names.values.contains(name))
+        }
+    }
+
+    /// Build 3 could leave the Buddy wearing the name of the squishy it used to be.
+    private func repairBuddyName() {
+        guard let ref = progress.buddy.squishy, isAnotherSquishysName(progress.buddy.name, than: ref),
+              let own = NameFilter.clean(displayName(for: ref)) else { return }
+        update { $0.buddy.name = own }
+    }
+
     var offersFirstBuddy: Bool { isExtraUnlocked(.buddy) && progress.buddy.squishy == nil }
 
     /// False when the name is empty or rude.
     func setBuddy(ref: String, name: String) -> Bool {
         guard isExtraUnlocked(.buddy), squeezables.contains(ref), let clean = NameFilter.clean(name) else { return false }
-        update { $0.buddy.squishy = ref; $0.buddy.name = clean; $0.seenExtras.insert(Extra.buddy.rawValue) }
+        // A name that is really another squishy's own name does not follow the Buddy to a new squishy.
+        let kept = isAnotherSquishysName(clean, than: ref) ? (NameFilter.clean(displayName(for: ref)) ?? clean) : clean
+        update { $0.buddy.squishy = ref; $0.buddy.name = kept; $0.seenExtras.insert(Extra.buddy.rawValue) }
         say("greet_back")
         return true
     }
@@ -677,14 +918,15 @@ final class AppModel: ObservableObject {
         heartsChanged(from: before)
     }
 
-    /// Hearts only ever add up: every 10 teach a trick, and the Buddy grows a little up to 50.
+    /// Hearts only ever add up: every 10 teach a trick, and each one makes the Buddy a little bigger.
     private func heartsChanged(from before: Int) {
         let now = progress.buddy.hearts
         if BuddyState.tricksKnown(hearts: now) > BuddyState.tricksKnown(hearts: before) {
             sounds.play("trick", or: "unlock_new")
             buddySays = String(localized: "I grew!")
             if showingNews == nil { showingNews = .trick(BuddyState.tricksKnown(hearts: now)) }
-        } else if BuddyState.growthSteps(hearts: now) > BuddyState.growthSteps(hearts: before) {
+        } else if now / 5 > before / 5, Double(before) * BuddyState.growthPerHeart < BuddyState.maxGrowth {
+            // Every fifth heart the Buddy says so; the growing itself shows on every treat.
             sounds.play("grow", or: "heart")
             buddySays = String(localized: "I grew!")
         } else {
@@ -769,6 +1011,8 @@ final class AppModel: ObservableObject {
     /// Re-derived from the current storefront every time (unknown storefront = strictest).
     var ageGroup: AgeGroup { AgePolicy.group(of: progress.age, storefront: storefront) }
     var isGentleMode: Bool { ageGroup == .child }
+    /// Sharing a clip of a big moment: 13 and over only (14 in Korea), never before the age step.
+    var canShareClips: Bool { progress.age != nil && !isGentleMode && !AppModel.isUITesting && clips.available }
     var ownsRemoveAds: Bool { purchases.ownsRemoveAds }
 
     func update(_ change: (inout PlayerProgress) -> Void) {
@@ -797,11 +1041,19 @@ final class AppModel: ObservableObject {
         /// The Buddy's free treat for this win: true = one more in the jar, false = the jar was full, nil = no Buddy yet.
         var treat: Bool?
         var buddyName = ""
+        /// This was today's Daily Jar.
+        var dailyJar = false
+        /// How full the piggy bank is after this win, 0 to 1. Nil where it isn't shown.
+        var piggyFill: Double?
         var total: Int { pot * (doubled ? 2 : 1) + starBonus + streakBonus + dailyBonus + stampCoins }
     }
 
     /// `pot` is what the level's jars threw on this attempt (0 on a replay).
     func won(index: Int, moves: Int, stars: Int, attempts: Int, playSeconds: Double, pot: Int) {
+        if playingDaily {
+            wonDailyJar(playSeconds: playSeconds)
+            return
+        }
         let level = levels[index]
         let rules = config.coins
         // A level pays out once. Replays can raise the stars (and pay the
@@ -812,7 +1064,8 @@ final class AppModel: ObservableObject {
         let worldWasComplete = isWorldComplete(level.file.world)
         var summary = WinSummary()
         summary.firstClear = firstClear
-        summary.pot = firstClear ? pot : 0
+        // A double coins event doubles what the jars threw.
+        summary.pot = firstClear ? pot * (event?.kind == .doubleCoins ? 2 : 1) : 0
         summary.starBonus = Coins.starBonus(stars: stars, previousBest: previousBest, rules: rules)
         let streak = Coins.nextStreak(current: progress.winStreak, firstClear: firstClear, attempts: attempts)
         if firstClear && !isGentleMode {
@@ -845,6 +1098,8 @@ final class AppModel: ObservableObject {
             p.stampCard = card
             if stampFillsBar { barFull = p.mystery.addStep() }
             p.wallet.earn(summary.total)
+            // The piggy bank gets a bonus on top; the win's own coins are untouched.
+            if offersAllowed, p.piggy.add(forWin: summary.total) > 0 || p.piggy.isFull { summary.piggyFill = p.piggy.fill }
             p.winStreak = streak
             p.lastWinDay = today
             if summary.offersRemoveAds { p.removeAdsOfferShown = true }
@@ -865,11 +1120,38 @@ final class AppModel: ObservableObject {
         if unlockedExtra { sounds.play("unlock_new") }
         // Told when the player moves on from the win card. The Squish Room's card is queued
         // by the first capsule (see openCapsule), because that capsule is what unlocks it.
-        if !worldWasComplete, isWorldComplete(level.file.world) {
+        if level.file.world == LevelCatalog.endless {
+            // The last level of Keep Squishing starts the next lap: its stars come off and it pays again.
+            if isWorldComplete(LevelCatalog.endless) {
+                let ids = levels.filter { $0.file.world == LevelCatalog.endless }.map(\.id)
+                update { p in
+                    for id in ids { p.stars[id] = nil }
+                    p.endlessLaps += 1
+                    p.highestUnlocked = storyLevelCount
+                    p.wallet.earn(config.coins.worldComplete)
+                }
+                endlessLapJustDone = true
+                toast = String(localized: "You squished them all! Round \(progress.endlessLaps + 1) starts.")
+            }
+        } else if !worldWasComplete, isWorldComplete(level.file.world) {
             let order = LevelCatalog.worlds
             let next = order.firstIndex(of: level.file.world).flatMap { $0 + 1 < order.count ? order[$0 + 1] : nil }
             news.append(.worldComplete(world: level.file.world, next: next))
             update { $0.wallet.earn(config.coins.worldComplete) }
+            // The world's big show follows its WORLD COMPLETE card.
+            if !AppModel.isUITesting, ShowPlan.load(level.file.world) != nil { news.append(.finale(world: level.file.world)) }
+        }
+        // A sneak peek of the big show on a few levels along the way, each one once.
+        if !AppModel.isUITesting, let plan = ShowPlan.load(level.file.world),
+           let spot = plan.teaserLevels.firstIndex(of: level.file.index),
+           spot + 1 > (progress.teasersSeen[level.file.world] ?? 0) {
+            news.append(.teaser(world: level.file.world, number: spot + 1))
+        }
+        // One soft card for the starter pack, once, after the first world. No timer, and never again.
+        if offersAllowed, !progress.starterPackOwned, !progress.starterCardShown, !AppModel.isUITesting,
+           purchases.starterProduct != nil, isWorldComplete(LevelCatalog.worlds[0]) {
+            news.append(.starterPack)
+            update { $0.starterCardShown = true }
         }
         awardStarJars()
         // The Buddy is met in the first capsule itself ("Is this your Buddy?"), so it has no card.
@@ -882,7 +1164,7 @@ final class AppModel: ObservableObject {
             update { $0.pendingCapsules.append(world) }
         }
         if firstClear && level.file.capsule {
-            openCapsule(world: level.file.world)
+            openCapsule(world: level.look)
         } else {
             openPendingCapsule()
         }
@@ -928,6 +1210,34 @@ final class AppModel: ObservableObject {
             joinedBook = squishy
             queueSecretIfWon(world: squishy.world)
         }
+    }
+
+    // MARK: - Boss levels
+
+    /// The giant that guards a world's last level: the world's shape-shifter.
+    func bossID(world: String) -> String {
+        roster.collectibles.first { $0.world == world && $0.shapeshifter }?.id ?? "morphy"
+    }
+
+    /// The last level of a world: its finale.
+    func isFinale(_ index: Int) -> Bool {
+        guard levels.indices.contains(index) else { return false }
+        let world = levels[index].file.world
+        return levels.lastIndex { $0.file.world == world } == index
+    }
+
+    /// Levels still to win before the world's finale, counting from the level to play next: 3, 2 or 1.
+    /// Nil when the finale is further off, is next, or is already won.
+    func levelsToFinale(world: String) -> Int? {
+        let own = levels.indices.filter { levels[$0].file.world == world }
+        guard let last = own.last, progress.stars[levels[last].id] == nil,
+              let next = own.first(where: { progress.stars[levels[$0].id] == nil }), isUnlocked(next) else { return nil }
+        let left = last - next
+        return (1...3).contains(left) ? left : nil
+    }
+
+    func bossSplashShown() {
+        if !progress.bossSplashSeen { update { $0.bossSplashSeen = true } }
     }
 
     // MARK: - Collection
@@ -1014,8 +1324,17 @@ final class AppModel: ObservableObject {
     }
 
     func next(after index: Int) {
-        let n = index + 1
+        var n = index + 1
         levelCheer = nil
+        if playingDaily {
+            screen = homeScreen
+            return
+        }
+        // A new lap of Keep Squishing begins at its first level.
+        if endlessLapJustDone {
+            endlessLapJustDone = false
+            n = storyLevelCount
+        }
         // The main path never rolls on into a side world.
         let samePath = isSideLevel(n) == isSideLevel(index)
         screen = samePath && isUnlocked(n) ? .level(n) : homeScreen
@@ -1212,7 +1531,7 @@ final class AppModel: ObservableObject {
             afterNews = index
             let first = news.removeFirst()
             // The world complete screen brings its own fanfare.
-            if case .worldComplete = first {} else { sounds.play("win_boss"); haptics.win() }
+            if case .worldComplete = first {} else if !first.isShow { sounds.play("win_boss"); haptics.win() }
             showingNews = first
             return
         }
@@ -1225,6 +1544,23 @@ final class AppModel: ObservableObject {
         // A trick just learned is done straight away, as soon as its card is closed.
         if case .trick(let number) = read { trickToShow = number }
         if case .worldComplete = read { maybeAskForRating(at: .worldComplete) }
+        if case .teaser(let world, let number) = read {
+            update { $0.teasersSeen[world] = max($0.teasersSeen[world] ?? 0, number) }
+        }
+        if case .finale(let world) = read, let plan = ShowPlan.load(world) {
+            update {
+                $0.finalesSeen.insert(world)
+                $0.keepsakes.insert(plan.keepsake)
+            }
+        }
+        if open, case .starterPack = read {
+            news = []
+            showingNews = nil
+            afterNews = nil
+            levelCheer = nil
+            screen = .shop
+            return
+        }
         if open, case .unlocked(let extra) = read {
             news = []
             showingNews = nil
@@ -1234,8 +1570,9 @@ final class AppModel: ObservableObject {
             return
         }
         if !news.isEmpty {
-            showingNews = news.removeFirst()
-            sounds.play("unlock_new")
+            let following = news.removeFirst()
+            showingNews = following
+            if !following.isShow { sounds.play("unlock_new") }
             return
         }
         showingNews = nil
@@ -1307,18 +1644,9 @@ final class AppModel: ObservableObject {
 
     var undoLimit: Int? { ownsRemoveAds ? nil : 5 }
 
-    /// Extra jar: 1 free a day (1 free per level with Remove Ads).
-    func canUseFreeExtraJar(usedThisLevel: Bool) -> Bool {
-        ownsRemoveAds ? !usedThisLevel : progress.freeExtraJarDay != today
-    }
-
-    func useFreeExtraJar() {
-        if !ownsRemoveAds { update { $0.freeExtraJarDay = today } }
-    }
-
     /// Hint: first one free, then 3 a day with Remove Ads (rewarded ads for others once ads are in).
     var hintsAvailable: Bool {
-        if !progress.freeHintUsed { return true }
+        if !progress.freeHintUsed || progress.hintTokens > 0 { return true }
         guard ownsRemoveAds else { return false }
         return progress.hintDay != today || progress.hintsUsedToday < 3
     }
@@ -1327,6 +1655,8 @@ final class AppModel: ObservableObject {
         update { p in
             if !p.freeHintUsed { p.freeHintUsed = true; return }
             if p.hintDay != today { p.hintDay = today; p.hintsUsedToday = 0 }
+            // Remove Ads owners use their three a day first; starter pack hints are kept for after.
+            if !(ownsRemoveAds && p.hintsUsedToday < 3), p.hintTokens > 0 { p.hintTokens -= 1; return }
             p.hintsUsedToday += 1
         }
     }
@@ -1350,6 +1680,7 @@ final class AppModel: ObservableObject {
     func setMusicLevel(_ level: Double) {
         let level = min(1, max(0, level))
         update { $0.musicLevel = level; $0.musicOn = level > 0 }
+        sounds.musicLevel = Float(level)
     }
 
     func setSquishSounds(_ on: Bool) {

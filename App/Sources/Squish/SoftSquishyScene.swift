@@ -2,6 +2,7 @@ import CoreMotion
 import SpriteKit
 import UIKit
 import SquishSoft
+import SquishPolicy
 
 /// Where the art is, sampled from its transparency, so only the toy itself is soft.
 struct SquishMask {
@@ -139,6 +140,8 @@ final class SoftSquishyScene: SKScene {
     }
 
     var mode = Mode.pressOnly
+    /// The Buddy on Home: once thrown and settled, it slides back to the middle.
+    var comesHome = false
     var reduceMotion = false
     var soundOn: () -> Bool = { true }
     var hapticsOn: () -> Bool = { true }
@@ -149,6 +152,12 @@ final class SoftSquishyScene: SKScene {
     /// The last finger left; the number is how deep the squeeze was (`metric.D`).
     var onLetGo: ((Double) -> Void)?
     var onDoubleTap: (() -> Void)?
+    /// A finger drew a trick (a flick up, a circle). True if a trick was done, so the toy is not also thrown.
+    var onGesture: ((TrickGesture) -> Bool)?
+    /// Each frame: where the body is and how hard it is squeezed, for the signature moves drawn over it.
+    var onPulse: ((SquishPulse) -> Void)?
+    /// Each finger's path since it went down, on or beside the toy.
+    private var paths: [Int: (points: [(x: Double, y: Double)], began: TimeInterval)] = [:]
 
     private let tuning = SquishTuning.standard
     private var body: SquishBody?
@@ -218,6 +227,7 @@ final class SoftSquishyScene: SKScene {
         body?.releaseAll()
         touchTimes = [:]
         touchStarts = [:]
+        paths = [:]
         motion.stop(self)
         pokeEnds = nil
         sounds?.rest()
@@ -273,6 +283,7 @@ final class SoftSquishyScene: SKScene {
         }
         touchTimes = [:]
         touchStarts = [:]
+        paths = [:]
         pokeEnds = nil
         waitsForPop = false
         carried = 0
@@ -328,6 +339,7 @@ final class SoftSquishyScene: SKScene {
         for touch in touches {
             let at = point(touch), id = ObjectIdentifier(touch).hashValue
             var held = at
+            if onGesture != nil { paths[id] = ([at], touch.timestamp) }
             if mode == .room {
                 guard body.grab(id, x: at.x, y: at.y) else { continue }
             } else {
@@ -354,6 +366,7 @@ final class SoftSquishyScene: SKScene {
         guard let body else { return }
         for touch in touches {
             let id = ObjectIdentifier(touch).hashValue
+            if let n = paths[id]?.points.count, n < 600 { paths[id]?.points.append(point(touch)) }
             guard let last = touchTimes[id], let start = touchStarts[id] else { continue }
             // Outside the Squish Room the finger only presses: it stays where it went down.
             let at = mode == .room ? point(touch) : (x: start.x, y: start.y)
@@ -369,6 +382,14 @@ final class SoftSquishyScene: SKScene {
         guard let body else { return }
         for touch in touches {
             let id = ObjectIdentifier(touch).hashValue
+            var trick = false
+            if let path = paths.removeValue(forKey: id), let onGesture {
+                let c = body.centre()
+                if let gesture = TrickGesture.classify(points: path.points, seconds: touch.timestamp - path.began,
+                                                       centre: (x: c.x, y: c.y), size: body.size) {
+                    trick = onGesture(gesture)
+                }
+            }
             guard touchTimes.removeValue(forKey: id) != nil else { continue }
             touchStarts[id] = nil
             let depth = body.metric.D
@@ -376,7 +397,7 @@ final class SoftSquishyScene: SKScene {
             body.release(id)
             guard !body.isHeld else { continue }
             // Reduce Motion: let go without a throw.
-            if reduceMotion { body.stop() }
+            if reduceMotion || trick { body.stop() }
             waitsForPop = tuning.feel(feel).hapticDentPop && dent > 0.2
             if let volume = mixer.pop(depth: depth, feel: feel) {
                 sounds?.pop(volume: volume, pan: pan, enabled: soundOn())
@@ -424,10 +445,23 @@ final class SoftSquishyScene: SKScene {
         // Untouched and settled, only the slow breath and the phone's lean are left to show:
         // a third of the frames is plenty for those, and easier on the battery.
         let m = body.metric
+        if let onPulse {
+            let c = body.centre(), held = !touchTimes.isEmpty
+            onPulse(SquishPulse(squeeze: min(1, max(m.D / 0.15, held ? 0.35 : 0)), held: held,
+                                x: c.x, y: c.y, side: side, angle: body.theta))
+        }
         let busy = !touchTimes.isEmpty || pokeEnds != nil || m.air || m.speed > 0.02 || m.Z > 0.01 || abs(m.rate) > 0.01
         stillFor = busy ? 0 : stillFor + dt
         drawTick &+= 1
-        if stillFor < 1 || drawTick % 3 == 0 { draw() }
+        var sliding = false
+        if comesHome, stillFor > 0.5, size.width > 0 {
+            let off = Double(size.width) / 2 - body.centre().x
+            if abs(off) > 1.5 {
+                body.shift(dx: off * min(1, dt * 4))
+                sliding = true
+            }
+        }
+        if stillFor < 1 || sliding || drawTick % 3 == 0 { draw() }
     }
 
     private func feedback(_ dt: Double) {

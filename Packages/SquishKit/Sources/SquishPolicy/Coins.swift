@@ -47,7 +47,7 @@ public struct CoinRules: Codable, Equatable, Sendable {
 }
 
 /// Coins (Ian, 16 Nov 2026): earned by playing, also sold in packs. Spent on
-/// hints, extra jars, board themes and Buddy treats and gifts only. Nothing paid leads to squishies or
+/// hints, shuffles, board themes and Buddy treats and gifts only. Nothing paid leads to squishies or
 /// capsules: capsules come only from finishing levels, and every level can be
 /// finished free (no move limit, unlimited retries, auto-softening).
 public enum Coins {
@@ -98,7 +98,7 @@ public enum Coins {
     }
 
     public enum Item: String, Codable, CaseIterable, Sendable {
-        case hint, extraJar, theme
+        case hint, theme
         /// Buddy items. Cosmetic fun only: hearts never affect squishies, capsules, odds or level help.
         case treat, gift
         /// A second or later shuffle on a level. The first one each level is free.
@@ -107,7 +107,6 @@ public enum Coins {
         public var price: Int {
             switch self {
             case .hint: return 250
-            case .extraJar: return 400
             case .theme: return 1500
             case .treat: return 100
             case .gift: return 600
@@ -192,6 +191,18 @@ public struct LevelPot: Equatable, Sendable {
     }
 
     private var paidWords: Set<SortChain.Word> = []
+    private var encores = 0
+    public static let encoreCoins = 20
+
+    /// A duet let go: +20 on a first clear, at most once for each duet the level has, so undoing
+    /// and letting go again adds nothing.
+    @discardableResult
+    public mutating func encore(duetsInLevel: Int) -> Int {
+        guard paysCoins, encores < duetsInLevel else { return 0 }
+        encores += 1
+        coins += LevelPot.encoreCoins
+        return LevelPot.encoreCoins
+    }
 
     /// Squish Fever: a jar finished during it pays its coins a second time (first clears only).
     @discardableResult
@@ -309,12 +320,12 @@ public struct OptInAdState: Codable, Equatable, Sendable {
 }
 
 public enum OptInReward: String, CaseIterable, Sendable {
-    case hint, extraJar, doubleCoins, extraGuess, dailyGift
+    case hint, shuffle, doubleCoins, extraGuess, dailyGift
 
-    /// Gentle mode is offered opt-in ads only for a hint and for the extra jar.
+    /// Gentle mode is offered opt-in ads only for a hint and for a shuffle on the stuck screen.
     /// (Its daily gift is free, with no ad.)
     public func isOffered(to group: AgeGroup) -> Bool {
-        group != .child || self == .hint || self == .extraJar
+        group != .child || self == .hint || self == .shuffle
     }
 }
 
@@ -353,6 +364,25 @@ public struct CoinWallet: Codable, Equatable, Sendable {
         guard !creditedTransactions.contains(transactionID) else { return false }
         creditedTransactions.insert(transactionID)
         balance += pack.coins
+        return true
+    }
+
+    /// Coins from a purchase that isn't a fixed pack (the starter pack, the piggy bank). Once per transaction.
+    @discardableResult
+    public mutating func credit(coins: Int, transactionID: UInt64) -> Bool {
+        guard !creditedTransactions.contains(transactionID) else { return false }
+        creditedTransactions.insert(transactionID)
+        balance += max(0, coins)
+        return true
+    }
+
+    public func hasCredited(_ transactionID: UInt64) -> Bool { creditedTransactions.contains(transactionID) }
+
+    /// Spends a plain amount (a Maker place). False, and nothing spent, when there isn't enough.
+    @discardableResult
+    public mutating func spend(_ amount: Int) -> Bool {
+        guard amount >= 0, balance >= amount else { return false }
+        balance -= amount
         return true
     }
 

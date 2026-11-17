@@ -47,6 +47,10 @@ struct RootView: View {
             if let news = model.showingNews {
                 if case .worldComplete(let world, let next) = news {
                     WorldCompleteView(world: world, next: next).id(news.id).transition(.opacity)
+                } else if case .teaser(let world, let number) = news {
+                    WorldShowView(world: world, teaser: number).id(news.id).transition(.opacity)
+                } else if case .finale(let world) = news {
+                    WorldShowView(world: world, teaser: nil).id(news.id).transition(.opacity)
                 } else {
                     NewsCard(news: news).id(news.id).transition(.opacity)
                 }

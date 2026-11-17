@@ -5,7 +5,7 @@ Deterministic (fixed seeds), so re-running reproduces the same files. Levels 1-3
 and 5 are hand-built from the game design doc; the rest are chosen from random
 candidates by target par for their beat. CI re-solves every level in Swift.
 
-Usage: python3 tools/levelgen.py [--only toyshop-07] [--world christmas]
+Usage: python3 tools/levelgen.py [--only toyshop-07] [--world christmas] [--world endless 1 240]
 """
 import json, os, random, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -36,6 +36,9 @@ SHAPE = {
 FINALE = (8, 2, 3.2)
 # From this level of a world on, an earlier world's new thing mixes back in.
 MIX = {"starlight": (13, "hidden")}
+# Starlight Stage changes its twist half way: mixed duets up to level 12, Curtain Call jars from 13
+# (Ian, 17 Nov). Curtain levels have no duets.
+CURTAINS_FROM = {"starlight": 13}
 # Later worlds start a little bigger at the same positions.
 WORLD_BUMP = {0: 0, 1: 1, 2: 1, 3: 1}
 # Santa's Grotto is a side world that opens after main level 10, so it is
@@ -85,22 +88,27 @@ def mechanic_count(mech, pos):
     if mech == "hidden":
         return min(2 + pos // 2, 10)
     if mech == "sticky":
-        return min(1 + pos // 5, 4)
+        # mixed duets: one a level at first, then up to two, up to three from level 15
+        return 1 if pos <= 5 else (2 if pos < 15 else 3)
     if mech == "frozen":
         return min(1 + pos // 8, 3)
+    if mech == "curtain":
+        # one curtain at first, two from level 18
+        return 1 if pos < 18 else 2
     return 0
 
 
-def random_board(rng, names, empties, mech, mcount, mix_hidden=0):
+def random_board(rng, names, empties, mech, mcount, mix_hidden=0, mix_frozen=0):
     """Returns (jars, mechanics) or None."""
     units = []
     if mech == "sticky":
-        # duets are placed as 2-piece units
-        pair_kinds = rng.sample(names, min(mcount, len(names)))
+        # a duet is two different kinds placed as one 2-piece unit (bottom, top)
         pool = [n for n in names for _ in range(CAP)]
-        for k in pair_kinds:
-            pool.remove(k); pool.remove(k)
-            units.append((k, k))
+        for _ in range(mcount):
+            a, b = rng.sample(names, 2)
+            if a in pool and b in pool:
+                pool.remove(a); pool.remove(b)
+                units.append((a, b))
         units += [(p,) for p in pool]
     else:
         units = [(n,) for n in names for _ in range(CAP)]
@@ -141,11 +149,30 @@ def random_board(rng, names, empties, mech, mcount, mix_hidden=0):
                 if len(picks) == mcount:
                     break
             mechanics["frozen"] = sorted(picks)
+        closed = []
+        if mech == "curtain":
+            # a curtain hides a full jar; the spare jars are never behind one
+            closed = sorted(rng.sample(range(len(jars)), min(mcount, len(jars))))
+            mechanics["curtains"] = closed
         if mix_hidden:
-            # wrapped pieces mixed into a duet world: never a duet piece, never the top of a jar
+            # wrapped pieces mixed into a duet world: never a duet piece, never the top of a jar,
+            # never behind a curtain
             taken = {(j, i) for j, i in sticky} | {(j, i + 1) for j, i in sticky}
-            spots = [[j, i] for j in range(len(jars)) for i in range(CAP - 1) if (j, i) not in taken]
+            spots = [[j, i] for j in range(len(jars)) for i in range(CAP - 1) if (j, i) not in taken and j not in closed]
             mechanics["hidden"] = sorted(rng.sample(spots, min(mix_hidden, len(spots))))
+        if mix_frozen:
+            # frozen pieces mixed in (Keep Squishing): one a jar at most, never a duet piece,
+            # never wrapped as well, never behind a curtain
+            taken = {(j, i) for j, i in sticky} | {(j, i + 1) for j, i in sticky}
+            taken |= {(j, i) for j, i in mechanics.get("hidden", [])}
+            spots = [[j, i] for j in range(len(jars)) for i in range(CAP) if (j, i) not in taken and j not in closed]
+            picks, used = [], set()
+            for sp in rng.sample(spots, len(spots)):
+                if sp[0] not in used:
+                    picks.append(sp); used.add(sp[0])
+                if len(picks) == mix_frozen:
+                    break
+            mechanics["frozen"] = sorted(picks)
         jars = jars + [[] for _ in range(empties)]
         return jars, mechanics
     return None
@@ -166,27 +193,52 @@ def staircase(rng, names):
     return jars
 
 
-def choose(rng, level, names, empties, mech, mcount, target, mix_hidden=0):
-    """Best solvable random candidate by distance to target par (lowest par if no target)."""
+def killing_first_moves(b):
+    """How many opening moves leave the board with no way to win (Ian, level 42: one move in and
+    the level was already lost). Levels are picked so that there are none."""
+    dead = 0
+    for (f, t) in b.moves():
+        nb = b.apply(f, t)
+        if nb.won():
+            continue
+        sol, _ = solve(nb, 40_000, weight=3)
+        if sol is None:
+            dead += 1
+    return dead
+
+
+def choose(rng, level, names, empties, mech, mcount, target, mix_hidden=0, mix_frozen=0, tries=None, states=600_000):
+    """Best solvable random candidate: first one whose every opening move can still be won from,
+    then by distance to target par (lowest par if no target)."""
     best = None
-    for _ in range(80):
-        cand = random_board(rng, names, empties, mech, mcount, mix_hidden)
+    for _ in range(tries or int(os.environ.get("LEVELGEN_TRIES", "80"))):
+        cand = random_board(rng, names, empties, mech, mcount, mix_hidden, mix_frozen)
         if cand is None:
             continue
         jars_c, mech_c = cand
         b, _ = board_from_level(dict(level, jars=jars_c, mechanics=mech_c))
-        sol, _ = solve(b, 600_000)
+        if tries:
+            # Keep Squishing: a quick, greedy look first throws out the boards that would be slow to settle.
+            quick, _ = solve(b, 6_000, weight=3)
+            if quick is None:
+                continue
+        sol, _ = solve(b, states)
         if sol is None:
             continue
         score = abs(len(sol) - target) if target else len(sol)
-        if best is None or score < best[0]:
-            best = (score, jars_c, mech_c)
-        if target and score <= 1:
+        if best is not None and best[0][0] == 0 and score >= best[0][1]:
+            continue
+        rank = (killing_first_moves(b), score)
+        if best is None or rank < best[0]:
+            best = (rank, jars_c, mech_c)
+        if target and best[0][0] == 0 and best[0][1] <= 1:
             break
-        if not target and best and _ >= 20:
+        if not target and best[0][0] == 0 and _ >= 20:
             break
     if best is None:
         raise SystemExit(f"{level['id']}: no solvable candidate")
+    if best[0][0] > 0:
+        print(f"  {level['id']}: {best[0][0]} opening move(s) still lose the level", file=sys.stderr)
     return best[1], best[2]
 
 
@@ -211,6 +263,8 @@ def make_level(world_idx, pos):
             k = min(k, 7)
             mult = 9  # no target: the longest answer found wins
     names = kinds_for(world_idx, k)
+    if pos >= CURTAINS_FROM.get(world, 99):
+        mech = "curtain"
     rng = random.Random(f"{world}-{pos}")
     level = {
         "schema": 1, "id": f"{world}-{pos:02d}", "world": world, "index": pos,
@@ -243,11 +297,34 @@ def make_level(world_idx, pos):
             mcount = 1 if pos == 1 or (world_idx == SIDE_WORLD and pos == 2) else 2
         mix_from, mix_mech = MIX.get(world, (99, None))
         mix_hidden = min(2 + (pos - mix_from) // 2, 6) if pos >= mix_from and mix_mech == "hidden" else 0
-        jars, mechanics = choose(rng, level, names, empties, mech, mcount, target, mix_hidden)
+        if pos == CURTAINS_FROM.get(world, 99):
+            mix_hidden = 0  # the first curtain level shows the curtain alone
+        # Duets need room: if no board can be solved, ask for fewer duets, then for one more spare jar.
+        tries = [(mcount, empties)]
+        if mech in ("sticky", "curtain"):
+            tries += [(m, empties) for m in range(mcount - 1, 0, -1)] + [(1, empties + 1)]
+        for n, (mc, em) in enumerate(tries):
+            try:
+                jars, mechanics = choose(rng, level, names, em, mech, mc, target, mix_hidden)
+                break
+            except SystemExit:
+                if n == len(tries) - 1:
+                    raise
+        if mech == "curtain":
+            # A curtain and a single spare jar leave openings that lose on the spot. Rather than
+            # ship one, the level gets a second spare jar.
+            b0, _ = board_from_level(dict(level, jars=jars, mechanics=mechanics))
+            if killing_first_moves(b0) > 0:
+                jars2, mech2 = choose(rng, level, names, em + 1, mech, mc, target, mix_hidden)
+                b2, _ = board_from_level(dict(level, jars=jars2, mechanics=mech2))
+                if killing_first_moves(b2) == 0:
+                    jars, mechanics = jars2, mech2
     level["jars"] = jars
     level["mechanics"] = {"hidden": mechanics.get("hidden", []),
                           "sticky": mechanics.get("sticky", []),
                           "frozen": mechanics.get("frozen", [])}
+    if mechanics.get("curtains"):
+        level["mechanics"]["curtains"] = mechanics["curtains"]
     b, _ = board_from_level(level)
     sol, explored = solve(b, 3_000_000)
     if sol is None:
@@ -257,6 +334,110 @@ def make_level(world_idx, pos):
     level["capsule"] = capsule_level(pos, last)
     level["softenAfterFails"] = 3 if beat in ("tension", "boss") else None
     return level
+
+
+# Keep Squishing: the path carries on after Starlight Stage. Blocks of ten rotate through the
+# worlds and mix their new things; sizes are the late-world ones.
+ENDLESS = "endless"
+ENDLESS_LENGTH = 240
+# (world whose squishies appear, the block's main rule). Must match LevelCatalog.endlessLooks.
+ENDLESS_SKINS = [(1, "hidden"), (2, "sticky"), (0, "frozen"), (2, "curtain")]
+
+
+def endless_mix(block, mech):
+    """Rules mixed into a block (benchmark pass 2): two rules from level 81 on, three from 141 on.
+    Returns (wrapped pieces, frozen pieces) added on top of the block's main rule."""
+    hidden = 3 if mech in ("sticky", "curtain") else 0   # as in Starlight Stage
+    frozen = 0
+    if block >= 2:
+        if mech == "hidden":
+            frozen = 2
+        if mech == "frozen":
+            hidden = 3
+    if block >= 8:
+        frozen = max(frozen, 2) if mech != "frozen" else 0
+        hidden = max(hidden, 4) if mech != "hidden" else 0
+    return hidden, frozen
+
+
+def endless_capsule(pos):
+    """A capsule every fifth level."""
+    return pos % 5 == 0
+
+
+def make_endless(pos):
+    # A position whose first deal cannot be made fair is dealt again with a new seed.
+    for salt in range(12):
+        try:
+            return make_endless_once(pos, salt)
+        except SystemExit as e:
+            last = e
+    raise last
+
+
+def make_endless_once(pos, salt):
+    block, p = (pos - 1) // 10, (pos - 1) % 10 + 1
+    world_idx, mech = ENDLESS_SKINS[block % len(ENDLESS_SKINS)]
+    mix_hidden, mix_frozen = endless_mix(block, mech)
+    beat = BEATS[p - 1]
+    k, empties, mult = SHAPE[15 + p]
+    if beat in ("tension", "boss", "medium", "bonus"):
+        empties, k, mult = 1, min(k, 7), None
+    names = kinds_for(world_idx, k)
+    rng = random.Random(f"{ENDLESS}-{pos}" if salt == 0 else f"{ENDLESS}-{pos}-{salt}")
+    level = {"schema": 1, "id": f"{ENDLESS}-{pos:02d}", "world": ENDLESS, "index": pos, "beat": beat, "capacity": CAP}
+    mcount = {"hidden": 5 + p // 2, "sticky": 2 if p < 6 else 3, "frozen": 2 if p < 6 else 3,
+              "curtain": 1 if p < 6 else 2}[mech]
+    target = mult * k if mult else None
+    tries = [(mcount, empties)]
+    if mech in ("sticky", "curtain"):
+        tries += [(m, empties) for m in range(mcount - 1, 0, -1)]
+    tries += [(mcount, 2), (1, 2)]
+    jars = None
+    for mc, em in tries:
+        try:
+            # Boards the search can settle quickly: mixed rules make the others slow to check, here and on a phone.
+            jars_c, mech_c = choose(rng, level, names, em, mech, mc, target, mix_hidden, mix_frozen, tries=60, states=40_000)
+        except SystemExit:
+            continue
+        b0, _ = board_from_level(dict(level, jars=jars_c, mechanics=mech_c))
+        if jars is None:
+            jars, mechanics = jars_c, mech_c
+        # No level ships with an opening move that loses it.
+        if killing_first_moves(b0) == 0:
+            jars, mechanics = jars_c, mech_c
+            break
+    else:
+        if jars is None:
+            raise SystemExit(f"{level['id']}: no solvable candidate")
+        b0, _ = board_from_level(dict(level, jars=jars, mechanics=mechanics))
+        if killing_first_moves(b0) > 0:
+            raise SystemExit(f"{level['id']}: every candidate has a losing first move")
+    level["jars"] = jars
+    level["mechanics"] = {"hidden": mechanics.get("hidden", []), "sticky": mechanics.get("sticky", []),
+                          "frozen": mechanics.get("frozen", [])}
+    if mechanics.get("curtains"):
+        level["mechanics"]["curtains"] = mechanics["curtains"]
+    b, _ = board_from_level(level)
+    sol, explored = solve(b, 3_000_000)
+    if sol is None:
+        raise SystemExit(f"{level['id']}: unsolvable or too big ({explored} states)")
+    level["par"] = len(sol)
+    level["solution"] = [list(m) for m in sol]
+    level["capsule"] = endless_capsule(pos)
+    level["softenAfterFails"] = 3 if beat in ("tension", "boss") else None
+    return level
+
+
+def write_endless(first, last):
+    d = os.path.join(ROOT, "Levels", ENDLESS)
+    os.makedirs(d, exist_ok=True)
+    for pos in range(first, last + 1):
+        lv = make_endless(pos)
+        with open(os.path.join(d, f"{pos:03d}.json"), "w") as f:
+            f.write(dump(lv))
+        kinds = len({q for jar in lv["jars"] for q in jar})
+        print(f"{lv['id']:16} {lv['beat']:10} jars={len(lv['jars']):2} kinds={kinds} par={lv['par']:2} capsule={lv['capsule']}", flush=True)
 
 
 def dump(level):
@@ -271,7 +452,8 @@ def dump(level):
         lines.append(f"    {json.dumps(jar)}{comma}")
     lines.append("  ],")
     m = level["mechanics"]
-    lines.append(f'  "mechanics": {{"hidden": {json.dumps(m["hidden"])}, "sticky": {json.dumps(m["sticky"])}, "frozen": {json.dumps(m["frozen"])}}},')
+    extra = f', "curtains": {json.dumps(m["curtains"])}' if m.get("curtains") else ""
+    lines.append(f'  "mechanics": {{"hidden": {json.dumps(m["hidden"])}, "sticky": {json.dumps(m["sticky"])}, "frozen": {json.dumps(m["frozen"])}{extra}}},')
     lines.append(f'  "par": {level["par"]},')
     lines.append(f'  "solution": {json.dumps(level["solution"])},')
     lines.append(f'  "capsule": {json.dumps(level["capsule"])},')
@@ -287,6 +469,12 @@ def main():
     world = None
     if "--world" in sys.argv:
         world = sys.argv[sys.argv.index("--world") + 1]
+    if world == ENDLESS:
+        # python3 tools/levelgen.py --world endless [first last]
+        i = sys.argv.index("--world") + 2
+        nums = [int(x) for x in sys.argv[i:i + 2]]
+        write_endless(nums[0] if nums else 1, nums[1] if len(nums) > 1 else ENDLESS_LENGTH)
+        return
     for w in range(len(WORLDS)):
         if world and WORLDS[w][0] != world:
             continue

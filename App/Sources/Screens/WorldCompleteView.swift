@@ -127,7 +127,7 @@ struct WorldCompleteView: View {
                 .scaleEffect(coinsFly ? 1 : 0.3).opacity(coinsFly ? 1 : 0)
                 .animation(.spring(response: 0.4, dampingFraction: 0.5), value: coinsFly)
             if finishedEverything {
-                Text("You finished every world! More are on the way.")
+                Text("You finished every world! Keep Squishing carries on from here, and it never runs out.")
                     .font(Theme.body(17)).foregroundStyle(Theme.plum.opacity(0.8)).multilineTextAlignment(.center)
                 if let ref = model.progress.buddy.squishy {
                     SquishRefView(ref: ref).frame(width: 110, height: 110)

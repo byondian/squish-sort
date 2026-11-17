@@ -15,8 +15,14 @@ public struct AdCadenceConfig: Codable, Equatable, Sendable {
         }
     }
 
-    /// Levels 1–6 never; 7–15 every 4 levels and 4 min; 16–30 every 3 and 3 min; 31+ every 2 and 90 s.
+    /// Levels 1–6 never; 7–20 every 3 levels and 150 s of play; 21+ every 2 levels and 90 s
+    /// (Ian, 17 Nov 2026, after the benchmark: still far from the genre's ad after every level).
     public var tiers: [Tier] = [
+        Tier(fromLevel: 7, everyLevels: 3, everySeconds: 150),
+        Tier(fromLevel: 21, everyLevels: 2, everySeconds: 90),
+    ]
+    /// Gentle mode keeps the slower pacing it has always had (these gaps, doubled).
+    public var childTiers: [Tier] = [
         Tier(fromLevel: 7, everyLevels: 4, everySeconds: 240),
         Tier(fromLevel: 16, everyLevels: 3, everySeconds: 180),
         Tier(fromLevel: 31, everyLevels: 2, everySeconds: 90),
@@ -35,6 +41,7 @@ public struct AdCadenceConfig: Codable, Equatable, Sendable {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         let d = AdCadenceConfig()
         tiers = try c.decodeIfPresent([Tier].self, forKey: .tiers) ?? d.tiers
+        childTiers = try c.decodeIfPresent([Tier].self, forKey: .childTiers) ?? d.childTiers
         sessionGraceSeconds = try c.decodeIfPresent(Double.self, forKey: .sessionGraceSeconds) ?? d.sessionGraceSeconds
         childFirstLevel = try c.decodeIfPresent(Int.self, forKey: .childFirstLevel) ?? d.childFirstLevel
         childGapMultiplier = try c.decodeIfPresent(Int.self, forKey: .childGapMultiplier) ?? d.childGapMultiplier
@@ -76,14 +83,15 @@ public enum AdCadence {
     /// Call when a level is won, after `recordWin`.
     public static func shouldShowInterstitial(after win: LevelWin, state: AdCadenceState, group: AgeGroup,
                                               ownsRemoveAds: Bool, config: AdCadenceConfig = .init()) -> Bool {
-        guard config.interstitialsEnabled, !ownsRemoveAds, let firstTier = config.tiers.first else { return false }
         let child = group == .child
+        let tiers = child && !config.childTiers.isEmpty ? config.childTiers : config.tiers
+        guard config.interstitialsEnabled, !ownsRemoveAds, let firstTier = tiers.first else { return false }
         let firstLevel = child ? max(config.childFirstLevel, firstTier.fromLevel) : firstTier.fromLevel
         guard win.level >= firstLevel else { return false }
         guard win.secondsIntoSession >= config.sessionGraceSeconds else { return false }
         // Never straight after a boss win, a capsule or an extra unlocking: the big moments stay clean.
         if win.isBoss || win.hadReward { return false }
-        let tier = config.tiers.last { $0.fromLevel <= win.level } ?? firstTier
+        let tier = tiers.last { $0.fromLevel <= win.level } ?? firstTier
         let multiplier = child ? max(1, config.childGapMultiplier) : 1
         let secondsOK = state.playSecondsSinceAd >= tier.everySeconds * Double(multiplier)
         // The very first interstitial only waits for play time.

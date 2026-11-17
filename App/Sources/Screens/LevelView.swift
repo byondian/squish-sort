@@ -17,7 +17,6 @@ final class LevelController: ObservableObject {
     let scene: BoardScene
     @Published private(set) var session: GameSession
     @Published private(set) var outcome: Outcome?
-    @Published private(set) var extraJarUsed = false
     /// Paid-for helper choice sheet: watch an ad or spend coins.
     @Published var choosing: Coins.Item?
     /// Coins the jars have thrown on this attempt. Banked on the win; a retry empties it.
@@ -37,12 +36,16 @@ final class LevelController: ObservableObject {
     /// Shake-up: the move count at which the pieces are shuffled. Nil when there is none (left).
     @Published private(set) var shakeAt: Int?
     @Published private(set) var shaking = false
+    /// The finale's giant: 0 watching, 1 gasp, 2 nervous (one jar to go), 3 cheer.
+    @Published private(set) var bossMood = 0
     /// Shuffles used on this try: the first is free, the rest cost coins.
     @Published private(set) var shufflesUsed = 0
+    /// The one opt-in video shuffle of this try has been used (offered on the stuck screen only).
+    @Published private(set) var videoShuffleUsed = false
     /// A paid shuffle was tapped without enough coins.
     @Published private(set) var shuffleShort = false
     /// Moves left before the shake-up.
-    var shakeIn: Int? { shakeAt.map { max(0, $0 - session.history.count) } }
+    var shakeIn: Int? { shakeAt.map { max(0, $0 - session.moveCount) } }
     /// Bonus levels are Coin Rush: every finished jar throws double on a first clear.
     private var jarMultiplier: Int { level.file.beat == .bonus ? 2 : 1 }
     /// The hint search is running.
@@ -66,10 +69,11 @@ final class LevelController: ObservableObject {
         starSlack = model.starSlack(index: index)
         session = GameSession(board: level.board, par: level.par, undoLimit: model.undoLimit, starSlack: starSlack)
         scene = BoardScene(board: level.board, kinds: level.kinds)
-        scene.world = level.file.world
+        scene.world = level.look
+        scene.goldRims = level.file.beat == .boss
         chain = SortChain(timed: !model.isGentleMode)
         let lucky = model.luckyKind(index: index)
-        pot = LevelPot(firstClear: model.progress.stars[level.id] == nil, jars: level.kinds.count,
+        pot = LevelPot(firstClear: !model.playingDaily && model.progress.stars[level.id] == nil, jars: level.kinds.count,
                        luckyKind: lucky, jarMultiplier: level.file.beat == .bonus ? 2 : 1, rules: model.config.coins)
         scene.luckyKind = lucky.map { UInt8($0) }
         scene.onPlay = { [weak self] move in self?.play(move) }
@@ -81,6 +85,30 @@ final class LevelController: ObservableObject {
             model?.sounds.play("capsule_click")
             model?.haptics.land()
         }
+        // Each kind of move has its own sound when a finished jar shows off.
+        scene.onSignature = { [weak model] effect, sound in
+            guard let model else { return }
+            if let sound, Bundle.main.url(forResource: sound, withExtension: "wav") != nil { model.sounds.play(sound, volume: 0.8); return }
+            let name: String
+            switch effect {
+            case "BURST": name = "pop"
+            case "VORTEX": name = "combo_3"
+            case "GLOW": name = "star_2"
+            case "PUFF": name = "grow"
+            case "MELT": name = "splat"
+            case "LIFT", "SPLIT": name = "hop"
+            case "LIMB", "ROPE": name = "squeak_high"
+            case "SOUND": name = "squeak_low"
+            default: name = "trick"
+            }
+            model.sounds.play(name, volume: 0.7)
+        }
+        scene.onCurtainDrum = { [weak model] in model?.sounds.play("drumroll", volume: 0.6) }
+        scene.onCurtainUp = { [weak model] in
+            model?.sounds.play("curtain")
+            model?.sounds.play("star_2", volume: 0.7)
+            model?.haptics.star()
+        }
         scene.onReject = { [weak model] in
             model?.haptics.reject()
             model?.sounds.play("reject")
@@ -89,6 +117,7 @@ final class LevelController: ObservableObject {
             model?.sounds.move(run: result.count)
             self?.landed()
             if !result.thawedJars.isEmpty { model?.sounds.play("thaw") }
+            if result.duetLetGo { self?.duetLetGo(atJar: result.move.to) }
             if let jar = result.completedJar {
                 model?.haptics.complete()
                 self?.jarCompleted(jar)
@@ -106,6 +135,27 @@ final class LevelController: ObservableObject {
         if index == 0, model.progress.stars.isEmpty, let first = level.solution.first {
             scene.tutorialMove = first
         }
+    }
+
+    /// A duet landed on its own kind and let go: "Encore!" and a few coins the first time through.
+    private func duetLetGo(atJar jar: Int) {
+        guard let model else { return }
+        let duets = level.board.jars.joined().filter { $0.bondedAbove }.count
+        let coins = pot.encore(duetsInLevel: duets)
+        scene.popLabel(String(localized: "Encore!"), atJar: jar)
+        model.sounds.play("duet", or: "double_pop")
+        model.haptics.complete()
+        if coins > 0 {
+            scene.throwCoins(fromJar: jar, count: 3)
+            model.sounds.coin()
+        }
+    }
+
+    /// After a rule's demo, the hand shows a good first move on the real board.
+    func pointAtFirstMove() {
+        guard session.moveCount == 0, let first = level.solution.first else { return }
+        scene.tutorialMove = first
+        scene.reload(session.board)
     }
 
     private func play(_ move: Move) -> (MoveResult, Board)? {
@@ -165,6 +215,14 @@ final class LevelController: ObservableObject {
         model.jarSorted(kind: level.kinds[Int(piece.kind)])
         jarsDone += 1
         model.sounds.jarComplete(number: jarsDone)
+        if level.file.beat == .boss {
+            bossMood = 1
+            let oneLeft = session.board.jars.indices.filter { session.board.isComplete($0) }.count == level.kinds.count - 1
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
+                guard let self, self.bossMood == 1 else { return }
+                self.bossMood = oneLeft ? 2 : 0
+            }
+        }
         // First clear: the jar throws its share of coins into the level pot.
         var payout = pot.jarCompleted(kind: Int(piece.kind), at: Date().timeIntervalSince(started))
         if lastMoveWasFever {
@@ -213,7 +271,7 @@ final class LevelController: ObservableObject {
     /// The pieces in unfinished jars land in new spots. The new layout is always one that can be
     /// solved, and the star limit starts again from it, so a shake-up never costs stars.
     private func shakeUpIfDue() {
-        guard let at = shakeAt, session.history.count >= at, session.status == .playing, !shaking else { return }
+        guard let at = shakeAt, session.moveCount >= at, session.status == .playing, !shaking else { return }
         shakeAt = nil
         shake(word: String(localized: "Shake-up!"), keepsStarLimit: false) { _ in }
     }
@@ -221,7 +279,7 @@ final class LevelController: ObservableObject {
     /// The Shuffle button: the first shuffle on a level is free, later ones cost coins. The moves so far
     /// stay counted and the star limit does not move. Nothing is charged when no new layout is found.
     func shuffle() {
-        guard let model, session.status == .playing, !shaking, outcome == nil else { return }
+        guard let model, canShuffleNow else { return }
         let paid = shufflesUsed > 0
         if paid && !model.progress.wallet.canAfford(.shuffle) {
             // No shop offer from the board: just say what is in the purse.
@@ -234,6 +292,27 @@ final class LevelController: ObservableObject {
             guard let self, done else { return }
             if paid { _ = model.spend(.shuffle) }
             self.shufflesUsed += 1
+        }
+    }
+
+    /// The shuffle works while playing and from the stuck screen, never after a win.
+    private var canShuffleNow: Bool {
+        if shaking { return false }
+        if case .won = session.status { return false }
+        if case .some(.won) = outcome { return false }
+        return true
+    }
+
+    /// The next shuffle costs nothing (the first of a try).
+    var shuffleIsFree: Bool { shufflesUsed == 0 }
+
+    /// One opt-in video shuffle a try, from the stuck screen. Remove Ads owners get it without the video.
+    func videoShuffle() {
+        guard let model, canShuffleNow, !videoShuffleUsed else { return }
+        model.optIn(.shuffle) { [weak self] in
+            guard let self else { return }
+            self.videoShuffleUsed = true
+            self.shake(word: String(localized: "Shuffle!"), keepsStarLimit: true) { _ in }
         }
     }
 
@@ -250,6 +329,9 @@ final class LevelController: ObservableObject {
         model.haptics.complete()
         scene.tremble(seconds: 1.1)
         let board = session.board
+        // From the stuck screen the card steps aside while the pieces fly.
+        let wasStuck = outcome == .stuck
+        if wasStuck { outcome = nil }
         Task {
             let found: (board: Board, best: Int)? = await Task.detached(priority: .userInitiated) { () -> (board: Board, best: Int)? in
                 var rng = SystemRandomNumberGenerator()
@@ -268,7 +350,13 @@ final class LevelController: ObservableObject {
             }.value
             try? await Task.sleep(nanoseconds: 1_100_000_000)
             shaking = false
-            guard let found, session.board == board, outcome == nil else { then(false); return }
+            guard let found, session.board == board, outcome == nil else {
+                if wasStuck, outcome == nil, session.board == board { outcome = .stuck }
+                then(false)
+                return
+            }
+            // Play time up to a stuck screen was already counted for the ad cadence.
+            if wasStuck { started = Date() }
             if keepsStarLimit { session.shuffle(to: found.board) } else { session.shakeUp(to: found.board, bestFromHere: found.best) }
             foundHint = nil
             noWayThrough = false; hintGaveUp = false
@@ -282,7 +370,7 @@ final class LevelController: ObservableObject {
 
     private func newPot() {
         guard let model else { return }
-        pot = LevelPot(firstClear: model.progress.stars[level.id] == nil, jars: level.kinds.count,
+        pot = LevelPot(firstClear: !model.playingDaily && model.progress.stars[level.id] == nil, jars: level.kinds.count,
                        luckyKind: model.luckyKind(index: index), jarMultiplier: jarMultiplier, rules: model.config.coins)
         jarsDone = 0
         chain = SortChain(timed: !model.isGentleMode)
@@ -294,6 +382,8 @@ final class LevelController: ObservableObject {
         switch session.status {
         case .won(let stars):
             outcome = .won(stars: stars)
+            bossMood = 3
+            model.sounds.stopMusic()
             scene.celebrate()
             model.haptics.win()
             model.sounds.play(level.file.beat == .boss ? "win_boss" : "win")
@@ -321,18 +411,7 @@ final class LevelController: ObservableObject {
         scene.reload(session.board)
     }
 
-    var canExtraJar: Bool { !extraJarUsed }
     var canHint: Bool { !thinking }
-
-    func extraJar() {
-        guard let model, !extraJarUsed else { return }
-        if model.canUseFreeExtraJar(usedThisLevel: extraJarUsed) {
-            model.useFreeExtraJar()
-            addJar()
-        } else {
-            choosing = .extraJar
-        }
-    }
 
     /// The player picked how to pay for a helper.
     func pay(for item: Coins.Item, withAd: Bool) {
@@ -341,22 +420,14 @@ final class LevelController: ObservableObject {
         let grant: () -> Void = { [weak self] in
             switch item {
             case .hint: self?.showHint()
-            case .extraJar: self?.addJar()
             case .theme, .treat, .gift, .shuffle: break
             }
         }
         if withAd {
-            model.optIn(item == .hint ? .hint : .extraJar, granted: grant)
+            model.optIn(.hint, granted: grant)
         } else if model.spend(item) {
             grant()
         }
-    }
-
-    private func addJar() {
-        extraJarUsed = true
-        session.addExtraJar()
-        outcome = nil
-        scene.reload(session.board)
     }
 
     /// The hint is worked out first, off the main thread, and only charged for
@@ -403,7 +474,8 @@ final class LevelController: ObservableObject {
         session = GameSession(board: level.board, par: level.par, undoLimit: model?.undoLimit ?? 5, starSlack: starSlack)
         // Real walls soften: one extra jar after enough fails.
         if let soften = level.file.softenAfterFails, attempts > soften { session.addExtraJar() }
-        extraJarUsed = false
+        videoShuffleUsed = false
+        bossMood = 0
         shufflesUsed = 0
         noWayThrough = false; hintGaveUp = false
         outcome = nil
@@ -415,10 +487,44 @@ struct LevelView: View {
     @EnvironmentObject var model: AppModel
     @StateObject private var controller: LevelController
     @State private var nudge = false
+    @State private var bossSplash: Bool
+    /// The rule being shown before play, or replayed from the "?" button.
+    @State private var ruleDemo: BoardRule?
 
     init(index: Int, model: AppModel) {
         _controller = StateObject(wrappedValue: LevelController(index: index, model: model))
+        // A boss level opens with its splash (not on a level already won, and not in UI tests).
+        let level = model.levels[index]
+        _bossSplash = State(initialValue: level.file.beat == .boss && model.progress.stars[level.id] == nil && !AppModel.isUITesting)
     }
+
+    /// The twists on this board, for the "?" that replays their demos.
+    private var rules: [BoardRule] { BoardRule.rules(on: controller.level.board) }
+
+    /// The first rule on this board the player has not been shown yet.
+    private func showNewRule() {
+        guard !AppModel.isUITesting, ruleDemo == nil, controller.session.moveCount == 0 else { return }
+        // "Only what fits moves" is taught from the fourth level on, to old and new players alike.
+        if controller.index >= 3, !model.progress.rulesShown.contains(BoardRule.partial.rawValue) {
+            ruleDemo = .partial
+            return
+        }
+        ruleDemo = rules.first { !model.progress.rulesShown.contains($0.rawValue) }
+    }
+
+    private func closeRuleDemo() {
+        guard let shown = ruleDemo else { return }
+        ruleDemo = nil
+        if !model.progress.rulesShown.contains(shown.rawValue) {
+            model.update { $0.rulesShown.insert(shown.rawValue) }
+            // Another new rule on the same board comes next; otherwise the hand shows a first move.
+            showNewRule()
+            if ruleDemo == nil { controller.pointAtFirstMove() }
+        }
+    }
+
+    private var isBoss: Bool { controller.level.file.beat == .boss }
+    private var isFinale: Bool { isBoss && model.isFinale(controller.index) }
 
     private var number: Int { model.levelNumber(controller.index) }
     /// Helpers and the tracking prompt follow the main path; a side world has them all.
@@ -434,6 +540,15 @@ struct LevelView: View {
                 helpers
             }
             .padding(.horizontal, 12)
+            if isFinale {
+                // The giant peeks over the top corner and reacts.
+                VStack {
+                    HStack { Spacer(); BossPeek(world: controller.level.look, mood: controller.bossMood) }
+                        .padding(.top, 84)
+                    Spacer()
+                }
+                .allowsHitTesting(false)
+            }
             if let joined = model.joinedBook {
                 NewFindSticker(squishy: joined) { model.joinedBook = nil }
                     .id(joined.id)
@@ -451,7 +566,7 @@ struct LevelView: View {
                 .padding(30)
             }
             if let item = controller.choosing {
-                // Above the stuck card too: its extra jar button leads here.
+                // The hint's payment bubble.
                 Color.black.opacity(0.15).ignoresSafeArea().onTapGesture { controller.choosing = nil }.zIndex(9)
                 helperBubble(item).zIndex(10)
             }
@@ -490,8 +605,8 @@ struct LevelView: View {
                             perfect: controller.session.moveCount <= controller.session.par,
                             threeStarMoves: Stars.moveLimit(forStars: 3, par: controller.session.par, slack: controller.starSlack),
                             // Not while good news is waiting behind the win card: that is told first.
-                            retry: controller.index < 2 || !model.news.isEmpty ? nil : { controller.retry() },
-                            toCapsule: model.levelsToNextCapsule(after: controller.index),
+                            retry: controller.index < 2 || !model.news.isEmpty || model.lastWin.dailyJar ? nil : { controller.retry() },
+                            toCapsule: model.lastWin.dailyJar ? nil : model.levelsToNextCapsule(after: controller.index),
                             // The first two levels roll straight on after the celebration.
                             autoAdvance: controller.index < 2,
                             haptics: model.haptics, sounds: model.sounds,
@@ -501,21 +616,61 @@ struct LevelView: View {
                         model.continueAfterWin(index: controller.index, attempts: controller.attempts)
                     }
                 case .stuck:
-                    StuckCard(canUndo: controller.session.canUndo,
-                              canExtraJar: controller.canExtraJar,
-                              undo: controller.undo, extraJar: controller.extraJar, retry: controller.retry)
+                    StuckCard(boss: isBoss, canUndo: controller.session.canUndo,
+                              free: controller.shuffleIsFree,
+                              canPay: model.progress.wallet.canAfford(.shuffle),
+                              video: !controller.videoShuffleUsed && model.canOptIn(.shuffle),
+                              videoIsFree: model.ownsRemoveAds,
+                              undo: controller.undo, shuffle: controller.shuffle, videoShuffle: controller.videoShuffle,
+                              retry: controller.retry)
                 }
             }
         }
         .background {
-            // The plain theme shows the world's own room; a bought theme paints over it.
-            if model.boardTheme == .cream {
-                WorldBackdrop(world: controller.level.file.world)
-            } else {
-                LinearGradient(colors: model.boardTheme.colors, startPoint: .top, endPoint: .bottom).ignoresSafeArea()
+            ZStack {
+                // The plain theme shows the world's own room; a bought theme paints over it.
+                if model.boardTheme == .cream {
+                    WorldBackdrop(world: controller.level.look)
+                } else {
+                    LinearGradient(colors: model.boardTheme.colors, startPoint: .top, endPoint: .bottom).ignoresSafeArea()
+                }
+                if isBoss {
+                    // Evening falls on a boss level, with a soft spotlight on the jars.
+                    Theme.plum.opacity(0.42).ignoresSafeArea()
+                    RadialGradient(colors: [Color.white.opacity(0.28), .clear], center: .center, startRadius: 20, endRadius: 320)
+                        .ignoresSafeArea()
+                }
             }
         }
-        .onAppear { controller.scene.darkBackground = darkRoom }
+        .overlay {
+            if bossSplash {
+                BossSplash(world: controller.level.look, finale: isFinale, canSkip: model.progress.bossSplashSeen) {
+                    bossSplash = false
+                    model.bossSplashShown()
+                    model.sounds.startMusic("boss_loop")
+                    showNewRule()
+                }
+                .zIndex(50)
+            }
+        }
+        .overlay {
+            if let rule = ruleDemo {
+                ZStack {
+                    Color.black.opacity(0.3).ignoresSafeArea()
+                    RuleDemo(rule: rule, world: controller.level.look) { closeRuleDemo() }
+                        .id(rule)
+                }
+                .transition(.opacity)
+                .zIndex(40)
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: ruleDemo)
+        .onAppear {
+            controller.scene.darkBackground = darkRoom
+            if isBoss && !bossSplash && !AppModel.isUITesting { model.sounds.startMusic("boss_loop") }
+            if !bossSplash { showNewRule() }
+        }
+        .onDisappear { model.sounds.stopMusic() }
         .animation(.spring(response: 0.35, dampingFraction: 0.7), value: controller.outcome)
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: model.trackingExplainer)
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: controller.choosing)
@@ -523,18 +678,16 @@ struct LevelView: View {
         .onDisappear { model.joinedBook = nil }
     }
 
-    /// Paying for a hint or an extra jar: the game's own bubble, not a system sheet.
+    /// Paying for a hint: the game's own bubble, not a system sheet.
     private func helperBubble(_ item: Coins.Item) -> some View {
         VStack(spacing: 12) {
             HStack(alignment: .bottom, spacing: 8) {
                 if let ref = model.progress.buddy.squishy, model.buddyActive {
                     SquishRefView(ref: ref).frame(width: 56, height: 56)
                 }
-                SpeechBubble(text: item == .hint ? String(localized: "Want a hint?") : String(localized: "Need one more jar?"))
+                SpeechBubble(text: String(localized: "Want a hint?"))
             }
-            // Gentle mode is offered the extra jar ad only from the stuck screen.
-            if model.canOptIn(item == .hint ? .hint : .extraJar)
-                && (item == .hint || !model.isGentleMode || controller.outcome == .stuck) {
+            if model.canOptIn(.hint) {
                 // Remove Ads owners get it with one tap and no ad.
                 Button { controller.pay(for: item, withAd: true) } label: {
                     Label(model.ownsRemoveAds ? LocalizedStringKey("Free") : LocalizedStringKey("Watch an ad"),
@@ -577,6 +730,12 @@ struct LevelView: View {
                         .accessibilityLabel(Text("Levels"))
                 }
                 Spacer()
+                if let rule = rules.first ?? (controller.index >= 3 ? BoardRule.partial : nil), controller.outcome == nil {
+                    // Replays the demo of this board's twist.
+                    IconButton(system: "questionmark") { ruleDemo = rule }
+                        .accessibilityLabel(Text("How this works"))
+                        .accessibilityIdentifier("rule-help")
+                }
                 if model.showsCornerButtons {
                     IconButton(system: "book.fill") { model.screen = .book }
                     IconButton(system: "gearshape.fill") { model.screen = .settings }
@@ -584,7 +743,17 @@ struct LevelView: View {
             }
             VStack(spacing: 2) {
                 // A pink jelly pill with the level, and the world's name under it.
-                Text("Level \(number)").font(Theme.title(20)).foregroundStyle(.white)
+                HStack(spacing: 6) {
+                    if isBoss {
+                        Image("boss-crown").resizable().scaledToFit().frame(height: 18)
+                        Text("BOSS")
+                    } else if model.playingDaily {
+                        Text("Daily Jar")
+                    } else {
+                        Text("Level \(number)")
+                    }
+                }
+                .font(Theme.title(20)).foregroundStyle(.white)
                     .padding(.horizontal, 18).padding(.vertical, 5)
                     .background {
                         ZStack(alignment: .top) {
@@ -593,11 +762,10 @@ struct LevelView: View {
                             Capsule().fill(Color.white.opacity(0.35)).frame(height: 8).padding(.horizontal, 10).padding(.top, 3)
                         }
                     }
-                Text(controller.level.file.world == "christmas" ? AppModel.christmasWorldName : AppModel.worldName(controller.level.file.world))
+                Text(model.playingDaily ? LocalizedStringKey("One a day")
+                     : controller.level.file.world == "christmas" ? AppModel.christmasWorldName : AppModel.worldName(controller.level.file.world))
                     .font(Theme.body(13)).foregroundStyle(darkRoom ? Color.white.opacity(0.9) : Theme.plum.opacity(0.75))
-                if controller.level.file.beat == .boss {
-                    Text("BOSS 👑").font(Theme.body(13))
-                } else if controller.level.file.beat == .bonus {
+                if controller.level.file.beat == .bonus {
                     // Coin Rush: every finished jar throws double coins the first time through.
                     Text("BONUS x2").font(Theme.body(13)).foregroundStyle(Theme.plum)
                         .padding(.horizontal, 8).padding(.vertical, 1)
@@ -644,7 +812,8 @@ struct LevelView: View {
 
     /// A night scene behind the jars: they glow, and loose words turn white.
     private var darkRoom: Bool {
-        model.boardTheme == .night || (model.boardTheme == .cream && WorldBackdrop.isDark(controller.level.file.world))
+        model.boardTheme == .night || isBoss
+            || (model.boardTheme == .cream && WorldBackdrop.isDark(controller.level.look))
     }
 
     /// Three stars are out of reach on this try. Players of 13 and over get a nudge to start again;
@@ -655,7 +824,7 @@ struct LevelView: View {
             && Stars.rating(moves: moves, par: controller.session.par, slack: controller.starSlack) < 3
     }
 
-    // Undo appears after level 2, Hint after 4, Shuffle after 7. The extra jar is offered only when stuck.
+    // Undo appears after level 2, Hint after 4, Shuffle after 7.
     private var helpers: some View {
         HStack(spacing: 8) {
             if pathNumber >= 2 {
@@ -877,7 +1046,7 @@ struct WinCard: View {
 
     var body: some View {
         VStack(spacing: 14) {
-            Text(showpiece ? "Genius!" : "Sorted!").font(Theme.title(34)).foregroundStyle(Theme.plum)
+            Text(summary.dailyJar ? LocalizedStringKey("Daily Jar done!") : showpiece ? LocalizedStringKey("Genius!") : LocalizedStringKey("Sorted!")).font(Theme.title(34)).foregroundStyle(Theme.plum)
             HStack(spacing: 10) {
                 ForEach(0..<3) { i in
                     Image(systemName: i < shown ? "star.fill" : "star")
@@ -941,6 +1110,16 @@ struct WinCard: View {
                     Image(systemName: "birthday.cake.fill")
                 }
                 .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.75))
+            }
+            if let fill = summary.piggyFill {
+                // The piggy bank fills a little with every win. A bar only: it is opened in the shop.
+                HStack(spacing: 8) {
+                    Text(verbatim: "🐷").font(.system(size: 16))
+                    PiggyBar(fill: fill).frame(width: 120)
+                    if fill >= 1 { Text("Piggy bank full!").font(Theme.body(12)).foregroundStyle(Theme.plum.opacity(0.7)) }
+                }
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel(Text("Piggy bank"))
             }
             if let toCapsule {
                 Label {
@@ -1020,23 +1199,55 @@ struct WinCard: View {
     }
 }
 
+/// No moves left: a shuffle gets the board going again (free the first time, then coins or one
+/// opt-in video), or undo, or start again. Never a shop offer here.
 struct StuckCard: View {
+    var boss = false
     let canUndo: Bool
-    let canExtraJar: Bool
+    /// The first shuffle of a try costs nothing.
+    let free: Bool
+    let canPay: Bool
+    /// The opt-in video shuffle is on offer.
+    let video: Bool
+    let videoIsFree: Bool
     let undo: () -> Void
-    let extraJar: () -> Void
+    let shuffle: () -> Void
+    let videoShuffle: () -> Void
     let retry: () -> Void
 
     var body: some View {
         VStack(spacing: 14) {
-            Text("No moves left").font(Theme.title(28)).foregroundStyle(Theme.plum)
-            if canExtraJar {
-                Text("An extra jar gives you room to keep going.").font(Theme.body(15)).foregroundStyle(Theme.plum.opacity(0.7))
+            Text(boss ? LocalizedStringKey("So close! Rematch?") : LocalizedStringKey("No moves left"))
+                .font(Theme.title(28)).foregroundStyle(Theme.plum).multilineTextAlignment(.center)
+            Text("A shuffle gets things moving again.").font(Theme.body(15)).foregroundStyle(Theme.plum.opacity(0.7))
+            if free || canPay {
+                Button(action: shuffle) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "shuffle")
+                        Text("Shuffle")
+                        if free {
+                            Text("Free").font(Theme.body(14)).padding(.horizontal, 8).padding(.vertical, 2)
+                                .background(Capsule().fill(.white.opacity(0.3)))
+                        } else {
+                            Label { Text(verbatim: "\(Coins.Item.shuffle.price)") } icon: { CoinIcon() }.font(Theme.body(15))
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(SquishButtonStyle(fill: Theme.grape)).font(Theme.title(22))
+                .accessibilityIdentifier("stuck-shuffle")
             }
-            Button("Try again", action: retry).buttonStyle(SquishButtonStyle()).font(Theme.title(22))
+            if video && !free {
+                Button(action: videoShuffle) {
+                    Label(videoIsFree ? LocalizedStringKey("Free shuffle") : LocalizedStringKey("Watch a video to shuffle"),
+                          systemImage: videoIsFree ? "sparkles" : "play.rectangle.fill")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(SquishButtonStyle(fill: Theme.mint, text: Theme.plum))
+            }
             HStack {
                 if canUndo { Button("Undo", action: undo).buttonStyle(SquishButtonStyle(fill: .white, text: Theme.plum)) }
-                if canExtraJar { Button("Extra jar", action: extraJar).buttonStyle(SquishButtonStyle(fill: Theme.mint, text: Theme.plum)) }
+                Button("Try again", action: retry).buttonStyle(SquishButtonStyle())
             }
         }
         .padding(28)

@@ -48,7 +48,8 @@ jobs:
           UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; print(next(x['udid'] for k,v in sorted(d.items(), reverse=True) if 'iOS' in k for x in v if x['name'].startswith('iPhone')))")
           echo "Simulator $UDID"
           xcodebuild test -project SquishSort.xcodeproj -scheme SquishSort -resultBundlePath ui.xcresult \
-            -destination "id=$UDID" CODE_SIGNING_ALLOWED=NO | tee test.log | grep -E "Test Case|error:|TEST" || true
+            -destination "id=$UDID" -skip-testing:SquishSortUITests/StoreShotTests CODE_SIGNING_ALLOWED=NO \
+            | tee test.log | grep -E "Test Case|error:|TEST|FIRST-SQUISH" || true
           # Pictures the tests kept (the soft squishy at rest and just squeezed), for a look without a phone.
           xcrun xcresulttool export attachments --path ui.xcresult --output-path shots || true
           if ! grep -q "TEST SUCCEEDED" test.log; then

@@ -14,7 +14,7 @@ public enum LevelValidator {
         if file.schema != LevelFile.currentSchema { p.append("\(id): schema \(file.schema), expected \(LevelFile.currentSchema)") }
         let expectedID = file.world + "-" + String(format: "%02d", file.index)
         if file.id != expectedID { p.append("\(id): id should be \(expectedID)") }
-        if !LevelCatalog.allWorlds.contains(file.world) { p.append("\(id): unknown world \(file.world)") }
+        if !LevelCatalog.fileWorlds.contains(file.world) { p.append("\(id): unknown world \(file.world)") }
         if !(1...LevelCatalog.levelCount(in: file.world)).contains(file.index) { p.append("\(id): index out of range") }
         if file.capacity != launchCapacity { p.append("\(id): capacity \(file.capacity), launch levels use \(launchCapacity)") }
         if !(2...BoardLayout.maxJars).contains(file.jars.count) { p.append("\(id): \(file.jars.count) jars, allowed 2 to \(BoardLayout.maxJars)") }
@@ -42,10 +42,25 @@ public enum LevelValidator {
             for i in jar.indices where jar[i].bondedAbove {
                 if i + 1 >= jar.count { p.append("\(id): duet at the top of a jar has no partner"); continue }
                 let a = jar[i], b = jar[i + 1]
-                if a.kind != b.kind { p.append("\(id): duet pieces must be the same kind") }
+                if a.kind == b.kind { p.append("\(id): duet pieces must be different kinds") }
                 if a.hidden || b.hidden || a.isFrozen || b.isFrozen { p.append("\(id): duet pieces can't be hidden or frozen") }
                 if b.bondedAbove { p.append("\(id): a piece can only be in one duet") }
             }
+        }
+        // Curtain jars: at most two, each a full jar with nothing wrapped, frozen or paired inside,
+        // and never on a level with duets.
+        let curtains = board.curtains
+        if curtains.count > 2 { p.append("\(id): \(curtains.count) curtain jars, at most 2") }
+        if curtains.count != (file.mechanics?.curtains ?? []).count { p.append("\(id): a curtain jar is listed twice") }
+        for j in curtains {
+            let jar = board.jars[j]
+            if jar.count != file.capacity { p.append("\(id): curtain jar \(j) must start full") }
+            if jar.contains(where: { $0.hidden || $0.isFrozen || $0.bondedAbove }) {
+                p.append("\(id): curtain jar \(j) can't hold wrapped, frozen or duet pieces")
+            }
+        }
+        if !curtains.isEmpty, board.jars.contains(where: { $0.contains(where: { $0.bondedAbove }) }) {
+            p.append("\(id): curtain levels have no duets")
         }
         return p
     }

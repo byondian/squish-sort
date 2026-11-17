@@ -1,4 +1,5 @@
 import SwiftUI
+import SquishLevels
 
 /// World map: the three worlds of the main path, plus Santa's Grotto once its door has been opened.
 struct MapView: View {
@@ -6,8 +7,16 @@ struct MapView: View {
 
     private var worlds: [(id: String, name: LocalizedStringKey)] { [
         ("toyshop", "Toy Shop"), ("sweetfactory", "Sweet Factory"),
-        ("starlight", "Starlight Stage"), ("christmas", AppModel.christmasWorldName),
+        ("starlight", "Starlight Stage"), (LevelCatalog.endless, "Keep Squishing"),
+        ("christmas", AppModel.christmasWorldName),
     ] }
+
+    /// Keep Squishing shows once its first level is open; Santa's Grotto once its door has been opened.
+    private func shows(_ world: String) -> Bool {
+        if world == "christmas" { return model.progress.christmasEntered }
+        if world == LevelCatalog.endless { return model.endlessCount > 0 && model.progress.highestUnlocked >= model.storyLevelCount }
+        return true
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -26,14 +35,28 @@ struct MapView: View {
                                 .buttonStyle(SquishButtonStyle(fill: Theme.butter, text: Theme.plum))
                         }
                     }
-                    ForEach(worlds.filter { $0.id != "christmas" || model.progress.christmasEntered }, id: \.id) { world in
+                    ForEach(worlds.filter { shows($0.id) }, id: \.id) { world in
                         VStack(alignment: .leading, spacing: 10) {
                             HStack(alignment: .firstTextBaseline) {
                                 Text(world.name).font(Theme.title(22)).foregroundStyle(Theme.plum)
-                                if model.starJarPrizes(world.id) >= 3 { Text(verbatim: "👑").font(.system(size: 20)) }
+                                // A gold crown stamps a finished world.
+                                if world.id != LevelCatalog.endless, model.isWorldComplete(world.id) {
+                                    Image("boss-crown").resizable().scaledToFit().frame(height: 22)
+                                        .accessibilityIdentifier("world-crown-\(world.id)")
+                                }
+                                if world.id != LevelCatalog.endless, let left = model.levelsToFinale(world: world.id) {
+                                    Text("\(left) to the boss!").font(Theme.body(12)).foregroundStyle(Theme.plum)
+                                        .padding(.horizontal, 8).padding(.vertical, 3)
+                                        .background(Capsule().fill(Theme.butter))
+                                }
                                 Spacer()
-                                starJar(world.id)
+                                if world.id != LevelCatalog.endless { starJar(world.id) }
                             }
+                            if world.id == LevelCatalog.endless {
+                                Text("It never runs out. A capsule every fifth level.")
+                                    .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.65))
+                            }
+                            ShowPoster(world: world.id)
                             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 5), spacing: 10) {
                                 ForEach(model.levels.indices.filter { model.levels[$0].file.world == world.id }, id: \.self) { i in
                                     levelBubble(i)
@@ -95,11 +118,15 @@ struct MapView: View {
         let stars = model.progress.stars[model.levels[i].id] ?? 0
         let current = isCurrent(i)
         let boss = model.levels[i].file.beat == .boss
+        let finale = boss && model.isFinale(i) && model.levels[i].file.world != LevelCatalog.endless
+        let world = model.levels[i].look
+        // Three figures need smaller type to stay inside the bubble.
+        let number = model.levelNumber(i)
         return Button {
             if unlocked { model.screen = .level(i) }
         } label: {
             VStack(spacing: 2) {
-                Text("\(model.levelNumber(i))").font(Theme.title(18))
+                Text(verbatim: "\(number)").font(Theme.title(number > 999 ? 13 : number > 99 ? 15 : 18)).lineLimit(1)
                 if current {
                     Text("Play").font(.system(size: 11, weight: .heavy, design: .rounded)).lineLimit(1).minimumScaleFactor(0.6)
                 } else {
@@ -111,9 +138,26 @@ struct MapView: View {
             .frame(width: 58, height: 58)
             // Only the level you are on is filled with colour. A boss wears a crown instead.
             .background(Circle().fill(current ? Theme.bubblegum : (unlocked ? Color.white : Color.white.opacity(0.4))))
-            .overlay(Circle().stroke(current ? Theme.plum : .clear, lineWidth: 3))
+            .overlay(Circle().stroke(finale ? RarityLook.gold : (current ? Theme.plum : .clear), lineWidth: finale ? 4 : 3))
             .overlay(alignment: .top) {
-                if boss { Text(verbatim: "👑").font(.system(size: 14)).offset(y: -9) }
+                if finale {
+                    // The world's finale: a crown and a BOSS ribbon.
+                    VStack(spacing: 0) {
+                        Image("boss-crown").resizable().scaledToFit().frame(height: 18)
+                        Text("BOSS").font(.system(size: 9, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                            .padding(.horizontal, 5).padding(.vertical, 1)
+                            .background(Capsule().fill(Theme.grape))
+                    }
+                    .offset(y: -22)
+                } else if boss {
+                    Text(verbatim: "👑").font(.system(size: 14)).offset(y: -9)
+                }
+            }
+            .overlay(alignment: .bottomLeading) {
+                // The giant waits beside its level until it is beaten.
+                if finale && stars == 0 {
+                    BossGiant(world: world).frame(width: 34, height: 34).offset(x: -12, y: 10).allowsHitTesting(false)
+                }
             }
             // The Buddy (or the favourite squishy) sits on the level to play next.
             .overlay(alignment: .topTrailing) {
@@ -123,8 +167,9 @@ struct MapView: View {
                         .allowsHitTesting(false)
                 }
             }
-            .scaleEffect(current ? 1.08 : 1)
+            .scaleEffect(finale ? 1.18 : (current ? 1.08 : 1))
         }
+        .zIndex(finale ? 1 : 0)
         .buttonStyle(.plain)
         .disabled(!unlocked)
         .id(i)

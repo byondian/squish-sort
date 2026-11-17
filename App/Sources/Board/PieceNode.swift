@@ -35,7 +35,7 @@ final class PieceNode: SKNode {
         body = SKShapeNode(path: style.bodyPath(diameter: d))
         question = SKLabelNode(text: "?")
         ice = SKShapeNode(path: style.bodyPath(diameter: d * 1.06))
-        duetMark = SKLabelNode(text: "♥")
+        duetMark = SKLabelNode(text: String(localized: "DUET"))
         super.init()
         content.position = CGPoint(x: 0, y: d / 2)
         soft.addChild(content)
@@ -100,12 +100,20 @@ final class PieceNode: SKNode {
         ice.addChild(flake)
         content.addChild(ice)
 
-        duetMark.fontSize = d * 0.3
+        duetMark.fontSize = d * 0.2
+        duetMark.fontName = "AvenirNext-Heavy"
         duetMark.fontColor = UIColor(hex: 0xFF7EB6)
         duetMark.verticalAlignmentMode = .center
         duetMark.position = CGPoint(x: 0, y: d * 0.5)
         duetMark.zPosition = 2
         duetMark.isHidden = true
+        // A white pill behind the word keeps it readable on any squishy.
+        let tag = SKShapeNode(rectOf: CGSize(width: d * 0.62, height: d * 0.26), cornerRadius: d * 0.13)
+        tag.fillColor = .white
+        tag.strokeColor = UIColor(hex: 0xFF7EB6)
+        tag.lineWidth = 1.5
+        tag.zPosition = -1
+        duetMark.addChild(tag)
         content.addChild(duetMark)
 
         glitter.fontSize = d * 0.42
@@ -295,7 +303,7 @@ final class JarNode: SKNode {
     /// - Parameters:
     ///   - world: picks the lid.
     ///   - dark: on a dark background the outline becomes a soft glow so the jar still reads.
-    init(size: CGSize, world: String = "", dark: Bool = false) {
+    init(size: CGSize, world: String = "", dark: Bool = false, gold: Bool = false) {
         self.size = size
         self.world = world
         self.dark = dark
@@ -326,8 +334,9 @@ final class JarNode: SKNode {
         // A slightly wider rim on top.
         let rim = SKShapeNode(rectOf: CGSize(width: size.width * 1.06, height: max(5, size.width * 0.09)),
                               cornerRadius: max(2.5, size.width * 0.045))
-        rim.fillColor = UIColor.white.withAlphaComponent(dark ? 0.55 : 0.95)
-        rim.strokeColor = UIColor(hex: 0x965A78).withAlphaComponent(0.28)
+        // A boss level's jars have gold rims.
+        rim.fillColor = gold ? UIColor(hex: 0xFFC93C) : UIColor.white.withAlphaComponent(dark ? 0.55 : 0.95)
+        rim.strokeColor = gold ? UIColor(hex: 0xC78A12) : UIColor(hex: 0x965A78).withAlphaComponent(0.28)
         rim.lineWidth = 1.5
         rim.position = CGPoint(x: 0, y: size.height / 2)
         rim.zPosition = 1
@@ -519,6 +528,155 @@ final class JarNode: SKNode {
                         .fadeOut(withDuration: 0.3), .scaleY(to: 1.6, duration: 0.3)]),
                 .removeFromParent(),
             ]))
+        }
+    }
+}
+
+/// The velvet stage curtain in front of a Curtain Call jar. It hangs from its top edge, so it
+/// gathers upwards when it rises.
+final class CurtainNode: SKNode {
+    private let cloth = SKNode()
+
+    init(size: CGSize) {
+        super.init()
+        let w = size.width, h = size.height
+        // The cloth: a scalloped hem at the bottom.
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: -w / 2, y: 0))
+        path.addLine(to: CGPoint(x: w / 2, y: 0))
+        path.addLine(to: CGPoint(x: w / 2, y: -h + 6))
+        let folds = 4
+        let fold = w / CGFloat(folds)
+        for i in 0..<folds {
+            let x1 = w / 2 - fold * CGFloat(i + 1)
+            path.addQuadCurve(to: CGPoint(x: x1, y: -h + 6), control: CGPoint(x: x1 + fold / 2, y: -h - 4))
+        }
+        path.closeSubpath()
+        let velvet = SKShapeNode(path: path)
+        velvet.fillColor = UIColor(red: 0.69, green: 0.13, blue: 0.33, alpha: 1)
+        velvet.strokeColor = UIColor(red: 0.36, green: 0.07, blue: 0.22, alpha: 1)
+        velvet.lineWidth = 2
+        cloth.addChild(velvet)
+        // Pleats: darker stripes down each fold.
+        for i in 1..<folds {
+            let pleat = SKShapeNode(rect: CGRect(x: -w / 2 + fold * CGFloat(i) - 1.5, y: -h + 8, width: 3, height: h - 12), cornerRadius: 1.5)
+            pleat.fillColor = UIColor(red: 0.45, green: 0.08, blue: 0.25, alpha: 0.55)
+            pleat.strokeColor = .clear
+            cloth.addChild(pleat)
+        }
+        // A soft sheen and a gold rail with a star.
+        let sheen = SKShapeNode(rect: CGRect(x: -w / 2 + 4, y: -h * 0.8, width: fold * 0.3, height: h * 0.66), cornerRadius: 3)
+        sheen.fillColor = UIColor.white.withAlphaComponent(0.16)
+        sheen.strokeColor = .clear
+        cloth.addChild(sheen)
+        addChild(cloth)
+        let rail = SKShapeNode(rect: CGRect(x: -w / 2 - 3, y: -5, width: w + 6, height: 9), cornerRadius: 4.5)
+        rail.fillColor = UIColor(red: 1, green: 0.82, blue: 0.36, alpha: 1)
+        rail.strokeColor = UIColor(red: 0.72, green: 0.5, blue: 0.1, alpha: 1)
+        rail.lineWidth = 1.5
+        addChild(rail)
+        let star = SKLabelNode(text: "★")
+        star.fontSize = min(22, w * 0.42)
+        star.fontColor = UIColor(red: 1, green: 0.86, blue: 0.45, alpha: 1)
+        star.verticalAlignmentMode = .center
+        star.position = CGPoint(x: 0, y: -h * 0.48)
+        cloth.addChild(star)
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) is not used") }
+
+    /// A tap on a closed curtain: it sways and stays shut.
+    func ripple() {
+        cloth.removeAction(forKey: "ripple")
+        cloth.xScale = 1
+        cloth.run(.sequence([.scaleX(to: 0.92, duration: 0.07), .scaleX(to: 1.04, duration: 0.09), .scaleX(to: 1, duration: 0.08)]), withKey: "ripple")
+    }
+
+    func tremble(seconds: Double) {
+        let step = SKAction.sequence([.moveBy(x: 1.5, y: 0, duration: 0.03), .moveBy(x: -3, y: 0, duration: 0.06), .moveBy(x: 1.5, y: 0, duration: 0.03)])
+        cloth.run(.repeat(step, count: max(1, Int(seconds / 0.12))))
+    }
+
+    /// Up it goes, gathered to the rail, and away. With Reduce Motion it fades.
+    func rise(calm: Bool) {
+        if calm {
+            run(.sequence([.fadeOut(withDuration: 0.4), .removeFromParent()]))
+            return
+        }
+        let up = SKAction.scaleY(to: 0.06, duration: 0.45)
+        up.timingMode = .easeIn
+        cloth.run(up)
+        run(.sequence([.wait(forDuration: 0.45), .fadeOut(withDuration: 0.25), .removeFromParent()]))
+    }
+}
+
+/// The show around a Starlight board: six stage lamps along the top, one switched on by each
+/// finished jar in that jar's colour, and a front row of fans with lightsticks along the bottom
+/// who sway all the time and cheer when a jar is finished. No flashing, and still with Reduce Motion.
+final class StageShowNode: SKNode {
+    private var lamps: [SKShapeNode] = []
+    private var sticks: [SKShapeNode] = []
+    private var lit = 0
+    private let calm: Bool
+
+    init(size: CGSize, calm: Bool) {
+        self.calm = calm
+        super.init()
+        let count = 6
+        for i in 0..<count {
+            let lamp = SKShapeNode(circleOfRadius: 6)
+            lamp.fillColor = UIColor.white.withAlphaComponent(0.18)
+            lamp.strokeColor = UIColor.white.withAlphaComponent(0.35)
+            lamp.lineWidth = 1.5
+            lamp.position = CGPoint(x: size.width * (CGFloat(i) + 0.5) / CGFloat(count), y: size.height - 9)
+            addChild(lamp)
+            lamps.append(lamp)
+        }
+        let fans = 9
+        let colours: [UIColor] = [UIColor(named: "Bubblegum"), UIColor(named: "Butter"), UIColor(named: "Mint"),
+                                  UIColor(named: "Sky"), UIColor(named: "Grape")].map { $0 ?? .white }
+        for i in 0..<fans {
+            let x = size.width * (CGFloat(i) + 0.5) / CGFloat(fans)
+            let fan = SKShapeNode(rect: CGRect(x: -9, y: -10, width: 18, height: 20), cornerRadius: 8)
+            fan.fillColor = UIColor.black.withAlphaComponent(0.35)
+            fan.strokeColor = .clear
+            fan.position = CGPoint(x: x, y: 2)
+            addChild(fan)
+            let stick = SKShapeNode(rect: CGRect(x: -1.5, y: 0, width: 3, height: 11), cornerRadius: 1.5)
+            stick.fillColor = colours[i % colours.count]
+            stick.strokeColor = .clear
+            stick.position = CGPoint(x: x + 7, y: 8)
+            addChild(stick)
+            sticks.append(stick)
+            if !calm {
+                let sway = SKAction.sequence([.rotate(toAngle: 0.22, duration: 0.7), .rotate(toAngle: -0.22, duration: 0.7)])
+                stick.run(.sequence([.wait(forDuration: 0.11 * Double(i)), .repeatForever(sway)]), withKey: "sway")
+            }
+        }
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) is not used") }
+
+    /// The next lamp comes on in the finished jar's colour.
+    func lightLamp(_ colour: UIColor, animated: Bool) {
+        guard lit < lamps.count else { return }
+        let lamp = lamps[lit]
+        lit += 1
+        lamp.fillColor = colour
+        lamp.strokeColor = .white
+        lamp.glowWidth = 3
+        guard animated else { return }
+        lamp.setScale(0.4)
+        lamp.run(.sequence([.scale(to: 1.5, duration: 0.2), .scale(to: 1, duration: 0.2)]))
+    }
+
+    /// Lightsticks up!
+    func cheer() {
+        guard !calm else { return }
+        for (i, stick) in sticks.enumerated() {
+            let up = SKAction.moveBy(x: 0, y: 7, duration: 0.12)
+            up.timingMode = .easeOut
+            stick.run(.sequence([.wait(forDuration: 0.03 * Double(i)), up, up.reversed(), up, up.reversed()]), withKey: "cheer")
         }
     }
 }

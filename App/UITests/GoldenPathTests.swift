@@ -137,6 +137,23 @@ final class GoldenPathTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Level 1"].waitForExistence(timeout: 30), "Level 1 is the first screen")
     }
 
+    /// How long a new player waits for the first squish: from tapping the icon to a jar that can be tapped.
+    /// Nothing sits in front of level 1 (the birthday question comes after the first capsule).
+    /// The simulator on a build machine is slower than a phone, so this prints the time and only
+    /// fails when something has clearly been put in the way.
+    func testFirstSquishIsQuick() {
+        app.terminate()
+        let started = Date()
+        app.launch()
+        let jar = app.buttons["jar-0"]
+        XCTAssertTrue(jar.waitForExistence(timeout: 30), "the first board is the first screen")
+        let ready = Date().timeIntervalSince(started)
+        jar.tap()
+        let squished = Date().timeIntervalSince(started)
+        print("FIRST-SQUISH board ready after \(String(format: "%.1f", ready)) s, first tap done after \(String(format: "%.1f", squished)) s")
+        XCTAssertLessThan(squished, 25, "nothing should sit between the icon and the first squish")
+    }
+
     func testSkippingTheBirthdayQuestionMeansGentleMode() {
         playFirstThreeAndOpenCapsule()
         let skip = app.buttons["Skip"]

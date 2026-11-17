@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "id": "endless-210",
+  "world": "endless",
+  "index": 210,
+  "beat": "boss",
+  "capacity": 4,
+  "jars": [
+    ["macaron", "donut", "lolly", "cupcake"],
+    ["jelly", "gummy-bear", "donut", "strawbie"],
+    ["cupcake", "macaron", "macaron", "donut"],
+    ["strawbie", "jelly", "donut", "macaron"],
+    ["jelly", "cupcake", "lolly", "strawbie"],
+    ["jelly", "strawbie", "lolly", "gummy-bear"],
+    ["gummy-bear", "cupcake", "gummy-bear", "lolly"],
+    [],
+    []
+  ],
+  "mechanics": {"hidden": [[0, 1], [1, 1], [1, 2], [2, 0], [2, 1], [2, 2], [3, 1], [3, 2], [4, 1], [6, 0]], "sticky": [], "frozen": [[4, 3], [6, 1]]},
+  "par": 23,
+  "solution": [[6, 7], [5, 6], [5, 7], [1, 5], [2, 1], [3, 2], [1, 8], [3, 8], [4, 5], [4, 7], [0, 4], [0, 7], [0, 8], [6, 1], [6, 4], [1, 6], [3, 1], [5, 3], [1, 5], [2, 0], [2, 0], [4, 2], [4, 5]],
+  "capsule": true,
+  "softenAfterFails": 3
+}

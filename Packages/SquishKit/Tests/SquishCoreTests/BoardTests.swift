@@ -67,23 +67,35 @@ final class BoardTests: XCTestCase {
         XCTAssertFalse(b.jars[0][1].hidden)
     }
 
-    func testDuetsMoveTogetherAndNeedTwoSpaces() {
-        // jar 0: B, A+A (duet at positions 1-2)
-        var b = board(["BA+A", "CCA", "DDD", ""])
+    func testADuetMovesTogetherAndNeedsTwoSpaces() {
+        // jar 0: C, then the duet A (bottom) holding B (top).
+        var b = board(["CA+B", "CCA", "DDD", ""])
         XCTAssertEqual(b.runLength(at: 0), 2)
         XCTAssertFalse(b.isLegal(Move(from: 0, to: 1)), "only one space, a duet needs two")
+        XCTAssertFalse(b.isLegal(Move(from: 0, to: 2)), "one space and the wrong kind")
         XCTAssertEqual(b.piecesToMove(Move(from: 0, to: 3)), 2)
-        b.apply(Move(from: 0, to: 3))
-        XCTAssertTrue(b.jars[3][0].bondedAbove)
+        let r = b.apply(Move(from: 0, to: 3))
+        XCTAssertEqual(r?.duetLetGo, false)
+        XCTAssertTrue(b.jars[3][0].bondedAbove, "in an empty jar the two stay together")
         XCTAssertEqual(b.jars[0].count, 1)
     }
 
-    func testCongaNeverSplitsADuet() {
-        // A, A+A, A on top: room 2 moves only the top A (taking 2 would split the duet).
-        let b = board(["CA+AA", "AA", "", "CCC"])
-        XCTAssertEqual(b.runLength(at: 0), 3)
+    func testADuetLetsGoOnItsBottomMembersKind() {
+        var b = board(["CA+B", "AA", "B", ""])
+        XCTAssertFalse(b.isLegal(Move(from: 0, to: 2)), "the top member's kind is not enough")
+        let r = b.apply(Move(from: 0, to: 1))
+        XCTAssertEqual(r?.duetLetGo, true)
+        XCTAssertFalse(b.jars[1].contains { $0.bondedAbove }, "they are ordinary pieces now")
+        XCTAssertEqual(b.jars[1].map(\.kind), [0, 0, 0, 1])
+        // The freed top member moves on by itself.
+        XCTAssertEqual(b.piecesToMove(Move(from: 1, to: 2)), 1)
+    }
+
+    func testARunAboveADuetStopsAtTheDuet() {
+        // C, the duet A+B, then a loose B on top: only the loose B moves.
+        let b = board(["CA+BB", "B", "", "CCC"])
+        XCTAssertEqual(b.runLength(at: 0), 1)
         XCTAssertEqual(b.piecesToMove(Move(from: 0, to: 1)), 1)
-        XCTAssertEqual(b.piecesToMove(Move(from: 0, to: 2)), 3)
     }
 
     func testFrozenPiecesThawAfterTwoNeighbourMoves() {
@@ -125,6 +137,50 @@ final class BoardTests: XCTestCase {
         let b = board(["ABAB", "BABA"])
         XCTAssertTrue(b.isStuck)
         XCTAssertFalse(board(["ABAB", "BABA", ""]).isStuck)
+    }
+
+    func testCurtainJarIsShutUntilTheJarNextDoorIsFinished() {
+        let open = board(["A", "BC", "A", "CB", ""], capacity: 2)
+        var b = Board(capacity: 2, jars: open.jars, curtains: [1])
+        XCTAssertTrue(b.isCurtained(1))
+        XCTAssertEqual(b.runLength(at: 1), 0)
+        XCTAssertFalse(b.isLegal(Move(from: 1, to: 4)))
+        // Nothing goes in either.
+        var filler = Board(capacity: 2, jars: board(["C", "", "A", "A"], capacity: 2).jars, curtains: [1])
+        XCTAssertFalse(filler.isLegal(Move(from: 0, to: 1)))
+        XCTAssertEqual(filler.apply(Move(from: 2, to: 3))?.raisedCurtains, [])
+        // Finishing the jar next door raises it for good.
+        let result = b.apply(Move(from: 0, to: 2))
+        XCTAssertEqual(result?.completedJar, 2)
+        XCTAssertEqual(result?.raisedCurtains, [1])
+        XCTAssertFalse(b.isCurtained(1))
+        XCTAssertTrue(b.isLegal(Move(from: 1, to: 4)))
+    }
+
+    func testShakeUpLeavesAClosedCurtainAlone() {
+        let jars = board(["AB", "BC", "CA", "", ""], capacity: 2).jars
+        let b = Board(capacity: 2, jars: jars, curtains: [1])
+        var rng = SystemRandomNumberGenerator()
+        for _ in 0..<10 {
+            let next = b.shakenUp(using: &rng)
+            XCTAssertEqual(next.jars[1], b.jars[1])
+            XCTAssertEqual(next.curtains, [1])
+        }
+    }
+
+    func testDeadEndIsSeenBeforeTheLastMove() {
+        // The only move passes one B back and forth for ever: no jar can ever be freed.
+        let dead = board(["AB", "ABB", "A"], capacity: 3)
+        XCTAssertFalse(dead.isStuck)
+        XCTAssertTrue(dead.isDeadEnd())
+        XCTAssertEqual(GameSession(board: dead, par: 5).status, .stuck)
+        // Few moves open, but they lead to a win: alive.
+        let alive = board(["AB", "B", "A"], capacity: 2)
+        XCTAssertFalse(alive.isDeadEnd())
+        XCTAssertEqual(GameSession(board: alive, par: 2).status, .playing)
+        // Won boards and boards with no move at all are not this.
+        XCTAssertFalse(board(["AAAA", ""]).isDeadEnd())
+        XCTAssertFalse(board(["ABAB", "BABA"]).isDeadEnd())
     }
 
     func testLayoutRows() {

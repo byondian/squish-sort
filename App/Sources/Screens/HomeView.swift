@@ -5,57 +5,55 @@ import SquishPolicy
 /// the next level, then the Collection and the Mystery Bag. Nothing here pops up by itself.
 struct HomeView: View {
     @EnvironmentObject var model: AppModel
+    @State private var coinGate = false
+    @State private var coinGatePassed = false
     @State private var wobble = false
     @State private var showStamps = false
     @State private var coinsFlying = false
     @State private var coinsLanded = false
 
     var body: some View {
+        // While a new trick is being taught, everything but the Buddy steps back.
+        let teaching = model.trickTeaching != nil
         GeometryReader { screen in
             // Small phones get a smaller logo and shorter buttons, so the Buddy keeps its room.
             let compact = screen.size.height < 720
-            VStack(spacing: compact ? 6 : 10) {
-                HStack {
-                    // The coins pill opens the shop (under-13s reach it only from Settings).
-                    Button { if !model.isGentleMode { model.screen = .shop } } label: {
-                        Label { Text("\(model.progress.wallet.balance)") } icon: { CoinIcon() }
-                            .font(Theme.body(17)).foregroundStyle(Theme.plum)
-                            .monospacedDigit()
-                            .contentTransition(.numericText(value: Double(model.progress.wallet.balance)))
-                            .animation(.easeOut(duration: 0.9), value: model.progress.wallet.balance)
-                            .scaleEffect(coinsLanded && coinsFlying ? 1.12 : 1)
-                            .padding(.horizontal, 14).frame(height: 44)
-                            .background(Capsule().fill(.white))
+            VStack(spacing: 0) {
+                VStack(spacing: compact ? 6 : 10) {
+                    topBar.dimmed(teaching)
+                    JellyLogo(scale: compact ? 0.32 : 0.42).dimmed(teaching)
+                    if model.adventDoors > 0 { AdventShelf().dimmed(teaching) }
+                    Spacer(minLength: 0)
+                    if model.isExtraUnlocked(.buddy) {
+                        BuddyHomeView(side: compact ? 160 : 200)
+                    } else {
+                        SquishyView(id: model.progress.favouriteSquishy ?? "peach-bun", rarity: .rare)
+                            .frame(width: 170, height: 170)
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityIdentifier("home-coins")
-                    Spacer()
-                    IconButton(system: "gearshape.fill") { model.screen = .settings }
+                    Spacer(minLength: 0)
+                    if let banner = model.eventBanner {
+                        // A light event from the website's config. No countdown.
+                        Text(verbatim: banner).font(Theme.body(13)).foregroundStyle(Theme.plum)
+                            .lineLimit(1).minimumScaleFactor(0.7)
+                            .padding(.horizontal, 12).padding(.vertical, 4)
+                            .background(Capsule().fill(Theme.butter))
+                            .dimmed(teaching)
+                    }
+                    if model.dailyJarOpen { dailyJarButton.dimmed(teaching) }
+                    playButton(height: compact ? 84 : 104).dimmed(teaching)
+                    HStack(spacing: 12) {
+                        collectionButton(height: compact ? 76 : 88)
+                        mysteryButton(height: compact ? 76 : 88)
+                    }
+                    .dimmed(teaching)
                 }
-                JellyLogo(scale: compact ? 0.42 : 0.56)
-                if model.adventDoors > 0 { AdventShelf() }
-                Spacer(minLength: 0)
-                if model.isExtraUnlocked(.buddy) {
-                    BuddyHomeView()
-                } else {
-                    SquishyView(id: model.progress.favouriteSquishy ?? "peach-bun", rarity: .rare)
-                        .frame(width: 170, height: 170)
-                }
-                Spacer(minLength: 0)
-                playButton(height: compact ? 72 : 90)
-                HStack(spacing: 12) {
-                    collectionButton(height: compact ? 78 : 100)
-                    mysteryButton(height: compact ? 78 : 100)
-                }
-                places
-                capsuleBar
+                .padding(.horizontal, 16).padding(.top, 16).padding(.bottom, 12)
+                tabBar.dimmed(teaching)
             }
-            .padding(16)
         }
         .background(
             LinearGradient(stops: [.init(color: Color(hex: 0xFFE1EE), location: 0), .init(color: Color(hex: 0xFFF0F4), location: 0.48),
                                    .init(color: Color(hex: 0xFFF6EA), location: 1)], startPoint: .top, endPoint: .bottom)
-                .overlay { bubbles }
                 .ignoresSafeArea()
         )
         .overlay {
@@ -69,7 +67,7 @@ struct HomeView: View {
                             .position(coinsLanded
                                 ? CGPoint(x: 50, y: 34)
                                 : CGPoint(x: geo.size.width * 0.5 + CGFloat((i * 37) % 120 - 60),
-                                          y: geo.size.height * 0.62 + CGFloat((i * 53) % 70 - 35)))
+                                          y: geo.size.height * 0.5 + CGFloat((i * 53) % 70 - 35)))
                             .opacity(coinsLanded ? 0 : 1)
                             .animation(.easeIn(duration: 0.5).delay(0.15 + Double(i) * 0.05), value: coinsLanded)
                     }
@@ -87,34 +85,88 @@ struct HomeView: View {
             model.homeAppeared()
             withAnimation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true)) { wobble = true }
         }
+        .onDisappear { model.trickTeaching = nil }
     }
 
-    /// A few soft bubbles in the background.
-    private var bubbles: some View {
-        GeometryReader { geo in
-            ForEach(0..<7, id: \.self) { i in
-                let d = CGFloat(40 + (i * 37) % 70)
-                Circle().fill(Color.white.opacity(0.35))
-                    .overlay(Circle().stroke(Color.white.opacity(0.6), lineWidth: 1.5))
-                    .frame(width: d, height: d)
-                    .position(x: geo.size.width * CGFloat((i * 53) % 100) / 100, y: geo.size.height * CGFloat((i * 29 + 11) % 100) / 100)
+    /// Coins (opens the coin shop), the stamp card, the festive door in season, and settings.
+    private var topBar: some View {
+        HStack(spacing: 8) {
+            // Under-13s (and players who gave no age) meet the grown-up check first, the same one Settings uses.
+            Button { if model.isGentleMode { coinGate = true } else { model.screen = .shop } } label: {
+                HStack(spacing: 6) {
+                    Label { Text("\(model.progress.wallet.balance)") } icon: { CoinIcon() }
+                        .font(Theme.body(17)).foregroundStyle(Theme.plum)
+                        .monospacedDigit()
+                        .contentTransition(.numericText(value: Double(model.progress.wallet.balance)))
+                        .animation(.easeOut(duration: 0.9), value: model.progress.wallet.balance)
+                    // No nudge to buy coins for younger players: the pill is only a counter there.
+                    if !model.isGentleMode {
+                        Image(systemName: "plus").font(.system(size: 12, weight: .heavy)).foregroundStyle(.white)
+                            .frame(width: 22, height: 22).background(Circle().fill(Theme.mint))
+                    }
+                }
+                .scaleEffect(coinsLanded && coinsFlying ? 1.12 : 1)
+                .padding(.leading, 14).padding(.trailing, 8).frame(height: 44)
+                .background(Capsule().fill(.white))
             }
+            .buttonStyle(PressSquish())
+            .accessibilityLabel(Text("Get coins"))
+            .sheet(isPresented: $coinGate, onDismiss: { if coinGatePassed { coinGatePassed = false; model.screen = .shop } }) {
+                ParentalGate(onPass: { coinGatePassed = true; coinGate = false }, onCancel: { coinGate = false })
+            }
+            .accessibilityIdentifier("home-coins")
+            stampPill
+            Spacer(minLength: 0)
+            // The festive door: a side world. No countdown anywhere.
+            if model.showsFestiveDoor {
+                Button { model.openFestiveDoor() } label: {
+                    Image(systemName: "door.left.hand.closed").font(.system(size: 18, weight: .bold)).foregroundStyle(.white)
+                        .frame(width: 44, height: 44).background(Circle().fill(Color(hex: 0xD8434F)))
+                }
+                .buttonStyle(PressSquish())
+                .accessibilityLabel(Text(AppModel.christmasWorldName))
+                .accessibilityIdentifier("festive-door")
+            }
+            IconButton(system: "gearshape.fill") { model.screen = .settings }
         }
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
     }
 
-    /// The main button: straight into the level to play next.
+    /// Daily Jar: one board a day. Once it is won it just says so until tomorrow; nothing counts down.
+    private var dailyJarButton: some View {
+        let done = model.dailyJarDone
+        return Button { model.playDailyJar() } label: {
+            HStack(spacing: 8) {
+                Image(systemName: done ? "checkmark.circle.fill" : "sun.max.fill").font(.system(size: 17, weight: .bold))
+                    .foregroundStyle(done ? Theme.mint : Theme.butter)
+                Text("Daily Jar").font(Theme.title(17))
+                Spacer(minLength: 0)
+                if done {
+                    Text("Done today").font(Theme.body(14)).opacity(0.7)
+                } else {
+                    Label { Text(verbatim: "+\(model.dailyJarCoins)") } icon: { CoinIcon() }.font(Theme.body(15))
+                }
+            }
+            .foregroundStyle(Theme.plum)
+            .padding(.horizontal, 16).frame(height: 44)
+            .background(Capsule().fill(.white))
+            .overlay(Capsule().stroke(Theme.plum.opacity(0.12), lineWidth: 2))
+        }
+        .buttonStyle(PressSquish())
+        .disabled(done)
+        .accessibilityIdentifier("home-daily-jar")
+    }
+
+    /// The main button: straight into the level to play next, with how close the next capsule is.
     private func playButton(height: CGFloat) -> some View {
         let index = model.progress.highestUnlocked
         return Button { model.screen = .level(index) } label: {
             HStack(spacing: 14) {
-                Image(systemName: "play.fill").font(.system(size: height * 0.3, weight: .heavy))
+                Image(systemName: "play.fill").font(.system(size: height * 0.28, weight: .heavy))
                     .foregroundStyle(Color(hex: 0xEE4689))
-                    .frame(width: height * 0.62, height: height * 0.62)
+                    .frame(width: height * 0.6, height: height * 0.6)
                     .background(Circle().fill(.white))
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Level \(model.levelNumber(index))").font(Theme.title(height * 0.34)).foregroundStyle(.white)
+                    Text("Level \(model.levelNumber(index))").font(Theme.title(height * 0.32)).foregroundStyle(.white)
                         .lineLimit(1).minimumScaleFactor(0.6)
                     if model.levels.indices.contains(index) {
                         Text(AppModel.worldName(model.levels[index].file.world)).font(Theme.body(13))
@@ -124,6 +176,21 @@ struct HomeView: View {
                     }
                 }
                 Spacer(minLength: 0)
+                if let before = model.levelsToNextCapsule(after: index - 1) {
+                    // A capsule over three pips: one fills with each level won.
+                    let toGo = before + 1
+                    VStack(spacing: 6) {
+                        Image(systemName: "capsule.portrait.fill").font(.system(size: height * 0.26, weight: .bold))
+                            .foregroundStyle(.white)
+                        HStack(spacing: 4) {
+                            ForEach(0..<3, id: \.self) { i in
+                                Circle().fill(Color.white.opacity(i < 3 - toGo ? 1 : 0.35)).frame(width: 8, height: 8)
+                            }
+                        }
+                    }
+                    .accessibilityElement()
+                    .accessibilityLabel(toGo == 1 ? Text("1 more level to a capsule") : Text("\(toGo) more levels to a capsule"))
+                }
             }
             .padding(.horizontal, 18)
             .frame(maxWidth: .infinity).frame(height: height)
@@ -203,70 +270,56 @@ struct HomeView: View {
         .accessibilityIdentifier("home-mystery")
     }
 
-    /// The smaller places: the level map, and the ones that open later.
-    private var places: some View {
-        HStack(spacing: 8) {
-            place("Levels", "circle.grid.3x3.fill") { model.screen = .map }
-            if model.isExtraUnlocked(.squishRoom) {
-                place("Squish Room", "hand.tap.fill", extra: .squishRoom) { model.open(.squishRoom) }
-            }
-            if model.isExtraUnlocked(.maker) {
-                place("Maker", "paintbrush.fill", extra: .maker) { model.open(.maker) }
-            }
-            // The festive door: a side world. No countdown anywhere.
-            if model.showsFestiveDoor {
-                place(AppModel.christmasWorldName, "door.left.hand.closed") { model.openFestiveDoor() }
-                    .accessibilityIdentifier("festive-door")
-            }
+    /// The places, along the bottom. Home is where we are; the ones that open later show a lock until then.
+    private var tabBar: some View {
+        HStack(spacing: 4) {
+            tab("Home", "house.fill", selected: true) {}
+            tab("Levels", "circle.grid.3x3.fill") { model.screen = .map }
+            tab("Squish Room", "hand.tap.fill", extra: .squishRoom) { model.open(.squishRoom) }
+            tab("Maker", "paintbrush.fill", extra: .maker) { model.open(.maker) }
         }
+        .padding(.horizontal, 10).padding(.top, 8).padding(.bottom, 2)
+        .frame(maxWidth: .infinity)
+        .background(
+            UnevenRoundedRectangle(topLeadingRadius: 26, topTrailingRadius: 26)
+                .fill(Color.white.opacity(0.92))
+                .shadow(color: Theme.plum.opacity(0.12), radius: 8, y: -2)
+                .ignoresSafeArea(edges: .bottom)
+        )
     }
 
-    private func place(_ title: LocalizedStringKey, _ icon: String, extra: Extra? = nil, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Label(title, systemImage: icon).font(Theme.body(13)).foregroundStyle(Theme.plum)
-                .lineLimit(1).minimumScaleFactor(0.6)
-                .padding(.horizontal, 10).frame(maxWidth: .infinity).frame(height: 40)
-                .background(Capsule().fill(.white))
-                .overlay(alignment: .topTrailing) { if let extra, model.isNew(extra) { NewBadge().offset(x: 4, y: -8) } }
+    private func tab(_ title: LocalizedStringKey, _ icon: String, selected: Bool = false, extra: Extra? = nil,
+                     action: @escaping () -> Void) -> some View {
+        let locked = extra.map { !model.isExtraUnlocked($0) } ?? false
+        return Button(action: action) {
+            VStack(spacing: 3) {
+                Image(systemName: locked ? "lock.fill" : icon).font(.system(size: 19, weight: .bold))
+                Text(title).font(Theme.body(11)).lineLimit(1).minimumScaleFactor(0.6)
+            }
+            .foregroundStyle(selected ? Color.white : Theme.plum.opacity(locked ? 0.35 : 0.8))
+            .frame(maxWidth: .infinity).frame(height: 50)
+            .background(RoundedRectangle(cornerRadius: 20, style: .continuous).fill(selected ? Theme.bubblegum : Color.clear))
+            .overlay(alignment: .topTrailing) { if let extra, model.isNew(extra) { NewBadge().offset(x: 2, y: -8) } }
         }
         .buttonStyle(PressSquish())
+        .disabled(locked)
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
-    private var ownedCount: Int {
-        model.roster.collectibles.filter { model.progress.collection.owns($0.id) }.count
-    }
-
-    /// How close the next capsule is, under Play.
-    @ViewBuilder private var capsuleBar: some View {
-        if let before = model.levelsToNextCapsule(after: model.progress.highestUnlocked - 1) {
-            let toGo = before + 1
-            HStack(spacing: 6) {
-                ForEach(0..<3, id: \.self) { i in
-                    Capsule().fill(i < 3 - toGo ? Theme.grape : Color.white)
-                        .frame(width: 26, height: 9)
-                        .overlay(Capsule().stroke(Theme.plum.opacity(0.25), lineWidth: 1.5))
-                }
-                if toGo == 1 {
-                    Text("1 more level to a capsule")
-                } else {
-                    Text("\(toGo) more levels to a capsule")
-                }
-            }
-            .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.75))
-        }
-        // The stamp card: one stamp for the first win of each day, once level 3 is won.
-        // Nothing is lost on a missed day. Tap to see the seven rewards.
+    /// The stamp card: one stamp for the first win of each day, once level 3 is won.
+    /// Nothing is lost on a missed day. Tap to see the seven rewards.
+    private var stampPill: some View {
         Button { showStamps = true } label: {
             HStack(spacing: 5) {
-                ForEach(0..<StampCard.size, id: \.self) { i in
-                    Image(systemName: i < model.progress.stampCard.stamps ? "seal.fill" : "circle.dotted")
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundStyle(i < model.progress.stampCard.stamps ? Theme.bubblegum : Theme.plum.opacity(0.3))
-                }
-                Text("Stamp card").font(Theme.body(12)).foregroundStyle(Theme.plum.opacity(0.65))
+                Image(systemName: "seal.fill").font(.system(size: 16, weight: .bold)).foregroundStyle(Theme.bubblegum)
+                Text(verbatim: "\(model.progress.stampCard.stamps)/\(StampCard.size)")
+                    .font(Theme.body(15)).foregroundStyle(Theme.plum).monospacedDigit()
             }
+            .padding(.horizontal, 12).frame(height: 44)
+            .background(Capsule().fill(.white))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PressSquish())
+        .accessibilityLabel(Text("Stamp card"))
         .accessibilityIdentifier("stamp-card")
         .sheet(isPresented: $showStamps) {
             VStack(spacing: 14) {
@@ -299,8 +352,13 @@ struct HomeView: View {
             .presentationDetents([.medium])
         }
     }
+}
 
-    /// One object in the scene: a picture with its name under it, and a "new!" tag until first opened.
+private extension View {
+    /// Steps back while the Buddy is teaching a trick.
+    func dimmed(_ on: Bool) -> some View {
+        opacity(on ? 0.25 : 1).allowsHitTesting(!on).animation(.easeInOut(duration: 0.25), value: on)
+    }
 }
 
 /// 24 little doors, 1 to 24 December. Every door up to today can be opened once,
@@ -377,14 +435,19 @@ struct NewBadge: View {
     }
 }
 
-/// The Buddy on the home screen: says hello, reacts to pokes, eats treats.
-/// It never gets hungry, sick or sad.
+/// The Buddy on the home screen: says hello, reacts to pokes, eats treats and does tricks.
+/// Tricks are finger movements on the Buddy itself: round it for a spin, a flick up for a flip,
+/// a double tap for a dance. It never gets hungry, sick or sad.
 struct BuddyHomeView: View {
     @EnvironmentObject var model: AppModel
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    var side: CGFloat = 200
     @State private var picking = false
+    @State private var showSheet = false
     @State private var pokes = 0
-    @State private var confirmTreat = false
     @State private var feeding = false
+    @State private var gulp = false
+    @State private var biggerPop = false
     @State private var flying = "🧁"
     @State private var burst = false
     @State private var burstShown = false
@@ -392,71 +455,43 @@ struct BuddyHomeView: View {
     @State private var spin = 0.0
     @State private var flip = 0.0
     @State private var sway: CGFloat = 0
-    @State private var trickTurn = 0
+    @State private var hop: CGFloat = 0
     @State private var giftWobble = false
     @State private var talking = false
-    /// The trick chip a bouncing hand points at (a trick just learned).
-    @State private var pointAt: Int?
-    @State private var handBounce = false
+    /// The pointing hand's loop while a trick is taught, and the cheer once it is done.
+    @State private var handMoves = false
+    @State private var cheer = false
 
-    /// One chip per trick. A learned one plays its trick; a locked one shows the hearts still needed.
-    /// A bouncing hand points at a trick that has just been learned until it is tapped once.
-    private var trickChips: some View {
-        let buddy = model.progress.buddy
-        let names: [LocalizedStringKey] = ["Spin", "Flip", "Dance"]
-        let icons = ["arrow.triangle.2.circlepath", "arrow.up.and.down.circle.fill", "music.note"]
-        return HStack(spacing: 8) {
-            ForEach(1...3, id: \.self) { n in
-                let learned = n <= buddy.tricksUnlocked
-                Button {
-                    if pointAt == n { pointAt = nil }
-                    playTrick(n)
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: learned ? icons[n - 1] : "lock.fill")
-                        Text(names[n - 1])
-                        if !learned {
-                            Label { Text(verbatim: "\(max(1, n * BuddyState.heartsPerTrick - buddy.hearts))") } icon: { Image(systemName: "heart.fill") }
-                                .labelStyle(.titleAndIcon)
-                        }
-                    }
-                    .font(Theme.body(13)).lineLimit(1).minimumScaleFactor(0.7)
-                    .foregroundStyle(Theme.plum.opacity(learned ? 1 : 0.5))
-                    .padding(.horizontal, 10).padding(.vertical, 7)
-                    .background(Capsule().fill(learned ? Theme.mint : Color.white.opacity(0.5)))
-                    .overlay(Capsule().stroke(pointAt == n ? Theme.bubblegum : Theme.plum.opacity(0.15), lineWidth: pointAt == n ? 3 : 2))
-                }
-                .buttonStyle(PressSquish())
-                .disabled(!learned)
-                .accessibilityIdentifier("trick-\(n)")
-                .overlay(alignment: .bottom) {
-                    if pointAt == n {
-                        Text(verbatim: "👆").font(.system(size: 34))
-                            .offset(y: handBounce ? 34 : 44)
-                            .allowsHitTesting(false)
-                            .onAppear {
-                                handBounce = false
-                                withAnimation(.easeInOut(duration: 0.45).repeatForever(autoreverses: true)) { handBounce = true }
-                            }
-                    }
-                }
-                .zIndex(pointAt == n ? 1 : 0)
+    static let trickNames: [LocalizedStringKey] = ["Spin", "Flip", "Dance"]
+    static let trickHows: [LocalizedStringKey] = ["Draw a circle round your Buddy", "Swipe up on your Buddy", "Double tap your Buddy"]
+    static let trickIcons = ["arrow.triangle.2.circlepath", "arrow.up", "hand.tap.fill"]
+
+    /// A trick just learned: Home steps back, the Buddy shows it once, and a hand shows how to ask for it.
+    private func showOffTrick() {
+        guard let number = model.trickToShow, (1...3).contains(number) else { return }
+        model.trickToShow = nil
+        cheer = false
+        handMoves = false
+        withAnimation { model.buddySays = nil; model.trickTeaching = number }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            spin = 0; flip = 0; sway = 0; hop = 0
+            playTrick(number)
+            hearts()
+            if !reduceMotion {
+                withAnimation(.easeInOut(duration: number == 1 ? 2.2 : 1.1).repeatForever(autoreverses: false)) { handMoves = true }
             }
+        }
+        // It never holds Home for long: after a while it steps aside by itself.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 25) {
+            if model.trickTeaching == number, !cheer { withAnimation { model.trickTeaching = nil } }
         }
     }
 
-    private func showOffTrick() {
-        guard let number = model.trickToShow else { return }
-        model.trickToShow = nil
-        pointAt = number
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-            spin = 0; flip = 0; sway = 0
-            playTrick(number)
-            burstShown = true
-            burst = false
-            withAnimation(.easeOut(duration: 0.7)) { burst = true }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { burstShown = false; burst = false }
-        }
+    private func hearts() {
+        burstShown = true
+        burst = false
+        withAnimation(.easeOut(duration: 0.7)) { burst = true }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { burstShown = false; burst = false }
     }
 
     /// Three little squashes, like a mouth moving.
@@ -474,9 +509,12 @@ struct BuddyHomeView: View {
     ]
 
     var body: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 8) {
             if let ref = model.progress.buddy.squishy {
-                if let says = model.buddySays {
+                if let teaching = model.trickTeaching {
+                    trickCard(teaching)
+                        .transition(.scale(scale: 0.6, anchor: .bottom).combined(with: .opacity))
+                } else if let says = model.buddySays {
                     // A comic bubble; the mood question and its faces sit in the same bubble.
                     BuddyBubble(text: says, kind: model.buddySaysKind,
                                 asker: model.buddyAsksMood ? model.progress.buddy.name : nil, sounds: model.sounds) {
@@ -510,81 +548,57 @@ struct BuddyHomeView: View {
                         }
                     }
                 }
-                // The Buddy is as soft as in the Squish Room: knead, pull, pinch, pick up and throw.
-                SoftSquishy(toy: ref, look: ref, feel: model.feel(for: ref), mode: .room, pokes: pokes,
-                            onTouch: { withAnimation { model.pokeBuddy() } }, onDoubleTap: { playTrick() }) {
-                    SquishRefView(ref: ref)
-                }
-                .frame(maxWidth: .infinity, minHeight: 200, maxHeight: 340)
-                // Tricks: spin, flip and dance. Then the little growth from hearts, which never goes back.
-                .rotationEffect(.degrees(spin))
-                .modifier(FlipEffect(turn: flip))
-                .offset(x: sway)
-                // It squashes a little as it talks.
-                .scaleEffect(x: talking ? 1.04 : 1, y: talking ? 0.94 : 1, anchor: .bottom)
-                .scaleEffect(1 + buddySize, anchor: .bottom)
-                .padding(.top, 60 * buddySize)
-                .animation(.spring(response: 0.5, dampingFraction: 0.5), value: model.progress.buddy.lastTreatAt)
-                .overlay {
-                    // A treat flies up to the Buddy, and a heart floats off it.
-                    if feeding {
-                        Text(verbatim: flying).font(.system(size: flying == "🎁" ? 44 : 34))
-                            .transition(.asymmetric(insertion: .offset(x: -70, y: 150).combined(with: .opacity),
-                                                    removal: .scale(scale: 0.1).combined(with: .opacity)))
-                    }
-                    // A gift opens in a burst of hearts.
-                    ForEach(0..<8, id: \.self) { i in
-                        let angle = Double(i) / 8 * 2 * Double.pi
-                        Image(systemName: "heart.fill").font(.system(size: 20)).foregroundStyle(Theme.bubblegum)
-                            .offset(x: burst ? CGFloat(cos(angle)) * 110 : 0, y: burst ? CGFloat(sin(angle)) * 110 - 20 : 0)
-                            .scaleEffect(burst ? 1.2 : 0.2)
-                            .opacity(burstShown ? (burst ? 0 : 1) : 0)
-                    }
-                    if heartUp {
-                        Image(systemName: "heart.fill").font(.system(size: 26)).foregroundStyle(Theme.bubblegum)
-                            .transition(.asymmetric(insertion: .scale(scale: 0.3).combined(with: .opacity),
-                                                    removal: .offset(x: 50, y: -120).combined(with: .opacity)))
+                ZStack(alignment: .bottomTrailing) {
+                    toy(ref)
+                    // One round treat button by the Buddy, with how many are left. Gone when there are none.
+                    if model.progress.buddy.treats > 0, model.trickTeaching == nil {
+                        Button { feed { model.feedBuddy() } } label: {
+                            Text(verbatim: "🧁").font(.system(size: 28))
+                                .frame(width: 58, height: 58)
+                                .background(Circle().fill(Theme.butter))
+                                .overlay(Circle().stroke(.white, lineWidth: 3))
+                                .shadow(color: Theme.plum.opacity(0.18), radius: 4, y: 3)
+                                .overlay(alignment: .topTrailing) {
+                                    Text(verbatim: "\(model.progress.buddy.treats)")
+                                        .font(Theme.body(13)).foregroundStyle(.white).monospacedDigit()
+                                        .frame(minWidth: 22, minHeight: 22)
+                                        .background(Capsule().fill(Theme.bubblegum))
+                                        .overlay(Capsule().stroke(.white, lineWidth: 2))
+                                        .offset(x: 4, y: -4)
+                                }
+                        }
+                        .buttonStyle(PressSquish())
+                        .accessibilityLabel(Text("Treat ×\(model.progress.buddy.treats)"))
+                        .accessibilityIdentifier("treat")
+                        .padding(.trailing, 30)
+                        .transition(.scale(scale: 0.4).combined(with: .opacity))
                     }
                 }
-                .overlay(alignment: .bottomTrailing) {
-                    // The daily gift sits by the Buddy and wobbles until it is opened, then bursts.
-                    if model.dailyGiftWaiting {
-                        Text(verbatim: "🎁").font(.system(size: 46))
-                            .rotationEffect(.degrees(giftWobble ? 9 : -9), anchor: .bottom)
-                            .animation(.easeInOut(duration: 0.45).repeatForever(autoreverses: true), value: giftWobble)
-                            .offset(x: -18, y: -8)
-                            .onAppear { giftWobble = true }
-                            .onDisappear { giftWobble = false }
-                            .onTapGesture { model.takeDailyGift() }
-                            .transition(.asymmetric(insertion: .scale(scale: 0.4).combined(with: .opacity),
-                                                    removal: .scale(scale: 2.2).combined(with: .opacity)))
+                // The name row opens the Buddy's own page: friendship, tricks, change Buddy.
+                Button { showSheet = true } label: {
+                    HStack(spacing: 8) {
+                        Text(verbatim: model.progress.buddy.name).font(Theme.title(22)).foregroundStyle(Theme.plum)
+                            .lineLimit(1).minimumScaleFactor(0.6)
+                        // The heart ring fills towards the next trick.
+                        ZStack {
+                            Circle().stroke(Theme.bubblegum.opacity(0.2), lineWidth: 4)
+                            Circle().trim(from: 0, to: model.progress.buddy.trickProgress)
+                                .stroke(Theme.bubblegum, style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                                .rotationEffect(.degrees(-90))
+                            Image(systemName: "heart.fill").font(.system(size: 11)).foregroundStyle(Theme.bubblegum)
+                        }
+                        .frame(width: 28, height: 28)
+                        .animation(.spring(response: 0.4, dampingFraction: 0.6), value: model.progress.buddy.hearts)
+                        Text(verbatim: "\(model.progress.buddy.hearts)").font(Theme.body(15)).foregroundStyle(Theme.bubblegum)
+                        Image(systemName: "chevron.right").font(.system(size: 12, weight: .bold)).foregroundStyle(Theme.plum.opacity(0.4))
                     }
+                    .padding(.horizontal, 14).frame(minHeight: 44)
+                    .contentShape(Rectangle())
                 }
-                .accessibilityElement()
-                .accessibilityLabel(Text(verbatim: model.progress.buddy.name))
-                .accessibilityAddTraits(.isButton)
-                .accessibilityAction { poke() }
-                .accessibilityIdentifier("buddy")
-                HStack(spacing: 8) {
-                    Text(verbatim: model.progress.buddy.name).font(Theme.title(22))
-                    // The heart ring fills towards the next trick.
-                    ZStack {
-                        Circle().stroke(Theme.bubblegum.opacity(0.2), lineWidth: 4)
-                        Circle().trim(from: 0, to: model.progress.buddy.trickProgress)
-                            .stroke(Theme.bubblegum, style: StrokeStyle(lineWidth: 4, lineCap: .round))
-                            .rotationEffect(.degrees(-90))
-                        Image(systemName: "heart.fill").font(.system(size: 12)).foregroundStyle(Theme.bubblegum)
-                    }
-                    .frame(width: 30, height: 30)
-                    .animation(.spring(response: 0.4, dampingFraction: 0.6), value: model.progress.buddy.hearts)
-                    Text(verbatim: "\(model.progress.buddy.hearts)").font(Theme.body(15)).foregroundStyle(Theme.bubblegum)
-                }
-                .foregroundStyle(Theme.plum)
-                if let toGo = model.progress.buddy.heartsToNextTrick {
-                    Text("\(toGo) more hearts to the next trick").font(Theme.body(12)).foregroundStyle(Theme.plum.opacity(0.6))
-                } else {
-                    Text("Double tap for a trick!").font(Theme.body(12)).foregroundStyle(Theme.plum.opacity(0.6))
-                }
+                .buttonStyle(PressSquish())
+                .accessibilityIdentifier("buddy-name")
+                .opacity(model.trickTeaching == nil ? 1 : 0.25)
+                .allowsHitTesting(model.trickTeaching == nil)
                 if model.dailyGiftReady {
                     // The Buddy's daily gift: coins by opt-in ad, or free in gentle mode.
                     Button { model.takeDailyGift(); squish() } label: {
@@ -600,55 +614,15 @@ struct BuddyHomeView: View {
                         .padding(.horizontal, 14).padding(.vertical, 8)
                         .background(Capsule().fill(Color.white.opacity(0.7)))
                 }
-                trickChips
-                HStack(spacing: 10) {
-                    if model.progress.buddy.treats > 0 {
-                        Button { feed { model.feedBuddy() } } label: {
-                            Label("Treat ×\(model.progress.buddy.treats)", systemImage: "birthday.cake.fill")
-                        }
-                        .buttonStyle(SquishButtonStyle(fill: Theme.butter, text: Theme.plum))
-                    } else if !model.isGentleMode && model.progress.wallet.canAfford(.treat) {
-                        // Out of free treats: one more for coins, given straight away.
-                        // Two taps, so a poke meant for the Buddy never spends coins.
-                        Button {
-                            if confirmTreat {
-                                confirmTreat = false
-                                feed { model.buyForBuddy(.treat) }
-                            } else {
-                                withAnimation { confirmTreat = true }
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { withAnimation { confirmTreat = false } }
-                            }
-                        } label: {
-                            HStack(spacing: 6) {
-                                Image(systemName: "birthday.cake.fill")
-                                Text(confirmTreat ? LocalizedStringKey("Tap again") : LocalizedStringKey("Treat"))
-                                Label { Text("\(Coins.Item.treat.price)") } icon: { CoinIcon() }.font(Theme.body(14))
-                            }
-                        }
-                        .buttonStyle(SquishButtonStyle(fill: confirmTreat ? Theme.mint : Theme.butter, text: Theme.plum))
-                        .accessibilityIdentifier("buy-treat")
-                    } else {
-                        // No treats and no coins: say where treats come from.
-                        Button {
-                            withAnimation { model.buddySays = String(localized: "Win a level and I get a treat!") }
-                        } label: { Label("Get treats", systemImage: "birthday.cake.fill") }
-                        .buttonStyle(SquishButtonStyle(fill: Theme.butter, text: Theme.plum))
-                        .accessibilityIdentifier("get-treats")
-                    }
-                    Button { picking = true } label: {
-                        Label("Change Buddy", systemImage: "arrow.left.arrow.right").font(Theme.body(14))
-                    }
-                    .buttonStyle(SquishButtonStyle(fill: .white, text: Theme.plum))
-                }
             } else {
-                Text(verbatim: "Squish Sort").font(Theme.title(40)).foregroundStyle(Theme.plum)
                 Button { picking = true } label: { Label("Choose your Buddy", systemImage: "heart.fill") }
                     .buttonStyle(SquishButtonStyle(fill: Theme.grape))
                     .overlay(alignment: .topTrailing) { if model.isNew(.buddy) { NewBadge().offset(x: 10, y: -10) } }
             }
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.7), value: model.buddySays)
-        // A trick just learned is shown off at once, with a burst of hearts.
+        .animation(.spring(response: 0.35, dampingFraction: 0.7), value: model.trickTeaching)
+        // A trick just learned is taught at once.
         .onChange(of: model.trickToShow) { _, _ in showOffTrick() }
         .onAppear { showOffTrick() }
         // Something bought in the shop arrives here, so the Buddy is seen enjoying it.
@@ -661,6 +635,161 @@ struct BuddyHomeView: View {
         .sheet(isPresented: $picking) {
             BuddyPickerView { picking = false }.environmentObject(model)
         }
+        .sheet(isPresented: $showSheet) {
+            BuddySheet { showSheet = false }.environmentObject(model)
+        }
+    }
+
+    /// The Buddy itself: as soft as in the Squish Room. Knead, pull, pinch, pick up and throw.
+    private func toy(_ ref: String) -> some View {
+        SoftSquishy(toy: ref, look: ref, feel: model.feel(for: ref), mode: .room, pokes: pokes, comesHome: true,
+                    onTouch: { withAnimation { model.pokeBuddy() } },
+                    onDoubleTap: { _ = ask(for: 3) },
+                    onGesture: { gesture in ask(for: gesture == .circle ? 1 : 2) }) {
+            SquishRefView(ref: ref)
+        }
+        .frame(maxWidth: .infinity).frame(height: side)
+        // Tricks: spin, flip and dance. Then the little growth from hearts, which never goes back.
+        .rotationEffect(.degrees(spin))
+        .modifier(FlipEffect(turn: flip))
+        .offset(x: sway, y: hop)
+        // It squashes a little as it talks.
+        .scaleEffect(x: talking ? 1.04 : 1, y: talking ? 0.94 : 1, anchor: .bottom)
+        // Every treat: a big gulp that springs back to a size a little bigger than before.
+        .scaleEffect(gulp ? 1.22 : 1, anchor: .bottom)
+        .scaleEffect(1 + buddySize, anchor: .bottom)
+        .padding(.top, side * 0.6 * buddySize)
+        .animation(.spring(response: 0.5, dampingFraction: 0.5), value: model.progress.buddy.lastTreatAt)
+        .animation(.spring(response: 0.5, dampingFraction: 0.5), value: model.progress.buddy.hearts)
+        .onChange(of: model.progress.buddy.hearts) { old, new in
+            guard new > old else { return }
+            withAnimation(.easeOut(duration: 0.18)) { gulp = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.35)) { gulp = false }
+            }
+            if model.progress.buddy.growth < BuddyState.maxGrowth || old < Int(BuddyState.maxGrowth / BuddyState.growthPerHeart) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { biggerPop = true }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.3) { withAnimation { biggerPop = false } }
+            }
+        }
+        .overlay(alignment: .top) {
+            if biggerPop {
+                Text("Bigger!").font(Theme.title(22)).foregroundStyle(.white)
+                    .padding(.horizontal, 14).padding(.vertical, 4)
+                    .background(Capsule().fill(Theme.bubblegum))
+                    .rotationEffect(.degrees(-5))
+                    .transition(.scale(scale: 0.3).combined(with: .opacity))
+                    .allowsHitTesting(false)
+            }
+        }
+        .overlay {
+            // A treat flies up to the Buddy, and a heart floats off it.
+            if feeding {
+                Text(verbatim: flying).font(.system(size: flying == "🎁" ? 44 : 34))
+                    .transition(.asymmetric(insertion: .offset(x: 70, y: 110).combined(with: .opacity),
+                                            removal: .scale(scale: 0.1).combined(with: .opacity)))
+            }
+            // A gift, a new trick: a burst of hearts.
+            ForEach(0..<8, id: \.self) { i in
+                let angle = Double(i) / 8 * 2 * Double.pi
+                Image(systemName: "heart.fill").font(.system(size: 20)).foregroundStyle(Theme.bubblegum)
+                    .offset(x: burst ? CGFloat(cos(angle)) * 110 : 0, y: burst ? CGFloat(sin(angle)) * 110 - 20 : 0)
+                    .scaleEffect(burst ? 1.2 : 0.2)
+                    .opacity(burstShown ? (burst ? 0 : 1) : 0)
+                    .allowsHitTesting(false)
+            }
+            if heartUp {
+                Image(systemName: "heart.fill").font(.system(size: 26)).foregroundStyle(Theme.bubblegum)
+                    .transition(.asymmetric(insertion: .scale(scale: 0.3).combined(with: .opacity),
+                                            removal: .offset(x: 50, y: -120).combined(with: .opacity)))
+                    .allowsHitTesting(false)
+            }
+            // Show, don't tell: the hand draws the movement that asks for the new trick.
+            if let teaching = model.trickTeaching, !cheer { trickHand(teaching) }
+        }
+        .overlay(alignment: .bottomLeading) {
+            // The daily gift sits by the Buddy and wobbles until it is opened, then bursts.
+            if model.dailyGiftWaiting {
+                Text(verbatim: "🎁").font(.system(size: 46))
+                    .rotationEffect(.degrees(giftWobble ? 9 : -9), anchor: .bottom)
+                    .animation(.easeInOut(duration: 0.45).repeatForever(autoreverses: true), value: giftWobble)
+                    .offset(x: 26, y: -8)
+                    .onAppear { giftWobble = true }
+                    .onDisappear { giftWobble = false }
+                    .onTapGesture { model.takeDailyGift() }
+                    .transition(.asymmetric(insertion: .scale(scale: 0.4).combined(with: .opacity),
+                                            removal: .scale(scale: 2.2).combined(with: .opacity)))
+            }
+        }
+        .accessibilityElement()
+        .accessibilityLabel(Text(verbatim: model.progress.buddy.name))
+        .accessibilityAddTraits(.isButton)
+        .accessibilityAction { poke() }
+        .accessibilityIdentifier("buddy")
+    }
+
+    /// The card over the Buddy while a new trick is taught. A tap puts it away.
+    private func trickCard(_ number: Int) -> some View {
+        VStack(spacing: 4) {
+            Text(cheer ? LocalizedStringKey("Yay!") : LocalizedStringKey("NEW TRICK"))
+                .font(Theme.body(13)).foregroundStyle(.white)
+                .padding(.horizontal, 12).padding(.vertical, 3)
+                .background(Capsule().fill(Theme.bubblegum))
+            HStack(spacing: 8) {
+                Image(systemName: BuddyHomeView.trickIcons[number - 1]).font(.system(size: 22, weight: .heavy))
+                Text(BuddyHomeView.trickNames[number - 1]).font(Theme.title(28))
+            }
+            .foregroundStyle(Theme.plum)
+            if !cheer {
+                Text(BuddyHomeView.trickHows[number - 1]).font(Theme.body(15)).foregroundStyle(Theme.plum.opacity(0.8))
+                    .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
+                Text("Try it now!").font(Theme.body(13)).foregroundStyle(Theme.bubblegum)
+            }
+        }
+        .padding(.horizontal, 20).padding(.vertical, 12)
+        .background(RoundedRectangle(cornerRadius: 24, style: .continuous).fill(.white))
+        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(Theme.butter, lineWidth: 4))
+        .onTapGesture { withAnimation { model.trickTeaching = nil } }
+        .accessibilityIdentifier("trick-card")
+    }
+
+    /// A pointing hand over the Buddy that plays the movement: round it, up it, or two taps on it.
+    @ViewBuilder private func trickHand(_ number: Int) -> some View {
+        let r = side * 0.5
+        let dots = StrokeStyle(lineWidth: 4, lineCap: .round, dash: [2, 10])
+        Group {
+            switch number {
+            case 1:
+                ZStack {
+                    Circle().stroke(Theme.bubblegum.opacity(0.7), style: dots).frame(width: r * 2, height: r * 2)
+                    Text(verbatim: "👆").font(.system(size: 38))
+                        .rotationEffect(.degrees(handMoves ? -360 : 0))
+                        .offset(y: -r)
+                        .rotationEffect(.degrees(handMoves ? 360 : 0))
+                }
+            case 2:
+                ZStack {
+                    VStack(spacing: 0) {
+                        Image(systemName: "arrowtriangle.up.fill").font(.system(size: 16)).foregroundStyle(Theme.bubblegum.opacity(0.8))
+                        Rectangle().fill(.clear).frame(width: 4, height: r * 1.3)
+                            .overlay(Path { p in p.move(to: CGPoint(x: 2, y: 0)); p.addLine(to: CGPoint(x: 2, y: r * 1.3)) }
+                                .stroke(Theme.bubblegum.opacity(0.7), style: dots))
+                    }
+                    .offset(x: -30)
+                    Text(verbatim: "👆").font(.system(size: 38))
+                        .offset(y: handMoves ? -r * 0.75 : r * 0.6)
+                        .opacity(handMoves ? 0.2 : 1)
+                }
+            default:
+                Text(verbatim: "👆").font(.system(size: 38))
+                    .scaleEffect(handMoves ? 1 : 0.78)
+                    .offset(x: 10, y: 24)
+                    .background(Circle().stroke(Theme.bubblegum.opacity(handMoves ? 0 : 0.8), lineWidth: 4)
+                        .frame(width: handMoves ? 90 : 30, height: handMoves ? 90 : 30).offset(y: 4))
+                    .animation(reduceMotion ? nil : .easeOut(duration: 0.22).repeatForever(autoreverses: true), value: handMoves)
+            }
+        }
+        .allowsHitTesting(false)
     }
 
     private func poke() {
@@ -686,12 +815,7 @@ struct BuddyHomeView: View {
             withAnimation(.easeIn(duration: 0.15)) { feeding = false }
             squish()
             withAnimation { give() }
-            if gift {
-                burst = false
-                burstShown = true
-                withAnimation(.easeOut(duration: 0.8)) { burst = true }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.85) { burstShown = false; burst = false }
-            }
+            if gift { hearts() }
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
             squish()
@@ -702,16 +826,36 @@ struct BuddyHomeView: View {
         }
     }
 
-    /// A double tap plays a trick the Buddy knows: spin, flip or dance.
-    /// Does trick `number` (1 spin, 2 flip, 3 dance), or the next one the Buddy knows.
-    private func playTrick(_ number: Int? = nil) {
-        let known = model.progress.buddy.tricksUnlocked
-        guard known > 0, spin == 0, flip == 0, sway == 0 else { return }
-        trickTurn += 1
-        let which = number.map { min(max(1, $0), known) } ?? (trickTurn - 1) % known + 1
+    /// The player asked for trick `number` with its movement. Nothing happens until the Buddy knows it.
+    /// True if the trick was done.
+    private func ask(for number: Int) -> Bool {
+        guard number <= model.progress.buddy.tricksUnlocked, playTrick(number) else { return false }
+        if model.trickTeaching == number, !cheer {
+            // Done once: a cheer, and Home comes back.
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { cheer = true }
+            hearts()
+            model.haptics.win()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
+                withAnimation { model.trickTeaching = nil }
+                cheer = false
+                handMoves = false
+            }
+        }
+        return true
+    }
+
+    /// Does trick `number`: 1 spin, 2 flip, 3 dance. With Reduce Motion every trick is a gentle hop.
+    @discardableResult
+    private func playTrick(_ number: Int) -> Bool {
+        guard spin == 0, flip == 0, sway == 0, hop == 0 else { return false }
         model.sounds.play("trick", or: "buddy_giggle")
         model.haptics.complete()
-        switch which {
+        if reduceMotion {
+            withAnimation(.easeOut(duration: 0.2)) { hop = -16 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) { withAnimation(.easeIn(duration: 0.2)) { hop = 0 } }
+            return true
+        }
+        switch number {
         case 1:
             withAnimation(.easeInOut(duration: 0.6)) { spin = 360 }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) { spin = 0 }
@@ -722,6 +866,72 @@ struct BuddyHomeView: View {
             withAnimation(.easeInOut(duration: 0.15).repeatCount(6, autoreverses: true)) { sway = 14 }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.95) { withAnimation(.easeOut(duration: 0.1)) { sway = 0 } }
         }
+        return true
+    }
+}
+
+/// The Buddy's own page, opened from its name on Home: friendship, the tricks it knows and the
+/// finger movement for each, the next trick, and Change Buddy.
+struct BuddySheet: View {
+    @EnvironmentObject var model: AppModel
+    let done: () -> Void
+    @State private var picking = false
+
+    var body: some View {
+        let buddy = model.progress.buddy
+        ScrollView {
+            VStack(spacing: 14) {
+                if let ref = buddy.squishy {
+                    SquishRefView(ref: ref).frame(width: 120, height: 120)
+                }
+                Text(verbatim: buddy.name).font(Theme.title(28)).foregroundStyle(Theme.plum)
+                HStack(spacing: 8) {
+                    Image(systemName: "heart.fill").foregroundStyle(Theme.bubblegum)
+                    Text(verbatim: "\(buddy.hearts)").font(Theme.title(20)).foregroundStyle(Theme.bubblegum)
+                    ProgressView(value: buddy.trickProgress).tint(Theme.bubblegum).frame(width: 140)
+                }
+                Text("Tricks").font(Theme.title(20)).foregroundStyle(Theme.plum)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                ForEach(1...BuddyState.tricks, id: \.self) { n in
+                    if n <= buddy.tricksUnlocked {
+                        row(icon: BuddyHomeView.trickIcons[n - 1], tint: Theme.mint,
+                            title: Text(BuddyHomeView.trickNames[n - 1]), detail: Text(BuddyHomeView.trickHows[n - 1]))
+                    }
+                }
+                if let toGo = buddy.heartsToNextTrick {
+                    row(icon: "lock.fill", tint: Color.white, title: Text("Next trick"),
+                        detail: Text("\(toGo) more hearts to the next trick"))
+                        .opacity(0.7)
+                }
+                Button { picking = true } label: {
+                    Label("Change Buddy", systemImage: "arrow.left.arrow.right")
+                }
+                .buttonStyle(SquishButtonStyle(fill: .white, text: Theme.plum))
+                .padding(.top, 6)
+                .accessibilityIdentifier("change-buddy")
+            }
+            .padding(20)
+        }
+        .background(Theme.marshmallow.ignoresSafeArea())
+        .presentationDetents([.medium, .large])
+        .sheet(isPresented: $picking) {
+            BuddyPickerView { picking = false; done() }.environmentObject(model)
+        }
+    }
+
+    private func row(icon: String, tint: Color, title: Text, detail: Text) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon).font(.system(size: 18, weight: .bold)).foregroundStyle(Theme.plum)
+                .frame(width: 44, height: 44).background(Circle().fill(tint))
+            VStack(alignment: .leading, spacing: 2) {
+                title.font(Theme.title(18)).foregroundStyle(Theme.plum)
+                detail.font(Theme.body(14)).foregroundStyle(Theme.plum.opacity(0.7))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(12)
+        .background(RoundedRectangle(cornerRadius: 20, style: .continuous).fill(Color.white.opacity(0.8)))
     }
 }
 

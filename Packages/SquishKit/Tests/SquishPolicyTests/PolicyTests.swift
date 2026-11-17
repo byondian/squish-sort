@@ -203,9 +203,9 @@ final class CadenceTests: XCTestCase {
         }
     }
 
-    func testFirstAdAfterLevelSevenOnceFourMinutesPlayed() {
-        XCTAssertFalse(AdCadence.shouldShowInterstitial(after: win(7), state: played(200, levels: 7), group: .adult, ownsRemoveAds: false))
-        XCTAssertTrue(AdCadence.shouldShowInterstitial(after: win(7), state: played(240, levels: 7), group: .adult, ownsRemoveAds: false))
+    func testFirstAdAfterLevelSevenOnceEnoughPlayed() {
+        XCTAssertFalse(AdCadence.shouldShowInterstitial(after: win(7), state: played(140, levels: 7), group: .adult, ownsRemoveAds: false))
+        XCTAssertTrue(AdCadence.shouldShowInterstitial(after: win(7), state: played(150, levels: 7), group: .adult, ownsRemoveAds: false))
     }
 
     func testRemoveAdsMeansNoInterstitials() {
@@ -242,9 +242,12 @@ final class CadenceTests: XCTestCase {
     }
 
     func testTiersRampUp() {
-        let s3 = played(180, levels: 3, shown: 1)
-        XCTAssertFalse(AdCadence.shouldShowInterstitial(after: win(12), state: s3, group: .adult, ownsRemoveAds: false), "7–15 waits 4 levels")
-        XCTAssertTrue(AdCadence.shouldShowInterstitial(after: win(20), state: s3, group: .adult, ownsRemoveAds: false), "16–30 every 3 levels / 3 min")
+        let s2 = played(150, levels: 2, shown: 1)
+        XCTAssertFalse(AdCadence.shouldShowInterstitial(after: win(12), state: s2, group: .adult, ownsRemoveAds: false), "7–20 waits 3 levels")
+        XCTAssertTrue(AdCadence.shouldShowInterstitial(after: win(12), state: played(150, levels: 3, shown: 1), group: .adult, ownsRemoveAds: false))
+        XCTAssertTrue(AdCadence.shouldShowInterstitial(after: win(21), state: s2, group: .adult, ownsRemoveAds: false), "21 on: every 2 levels and 90 s")
+        XCTAssertFalse(AdCadence.shouldShowInterstitial(after: win(35), state: played(80, levels: 2, shown: 4), group: .adult, ownsRemoveAds: false),
+                       "never two close together")
         XCTAssertTrue(AdCadence.shouldShowInterstitial(after: win(35), state: played(90, levels: 2, shown: 4), group: .adult, ownsRemoveAds: false))
     }
 
@@ -469,7 +472,9 @@ final class ConfigTests: XCTestCase {
         let json = #"{"adCadence": {"sessionGraceSeconds": 90}, "christmasOpenFrom": "2026-12-05", "coins": {"lucky": 150}}"#
         let c = GameConfig.decodeOrDefault(Data(json.utf8))
         XCTAssertEqual(c.adCadence.sessionGraceSeconds, 90)
-        XCTAssertEqual(c.adCadence.tiers.count, 3)
+        XCTAssertEqual(c.adCadence.tiers.count, 2)
+        XCTAssertEqual(c.adCadence.childTiers.count, 3, "gentle mode keeps its slower pacing")
+        XCTAssertNil(c.event)
         XCTAssertEqual(c.christmasOpenFrom, "2026-12-05")
         XCTAssertEqual(c.christmasOpenUntil, "2027-01-06")
         XCTAssertEqual(c.coins.lucky, 150)
@@ -546,7 +551,7 @@ final class CoinTests: XCTestCase {
     }
 
     func testNothingInTheShopIsASquishy() {
-        XCTAssertEqual(Set(Coins.Item.allCases), [.hint, .extraJar, .theme, .treat, .gift, .shuffle])
+        XCTAssertEqual(Set(Coins.Item.allCases), [.hint, .theme, .treat, .gift, .shuffle])
     }
 
     func testALevelPaysOnceSoReplaysCannotBeFarmed() {
@@ -562,7 +567,7 @@ final class CoinTests: XCTestCase {
     }
 
     func testPricesAreTenTimesTheOldOnes() {
-        XCTAssertEqual(Coins.Item.allCases.map(\.price), [250, 400, 1500, 100, 600, 150])
+        XCTAssertEqual(Coins.Item.allCases.map(\.price), [250, 1500, 100, 600, 150])
         XCTAssertEqual(CoinRules().dailyGift, 200)
     }
 
@@ -627,7 +632,7 @@ final class CoinTests: XCTestCase {
         XCTAssertEqual(StampCard.reward(stamp: 7), .capsuleStep)
     }
 
-    func testOptInAdsAreCappedADayAndGentleModeGetsOnlyHintAndExtraJar() {
+    func testOptInAdsAreCappedADayAndGentleModeGetsOnlyHintAndShuffle() {
         var ads = OptInAdState()
         for _ in 0..<6 {
             XCTAssertTrue(ads.canWatch(today: "2026-12-01", cap: 6))
@@ -635,7 +640,7 @@ final class CoinTests: XCTestCase {
         }
         XCTAssertFalse(ads.canWatch(today: "2026-12-01", cap: 6))
         XCTAssertTrue(ads.canWatch(today: "2026-12-02", cap: 6), "a new day starts again")
-        XCTAssertEqual(OptInReward.allCases.filter { $0.isOffered(to: .child) }, [.hint, .extraJar])
+        XCTAssertEqual(OptInReward.allCases.filter { $0.isOffered(to: .child) }, [.hint, .shuffle])
         XCTAssertEqual(OptInReward.allCases.filter { $0.isOffered(to: .teen) }, OptInReward.allCases)
     }
 
@@ -723,6 +728,47 @@ final class ExtrasTests: XCTestCase {
         })
         XCTAssertGreaterThan(answers.count, 10, "the bag changes from day to day")
         XCTAssertNil(MysteryBag.daily(day: "2026-12-01", playerSeed: "p1", roster: Roster(collectibles: []), worlds: worlds))
+    }
+
+    func testMysteryBagChoicesShareTheAnswersShapeAfterTheEasyDays() throws {
+        let roster = try Roster.decode(content("roster.json"))
+        let file = try JSONSerialization.jsonObject(with: content("shapes.json")) as? [String: Any]
+        let shapes = try XCTUnwrap(file?["shapes"] as? [String: String])
+        for c in roster.collectibles { XCTAssertNotNil(shapes[c.id], "\(c.id) has a shape group") }
+        let worlds = ["toyshop", "sweetfactory", "starlight"]
+        let seen = Set(roster.collectibles.filter { $0.rarity == .common }.map(\.id))
+        for day in 1...28 {
+            let d = String(format: "2026-12-%02d", day)
+            let bag = try XCTUnwrap(MysteryBag.daily(day: d, playerSeed: "p1", roster: roster, worlds: worlds,
+                                                     shapes: shapes, seen: seen, easy: false))
+            XCTAssertEqual(bag, MysteryBag.daily(day: d, playerSeed: "p1", roster: roster, worlds: worlds,
+                                                 shapes: shapes, seen: seen, easy: false))
+            XCTAssertEqual(Set(bag.choices.map(\.id)).count, 4)
+            XCTAssertTrue(bag.choices.contains(bag.answer))
+            let alike = bag.choices.filter { $0 != bag.answer && shapes[$0.id] == shapes[bag.answer.id] }
+            XCTAssertGreaterThanOrEqual(alike.count, 2, "the shape alone never decides it")
+            for c in bag.choices {
+                XCTAssertNotEqual(c.rarity, .secret)
+                XCTAssertNotEqual(c.world, "christmas")
+            }
+            // The answer does not depend on what the player has seen, so it holds all day.
+            XCTAssertEqual(bag.answer, MysteryBag.daily(day: d, playerSeed: "p1", roster: roster, worlds: worlds,
+                                                        shapes: shapes, seen: [], easy: false)?.answer)
+        }
+    }
+
+    func testMysteryPrizeDropsWithCluesAndTheFirstDaysAreEasy() {
+        XCTAssertEqual([0, 1, 2, 3, 9].map { MysteryBag.prize(cluesUsed: $0) }, [150, 100, 75, 50, 50])
+        var s = MysteryState()
+        for day in ["2026-12-01", "2026-12-02", "2026-12-03"] {
+            XCTAssertTrue(s.isLearning(today: day))
+            _ = s.recordGuess(correct: false, today: day)
+            XCTAssertTrue(s.isLearning(today: day), "the bag does not change in the middle of a day")
+        }
+        XCTAssertFalse(s.isLearning(today: "2026-12-04"))
+        // A save from before this was counted has played already.
+        let old = try? JSONDecoder().decode(MysteryState.self, from: Data(#"{"steps": 1, "lastPlayedDay": "2026-11-16"}"#.utf8))
+        XCTAssertEqual(old?.isLearning(today: "2026-11-17"), false)
     }
 
     func testMysteryBagIsOneGuessADayAndThreeRightGuessesEarnACapsule() {
@@ -952,34 +998,142 @@ final class ExtrasTests: XCTestCase {
         XCTAssertEqual(rush.coins, plain.coins * 2)
     }
 
+    func testAnEncorePaysOncePerDuetAndOnlyOnAFirstClear() {
+        var pot = LevelPot(firstClear: true, jars: 4)
+        XCTAssertEqual(pot.encore(duetsInLevel: 2), 20)
+        XCTAssertEqual(pot.encore(duetsInLevel: 2), 20)
+        XCTAssertEqual(pot.encore(duetsInLevel: 2), 0, "undo and let go again adds nothing")
+        XCTAssertEqual(pot.coins, 40)
+        var replay = LevelPot(firstClear: false, jars: 4)
+        XCTAssertEqual(replay.encore(duetsInLevel: 2), 0)
+    }
+
     func testBuddyHeartsOpenTricksAndGrowth() {
         var b = BuddyState()
         XCTAssertEqual(b.tricksUnlocked, 0)
         XCTAssertEqual(b.heartsToNextTrick, 10)
         XCTAssertEqual(b.growth, 0)
+        b.hearts = 1
+        XCTAssertEqual(b.growth, 0.02, accuracy: 1e-9, "the first treat already shows")
         b.hearts = 7
         XCTAssertEqual(b.heartsToNextTrick, 3)
         XCTAssertEqual(b.trickProgress, 0.7, accuracy: 1e-9)
         b.hearts = 10
         XCTAssertEqual(b.tricksUnlocked, 1)
-        XCTAssertEqual(b.growth, 0.05, accuracy: 1e-9)
+        XCTAssertEqual(b.growth, 0.20, accuracy: 1e-9, "2% a heart")
         XCTAssertEqual(b.heartsToNextTrick, 10)
         b.hearts = 30
         XCTAssertEqual(b.tricksUnlocked, 3)
         XCTAssertNil(b.heartsToNextTrick)
         XCTAssertEqual(b.trickProgress, 1)
         b.hearts = 500
-        XCTAssertEqual(b.growth, 0.25, accuracy: 1e-9, "growth stops at a quarter bigger")
+        XCTAssertEqual(b.growth, 0.40, accuracy: 1e-9, "growth stops at 40% bigger")
         // A treat's puff eases back over a day, and the earned growth stays.
         XCTAssertEqual(b.puff(at: 1000), 0)
         b.lastTreatAt = 1000
-        XCTAssertEqual(b.puff(at: 1000), 0.10, accuracy: 1e-9)
-        XCTAssertEqual(b.puff(at: 1000 + 43_200), 0.05, accuracy: 1e-9)
+        XCTAssertEqual(b.puff(at: 1000), 0.15, accuracy: 1e-9)
+        XCTAssertEqual(b.puff(at: 1000 + 43_200), 0.075, accuracy: 1e-9)
         XCTAssertEqual(b.puff(at: 1000 + 200_000), 0)
         XCTAssertEqual(b.puff(at: 500), 0, "a clock set back gives no puff")
         // Gentle mode: gone within a minute, so there is nothing to come back for.
-        XCTAssertEqual(b.puff(at: 1030, lasting: BuddyState.puffSecondsGentle), 0.05, accuracy: 1e-9)
+        XCTAssertEqual(b.puff(at: 1030, lasting: BuddyState.puffSecondsGentle), 0.075, accuracy: 1e-9)
         XCTAssertEqual(b.puff(at: 1061, lasting: BuddyState.puffSecondsGentle), 0)
-        XCTAssertEqual(b.growth, 0.25, accuracy: 1e-9)
+        XCTAssertEqual(b.growth, BuddyState.maxGrowth, accuracy: 1e-9)
+    }
+}
+
+final class TrickGestureTests: XCTestCase {
+    private let centre = (x: 150.0, y: 100.0)
+
+    private func ring(turns: Double, radius: Double = 80, backwards: Bool = false) -> [(x: Double, y: Double)] {
+        (0...40).map { i in
+            let a = Double(i) / 40 * turns * 2 * Double.pi * (backwards ? -1 : 1)
+            return (x: centre.x + cos(a) * radius, y: centre.y + sin(a) * radius)
+        }
+    }
+
+    func testCircleRoundTheBuddyEitherWay() {
+        XCTAssertEqual(TrickGesture.classify(points: ring(turns: 1), seconds: 1.2, centre: centre, size: 160), .circle)
+        XCTAssertEqual(TrickGesture.classify(points: ring(turns: 0.9, backwards: true), seconds: 2, centre: centre, size: 160), .circle)
+        // Half way round is not a circle.
+        XCTAssertNil(TrickGesture.classify(points: ring(turns: 0.5), seconds: 1, centre: centre, size: 160))
+    }
+
+    func testQuickSwipeUp() {
+        let up = (0...8).map { (x: 150.0 + Double($0), y: 150.0 - Double($0) * 12) }
+        XCTAssertEqual(TrickGesture.classify(points: up, seconds: 0.2, centre: centre, size: 160), .swipeUp)
+        // A slow pull up is a stretch, not a trick.
+        XCTAssertNil(TrickGesture.classify(points: up, seconds: 1.5, centre: centre, size: 160))
+        // Down and sideways are nothing.
+        XCTAssertNil(TrickGesture.classify(points: up.reversed(), seconds: 0.2, centre: centre, size: 160))
+        let side = (0...8).map { (x: 100.0 + Double($0) * 12, y: 100.0 - Double($0)) }
+        XCTAssertNil(TrickGesture.classify(points: side, seconds: 0.2, centre: centre, size: 160))
+    }
+
+    func testTapAndKneadAreNotTricks() {
+        XCTAssertNil(TrickGesture.classify(points: [(x: 150, y: 100)], seconds: 0.1, centre: centre, size: 160))
+        // Rubbing little circles on the Buddy's middle.
+        XCTAssertNil(TrickGesture.classify(points: ring(turns: 3, radius: 15), seconds: 2, centre: centre, size: 160))
+    }
+}
+
+final class OffersTests: XCTestCase {
+    func testOffersAreForKnownTeensAndAdultsOnly() {
+        XCTAssertFalse(Offers.allowed(group: .child, ageKnown: true))
+        XCTAssertFalse(Offers.allowed(group: .adult, ageKnown: false), "an unknown age sees no offers")
+        XCTAssertTrue(Offers.allowed(group: .teen, ageKnown: true))
+        XCTAssertTrue(Offers.allowed(group: .adult, ageKnown: true))
+    }
+
+    func testPiggyBankFillsStopsWhenFullAndNeverLosesCoins() {
+        var piggy = PiggyBank()
+        XCTAssertEqual(piggy.add(forWin: 100), 50)
+        XCTAssertFalse(piggy.isReady)
+        for _ in 0..<200 { piggy.add(forWin: 100) }
+        XCTAssertEqual(piggy.coins, PiggyBank.full)
+        XCTAssertTrue(piggy.isFull)
+        XCTAssertEqual(piggy.add(forWin: 100), 0, "a full piggy takes no more")
+        let copy = try! JSONDecoder().decode(PiggyBank.self, from: JSONEncoder().encode(piggy))
+        XCTAssertEqual(copy, piggy)
+        XCTAssertEqual(piggy.take(), PiggyBank.full)
+        XCTAssertEqual(piggy.coins, 0)
+    }
+
+    func testWalletCreditsAPurchaseOnceAndSpendsPlainAmounts() {
+        var wallet = CoinWallet()
+        XCTAssertTrue(wallet.credit(coins: StarterPack.coins, transactionID: 7))
+        XCTAssertFalse(wallet.credit(coins: StarterPack.coins, transactionID: 7))
+        XCTAssertEqual(wallet.balance, 2500)
+        XCTAssertFalse(wallet.spend(MakerSlots.price + 1))
+        XCTAssertTrue(wallet.spend(MakerSlots.price))
+        XCTAssertEqual(wallet.balance, 0)
+    }
+
+    func testMakerPlacesStartWithWhatWasAlreadyMade() {
+        XCTAssertEqual(MakerSlots.starting(alreadyMade: 0), 1)
+        XCTAssertEqual(MakerSlots.starting(alreadyMade: 3), 3)
+        XCTAssertEqual(MakerSlots.starting(alreadyMade: 99), MakerParts.maxMade)
+    }
+
+    func testDailyJarIsTheSameBoardAllDayAndChangesWithTheDate() {
+        XCTAssertNil(DailyJar.board(day: "2026-12-01", count: 0))
+        let a = DailyJar.board(day: "2026-12-01", count: 240)
+        XCTAssertEqual(a, DailyJar.board(day: "2026-12-01", count: 240))
+        let days = (1...28).map { DailyJar.board(day: "2026-12-" + ($0 < 10 ? "0" : "") + "\($0)", count: 240)! }
+        XCTAssertGreaterThan(Set(days).count, 20, "the days spread across the boards")
+        XCTAssertTrue(days.allSatisfy { (0..<240).contains($0) })
+    }
+
+    func testAnEventRunsBetweenItsDatesAndABrokenOneIsIgnored() {
+        let json = #"{"event": {"from": "2027-01-15", "until": "2027-01-17", "kind": "doubleCoins", "banner": {"en": "Double coin weekend!", "ja": "コイン2倍！"}}}"#
+        let c = GameConfig.decodeOrDefault(Data(json.utf8))
+        XCTAssertEqual(c.event?.kind, .doubleCoins)
+        XCTAssertEqual(c.event?.isOn(today: "2027-01-16"), true)
+        XCTAssertEqual(c.event?.isOn(today: "2027-01-18"), false)
+        XCTAssertEqual(c.event?.text(language: "ja"), "コイン2倍！")
+        XCTAssertEqual(c.event?.text(language: "ko"), "Double coin weekend!")
+        let broken = GameConfig.decodeOrDefault(Data(#"{"event": {"kind": "raffle"}, "optInAdsPerDay": 4}"#.utf8))
+        XCTAssertNil(broken.event)
+        XCTAssertEqual(broken.optInAdsPerDay, 4, "the rest of the config still loads")
     }
 }
