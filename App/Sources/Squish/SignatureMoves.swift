@@ -439,6 +439,9 @@ struct MoveLayer: View {
                     strand.move(to: CGPoint(x: ax, y: ay))
                     strand.addLine(to: CGPoint(x: ax, y: ay - pull))
                     let width = max(8, 46 * u * (1 - 0.6 * max(0, up)))
+                    // A dark edge down both sides, like the art's own outline, so the cream shows on any
+                    // background (it is nearly the colour of the Cream room).
+                    part.stroke(strand, with: .color(Theme.plum), style: StrokeStyle(lineWidth: width + 5 * u, lineCap: .butt))
                     part.stroke(strand, with: .color(Color(uiColor: UIColor(hex: 0xFFF4E8))), style: StrokeStyle(lineWidth: width, lineCap: .round))
                 }
                 part.translateBy(x: 0, y: -pull)

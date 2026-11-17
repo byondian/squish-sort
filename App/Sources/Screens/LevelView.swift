@@ -172,8 +172,8 @@ final class LevelController: ObservableObject {
         lastMoveWasFever = free
         if free { feverLeft -= 1 }
         landsOnMatch = ontoMatch
-        // Moves are left but none can win: a small note, and play goes on. Never the stuck card.
-        noWayThrough = session.isDeadEnd; hintGaveUp = false
+        // The game never looks ahead for the player: while a move is open it says nothing (Ian, 17 Nov).
+        noWayThrough = false; hintGaveUp = false
         return (result, session.board)
     }
 
@@ -396,9 +396,15 @@ final class LevelController: ObservableObject {
             model.won(index: index, moves: session.moveCount, stars: stars, attempts: attempts, playSeconds: seconds,
                       pot: pot.coins)
         case .stuck:
-            outcome = .stuck
             scene.sigh()
             model.failed(playSeconds: seconds)
+            // The board stays in plain view for a moment first, so the player can see for
+            // themselves that nothing can move before the card covers it.
+            let board = session.board
+            Task {
+                try? await Task.sleep(nanoseconds: 900_000_000)
+                if outcome == nil, session.board == board, session.status == .stuck { outcome = .stuck }
+            }
         case .playing:
             break
         }
@@ -412,7 +418,7 @@ final class LevelController: ObservableObject {
             feverLeft = before
             scene.setFever(before > 0)
         }
-        noWayThrough = session.isDeadEnd; hintGaveUp = false
+        noWayThrough = false; hintGaveUp = false
         outcome = nil
         scene.reload(session.board)
     }
@@ -1205,7 +1211,7 @@ struct WinCard: View {
     }
 }
 
-/// No moves left: a shuffle gets the board going again (free the first time, then coins or one
+/// Nothing can move: a shuffle gets the board going again (free the first time, then coins or one
 /// opt-in video), or undo, or start again. Never a shop offer here.
 struct StuckCard: View {
     var boss = false
@@ -1223,9 +1229,10 @@ struct StuckCard: View {
 
     var body: some View {
         VStack(spacing: 14) {
-            Text(boss ? LocalizedStringKey("So close! Rematch?") : LocalizedStringKey("No moves left"))
+            Text(boss ? LocalizedStringKey("So close! Rematch?") : LocalizedStringKey("Nothing can move"))
                 .font(Theme.title(28)).foregroundStyle(Theme.plum).multilineTextAlignment(.center)
-            Text("A shuffle gets things moving again.").font(Theme.body(15)).foregroundStyle(Theme.plum.opacity(0.7))
+            Text("No squishy has a jar it can go to. A shuffle gets things moving again.")
+                .font(Theme.body(15)).foregroundStyle(Theme.plum.opacity(0.7)).multilineTextAlignment(.center)
             if free || canPay {
                 Button(action: shuffle) {
                     HStack(spacing: 8) {

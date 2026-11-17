@@ -1038,6 +1038,20 @@ final class ExtrasTests: XCTestCase {
         // Gentle mode: gone within a minute, so there is nothing to come back for.
         XCTAssertEqual(b.puff(at: 1030, lasting: BuddyState.puffSecondsGentle), 0.075, accuracy: 1e-9)
         XCTAssertEqual(b.puff(at: 1061, lasting: BuddyState.puffSecondsGentle), 0)
+        // Treats stack, so even a fully grown Buddy gets visibly bigger on every one; a gift fills the puff.
+        var fed = BuddyState()
+        fed.hearts = 50
+        fed.puffUp(at: 5000)
+        XCTAssertEqual(fed.puff(at: 5000), 0.15, accuracy: 1e-9)
+        fed.puffUp(at: 5000)
+        XCTAssertEqual(fed.puff(at: 5000), 0.20, accuracy: 1e-9)
+        fed.puffUp(at: 5000)
+        fed.puffUp(at: 5000)
+        XCTAssertEqual(fed.puff(at: 5000), BuddyState.maxPuff, accuracy: 1e-9)
+        var gifted = BuddyState()
+        gifted.puffUp(.gift, at: 5000)
+        XCTAssertEqual(gifted.puff(at: 5000), BuddyState.maxPuff, accuracy: 1e-9)
+        XCTAssertEqual(gifted.puff(at: 5000 + 200_000), 0)
         XCTAssertEqual(b.growth, BuddyState.maxGrowth, accuracy: 1e-9)
     }
 }

@@ -65,6 +65,8 @@ final class AppModel: ObservableObject {
         case finale(world: String)
         /// The one soft card that says the starter pack is in the shop (13 and over).
         case starterPack
+        /// A boss in the middle of a world is beaten for the first time.
+        case bossBeaten(world: String)
 
         var isShow: Bool {
             switch self {
@@ -82,6 +84,7 @@ final class AppModel: ObservableObject {
             case .teaser(let world, let number): return "teaser-\(world)-\(number)"
             case .finale(let world): return "finale-\(world)"
             case .starterPack: return "starter-pack"
+            case .bossBeaten(let world): return "boss-\(world)"
             }
         }
     }
@@ -323,6 +326,9 @@ final class AppModel: ObservableObject {
     }
 
     var today: String { PlayerProgress.today() }
+    /// The Mystery Bag's day turns over at 4 in the morning, not midnight, so a bag opened in a
+    /// late-night session never uses up the next evening's bag.
+    var mysteryDay: String { PlayerProgress.today(Date().addingTimeInterval(-4 * 3600)) }
 
     /// Levels on the main path come first in `levels`; side-world levels follow.
     var mainLevelCount: Int { levels.filter { LevelCatalog.path.contains($0.file.world) }.count }
@@ -616,10 +622,10 @@ final class AppModel: ObservableObject {
     }
 
     var mysteryBag: MysteryBag? {
-        MysteryBag.daily(day: today, playerSeed: progress.installID, roster: roster, worlds: openWorlds,
+        MysteryBag.daily(day: mysteryDay, playerSeed: progress.installID, roster: roster, worlds: openWorlds,
                          shapes: AppModel.shapes,
                          seen: Set(roster.collectibles.filter { progress.collection.owns($0.id) }.map(\.id)),
-                         easy: progress.mystery.isLearning(today: today))
+                         easy: progress.mystery.isLearning(today: mysteryDay))
     }
 
     /// Body shape groups, so the Mystery Bag's choices can look alike.
@@ -634,11 +640,11 @@ final class AppModel: ObservableObject {
     /// Fewer clues used, bigger prize: every guess pays.
     @discardableResult
     func guessMystery(_ id: String, clues: Int = 3) -> Bool {
-        guard let bag = mysteryBag, progress.mystery.canPlay(today: today) else { return false }
+        guard let bag = mysteryBag, progress.mystery.canPlay(today: mysteryDay) else { return false }
         let correct = bag.answer.id == id
         var earned = false
         update {
-            earned = $0.mystery.recordGuess(correct: correct, today: today)
+            earned = $0.mystery.recordGuess(correct: correct, today: mysteryDay)
             // Any guess pays, right or wrong; a wrong one pays the smallest prize.
             $0.wallet.earn(MysteryBag.prize(cluesUsed: clues, correct: correct))
         }
@@ -653,14 +659,14 @@ final class AppModel: ObservableObject {
 
     /// After a wrong guess: one more, once a day, by opt-in ad. Never in gentle mode.
     var offersExtraMysteryGuess: Bool {
-        progress.mystery.canOfferExtraGuess(today: today) && canOptIn(.extraGuess)
+        progress.mystery.canOfferExtraGuess(today: mysteryDay) && canOptIn(.extraGuess)
     }
 
     func takeExtraMysteryGuess(_ ready: @escaping () -> Void) {
         guard offersExtraMysteryGuess else { return }
         optIn(.extraGuess) { [weak self] in
             guard let self else { return }
-            self.update { $0.mystery.grantExtraGuess(today: self.today) }
+            self.update { $0.mystery.grantExtraGuess(today: self.mysteryDay) }
             ready()
         }
     }
@@ -925,7 +931,8 @@ final class AppModel: ObservableObject {
     func feedBuddy() {
         guard buddyActive, progress.buddy.treats > 0 else { return }
         let before = progress.buddy.hearts
-        update { _ = $0.buddy.feedStoredTreat(); $0.buddy.lastTreatAt = Date().timeIntervalSince1970 }
+        let seconds = puffSeconds
+        update { _ = $0.buddy.feedStoredTreat(); $0.buddy.puffUp(at: Date().timeIntervalSince1970, lasting: seconds) }
         haptics.complete()
         sounds.play("buddy_yum", or: "buddy_munch")
         heartsChanged(from: before)
@@ -977,7 +984,8 @@ final class AppModel: ObservableObject {
     }
 
     private func applyToBuddy(_ item: Coins.Item) {
-        update { $0.buddy.give(item); if item == .treat { $0.buddy.lastTreatAt = Date().timeIntervalSince1970 } }
+        let seconds = puffSeconds
+        update { $0.buddy.give(item); $0.buddy.puffUp(item, at: Date().timeIntervalSince1970, lasting: seconds) }
     }
 
     private func celebrate(_ item: Coins.Item, heartsBefore before: Int) {
@@ -1153,6 +1161,9 @@ final class AppModel: ObservableObject {
             update { $0.wallet.earn(config.coins.worldComplete) }
             // The world's big show follows its WORLD COMPLETE card.
             if !AppModel.isUITesting, ShowPlan.load(level.file.world) != nil { news.append(.finale(world: level.file.world)) }
+        } else if firstClear, level.file.beat == .boss, !AppModel.isUITesting {
+            // A boss half way through a world gets its own cheer; the last boss has WORLD COMPLETE.
+            news.append(.bossBeaten(world: level.file.world))
         }
         // A sneak peek of the big show on a few levels along the way, each one once.
         if !AppModel.isUITesting, let plan = ShowPlan.load(level.file.world),

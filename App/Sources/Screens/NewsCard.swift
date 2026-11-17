@@ -73,6 +73,8 @@ struct NewsCard: View {
             Text(verbatim: "🏆").font(.system(size: 70))
         case .starterPack:
             Text(verbatim: "🎁").font(.system(size: 70))
+        case .bossBeaten:
+            Text(verbatim: "👑").font(.system(size: 70))
         case .trick:
             if let ref = model.progress.buddy.squishy {
                 // The Buddy does its new trick right here, again and again while the card is open.
@@ -145,6 +147,8 @@ struct NewsCard: View {
             return ""
         case .starterPack:
             return "Starter pack"
+        case .bossBeaten:
+            return "Boss beaten!"
         case .starJar:
             return "Star jar prize!"
         case .trick(let number):
@@ -174,6 +178,8 @@ struct NewsCard: View {
             }
         case .teaser, .finale:
             return ""
+        case .bossBeaten:
+            return "You out-sorted the boss. On to the next jars!"
         case .starterPack:
             return "\(StarterPack.coins) coins, \(StarterPack.hints) hints and the Golden Hour board. It is in the shop whenever you like."
         case .trick:
