@@ -1,8 +1,8 @@
 name: CI
 
+# Mac minutes cost ten times Linux ones, so the Mac job runs only when started by hand (once per
+# batch of changes, just before a merge). Pull requests run the Linux gates only; pushes to main run nothing.
 on:
-  push:
-    branches: [main]
   pull_request:
   workflow_dispatch:
 
@@ -33,6 +33,8 @@ jobs:
     name: App build and golden path UI test (gate 3)
     # The only Mac job: it builds the app and runs it, so a separate build job would pay twice.
     runs-on: macos-15
+    needs: rules-and-levels
+    if: github.event_name == 'workflow_dispatch'
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
