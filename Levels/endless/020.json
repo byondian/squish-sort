@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "id": "endless-20",
+  "world": "endless",
+  "index": 20,
+  "beat": "boss",
+  "capacity": 4,
+  "jars": [
+    ["riff", "lumi", "nova", "lumi"],
+    ["nova", "coco", "pip", "coco"],
+    ["zuzu", "strawbie", "nova", "coco"],
+    ["riff", "pip", "nova", "zuzu"],
+    ["strawbie", "strawbie", "riff", "lumi"],
+    ["lumi", "coco", "strawbie", "riff"],
+    ["pip", "zuzu", "pip", "zuzu"],
+    [],
+    []
+  ],
+  "mechanics": {"hidden": [[0, 0], [2, 1], [6, 0]], "sticky": [[0, 2], [2, 2], [3, 1]], "frozen": []},
+  "par": 22,
+  "solution": [[1, 7], [1, 8], [1, 7], [0, 1], [1, 0], [2, 1], [1, 7], [4, 0], [5, 4], [2, 5], [3, 2], [3, 8], [4, 3], [5, 4], [5, 7], [0, 5], [0, 3], [6, 2], [8, 1], [6, 8], [6, 2], [6, 8]],
+  "capsule": true,
+  "softenAfterFails": 3
+}

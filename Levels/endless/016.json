@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "id": "endless-16",
+  "world": "endless",
+  "index": 16,
+  "beat": "breather",
+  "capacity": 4,
+  "jars": [
+    ["pip", "pip", "nova", "nova"],
+    ["lumi", "lumi", "lumi", "riff"],
+    ["zuzu", "zuzu", "nova", "lumi"],
+    ["pip", "zuzu", "nova", "riff"],
+    ["riff", "zuzu", "pip", "riff"],
+    [],
+    []
+  ],
+  "mechanics": {"hidden": [[0, 0], [0, 2], [1, 0]], "sticky": [[2, 2], [3, 1], [4, 0]], "frozen": []},
+  "par": 13,
+  "solution": [[3, 5], [4, 5], [0, 6], [2, 6], [3, 2], [2, 0], [4, 3], [4, 5], [5, 2], [1, 5], [6, 1], [0, 6], [3, 0]],
+  "capsule": false,
+  "softenAfterFails": null
+}

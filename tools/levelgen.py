@@ -366,6 +366,16 @@ def endless_capsule(pos):
 
 
 def make_endless(pos):
+    # A position whose first deal cannot be made fair is dealt again with a new seed.
+    for salt in range(12):
+        try:
+            return make_endless_once(pos, salt)
+        except SystemExit as e:
+            last = e
+    raise last
+
+
+def make_endless_once(pos, salt):
     block, p = (pos - 1) // 10, (pos - 1) % 10 + 1
     world_idx, mech = ENDLESS_SKINS[block % len(ENDLESS_SKINS)]
     mix_hidden, mix_frozen = endless_mix(block, mech)
@@ -374,7 +384,7 @@ def make_endless(pos):
     if beat in ("tension", "boss", "medium", "bonus"):
         empties, k, mult = 1, min(k, 7), None
     names = kinds_for(world_idx, k)
-    rng = random.Random(f"{ENDLESS}-{pos}")
+    rng = random.Random(f"{ENDLESS}-{pos}" if salt == 0 else f"{ENDLESS}-{pos}-{salt}")
     level = {"schema": 1, "id": f"{ENDLESS}-{pos:02d}", "world": ENDLESS, "index": pos, "beat": beat, "capacity": CAP}
     mcount = {"hidden": 5 + p // 2, "sticky": 2 if p < 6 else 3, "frozen": 2 if p < 6 else 3,
               "curtain": 1 if p < 6 else 2}[mech]
