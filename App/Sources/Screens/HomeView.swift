@@ -112,7 +112,7 @@ struct HomeView: View {
                         .frame(width: 44, height: 44).background(Circle().fill(Color(hex: 0xD8434F)))
                 }
                 .buttonStyle(PressSquish())
-                .accessibilityLabel(Text(verbatim: AppModel.christmasWorldName))
+                .accessibilityLabel(Text(AppModel.christmasWorldName))
                 .accessibilityIdentifier("festive-door")
             }
             IconButton(system: "gearshape.fill") { model.screen = .settings }
