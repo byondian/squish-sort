@@ -154,6 +154,8 @@ final class SoftSquishyScene: SKScene {
     var onDoubleTap: (() -> Void)?
     /// A finger drew a trick (a flick up, a circle). True if a trick was done, so the toy is not also thrown.
     var onGesture: ((TrickGesture) -> Bool)?
+    /// Each frame: where the body is and how hard it is squeezed, for the signature moves drawn over it.
+    var onPulse: ((SquishPulse) -> Void)?
     /// Each finger's path since it went down, on or beside the toy.
     private var paths: [Int: (points: [(x: Double, y: Double)], began: TimeInterval)] = [:]
 
@@ -443,6 +445,11 @@ final class SoftSquishyScene: SKScene {
         // Untouched and settled, only the slow breath and the phone's lean are left to show:
         // a third of the frames is plenty for those, and easier on the battery.
         let m = body.metric
+        if let onPulse {
+            let c = body.centre(), held = !touchTimes.isEmpty
+            onPulse(SquishPulse(squeeze: min(1, max(m.D / 0.15, held ? 0.35 : 0)), held: held,
+                                x: c.x, y: c.y, side: side, angle: body.theta))
+        }
         let busy = !touchTimes.isEmpty || pokeEnds != nil || m.air || m.speed > 0.02 || m.Z > 0.01 || abs(m.rate) > 0.01
         stillFor = busy ? 0 : stillFor + dt
         drawTick &+= 1

@@ -32,11 +32,41 @@ struct SoftSquishy<Art: View>: View {
 
     final class Holder: ObservableObject {
         let scene = SoftSquishyScene()
+        let pulse = MovePulse()
+        var sim: MoveSim?
+    }
+
+    /// The squishy's own signature moves. A morphed look has none.
+    private var specs: [MoveSpec] { look == toy ? SignatureMoves.shared.moves(for: toy) : [] }
+
+    private func sim(_ specs: [MoveSpec]) -> MoveSim? {
+        guard !specs.isEmpty else {
+            holder.sim = nil
+            return nil
+        }
+        if holder.sim?.id != toy { holder.sim = MoveSim(id: toy, specs: specs) }
+        return holder.sim
     }
 
     var body: some View {
+        if look == toy, SignatureMoves.shared.isRope(toy) {
+            // A long squishy is a rope, not a blob: pull it out straight and it coils back.
+            RopeSquishy(room: mode == .room, onTouch: onTouch, onLetGo: onLetGo)
+        } else {
+            soft
+        }
+    }
+
+    private var soft: some View {
         let _ = connect()
-        SpriteView(scene: holder.scene, options: [.allowsTransparency])
+        let specs = self.specs
+        let sim = self.sim(specs)
+        return ZStack {
+            if let sim { MoveLayer(sim: sim, pulse: holder.pulse, behind: true) }
+            SpriteView(scene: holder.scene, options: [.allowsTransparency])
+            if let sim { MoveLayer(sim: sim, pulse: holder.pulse, behind: false) }
+        }
+        .modifier(MoveBodyEffect(specs: specs, pulse: holder.pulse, tricks: onGesture == nil))
             .onAppear { show(drop: true) }
             .onDisappear { holder.scene.goQuiet() }
             .onChange(of: toy) { _, _ in show(drop: true) }
@@ -64,9 +94,20 @@ struct SoftSquishy<Art: View>: View {
         scene.onLetGo = onLetGo
         scene.onDoubleTap = onDoubleTap
         scene.onGesture = onGesture
+        let pulse = holder.pulse
+        scene.onPulse = specs.isEmpty ? nil : { pulse.take($0) }
     }
 
     private func picture() -> UIImage? {
+        // A move that brings its own part (a hat, a lid) uses the art with that part taken off.
+        // Those pictures are drawn on a slightly wider frame than the squishy's own.
+        if look == toy, let base = SignatureMoves.shared.baseArt(for: toy) {
+            let bare = ImageRenderer(content: Image(base).resizable().frame(width: 320, height: 320)
+                .frame(width: 300, height: 300).clipped())
+            bare.scale = min(max(displayScale, 1), 3)
+            bare.isOpaque = false
+            if let image = bare.uiImage { return image }
+        }
         let renderer = ImageRenderer(content: art().environmentObject(model).frame(width: 300, height: 300))
         renderer.scale = min(max(displayScale, 1), 3)
         renderer.isOpaque = false
