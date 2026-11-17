@@ -2,7 +2,7 @@
 export default {
   meta: {
     title: 'Squish Sort: het squishy-sorteerspel voor iPhone',
-    description: 'Sorteer de squishies, vul de potten en knijp de stress weg. Meer dan 100 schattige, voldoening gevende levels en daarna eindeloos puzzels, Santa’s Grotto in december en 64 originele squishies om te verzamelen. Gratis op iPhone.',
+    description: 'Sorteer de squishies, vul de potten en knijp de stress weg. Meer dan 350 schattige, voldoening gevende levels en daarna eindeloos puzzels, Santa’s Grotto in december en 98 originele squishies om te verzamelen. Gratis op iPhone.',
   },
   skip: 'Naar de inhoud',
   nav: { demo: 'Speel de demo', squishies: 'Squishies', parents: 'Ouders', support: 'Hulp', language: 'Taal', findLanguage: 'Zoek een taal' },
@@ -22,22 +22,24 @@ export default {
     jar: 'Pot {n}', empty: 'leeg', full: 'vol, met deksel', closed: 'Pot dicht!',
     won: 'Squishtastisch!', wonMsg: 'Opgelost in {n} zetten. Het beste is {p}.',
     next: 'Volgend level', stars: '{n} van 3 sterren',
-    allDone: 'Je hebt er gevoel voor!', allDoneMsg: 'Je hebt drie werelden geprobeerd! Het volledige spel heeft 64 squishies om te verzamelen, Santa’s Grotto in december, een Squish Room en elke dag een Mystery Bag.',
+    allDone: 'Je hebt er gevoel voor!', allDoneMsg: 'Je hebt drie werelden geprobeerd! Het volledige spel heeft 98 squishies om te verzamelen, Santa’s Grotto in december, een Squish Room en elke dag een Mystery Bag.',
     again: 'Nog een keer',
     wrapTip: 'Ingepakte snoepjes laten zien wat erin zit zodra ze bovenaan de pot liggen.',
   },
   collect: {
-    kicker: 'Verzamel ze allemaal', title: '64 squishies om te vinden',
+    kicker: 'Verzamel ze allemaal', title: '98 squishies om te vinden',
     lede: 'Sorteer een nieuwe soort om hem in je album te zetten, en win levels om capsules met zeldzame squishies te openen. Elke squishy verdien je door te spelen. Ze zijn nooit te koop.',
     rarity: ['Gewoon', 'Zeldzaam', 'Ultrazeldzaam', 'Geheim'],
     oddsLink: 'Bekijk de kansen',
   },
   worlds: {
-    kicker: 'Drie werelden en een feestelijke', title: 'Meer dan 100 levels, daarna eindeloos puzzels en elke dag een nieuwe Daily Jar',
+    kicker: 'Vijf werelden en een feestelijke', title: 'Meer dan 350 levels, daarna eindeloos puzzels en elke dag een nieuwe Daily Jar',
     list: [
       ['Toy Shop', 'Hier begint het: aardbeien, puppy’s, kikkers en een heel trotse dino.'],
       ['Sweet Factory', 'Donuts, macarons en mochi, vers van de lopende band.'],
       ['Starlight Stage', 'Lightsticks omhoog! Sorteer de sterren van de show en verzamel hun photocards.'],
+      ['Bubble Bath', 'Badeendjes, otters en zeehonden in een schuimend bad. Sommige squishies zweven in zeepbellen die knappen als je er een squishy naast zet.'],
+      ['Jungle Jam', 'Luiaards, toekans en een tijgerwelpje. Lianenpotten blijven dichtgebonden tot genoeg andere potten vol zijn.'],
       ["Santa's Grotto", 'Een extra feestelijke wereld met 20 levels erbij, besneeuwde squishies en een adventsplank met elke dag een cadeautje.'],
     ],
     xmasBadge: 'December',

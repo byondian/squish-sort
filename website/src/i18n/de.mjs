@@ -2,7 +2,7 @@
 export default {
   meta: {
     title: 'Squish Sort: das Squishy-Sortierspiel für iPhone',
-    description: 'Sortiere die Squishies, fülle die Gläser und knautsch den Stress weg. Über 100 weiche, befriedigende Level und danach endlos weitere Rätsel, Santa’s Grotto im Dezember und 64 originelle Squishies zum Sammeln. Kostenlos für iPhone.',
+    description: 'Sortiere die Squishies, fülle die Gläser und knautsch den Stress weg. Über 350 weiche, befriedigende Level und danach endlos weitere Rätsel, Santa’s Grotto im Dezember und 98 originelle Squishies zum Sammeln. Kostenlos für iPhone.',
   },
   skip: 'Zum Inhalt springen',
   nav: { demo: 'Demo spielen', squishies: 'Squishies', parents: 'Eltern', support: 'Hilfe', language: 'Sprache', findLanguage: 'Sprache suchen' },
@@ -22,22 +22,24 @@ export default {
     jar: 'Glas {n}', empty: 'leer', full: 'voll, mit Deckel', closed: 'Glas zu!',
     won: 'Squishtastisch!', wonMsg: 'Gelöst in {n} Zügen. Der Bestwert ist {p}.',
     next: 'Nächstes Level', stars: '{n} von 3 Sternen',
-    allDone: 'Du bist ein Naturtalent!', allDoneMsg: 'Du hast drei Welten ausprobiert! Im ganzen Spiel gibt es 64 Squishies zu sammeln, Santa’s Grotto im Dezember, einen Squish Room und täglich eine Mystery Bag.',
+    allDone: 'Du bist ein Naturtalent!', allDoneMsg: 'Du hast drei Welten ausprobiert! Im ganzen Spiel gibt es 98 Squishies zu sammeln, Santa’s Grotto im Dezember, einen Squish Room und täglich eine Mystery Bag.',
     again: 'Nochmal spielen',
     wrapTip: 'Eingepackte Süßigkeiten zeigen, was drin ist, sobald sie oben im Glas liegen.',
   },
   collect: {
-    kicker: 'Sammle sie alle', title: '64 Squishies zu entdecken',
+    kicker: 'Sammle sie alle', title: '98 Squishies zu entdecken',
     lede: 'Sortiere eine neue Sorte, um sie in dein Album aufzunehmen, und gewinne Level, um Kapseln mit seltenen Squishies zu öffnen. Jedes Squishy wird erspielt. Sie sind nie käuflich.',
     rarity: ['Häufig', 'Selten', 'Ultraselten', 'Geheim'],
     oddsLink: 'Die Wahrscheinlichkeiten ansehen',
   },
   worlds: {
-    kicker: 'Drei Welten und eine festliche', title: 'Über 100 Level, danach endlos Rätsel und jeden Tag ein neues Daily Jar',
+    kicker: 'Fünf Welten und eine festliche', title: 'Über 350 Level, danach endlos Rätsel und jeden Tag ein neues Daily Jar',
     list: [
       ['Toy Shop', 'Hier fängt alles an: Erdbeeren, Welpen, Frösche und ein sehr stolzer Dinosaurier.'],
       ['Sweet Factory', 'Donuts, Macarons und Mochi, frisch vom Fließband.'],
       ['Starlight Stage', 'Lightsticks hoch! Sortiere die Stars der Show und sammle ihre Photocards.'],
+      ['Bubble Bath', 'Quietscheentchen, Otter und Robben in einer schaumigen Wanne. Manche Squishies schweben in Seifenblasen, die platzen, wenn du ein Squishy daneben setzt.'],
+      ['Jungle Jam', 'Faultiere, Tukane und ein Tigerbaby. Lianengläser bleiben zugebunden, bis genug andere Gläser voll sind.'],
       ["Santa's Grotto", 'Eine festliche Bonuswelt mit 20 zusätzlichen Leveln, verschneiten Squishies und einem Adventsregal mit jeden Tag einem kleinen Geschenk.'],
     ],
     xmasBadge: 'Dezember',

@@ -2,7 +2,7 @@
 export default {
   meta: {
     title: 'Squish Sort: game menyortir squishy untuk iPhone',
-    description: 'Sortir squishy, isi toplesnya, dan remas stres sampai hilang. Lebih dari 100 level yang imut dan memuaskan, lalu teka-teki tanpa batas, Santa’s Grotto di bulan Desember, dan 64 squishy orisinal untuk dikoleksi. Gratis di iPhone.',
+    description: 'Sortir squishy, isi toplesnya, dan remas stres sampai hilang. Lebih dari 350 level yang imut dan memuaskan, lalu teka-teki tanpa batas, Santa’s Grotto di bulan Desember, dan 98 squishy orisinal untuk dikoleksi. Gratis di iPhone.',
   },
   skip: 'Langsung ke konten',
   nav: { demo: 'Main demo', squishies: 'Squishy', parents: 'Orang tua', support: 'Bantuan', language: 'Bahasa', findLanguage: 'Cari bahasa' },
@@ -22,22 +22,24 @@ export default {
     jar: 'Toples {n}', empty: 'kosong', full: 'penuh, tertutup', closed: 'Toples tertutup!',
     won: 'Squishtastis!', wonMsg: 'Selesai dalam {n} langkah. Rekornya {p}.',
     next: 'Level berikutnya', stars: '{n} dari 3 bintang',
-    allDone: 'Kamu jago!', allDoneMsg: 'Kamu sudah mencoba tiga dunia! Game lengkapnya punya 64 squishy untuk dikoleksi, Santa’s Grotto di bulan Desember, Squish Room, dan Mystery Bag harian.',
+    allDone: 'Kamu jago!', allDoneMsg: 'Kamu sudah mencoba tiga dunia! Game lengkapnya punya 98 squishy untuk dikoleksi, Santa’s Grotto di bulan Desember, Squish Room, dan Mystery Bag harian.',
     again: 'Main lagi',
     wrapTip: 'Permen terbungkus menunjukkan isinya saat sampai di bagian atas toples.',
   },
   collect: {
-    kicker: 'Koleksi semuanya', title: '64 squishy untuk ditemukan',
+    kicker: 'Koleksi semuanya', title: '98 squishy untuk ditemukan',
     lede: 'Sortir jenis baru untuk memasukkannya ke album, dan menangkan level untuk membuka kapsul squishy langka. Setiap squishy didapat dengan bermain. Squishy tidak pernah dijual.',
     rarity: ['Biasa', 'Langka', 'Ultra langka', 'Rahasia'],
     oddsLink: 'Lihat peluangnya',
   },
   worlds: {
-    kicker: 'Tiga dunia dan satu dunia liburan', title: 'Lebih dari 100 level, lalu teka-teki tanpa batas dan Daily Jar baru setiap hari',
+    kicker: 'Lima dunia dan satu dunia liburan', title: 'Lebih dari 350 level, lalu teka-teki tanpa batas dan Daily Jar baru setiap hari',
     list: [
       ['Toy Shop', 'Tempat semuanya dimulai: stroberi, anak anjing, katak, dan dinosaurus yang sangat bangga.'],
       ['Sweet Factory', 'Donat, macaron, dan mochi yang baru keluar dari ban berjalan.'],
       ['Starlight Stage', 'Angkat lightstick-mu! Sortir bintang-bintang panggung dan koleksi photocard mereka.'],
+      ['Bubble Bath', 'Bebek karet, berang-berang, dan anjing laut di bak penuh busa. Beberapa squishy mengapung dalam gelembung sabun yang pecah saat kamu memindahkan squishy ke sebelahnya.'],
+      ['Jungle Jam', 'Kungkang, tukan, dan anak harimau. Toples sulur tetap terikat sampai cukup banyak toples lain selesai.'],
       ["Santa's Grotto", 'Dunia liburan ekstra dengan 20 level tambahan, squishy bersalju, dan rak Advent dengan hadiah kecil setiap hari.'],
     ],
     xmasBadge: 'Desember',

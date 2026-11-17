@@ -2,7 +2,7 @@
 export default {
   meta: {
     title: 'Squish Sort：iPhone 上的捏捏乐分类游戏',
-    description: '给捏捏乐分类，装满罐子，把压力捏走。100 多个可爱又解压的关卡，之后还有无尽谜题，12 月还有 Santa’s Grotto，64 个原创捏捏乐等你收集。iPhone 免费下载。',
+    description: '给捏捏乐分类，装满罐子，把压力捏走。350 多个可爱又解压的关卡，之后还有无尽谜题，12 月还有 Santa’s Grotto，98 个原创捏捏乐等你收集。iPhone 免费下载。',
   },
   skip: '跳到正文',
   nav: { demo: '试玩', squishies: '捏捏乐', parents: '家长', support: '帮助', language: '语言', findLanguage: '搜索语言' },
@@ -22,22 +22,24 @@ export default {
     jar: '罐子 {n}', empty: '空', full: '已装满，盖上了盖子', closed: '罐子盖好啦！',
     won: '捏捏太棒了！', wonMsg: '用 {n} 步完成。最佳是 {p} 步。',
     next: '下一关', stars: '{n} / 3 颗星',
-    allDone: '你真厉害！', allDoneMsg: '你已经玩过三个世界啦！完整游戏有 64 个捏捏乐可以收集，12 月有 Santa’s Grotto，还有 Squish Room 和每日 Mystery Bag。',
+    allDone: '你真厉害！', allDoneMsg: '你已经玩过三个世界啦！完整游戏有 98 个捏捏乐可以收集，12 月有 Santa’s Grotto，还有 Squish Room 和每日 Mystery Bag。',
     again: '再玩一次',
     wrapTip: '包起来的糖果到了罐子最上面，就会露出里面是什么。',
   },
   collect: {
-    kicker: '全部集齐', title: '64 个捏捏乐等你发现',
+    kicker: '全部集齐', title: '98 个捏捏乐等你发现',
     lede: '分好一种新的捏捏乐就能放进图鉴，过关还能打开扭蛋，获得稀有捏捏乐。每个捏捏乐都靠玩游戏获得，从不出售。',
     rarity: ['普通', '稀有', '超稀有', '隐藏'],
     oddsLink: '查看概率',
   },
   worlds: {
-    kicker: '三个世界，外加一个节日世界', title: '100 多个关卡，之后是无尽谜题，每天还有新的 Daily Jar',
+    kicker: '五个世界，外加一个节日世界', title: '350 多个关卡，之后是无尽谜题，每天还有新的 Daily Jar',
     list: [
       ['Toy Shop', '一切从这里开始：草莓、小狗、青蛙，还有一只特别骄傲的恐龙。'],
       ['Sweet Factory', '甜甜圈、马卡龙和麻糬，从传送带上新鲜出炉。'],
       ['Starlight Stage', '举起应援棒！给舞台明星分类，收集他们的小卡。'],
+      ['Bubble Bath', '泡泡满满的浴缸里有小黄鸭、水獭和海豹。有些捏捏乐飘在肥皂泡里，把一个捏捏乐移到旁边，泡泡就会啪地破掉。'],
+      ['Jungle Jam', '树懒、巨嘴鸟和小老虎。藤蔓罐子会一直绑着，直到完成足够多的其他罐子。'],
       ["Santa's Grotto", '额外的节日世界，多 20 个关卡、雪白的捏捏乐，还有每天送一个小礼物的降临节架子。'],
     ],
     xmasBadge: '12 月',

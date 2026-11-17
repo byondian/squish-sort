@@ -2,7 +2,7 @@
 export default {
   meta: {
     title: 'Squish Sort : le jeu de tri de squishies pour iPhone',
-    description: 'Triez les squishies, remplissez les bocaux et faites fondre le stress. Plus de 100 niveaux doux et satisfaisants, puis des puzzles à l’infini, Santa’s Grotto en décembre et 64 squishies originaux à collectionner. Gratuit sur iPhone.',
+    description: 'Triez les squishies, remplissez les bocaux et faites fondre le stress. Plus de 350 niveaux doux et satisfaisants, puis des puzzles à l’infini, Santa’s Grotto en décembre et 98 squishies originaux à collectionner. Gratuit sur iPhone.',
   },
   skip: 'Aller au contenu',
   nav: { demo: 'Jouer à la démo', squishies: 'Squishies', parents: 'Parents', support: 'Aide', language: 'Langue', findLanguage: 'Chercher une langue' },
@@ -22,22 +22,24 @@ export default {
     jar: 'Bocal {n}', empty: 'vide', full: 'plein, avec un couvercle', closed: 'Bocal fermé !',
     won: 'Squishtastique !', wonMsg: 'Résolu en {n} coups. Le record est de {p}.',
     next: 'Niveau suivant', stars: '{n} étoiles sur 3',
-    allDone: 'Vous êtes doué !', allDoneMsg: 'Tu as essayé trois mondes ! Le jeu complet compte 64 squishies à collectionner, Santa’s Grotto en décembre, une Squish Room et une Mystery Bag chaque jour.',
+    allDone: 'Vous êtes doué !', allDoneMsg: 'Tu as essayé trois mondes ! Le jeu complet compte 98 squishies à collectionner, Santa’s Grotto en décembre, une Squish Room et une Mystery Bag chaque jour.',
     again: 'Rejouer',
     wrapTip: 'Les bonbons emballés révèlent leur contenu quand ils arrivent en haut du bocal.',
   },
   collect: {
-    kicker: 'Collectionnez-les tous', title: '64 squishies à trouver',
+    kicker: 'Collectionnez-les tous', title: '98 squishies à trouver',
     lede: 'Triez une nouvelle sorte pour l’ajouter à votre album et gagnez des niveaux pour ouvrir des capsules de squishies rares. Chaque squishy se gagne en jouant. Ils ne sont jamais à vendre.',
     rarity: ['Commun', 'Rare', 'Ultra rare', 'Secret'],
     oddsLink: 'Voir les taux d’obtention',
   },
   worlds: {
-    kicker: 'Trois mondes et un monde de fête', title: 'Plus de 100 niveaux, puis des puzzles à l’infini et un nouveau Daily Jar chaque jour',
+    kicker: 'Cinq mondes et un monde de fête', title: 'Plus de 350 niveaux, puis des puzzles à l’infini et un nouveau Daily Jar chaque jour',
     list: [
       ['Toy Shop', 'Là où tout commence : fraises, chiots, grenouilles et un dinosaure très fier.'],
       ['Sweet Factory', 'Donuts, macarons et mochis tout juste sortis du tapis roulant.'],
       ['Starlight Stage', 'Lightsticks en l’air ! Triez les stars du spectacle et collectionnez leurs photocards.'],
+      ['Bubble Bath', 'Canards en plastique, loutres et phoques dans un bain moussant. Certains squishies flottent dans des bulles de savon qui éclatent quand tu poses un squishy à côté.'],
+      ['Jungle Jam', 'Paresseux, toucans et un bébé tigre. Les bocaux à lianes restent noués jusqu’à ce que d’autres bocaux soient remplis.'],
       ["Santa's Grotto", 'Un monde de fête en bonus avec 20 niveaux de plus, des squishies enneigés et une étagère de l’Avent avec un petit cadeau chaque jour.'],
     ],
     xmasBadge: 'Décembre',

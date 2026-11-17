@@ -103,8 +103,8 @@ function landing(code) {
   const row = list => `<div class="ribbon"><div class="track">${list.map(sq).join('')}${list.map(sq).join('').replace(/<button /g, '<button aria-hidden="true" tabindex="-1" ')}</div></div>`;
   const demoT = { ...t.demo, names, worlds: t.worlds.list.slice(0, 3).map(w => w[0]) };
   const demoWorlds = [['toyshop', 'dino-rex'], ['sweetfactory', 'donut'], ['starlight', 'lightstick-lamb']];
-  const worldsImg = ['dino-rex', 'donut', 'lightstick-lamb', 'reindeer'];
-  const worldsCol = ['#FFE3EF', '#FFF0C2', '#EEE7FF', '#DDF7EE'];
+  const worldsImg = ['dino-rex', 'donut', 'lightstick-lamb', 'floaty-otter', 'snoozy-sloth', 'reindeer'];
+  const worldsCol = ['#FFE3EF', '#FFF0C2', '#EEE7FF', '#DCF4FF', '#E6F7D9', '#DDF7EE'];
   const pile = ['strawbie', 'capy', 'axo', 'sparkle-unicorn', 'peach-bun', 'panda-dumpling', 'gummy-bear', 'snowbo', 'tango'];
   return head(code, { title: t.meta.title, description: t.meta.description }) + bar(code) + `
 <main id="main">
@@ -156,8 +156,8 @@ ${waveTo('#EEE7FF')}
 <section class="band grape">
   <p class="kicker">${esc(t.worlds.kicker)}</p><h2>${esc(t.worlds.title)}</h2>
   <div class="path">
-    <svg class="road" viewBox="0 0 100 400" preserveAspectRatio="none" aria-hidden="true"><path d="M20 20 C90 60 90 110 50 140 S10 230 50 260 S90 340 80 390" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="1 3" stroke-linecap="round" vector-effect="non-scaling-stroke" style="stroke-width:10px"/></svg>
-    ${t.worlds.list.map(([n, d], i) => `<div class="stop"><div class="disc" style="--c:${worldsCol[i]}"><img src="/assets/sq/${worldsImg[i]}.webp" alt="" width="110" height="110" loading="lazy"></div><div><h3>${esc(n)}${i === 3 ? ` <span class="badge">${esc(t.worlds.xmasBadge)}</span>` : ''}</h3><p>${esc(d)}</p></div></div>`).join('')}
+    <svg class="road" viewBox="0 0 100 400" preserveAspectRatio="none" aria-hidden="true"><path d="M20 10 C90 40 90 80 50 110 S10 180 50 210 S90 280 50 310 S10 370 70 395" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="1 3" stroke-linecap="round" vector-effect="non-scaling-stroke" style="stroke-width:10px"/></svg>
+    ${t.worlds.list.map(([n, d], i) => `<div class="stop"><div class="disc" style="--c:${worldsCol[i]}"><img src="/assets/sq/${worldsImg[i]}.webp" alt="" width="110" height="110" loading="lazy"></div><div><h3>${esc(n)}${i === t.worlds.list.length - 1 ? ` <span class="badge">${esc(t.worlds.xmasBadge)}</span>` : ''}</h3><p>${esc(d)}</p></div></div>`).join('')}
   </div>
 </section>
 ${waveTo('#EEE7FF', true)}

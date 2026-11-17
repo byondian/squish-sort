@@ -2,7 +2,7 @@
 export default {
   meta: {
     title: 'Squish Sort: squishy-sorteringsspillet for iPhone',
-    description: 'Sorter squishiene, fyll glassene og klem bort stresset. Over 100 søte, tilfredsstillende nivåer og uendelig med oppgaver etterpå, Santa’s Grotto i desember og 64 originale squishier å samle. Gratis på iPhone.',
+    description: 'Sorter squishiene, fyll glassene og klem bort stresset. Over 350 søte, tilfredsstillende nivåer og uendelig med oppgaver etterpå, Santa’s Grotto i desember og 98 originale squishier å samle. Gratis på iPhone.',
   },
   skip: 'Hopp til innholdet',
   nav: { demo: 'Spill demoen', squishies: 'Squishier', parents: 'Foreldre', support: 'Hjelp', language: 'Språk', findLanguage: 'Finn et språk' },
@@ -22,22 +22,24 @@ export default {
     jar: 'Glass {n}', empty: 'tomt', full: 'fullt, med lokk', closed: 'Glasset er lukket!',
     won: 'Squishtastisk!', wonMsg: 'Løst på {n} trekk. Det beste er {p}.',
     next: 'Neste nivå', stars: '{n} av 3 stjerner',
-    allDone: 'Du har taket på dette!', allDoneMsg: 'Du har prøvd tre verdener! Hele spillet har 64 squishier å samle, Santa’s Grotto i desember, et Squish Room og en daglig Mystery Bag.',
+    allDone: 'Du har taket på dette!', allDoneMsg: 'Du har prøvd tre verdener! Hele spillet har 98 squishier å samle, Santa’s Grotto i desember, et Squish Room og en daglig Mystery Bag.',
     again: 'Spill igjen',
     wrapTip: 'Innpakket godteri viser hva det er når det kommer øverst i glasset.',
   },
   collect: {
-    kicker: 'Samle alle', title: '64 squishier å finne',
+    kicker: 'Samle alle', title: '98 squishier å finne',
     lede: 'Sorter en ny sort for å legge den i albumet ditt, og vinn nivåer for å åpne kapsler med sjeldne squishier. Hver squishy får du ved å spille. De selges aldri.',
     rarity: ['Vanlig', 'Sjelden', 'Ultrasjelden', 'Hemmelig'],
     oddsLink: 'Se sjansene',
   },
   worlds: {
-    kicker: 'Tre verdener og en festlig', title: 'Over 100 nivåer, så uendelig med oppgaver og en ny Daily Jar hver dag',
+    kicker: 'Fem verdener og en festlig', title: 'Over 350 nivåer, så uendelig med oppgaver og en ny Daily Jar hver dag',
     list: [
       ['Toy Shop', 'Her begynner alt: jordbær, valper, frosker og en veldig stolt dinosaur.'],
       ['Sweet Factory', 'Smultringer, macarons og mochi rett fra samlebåndet.'],
       ['Starlight Stage', 'Lightsticks i været! Sorter showets stjerner og samle fotokortene deres.'],
+      ['Bubble Bath', 'Badeender, oter og seler i et skummende badekar. Noen squishier svever i såpebobler som sprekker når du flytter en squishy ved siden av.'],
+      ['Jungle Jam', 'Dovendyr, tukaner og en tigerunge. Lianglass er bundet igjen til nok andre glass er fylt.'],
       ["Santa's Grotto", 'En ekstra festlig verden med 20 nivåer til, snødekte squishier og en adventshylle med en liten gave hver dag.'],
     ],
     xmasBadge: 'Desember',

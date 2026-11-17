@@ -2,7 +2,7 @@
 export default {
   meta: {
     title: 'Squish Sort: iPhone için squishy sıralama oyunu',
-    description: 'Squishy’leri sırala, kavanozları doldur ve stresi sıkıp at. 100’den fazla sevimli ve tatmin edici bölüm, ardından sonsuz bulmacalar, aralıkta Santa’s Grotto ve toplanacak 64 orijinal squishy. iPhone’da ücretsiz.',
+    description: 'Squishy’leri sırala, kavanozları doldur ve stresi sıkıp at. 350’den fazla sevimli ve tatmin edici bölüm, ardından sonsuz bulmacalar, aralıkta Santa’s Grotto ve toplanacak 98 orijinal squishy. iPhone’da ücretsiz.',
   },
   skip: 'İçeriğe geç',
   nav: { demo: 'Demoyu oyna', squishies: 'Squishy’ler', parents: 'Ebeveynler', support: 'Yardım', language: 'Dil', findLanguage: 'Dil ara' },
@@ -22,22 +22,24 @@ export default {
     jar: 'Kavanoz {n}', empty: 'boş', full: 'dolu, kapaklı', closed: 'Kavanoz kapandı!',
     won: 'Squishtastik!', wonMsg: '{n} hamlede çözüldü. En iyisi {p}.',
     next: 'Sonraki bölüm', stars: '3 yıldızdan {n}',
-    allDone: 'Bu işte iyisin!', allDoneMsg: 'Üç dünyayı denedin! Oyunun tamamında toplanacak 64 squishy, aralıkta Santa’s Grotto, bir Squish Room ve günlük bir Mystery Bag var.',
+    allDone: 'Bu işte iyisin!', allDoneMsg: 'Üç dünyayı denedin! Oyunun tamamında toplanacak 98 squishy, aralıkta Santa’s Grotto, bir Squish Room ve günlük bir Mystery Bag var.',
     again: 'Tekrar oyna',
     wrapTip: 'Paketli şekerler kavanozun en üstüne gelince içlerinde ne olduğunu gösterir.',
   },
   collect: {
-    kicker: 'Hepsini topla', title: 'Bulunacak 64 squishy',
+    kicker: 'Hepsini topla', title: 'Bulunacak 98 squishy',
     lede: 'Yeni bir türü sıralayarak albümüne ekle, bölümleri kazanarak nadir squishy kapsülleri aç. Her squishy oynayarak kazanılır. Asla satılmazlar.',
     rarity: ['Sıradan', 'Nadir', 'Ultra nadir', 'Gizli'],
     oddsLink: 'Olasılıkları gör',
   },
   worlds: {
-    kicker: 'Üç dünya ve bir bayram dünyası', title: '100’den fazla bölüm, ardından sonsuz bulmacalar ve her gün yeni bir Daily Jar',
+    kicker: 'Beş dünya ve bir bayram dünyası', title: '350’den fazla bölüm, ardından sonsuz bulmacalar ve her gün yeni bir Daily Jar',
     list: [
       ['Toy Shop', 'Her şeyin başladığı yer: çilekler, yavru köpekler, kurbağalar ve çok gururlu bir dinozor.'],
       ['Sweet Factory', 'Banttan taze çıkan donutlar, makaronlar ve mochiler.'],
       ['Starlight Stage', 'Lightstick’ler havaya! Sahnenin yıldızlarını sırala ve fotokartlarını topla.'],
+      ['Bubble Bath', 'Köpüklü bir küvette lastik ördekler, su samurları ve foklar. Bazı squishy’ler sabun köpüklerinde süzülür; yanlarına bir squishy taşıdığında köpük patlar.'],
+      ['Jungle Jam', 'Tembel hayvanlar, tukanlar ve bir yavru kaplan. Sarmaşıklı kavanozlar, yeterince başka kavanoz tamamlanana kadar bağlı kalır.'],
       ["Santa's Grotto", '20 bölüm daha, karlı squishy’ler ve her gün küçük bir hediye veren bir advent rafı olan ekstra bir bayram dünyası.'],
     ],
     xmasBadge: 'Aralık',

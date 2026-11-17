@@ -2,7 +2,7 @@
 export default {
   meta: {
     title: 'Squish Sort: squishy-sorteringsspelet för iPhone',
-    description: 'Sortera squishies, fyll burkarna och kläm bort stressen. Över 100 gulliga, tillfredsställande nivåer och sedan oändligt med pussel, Santa’s Grotto i december och 64 egna squishies att samla. Gratis på iPhone.',
+    description: 'Sortera squishies, fyll burkarna och kläm bort stressen. Över 350 gulliga, tillfredsställande nivåer och sedan oändligt med pussel, Santa’s Grotto i december och 98 egna squishies att samla. Gratis på iPhone.',
   },
   skip: 'Hoppa till innehållet',
   nav: { demo: 'Spela demon', squishies: 'Squishies', parents: 'Föräldrar', support: 'Hjälp', language: 'Språk', findLanguage: 'Sök efter språk' },
@@ -22,22 +22,24 @@ export default {
     jar: 'Burk {n}', empty: 'tom', full: 'full, med lock', closed: 'Burken stängd!',
     won: 'Squishtastiskt!', wonMsg: 'Klarad på {n} drag. Bästa är {p}.',
     next: 'Nästa nivå', stars: '{n} av 3 stjärnor',
-    allDone: 'Du har kläm på det!', allDoneMsg: 'Du har testat tre världar! Hela spelet har 64 squishies att samla, Santa’s Grotto i december, ett Squish Room och en daglig Mystery Bag.',
+    allDone: 'Du har kläm på det!', allDoneMsg: 'Du har testat tre världar! Hela spelet har 98 squishies att samla, Santa’s Grotto i december, ett Squish Room och en daglig Mystery Bag.',
     again: 'Spela igen',
     wrapTip: 'Inslagna godisar visar vad de är när de hamnar överst i burken.',
   },
   collect: {
-    kicker: 'Samla alla', title: '64 squishies att hitta',
+    kicker: 'Samla alla', title: '98 squishies att hitta',
     lede: 'Sortera en ny sort för att lägga den i ditt album och vinn nivåer för att öppna kapslar med sällsynta squishies. Varje squishy får du genom att spela. De säljs aldrig.',
     rarity: ['Vanlig', 'Sällsynt', 'Ultrasällsynt', 'Hemlig'],
     oddsLink: 'Se chanserna',
   },
   worlds: {
-    kicker: 'Tre världar och en festlig', title: 'Över 100 nivåer, sedan oändligt med pussel och en ny Daily Jar varje dag',
+    kicker: 'Fem världar och en festlig', title: 'Över 350 nivåer, sedan oändligt med pussel och en ny Daily Jar varje dag',
     list: [
       ['Toy Shop', 'Här börjar allt: jordgubbar, valpar, grodor och en väldigt stolt dinosaurie.'],
       ['Sweet Factory', 'Munkar, macarons och mochi direkt från bandet.'],
       ['Starlight Stage', 'Upp med lightsticksen! Sortera showens stjärnor och samla deras fotokort.'],
+      ['Bubble Bath', 'Badankor, uttrar och sälar i ett skummande badkar. Vissa squishies svävar i såpbubblor som spricker när du flyttar en squishy bredvid dem.'],
+      ['Jungle Jam', 'Sengångare, tukaner och en tigerunge. Lianburkar är fastknutna tills tillräckligt många andra burkar är klara.'],
       ["Santa's Grotto", 'En extra festlig värld med 20 nivåer till, snöiga squishies och en adventshylla med en liten present varje dag.'],
     ],
     xmasBadge: 'December',

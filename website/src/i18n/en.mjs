@@ -1,7 +1,7 @@
 export default {
   meta: {
     title: 'Squish Sort: the squishy sorting game for iPhone',
-    description: 'Sort the squishies, fill the jars and squeeze the stress away. Over 100 soft, satisfying levels, endless puzzles after that, Santa’s Grotto in December and 64 original squishies to collect. Free on iPhone.',
+    description: 'Sort the squishies, fill the jars and squeeze the stress away. Over 350 soft, satisfying levels, endless puzzles after that, Santa’s Grotto in December and 98 original squishies to collect. Free on iPhone.',
   },
   skip: 'Skip to content',
   nav: { demo: 'Play demo', squishies: 'Squishies', parents: 'Parents', support: 'Support', language: 'Language', findLanguage: 'Find a language' },
@@ -26,22 +26,24 @@ export default {
     jar: 'Jar {n}', empty: 'empty', full: 'full, with a lid', closed: 'Jar closed!',
     won: 'Squishtastic!', wonMsg: 'Solved in {n} moves. The best is {p}.',
     next: 'Next level', stars: '{n} of 3 stars',
-    allDone: 'You are a natural!', allDoneMsg: 'You’ve tried three worlds! The full game has 64 squishies to collect, Santa’s Grotto in December, a Squish Room and a daily Mystery Bag.',
+    allDone: 'You are a natural!', allDoneMsg: 'You’ve tried three worlds! The full game has 98 squishies to collect, Santa’s Grotto in December, a Squish Room and a daily Mystery Bag.',
     again: 'Play again',
     wrapTip: 'Wrapped sweets show what’s inside when they reach the top of a jar.',
   },
   collect: {
-    kicker: 'Collect them all', title: '64 squishies to find',
+    kicker: 'Collect them all', title: '98 squishies to find',
     lede: 'Sort a new kind to add it to your book, and win levels to open capsules of rare squishies. Every squishy is earned by playing. They are never for sale.',
     rarity: ['Common', 'Rare', 'Ultra rare', 'Secret'],
     oddsLink: 'See the drop rates',
   },
   worlds: {
-    kicker: 'Three worlds and a festive one', title: 'Over 100 levels, then endless puzzles and a new Daily Jar every day',
+    kicker: 'Five worlds and a festive one', title: 'Over 350 levels, then endless puzzles and a new Daily Jar every day',
     list: [
       ['Toy Shop', 'Where it all begins: strawberries, puppies, frogs and a very proud dinosaur.'],
       ['Sweet Factory', 'Donuts, macarons and mochi, fresh off the conveyor belt.'],
       ['Starlight Stage', 'Light sticks up! Sort the stars of the show and collect their photocards.'],
+      ['Bubble Bath', 'Rubber ducks, otters and seals in a foamy tub. Some squishies float in soap bubbles that pop when you move a squishy next to them.'],
+      ['Jungle Jam', 'Sloths, toucans and a tiger cub. Vine jars stay tied shut until enough other jars are finished.'],
       ["Santa's Grotto", 'A festive side world with 20 extra levels, snowy squishies and an advent shelf with a little gift every day.'],
     ],
     xmasBadge: 'December',

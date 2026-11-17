@@ -2,7 +2,7 @@
 export default {
   meta: {
     title: 'Squish Sort: squishy-sorteringsspillet til iPhone',
-    description: 'Sortér squishies, fyld glassene og klem stressen væk. Over 100 søde, tilfredsstillende baner og uendelige puslespil bagefter, Santa’s Grotto i december og 64 originale squishies at samle. Gratis på iPhone.',
+    description: 'Sortér squishies, fyld glassene og klem stressen væk. Over 350 søde, tilfredsstillende baner og uendelige puslespil bagefter, Santa’s Grotto i december og 98 originale squishies at samle. Gratis på iPhone.',
   },
   skip: 'Spring til indholdet',
   nav: { demo: 'Spil demoen', squishies: 'Squishies', parents: 'Forældre', support: 'Hjælp', language: 'Sprog', findLanguage: 'Find et sprog' },
@@ -22,22 +22,24 @@ export default {
     jar: 'Glas {n}', empty: 'tomt', full: 'fyldt, med låg', closed: 'Glasset er lukket!',
     won: 'Squishtastisk!', wonMsg: 'Klaret på {n} træk. Det bedste er {p}.',
     next: 'Næste bane', stars: '{n} af 3 stjerner',
-    allDone: 'Du har styr på det!', allDoneMsg: 'Du har prøvet tre verdener! Hele spillet har 64 squishies at samle, Santa’s Grotto i december, et Squish Room og en daglig Mystery Bag.',
+    allDone: 'Du har styr på det!', allDoneMsg: 'Du har prøvet tre verdener! Hele spillet har 98 squishies at samle, Santa’s Grotto i december, et Squish Room og en daglig Mystery Bag.',
     again: 'Spil igen',
     wrapTip: 'Indpakkede slik viser, hvad de er, når de kommer øverst i glasset.',
   },
   collect: {
-    kicker: 'Saml dem alle', title: '64 squishies at finde',
+    kicker: 'Saml dem alle', title: '98 squishies at finde',
     lede: 'Sortér en ny slags for at sætte den i dit album, og vind baner for at åbne kapsler med sjældne squishies. Hver squishy får du ved at spille. De er aldrig til salg.',
     rarity: ['Almindelig', 'Sjælden', 'Ultrasjælden', 'Hemmelig'],
     oddsLink: 'Se chancerne',
   },
   worlds: {
-    kicker: 'Tre verdener og en festlig', title: 'Over 100 baner, derefter uendelige puslespil og en ny Daily Jar hver dag',
+    kicker: 'Fem verdener og en festlig', title: 'Over 350 baner, derefter uendelige puslespil og en ny Daily Jar hver dag',
     list: [
       ['Toy Shop', 'Her starter det hele: jordbær, hvalpe, frøer og en meget stolt dino.'],
       ['Sweet Factory', 'Donuts, macarons og mochi direkte fra samlebåndet.'],
       ['Starlight Stage', 'Lightsticks i vejret! Sortér showets stjerner og saml deres fotokort.'],
+      ['Bubble Bath', 'Badeænder, oddere og sæler i et skummende badekar. Nogle squishies svæver i sæbebobler, der springer, når du flytter en squishy ved siden af dem.'],
+      ['Jungle Jam', 'Dovendyr, tukaner og en tigerunge. Lianglas er bundet til, indtil nok andre glas er fyldt.'],
       ["Santa's Grotto", 'En ekstra festlig verden med 20 baner mere, sneklædte squishies og en adventshylde med en lille gave hver dag.'],
     ],
     xmasBadge: 'December',

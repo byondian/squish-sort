@@ -51,7 +51,7 @@ Replaying a level does not pay the level's coins again, so coins can't be farmed
 
 **Capsules hold rare and ultra-rare squishies.** They are always free and can only be earned by playing:
 
-- **Clearing a capsule level for the first time:** levels 3, 6, 9, 12, 15, 18 and 20 of each world (7 capsules per world).
+- **Clearing a capsule level for the first time:** every third level of a world and its last level: 5 capsules in the Toy Shop, 7 in the Sweet Factory, 9 in Starlight Stage, 10 in Bubble Bath, 12 in Jungle Jam and 7 in Santa's Grotto. After the story worlds, every fifth Keep Squishing level gives one too.
 - **The capsule bar:** three steps fill it and give a capsule. Steps come from a right first guess in the daily **Mystery Bag**, from the 7th stamp of the stamp card and from advent days 6, 12 and 18. An extra guess from a video or Remove Ads pays coins only and never moves the bar.
 - **The Christmas advent shelf:** the door for 24 December holds a Christmas capsule; other doors give 100 coins or 2 Buddy treats.
 - **Squishing spares:** three duplicate squishies can be swapped for a squishy you don't have yet.
@@ -60,7 +60,7 @@ Replaying a level does not pay the level's coins again, so coins can't be farmed
 
 ## Drop rates {#drop}
 
-A level capsule contains one squishy from the world it was earned in. A capsule from the capsule bar opens for the world you are playing, or another unlocked world if that book is complete.
+A level capsule contains one squishy from the world it was earned in (a Keep Squishing level counts as the world whose squishies it uses). A capsule from the capsule bar opens for the world you are playing, or another unlocked world if that book is complete.
 
 | Rarity | Chance per capsule |
 |---|---|
@@ -76,6 +76,8 @@ Within a rarity, every squishy you **don't own yet** is equally likely. If you a
 | Toy Shop | 7 | 3 | 1 |
 | Sweet Factory | 7 | 3 | 1 |
 | Starlight Stage | 7 | 3 | 1 |
+| Bubble Bath | 7 | 3 | 1 |
+| Jungle Jam | 7 | 3 | 1 |
 | Santa's Grotto (Santa's Workshop in the US and Canada) | 4 | 2 | 1 |
 
 Example: in the Toy Shop, after your first capsule (always Peach Bun, a Toy Shop rare), each of the 6 remaining rares has an 80% ÷ 6 ≈ 13.3% chance, and each of the 3 ultras 20% ÷ 3 ≈ 6.7%.

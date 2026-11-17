@@ -2,7 +2,7 @@
 export default {
   meta: {
     title: 'Squish Sort: il gioco per smistare gli squishy su iPhone',
-    description: 'Smista gli squishy, riempi i barattoli e manda via lo stress. Oltre 100 livelli morbidi e soddisfacenti, poi rompicapi infiniti, Santa’s Grotto a dicembre e 64 squishy originali da collezionare. Gratis su iPhone.',
+    description: 'Smista gli squishy, riempi i barattoli e manda via lo stress. Oltre 350 livelli morbidi e soddisfacenti, poi rompicapi infiniti, Santa’s Grotto a dicembre e 98 squishy originali da collezionare. Gratis su iPhone.',
   },
   skip: 'Vai al contenuto',
   nav: { demo: 'Gioca la demo', squishies: 'Squishy', parents: 'Genitori', support: 'Assistenza', language: 'Lingua', findLanguage: 'Cerca una lingua' },
@@ -22,22 +22,24 @@ export default {
     jar: 'Barattolo {n}', empty: 'vuoto', full: 'pieno, con il coperchio', closed: 'Barattolo chiuso!',
     won: 'Squishtastico!', wonMsg: 'Risolto in {n} mosse. Il record è {p}.',
     next: 'Livello successivo', stars: '{n} stelle su 3',
-    allDone: 'Hai talento!', allDoneMsg: 'Hai provato tre mondi! Il gioco completo ha 64 squishy da collezionare, Santa’s Grotto a dicembre, una Squish Room e una Mystery Bag ogni giorno.',
+    allDone: 'Hai talento!', allDoneMsg: 'Hai provato tre mondi! Il gioco completo ha 98 squishy da collezionare, Santa’s Grotto a dicembre, una Squish Room e una Mystery Bag ogni giorno.',
     again: 'Gioca ancora',
     wrapTip: 'I dolcetti incartati mostrano cosa c’è dentro quando arrivano in cima al barattolo.',
   },
   collect: {
-    kicker: 'Collezionali tutti', title: '64 squishy da trovare',
+    kicker: 'Collezionali tutti', title: '98 squishy da trovare',
     lede: 'Smista un tipo nuovo per aggiungerlo al tuo album e vinci livelli per aprire capsule di squishy rari. Ogni squishy si guadagna giocando. Non sono mai in vendita.',
     rarity: ['Comune', 'Raro', 'Ultra raro', 'Segreto'],
     oddsLink: 'Vedi le probabilità',
   },
   worlds: {
-    kicker: 'Tre mondi e uno di festa', title: 'Oltre 100 livelli, poi rompicapi infiniti e un nuovo Daily Jar ogni giorno',
+    kicker: 'Cinque mondi e uno di festa', title: 'Oltre 350 livelli, poi rompicapi infiniti e un nuovo Daily Jar ogni giorno',
     list: [
       ['Toy Shop', 'Dove tutto ha inizio: fragole, cuccioli, rane e un dinosauro molto orgoglioso.'],
       ['Sweet Factory', 'Ciambelle, macaron e mochi appena usciti dal nastro trasportatore.'],
       ['Starlight Stage', 'Su le lightstick! Smista le star dello show e colleziona le loro photocard.'],
+      ['Bubble Bath', 'Paperelle di gomma, lontre e foche in una vasca piena di schiuma. Alcuni squishy galleggiano in bolle di sapone che scoppiano quando gli sposti accanto uno squishy.'],
+      ['Jungle Jam', 'Bradipi, tucani e un cucciolo di tigre. I barattoli con le liane restano legati finché non si completano abbastanza altri barattoli.'],
       ["Santa's Grotto", 'Un mondo di festa extra con 20 livelli in più, squishy innevati e uno scaffale dell’Avvento con un piccolo regalo ogni giorno.'],
     ],
     xmasBadge: 'Dicembre',

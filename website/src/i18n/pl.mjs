@@ -2,7 +2,7 @@
 export default {
   meta: {
     title: 'Squish Sort: gra w sortowanie squishy na iPhone’a',
-    description: 'Sortuj squishy, napełniaj słoiki i wyciskaj stres. Ponad 100 uroczych, satysfakcjonujących poziomów, a potem niekończące się łamigłówki, Santa’s Grotto w grudniu i 64 oryginalne squishy do zebrania. Za darmo na iPhone’a.',
+    description: 'Sortuj squishy, napełniaj słoiki i wyciskaj stres. Ponad 350 uroczych, satysfakcjonujących poziomów, a potem niekończące się łamigłówki, Santa’s Grotto w grudniu i 98 oryginalne squishy do zebrania. Za darmo na iPhone’a.',
   },
   skip: 'Przejdź do treści',
   nav: { demo: 'Zagraj w demo', squishies: 'Squishy', parents: 'Rodzice', support: 'Pomoc', language: 'Język', findLanguage: 'Znajdź język' },
@@ -22,22 +22,24 @@ export default {
     jar: 'Słoik {n}', empty: 'pusty', full: 'pełny, z pokrywką', closed: 'Słoik zamknięty!',
     won: 'Squishtastycznie!', wonMsg: 'Rozwiązane w {n} ruchach. Najlepszy wynik to {p}.',
     next: 'Następny poziom', stars: '{n} z 3 gwiazdek',
-    allDone: 'Masz do tego dryg!', allDoneMsg: 'Wypróbowałeś trzy światy! Pełna gra ma 64 squishy do zebrania, Santa’s Grotto w grudniu, Squish Room i codzienną Mystery Bag.',
+    allDone: 'Masz do tego dryg!', allDoneMsg: 'Wypróbowałeś trzy światy! Pełna gra ma 98 squishy do zebrania, Santa’s Grotto w grudniu, Squish Room i codzienną Mystery Bag.',
     again: 'Zagraj jeszcze raz',
     wrapTip: 'Zapakowane słodycze pokazują, co jest w środku, gdy znajdą się na górze słoika.',
   },
   collect: {
-    kicker: 'Zbierz je wszystkie', title: '64 squishy do odkrycia',
+    kicker: 'Zbierz je wszystkie', title: '98 squishy do odkrycia',
     lede: 'Posortuj nowy rodzaj, żeby trafił do albumu, i wygrywaj poziomy, żeby otwierać kapsułki z rzadkimi squishy. Każdy squishy zdobywasz, grając. Nigdy nie są na sprzedaż.',
     rarity: ['Zwykły', 'Rzadki', 'Ultrarzadki', 'Sekretny'],
     oddsLink: 'Zobacz szanse',
   },
   worlds: {
-    kicker: 'Trzy światy i jeden świąteczny', title: 'Ponad 100 poziomów, potem niekończące się łamigłówki i codziennie nowy Daily Jar',
+    kicker: 'Pięć światów i jeden świąteczny', title: 'Ponad 350 poziomów, potem niekończące się łamigłówki i codziennie nowy Daily Jar',
     list: [
       ['Toy Shop', 'Tu wszystko się zaczyna: truskawki, szczeniaczki, żabki i bardzo dumny dinozaur.'],
       ['Sweet Factory', 'Pączki, makaroniki i mochi prosto z taśmy.'],
       ['Starlight Stage', 'Lightsticki w górę! Sortuj gwiazdy show i zbieraj ich photocardy.'],
+      ['Bubble Bath', 'Gumowe kaczuszki, wydry i foki w pełnej piany wannie. Niektóre squishy unoszą się w bańkach mydlanych, które pękają, gdy przesuniesz obok nich squishy.'],
+      ['Jungle Jam', 'Leniwce, tukany i mały tygrys. Słoiki z pnączami są zawiązane, dopóki nie skończysz dość innych słoików.'],
       ["Santa's Grotto", 'Dodatkowy świąteczny świat z 20 poziomami więcej, ośnieżonymi squishy i adwentową półką z małym prezentem na każdy dzień.'],
     ],
     xmasBadge: 'Grudzień',

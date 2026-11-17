@@ -2,7 +2,7 @@
 export default {
   meta: {
     title: 'Squish Sort: o jogo de organizar squishies para iPhone',
-    description: 'Organize os squishies, encha os potes e esprema o estresse para longe. Mais de 100 fases fofas e satisfatórias e, depois, quebra-cabeças sem fim, Santa’s Grotto em dezembro e 64 squishies originais para colecionar. Grátis no iPhone.',
+    description: 'Organize os squishies, encha os potes e esprema o estresse para longe. Mais de 350 fases fofas e satisfatórias e, depois, quebra-cabeças sem fim, Santa’s Grotto em dezembro e 98 squishies originais para colecionar. Grátis no iPhone.',
   },
   skip: 'Pular para o conteúdo',
   nav: { demo: 'Jogar a demo', squishies: 'Squishies', parents: 'Pais', support: 'Ajuda', language: 'Idioma', findLanguage: 'Buscar um idioma' },
@@ -22,22 +22,24 @@ export default {
     jar: 'Pote {n}', empty: 'vazio', full: 'cheio, com tampa', closed: 'Pote fechado!',
     won: 'Squishtástico!', wonMsg: 'Resolvido em {n} jogadas. O recorde é {p}.',
     next: 'Próxima fase', stars: '{n} de 3 estrelas',
-    allDone: 'Você leva jeito!', allDoneMsg: 'Você experimentou três mundos! O jogo completo tem 64 squishies para colecionar, Santa’s Grotto em dezembro, um Squish Room e uma Mystery Bag diária.',
+    allDone: 'Você leva jeito!', allDoneMsg: 'Você experimentou três mundos! O jogo completo tem 98 squishies para colecionar, Santa’s Grotto em dezembro, um Squish Room e uma Mystery Bag diária.',
     again: 'Jogar de novo',
     wrapTip: 'Os doces embrulhados mostram o que têm dentro quando chegam ao topo do pote.',
   },
   collect: {
-    kicker: 'Colecione todos', title: '64 squishies para encontrar',
+    kicker: 'Colecione todos', title: '98 squishies para encontrar',
     lede: 'Organize um tipo novo para colocá-lo no seu álbum e vença fases para abrir cápsulas de squishies raros. Todo squishy é conquistado jogando. Eles nunca estão à venda.',
     rarity: ['Comum', 'Raro', 'Ultrarraro', 'Secreto'],
     oddsLink: 'Ver as chances',
   },
   worlds: {
-    kicker: 'Três mundos e um festivo', title: 'Mais de 100 fases, depois quebra-cabeças sem fim e um Daily Jar novo todo dia',
+    kicker: 'Cinco mundos e um festivo', title: 'Mais de 350 fases, depois quebra-cabeças sem fim e um Daily Jar novo todo dia',
     list: [
       ['Toy Shop', 'Onde tudo começa: morangos, cachorrinhos, sapos e um dinossauro muito orgulhoso.'],
       ['Sweet Factory', 'Donuts, macarons e mochis fresquinhos saindo da esteira.'],
       ['Starlight Stage', 'Lightsticks para cima! Organize as estrelas do show e colecione seus photocards.'],
+      ['Bubble Bath', 'Patinhos de borracha, lontras e focas numa banheira cheia de espuma. Alguns squishies flutuam em bolhas de sabão que estouram quando você move um squishy para o lado delas.'],
+      ['Jungle Jam', 'Preguiças, tucanos e um filhote de tigre. Os potes com cipó ficam amarrados até você completar outros potes suficientes.'],
       ["Santa's Grotto", 'Um mundo festivo extra com mais 20 fases, squishies nevados e uma prateleira do Advento com um presentinho por dia.'],
     ],
     xmasBadge: 'Dezembro',
