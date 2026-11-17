@@ -157,6 +157,48 @@ final class BoardTests: XCTestCase {
         XCTAssertTrue(b.isLegal(Move(from: 1, to: 4)))
     }
 
+    func testVineJarIsShutUntilItsTagIsCountedDown() {
+        // Jar 1 is tied with a 2 on its tag; jar 4 is spare room.
+        let jars = board(["A", "BC", "A", "CB", ""], capacity: 2).jars
+        var b = Board(capacity: 2, jars: jars, vines: [1: 2])
+        XCTAssertEqual(b.vineTag(1), 2)
+        XCTAssertTrue(b.isShut(1))
+        XCTAssertFalse(b.isComplete(1), "a tied jar is not a finished jar")
+        XCTAssertEqual(b.runLength(at: 1), 0)
+        XCTAssertFalse(b.isLegal(Move(from: 1, to: 4)), "nothing comes out")
+        XCTAssertFalse(b.isLegal(Move(from: 3, to: 1)), "nothing goes in")
+        XCTAssertFalse(b.isStuck, "a tied jar does not make the board stuck while another move is open")
+        // The first finished jar counts the tag down to 1: still shut.
+        let first = b.apply(Move(from: 0, to: 2))
+        XCTAssertEqual(first?.completedJar, 2)
+        XCTAssertEqual(first?.snappedVines, [])
+        XCTAssertEqual(b.vineTag(1), 1)
+        XCTAssertTrue(b.isShut(1))
+        // A move that finishes nothing leaves the tag alone.
+        XCTAssertEqual(b.apply(Move(from: 3, to: 4))?.snappedVines, [])
+        XCTAssertEqual(b.vineTag(1), 1)
+    }
+
+    func testVineSnapsAtZeroAndTheJarIsOrdinaryAgain() {
+        let jars = board(["A", "BC", "A", "CB", ""], capacity: 2).jars
+        var b = Board(capacity: 2, jars: jars, vines: [1: 1])
+        XCTAssertTrue(b.hasVines)
+        let result = b.apply(Move(from: 0, to: 2))
+        XCTAssertEqual(result?.snappedVines, [1])
+        XCTAssertEqual(b.vineTag(1), 0)
+        XCTAssertFalse(b.hasVines)
+        XCTAssertFalse(b.isShut(1))
+        XCTAssertTrue(b.isLegal(Move(from: 1, to: 4)))
+    }
+
+    func testAnEmptyVineJarIsRoomThatArrivesLater() {
+        let jars = board(["AB", "BA", "", "C", "C"], capacity: 2).jars
+        var b = Board(capacity: 2, jars: jars, vines: [2: 1])
+        XCTAssertFalse(b.isLegal(Move(from: 0, to: 2)), "the spare jar is tied")
+        XCTAssertEqual(b.apply(Move(from: 3, to: 4))?.snappedVines, [2])
+        XCTAssertTrue(b.isLegal(Move(from: 0, to: 2)))
+    }
+
     func testShakeUpLeavesAClosedCurtainAlone() {
         let jars = board(["AB", "BC", "CA", "", ""], capacity: 2).jars
         let b = Board(capacity: 2, jars: jars, curtains: [1])

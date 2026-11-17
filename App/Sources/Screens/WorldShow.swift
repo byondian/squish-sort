@@ -10,7 +10,8 @@ struct ShowPlan: Decodable {
         let who: Int?
     }
 
-    /// stage (Starlight), parade (Toy Shop), bake (Sweet Factory) or sleigh (Santa's Grotto).
+    /// stage (Starlight), parade (Toy Shop), bake (Sweet Factory), sleigh (Santa's Grotto),
+    /// swim (Bubble Bath) or treetop (Jungle Jam).
     let style: String
     let music: String
     /// The sneak peeks' music is this plus their number.
@@ -22,7 +23,7 @@ struct ShowPlan: Decodable {
     private static var cache: [String: ShowPlan] = [:]
     private static var missing: Set<String> = []
 
-    static let worlds = ["toyshop", "sweetfactory", "starlight", "christmas"]
+    static let worlds = ["toyshop", "sweetfactory", "starlight", "bubblebath", "junglejam", "christmas"]
 
     static func load(_ world: String) -> ShowPlan? {
         if let plan = cache[world] { return plan }
@@ -48,6 +49,8 @@ struct ShowPlan: Decodable {
         case "drum": return "🥁"
         case "cake": return "🎂"
         case "globe": return "❄️"
+        case "duck": return "⛲"
+        case "bongo": return "🪘"
         default: return "🎤"
         }
     }
@@ -57,6 +60,8 @@ struct ShowPlan: Decodable {
         case "toyshop": return "Midnight Toy Parade"
         case "sweetfactory": return "Grand Bake-Off"
         case "christmas": return "Sleigh Night"
+        case "bubblebath": return "Bubble Ballet"
+        case "junglejam": return "Treetop Jam Session"
         default: return "Encore Concert"
         }
     }
@@ -200,6 +205,8 @@ struct WorldShowView: View {
         case "parade": return [Color(red: 0.10, green: 0.10, blue: 0.28), Color(red: 0.30, green: 0.18, blue: 0.42)]
         case "bake": return [Color(red: 0.36, green: 0.16, blue: 0.30), Color(red: 0.62, green: 0.30, blue: 0.42)]
         case "sleigh": return [Color(red: 0.05, green: 0.10, blue: 0.26), Color(red: 0.16, green: 0.26, blue: 0.48)]
+        case "swim": return [Color(red: 0.05, green: 0.28, blue: 0.44), Color(red: 0.24, green: 0.60, blue: 0.74)]
+        case "treetop": return [Color(red: 0.04, green: 0.16, blue: 0.14), Color(red: 0.14, green: 0.38, blue: 0.24)]
         default: return [Color(red: 0.09, green: 0.06, blue: 0.20), Color(red: 0.26, green: 0.14, blue: 0.42)]
         }
     }
@@ -296,14 +303,26 @@ struct WorldShowView: View {
         // Each world brings its performer on in its own way.
         let slide: Double = style == "parade" ? (1 - arrive) * -w * 0.6 : 0
         let rise: Double = style == "bake" ? (1 - arrive) * side : 0
-        let float: Double = style == "sleigh" && !reduceMotion ? sin(t * 2.4) * 8 : 0
+        let float: Double = (style == "sleigh" || style == "swim") && !reduceMotion ? sin(t * 2.4) * 8 : 0
+        // Bubble Bath floats up in a bubble; Jungle Jam drops in from the treetops.
+        let bubbleUp: Double = style == "swim" ? (1 - arrive) * h * 0.4 : 0
+        let dropIn: Double = style == "treetop" ? (1 - arrive) * -h * 0.5 : 0
+        let y: Double = floor - side / 2 + rise + float + bubbleUp + dropIn
         return ZStack {
             LinearGradient(colors: backdrop(style), startPoint: .top, endPoint: .bottom)
             spotlight(x: w / 2, floor: floor, side: side, strength: arrive)
             if !who.isEmpty {
                 performer(who, side: side, u: u > 0 && u < 1 ? u : 0, jump: 0)
                     .opacity(arrive)
-                    .position(x: w / 2 + slide, y: floor - side / 2 + rise + float)
+                    .position(x: w / 2 + slide, y: y)
+            }
+            if style == "swim", !who.isEmpty {
+                Circle().stroke(Color.white.opacity(0.7), lineWidth: 3)
+                    .background(Circle().fill(Color.white.opacity(0.12)))
+                    .frame(width: side * 1.4, height: side * 1.4)
+                    .opacity(arrive)
+                    .position(x: w / 2, y: y)
+                    .allowsHitTesting(false)
             }
             crowd(t, size, cheer: ramp(t, from: 2.4, over: 0.3))
         }
@@ -433,6 +452,76 @@ struct WorldShowView: View {
                     .shadow(color: Theme.butter.opacity(glow), radius: 8)
                     .position(x: w / 2 + (Double(k) - 2) * w * 0.08, y: floor - side * 2.25)
             }
+        case "swim":
+            // A giant tub: fountain jets in time, bubbles, a line of rubber ducks, and a rainbow for the finish.
+            let bow: Double = ramp(t, from: finishAt, over: 0.8)
+            ForEach(0..<4, id: \.self) { k in
+                let hue: Color = [Theme.bubblegum, Theme.butter, Theme.mint, Theme.sky][k]
+                let across: Double = w * (0.95 - 0.07 * Double(k))
+                Circle().trim(from: 0.5, to: 0.5 + 0.5 * bow)
+                    .stroke(hue.opacity(0.85), lineWidth: 9)
+                    .frame(width: across, height: across)
+                    .position(x: w / 2, y: floor - side * 0.4)
+            }
+            ForEach(0..<5, id: \.self) { k in
+                let beat: Double = reduceMotion ? 0.6 : 0.5 + 0.5 * sin(t * 4 + Double(k) * 1.3)
+                let tall: Double = max(1, side * (0.9 + 1.2 * beat) * lit)
+                Capsule().fill(Color.white.opacity(0.5))
+                    .frame(width: 10, height: tall)
+                    .position(x: w * (0.14 + 0.18 * Double(k)), y: floor - tall / 2)
+            }
+            ForEach(0..<14, id: \.self) { k in
+                let fx: Double = (Double(k) * 0.618).truncatingRemainder(dividingBy: 1)
+                let speed: Double = 0.06 + 0.02 * Double(k % 3)
+                let fy: Double = (Double(k) * 0.37 + (reduceMotion ? 0 : t * speed)).truncatingRemainder(dividingBy: 1)
+                let across: Double = 10 + Double(k % 4) * 5
+                Circle().stroke(Color.white.opacity(0.6), lineWidth: 2)
+                    .frame(width: across, height: across)
+                    .position(x: fx * w, y: (1 - fy) * h * 0.8)
+            }
+            RoundedRectangle(cornerRadius: 30).fill(Color.white.opacity(0.95))
+                .frame(width: w * 0.98, height: side * 1.1)
+                .position(x: w / 2, y: floor + side * 0.5)
+            RoundedRectangle(cornerRadius: 22).fill(Color(hex: 0xBFEFFF))
+                .frame(width: w * 0.9, height: side * 0.3)
+                .position(x: w / 2, y: floor + side * 0.1)
+            ForEach(0..<5, id: \.self) { k in
+                let bob: Double = reduceMotion ? 0 : sin(t * 3 + Double(k)) * 4
+                SquishyView(id: "quacky").frame(width: side * 0.42, height: side * 0.42)
+                    .position(x: w * (0.14 + 0.18 * Double(k)), y: floor + side * 0.62 + bob)
+            }
+        case "treetop":
+            // A plank stage in the treetops: swinging vines, fireflies, and leaves falling in time.
+            ForEach(0..<4, id: \.self) { k in
+                let swing: Double = reduceMotion ? 0 : sin(t * 1.6 + Double(k) * 1.1) * 9
+                let long: Double = h * (0.28 + 0.05 * Double(k % 2))
+                Capsule().fill(Color(hex: 0x4FA05A))
+                    .frame(width: 7, height: long)
+                    .rotationEffect(.degrees(swing), anchor: .top)
+                    .position(x: w * (0.12 + 0.25 * Double(k)), y: long / 2 - 8)
+            }
+            ForEach(0..<12, id: \.self) { k in
+                let fx: Double = (Double(k) * 0.618).truncatingRemainder(dividingBy: 1)
+                let fy: Double = (Double(k) * 0.37).truncatingRemainder(dividingBy: 1)
+                let blink: Double = reduceMotion ? 0.7 : 0.5 + 0.5 * sin(t * 2.2 + Double(k) * 1.7)
+                Circle().fill(Theme.butter.opacity(0.25 + 0.75 * blink * lit))
+                    .frame(width: 7, height: 7)
+                    .shadow(color: Theme.butter.opacity(blink * lit), radius: 6)
+                    .position(x: fx * w, y: h * (0.12 + 0.45 * fy))
+            }
+            ForEach(0..<10, id: \.self) { k in
+                let fx: Double = (Double(k) * 0.381 + 0.07).truncatingRemainder(dividingBy: 1)
+                let fy: Double = (Double(k) * 0.29 + (reduceMotion ? 0 : t * 0.09)).truncatingRemainder(dividingBy: 1)
+                let turn: Double = reduceMotion ? 20 : t * 60 + Double(k) * 40
+                Ellipse().fill(Color(hex: 0x7CCB6B).opacity(0.85))
+                    .frame(width: 14, height: 8)
+                    .rotationEffect(.degrees(turn))
+                    .position(x: fx * w, y: fy * h * 0.7)
+            }
+            RoundedRectangle(cornerRadius: 10).fill(Color(hex: 0xB98654))
+                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(hex: 0x8A5F38), lineWidth: 3))
+                .frame(width: w * 0.96, height: side * 0.32)
+                .position(x: w / 2, y: floor + side * 0.12)
         case "sleigh":
             // A moon, falling snow, and the sleigh the cast ride in.
             let rise: Double = ramp(t, from: open, over: 2)

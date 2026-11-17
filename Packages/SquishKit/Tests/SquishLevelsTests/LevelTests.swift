@@ -15,13 +15,13 @@ final class LevelTests: XCTestCase {
 
     func testWorldsGrowAndEveryLevelIsThere() throws {
         let all = try files()
-        XCTAssertEqual(LevelCatalog.worlds.map(LevelCatalog.levelCount(in:)), [15, 20, 25])
-        XCTAssertEqual(LevelCatalog.mainLevelCount, 60)
-        XCTAssertEqual(all.count, 320)
-        XCTAssertEqual(Array(all.prefix(60)).map(\.world),
+        XCTAssertEqual(LevelCatalog.worlds.map(LevelCatalog.levelCount(in:)), [15, 20, 25, 30, 35])
+        XCTAssertEqual(LevelCatalog.mainLevelCount, 125)
+        XCTAssertEqual(all.count, 385)
+        XCTAssertEqual(Array(all.prefix(125)).map(\.world),
                        LevelCatalog.worlds.flatMap { Array(repeating: $0, count: LevelCatalog.levelCount(in: $0)) },
                        "the main path comes first, in play order")
-        XCTAssertEqual(Array(all[60..<300]).map(\.world), Array(repeating: LevelCatalog.endless, count: 240),
+        XCTAssertEqual(Array(all[125..<365]).map(\.world), Array(repeating: LevelCatalog.endless, count: 240),
                        "Keep Squishing follows the story worlds")
         XCTAssertEqual(LevelCatalog.look(world: LevelCatalog.endless, index: 1), "sweetfactory")
         XCTAssertEqual(LevelCatalog.look(world: LevelCatalog.endless, index: 11), "starlight")
@@ -33,6 +33,24 @@ final class LevelTests: XCTestCase {
             XCTAssertEqual(inWorld.last?.beat, .boss, "\(world) ends on a boss")
             XCTAssertEqual(inWorld.last?.capsule, true, "\(world) ends on a capsule")
         }
+    }
+
+    func testJungleJamHasVineJarsAndBubbleBathHasBubbles() throws {
+        let all = try files()
+        let jungle = all.filter { $0.world == "junglejam" }
+        XCTAssertTrue(jungle.contains { !($0.mechanics?.vines ?? []).isEmpty }, "Jungle Jam has vine jars")
+        XCTAssertFalse(all.contains { $0.world != "junglejam" && !($0.mechanics?.vines ?? []).isEmpty }, "vines stay in Jungle Jam")
+        for file in jungle {
+            let board = try Level(file: file).board
+            let tied = (0..<board.jarCount).filter { board.vineTag($0) > 0 }
+            XCTAssertLessThanOrEqual(tied.count, 2, file.id)
+            for j in tied {
+                XCTAssertLessThanOrEqual(board.vineTag(j), 2, file.id)
+                XCTAssertFalse(board.isComplete(j), "\(file.id): a tied jar never starts finished")
+            }
+        }
+        let bath = try all.filter { $0.world == "bubblebath" }.map { try Level(file: $0).board }
+        XCTAssertTrue(bath.contains { $0.jars.contains { $0.contains { $0.frozen > 0 } } }, "Bubble Bath has bubbles")
     }
 
     func testStructureBeatAndCapsules() throws {

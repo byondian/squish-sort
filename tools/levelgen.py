@@ -19,9 +19,12 @@ WORLDS = [
     ("sweetfactory", ["macaron", "donut", "jelly", "cupcake", "gummy-bear", "lolly"], "hidden"),
     ("starlight", ["lumi", "riff", "zuzu", "pip", "nova", "coco"], "sticky"),
     ("christmas", ["santa", "elfie", "reindeer", "snowbo", "ginger", "waddles"], "frozen"),
+    # Added after the others so the indexes above stay put. On the path they follow Starlight Stage.
+    ("bubblebath", ["quacky", "soapy", "bubbly", "starla", "shelly", "fizzy"], "frozen"),   # bubbles: the frozen rule
+    ("junglejam", ["bongo", "tuki", "pina", "leafy", "dotty", "nana"], None),               # vine jars
 ]
 # Worlds grow as the game goes on. The last level of a world is always a boss.
-LENGTHS = {"toyshop": 15, "sweetfactory": 20, "starlight": 25, "christmas": 20}
+LENGTHS = {"toyshop": 15, "sweetfactory": 20, "starlight": 25, "christmas": 20, "bubblebath": 30, "junglejam": 35}
 BEATS = ["intro", "easy", "easy", "medium", "showpiece", "breather", "bonus", "tension", "calm", "boss"]
 
 # (kinds, empty jars, target par as a multiple of kinds) for world positions 1..20.
@@ -40,7 +43,7 @@ MIX = {"starlight": (13, "hidden")}
 # (Ian, 17 Nov). Curtain levels have no duets.
 CURTAINS_FROM = {"starlight": 13}
 # Later worlds start a little bigger at the same positions.
-WORLD_BUMP = {0: 0, 1: 1, 2: 1, 3: 1}
+WORLD_BUMP = {0: 0, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1}
 # Santa's Grotto is a side world that opens after main level 10, so it is
 # tuned like main levels 12 to 35: Toy Shop sizes for its first half.
 SIDE_WORLD = 3
@@ -50,7 +53,8 @@ def squeeze(world, pos, beat):
     """Where the game gets properly hard (Ian, 16 Nov: three stars on everything by level 33).
     Returns (kinds to add, spare jars) or None to leave the level's shape alone.
     One spare jar instead of two is what makes dead ends real, so Undo and Restart matter."""
-    tier = 1 if (world == "sweetfactory" and pos >= 14) else 2 if (world == "starlight" and pos >= 4) else 0
+    late = world in ("starlight", "bubblebath", "junglejam")
+    tier = 1 if (world == "sweetfactory" and pos >= 14) else 2 if (late and pos >= 4) else 0
     if not tier:
         return None
     if beat == "boss":
@@ -74,6 +78,8 @@ BORROW = {
     "sweetfactory": ["strawbie", "tango"],
     "starlight": ["strawbie", "tango"],
     "christmas": ["jelly", "cupcake"],
+    "bubblebath": ["minty", "strawbie"],
+    "junglejam": ["blu", "grapey"],
 }
 
 
@@ -98,7 +104,7 @@ def mechanic_count(mech, pos):
     return 0
 
 
-def random_board(rng, names, empties, mech, mcount, mix_hidden=0, mix_frozen=0):
+def random_board(rng, names, empties, mech, mcount, mix_hidden=0, mix_frozen=0, vines=None):
     """Returns (jars, mechanics) or None."""
     units = []
     if mech == "sticky":
@@ -154,6 +160,14 @@ def random_board(rng, names, empties, mech, mcount, mix_hidden=0, mix_frozen=0):
             # a curtain hides a full jar; the spare jars are never behind one
             closed = sorted(rng.sample(range(len(jars)), min(mcount, len(jars))))
             mechanics["curtains"] = closed
+        if vines:
+            # a vine ties a jar of mixed squishies shut until `tag` jars are finished; never a jar with a duet
+            free = [j for j in range(len(jars)) if not any(sj == j for sj, _ in sticky)]
+            if len(free) < len(vines):
+                continue
+            picked = sorted(rng.sample(free, len(vines)))
+            mechanics["vines"] = [[j, tag] for j, tag in zip(picked, vines)]
+            closed = closed + picked
         if mix_hidden:
             # wrapped pieces mixed into a duet world: never a duet piece, never the top of a jar,
             # never behind a curtain
@@ -207,12 +221,12 @@ def killing_first_moves(b):
     return dead
 
 
-def choose(rng, level, names, empties, mech, mcount, target, mix_hidden=0, mix_frozen=0, tries=None, states=600_000):
+def choose(rng, level, names, empties, mech, mcount, target, mix_hidden=0, mix_frozen=0, tries=None, states=600_000, vines=None):
     """Best solvable random candidate: first one whose every opening move can still be won from,
     then by distance to target par (lowest par if no target)."""
     best = None
     for _ in range(tries or int(os.environ.get("LEVELGEN_TRIES", "80"))):
-        cand = random_board(rng, names, empties, mech, mcount, mix_hidden, mix_frozen)
+        cand = random_board(rng, names, empties, mech, mcount, mix_hidden, mix_frozen, vines)
         if cand is None:
             continue
         jars_c, mech_c = cand
@@ -242,17 +256,40 @@ def choose(rng, level, names, empties, mech, mcount, target, mix_hidden=0, mix_f
     return best[1], best[2]
 
 
-def make_level(world_idx, pos):
+def late_rules(world, pos):
+    """Bubble Bath and Jungle Jam: (main rule, wrapped mixed in, bubbles mixed in, vine tags)."""
+    if world == "bubblebath":
+        # bubbles alone at first; duets and wrapped squishies mix in from level 16
+        if pos < 16:
+            return "frozen", 0, 0, None
+        return ("sticky", 0, 2, None) if pos % 2 == 0 else ("frozen", 3, 0, None)
+    # Jungle Jam: one vine with a 1 on its tag, then a 2, then two vines; everything earlier mixes in from 18
+    tags = [1] if pos < 8 else [2] if pos < 14 else [1, 2] if pos < 26 else [2, 2]
+    if pos < 18:
+        return None, 0, 0, tags
+    return [(None, 4, 0, tags), ("sticky", 0, 0, tags), (None, 0, 2, tags)][pos % 3]
+
+
+def make_level(world_idx, pos, salt=0):
     world, own, mech = WORLDS[world_idx]
     last = LENGTHS[world]
     finale = pos == last and pos % 10 != 0
     beat = "boss" if pos == last else BEATS[(pos - 1) % 10]
-    base_k, empties, mult = FINALE if finale else SHAPE[pos]
+    # past level 25 a world keeps cycling its last ten sizes
+    base_k, empties, mult = FINALE if finale else SHAPE[pos if pos <= 25 else 16 + (pos - 16) % 10]
+    if world == "junglejam" and pos <= 3:
+        # a vine needs a jar that can be finished without it: three kinds from the first level
+        base_k, empties = (3, 2) if pos == 1 else (4, 2)
     bump = WORLD_BUMP[world_idx] if pos > 3 else 0
     if world_idx == SIDE_WORLD and pos <= 10:
         bump = 0
     k = min(8, base_k + bump)
     showpiece = pos in (5, 15) and not finale
+    late = world in ("bubblebath", "junglejam")
+    late_hidden = late_frozen = 0
+    vines = None
+    if late:
+        mech, late_hidden, late_frozen, vines = late_rules(world, pos)
     if showpiece or finale:
         k = base_k
     hard = None if (showpiece or pos <= 3) else squeeze(world, pos, beat)
@@ -265,7 +302,7 @@ def make_level(world_idx, pos):
     names = kinds_for(world_idx, k)
     if pos >= CURTAINS_FROM.get(world, 99):
         mech = "curtain"
-    rng = random.Random(f"{world}-{pos}")
+    rng = random.Random(f"{world}-{pos}" if salt == 0 else f"{world}-{pos}-{salt}")
     level = {
         "schema": 1, "id": f"{world}-{pos:02d}", "world": world, "index": pos,
         "beat": beat, "capacity": CAP,
@@ -297,15 +334,27 @@ def make_level(world_idx, pos):
             mcount = 1 if pos == 1 or (world_idx == SIDE_WORLD and pos == 2) else 2
         mix_from, mix_mech = MIX.get(world, (99, None))
         mix_hidden = min(2 + (pos - mix_from) // 2, 6) if pos >= mix_from and mix_mech == "hidden" else 0
+        mix_hidden = mix_hidden or late_hidden
+        if late and mech == "sticky":
+            mcount = 2
         if pos == CURTAINS_FROM.get(world, 99):
             mix_hidden = 0  # the first curtain level shows the curtain alone
         # Duets need room: if no board can be solved, ask for fewer duets, then for one more spare jar.
         tries = [(mcount, empties)]
         if mech in ("sticky", "curtain"):
             tries += [(m, empties) for m in range(mcount - 1, 0, -1)] + [(1, empties + 1)]
+        elif late:
+            tries += [(mcount, empties + 1)]
+        # the two late worlds mix rules, so their boards get the quicker Keep Squishing search
+        quick = dict(tries=60, states=40_000) if late else {}
         for n, (mc, em) in enumerate(tries):
             try:
-                jars, mechanics = choose(rng, level, names, em, mech, mc, target, mix_hidden)
+                jars, mechanics = choose(rng, level, names, em, mech, mc, target, mix_hidden, late_frozen, vines=vines, **quick)
+                if late:
+                    # no level ships with an opening move that loses it: one more spare jar instead
+                    b0, _ = board_from_level(dict(level, jars=jars, mechanics=mechanics))
+                    if killing_first_moves(b0) > 0 and n < len(tries) - 1:
+                        continue
                 break
             except SystemExit:
                 if n == len(tries) - 1:
@@ -325,8 +374,17 @@ def make_level(world_idx, pos):
                           "frozen": mechanics.get("frozen", [])}
     if mechanics.get("curtains"):
         level["mechanics"]["curtains"] = mechanics["curtains"]
+    if mechanics.get("vines"):
+        level["mechanics"]["vines"] = mechanics["vines"]
+    if late and showpiece and vines:
+        # the showpiece keeps its staircase, with one vine on a jar that is not the first to finish
+        level["mechanics"]["vines"] = [[max(range(len(jars)), key=lambda j: (len(jars[j]) == 4, j)), 1]]
     b, _ = board_from_level(level)
     sol, explored = solve(b, 3_000_000)
+    if sol is None and level["mechanics"].get("vines") and showpiece:
+        del level["mechanics"]["vines"]
+        b, _ = board_from_level(level)
+        sol, explored = solve(b, 3_000_000)
     if sol is None:
         raise SystemExit(f"{level['id']}: unsolvable or too big ({explored} states)")
     level["par"] = len(sol)
@@ -453,6 +511,8 @@ def dump(level):
     lines.append("  ],")
     m = level["mechanics"]
     extra = f', "curtains": {json.dumps(m["curtains"])}' if m.get("curtains") else ""
+    if m.get("vines"):
+        extra += f', "vines": {json.dumps(m["vines"])}'
     lines.append(f'  "mechanics": {{"hidden": {json.dumps(m["hidden"])}, "sticky": {json.dumps(m["sticky"])}, "frozen": {json.dumps(m["frozen"])}{extra}}},')
     lines.append(f'  "par": {level["par"]},')
     lines.append(f'  "solution": {json.dumps(level["solution"])},')
@@ -475,14 +535,32 @@ def main():
         nums = [int(x) for x in sys.argv[i:i + 2]]
         write_endless(nums[0] if nums else 1, nums[1] if len(nums) > 1 else ENDLESS_LENGTH)
         return
+    # python3 tools/levelgen.py --world junglejam [first last]
+    span = []
+    if world:
+        i = sys.argv.index("--world") + 2
+        span = [int(x) for x in sys.argv[i:i + 2] if x.isdigit()]
     for w in range(len(WORLDS)):
         if world and WORLDS[w][0] != world:
             continue
-        for pos in range(1, LENGTHS[WORLDS[w][0]] + 1):
+        for pos in range(span[0] if span else 1, (span[1] if len(span) > 1 else LENGTHS[WORLDS[w][0]]) + 1):
             lid = f"{WORLDS[w][0]}-{pos:02d}"
             if only and only != lid:
                 continue
             lv = make_level(w, pos)
+            if WORLDS[w][0] in ("bubblebath", "junglejam"):
+                # A level whose first deal has an opening move that loses it is dealt again with a new seed.
+                for salt in range(1, 9):
+                    b0, _ = board_from_level(lv)
+                    if killing_first_moves(b0) == 0:
+                        break
+                    try:
+                        lv = make_level(w, pos, salt)
+                    except SystemExit:
+                        continue
+                b0, _ = board_from_level(lv)
+                if killing_first_moves(b0) > 0:
+                    raise SystemExit(f"{lid}: every deal has a losing first move")
             d = os.path.join(ROOT, "Levels", WORLDS[w][0])
             os.makedirs(d, exist_ok=True)
             with open(os.path.join(d, f"{pos:02d}.json"), "w") as f:

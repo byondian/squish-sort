@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "id": "bubblebath-30",
+  "world": "bubblebath",
+  "index": 30,
+  "beat": "boss",
+  "capacity": 4,
+  "jars": [
+    ["shelly", "bubbly", "soapy", "minty"],
+    ["minty", "soapy", "starla", "fizzy"],
+    ["shelly", "quacky", "soapy", "bubbly"],
+    ["starla", "shelly", "soapy", "fizzy"],
+    ["starla", "quacky", "shelly", "fizzy"],
+    ["starla", "bubbly", "fizzy", "bubbly"],
+    ["minty", "quacky", "minty", "quacky"],
+    [],
+    []
+  ],
+  "mechanics": {"hidden": [], "sticky": [[6, 0]], "frozen": [[1, 3], [4, 3]]},
+  "par": 25,
+  "solution": [[2, 7], [5, 7], [3, 5], [2, 3], [6, 2], [1, 8], [4, 8], [5, 8], [5, 7], [1, 5], [3, 1], [3, 4], [3, 5], [1, 3], [6, 1], [6, 1], [1, 2], [0, 1], [0, 3], [0, 7], [4, 0], [2, 6], [0, 2], [4, 6], [4, 5]],
+  "capsule": true,
+  "softenAfterFails": 3
+}

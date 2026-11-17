@@ -235,6 +235,22 @@ final class PieceNode: SKNode {
         }
     }
 
+    /// Bubble Bath: the same rule as ice, drawn as a soap bubble round the squishy.
+    func useBubble() {
+        let d = diameter * 1.14
+        ice.path = CGPath(ellipseIn: CGRect(x: -d / 2, y: -d / 2, width: d, height: d), transform: nil)
+        ice.fillColor = UIColor.white.withAlphaComponent(0.3)
+        ice.strokeColor = UIColor(hex: 0x8FD8F5)
+        ice.lineWidth = 2.5
+        ice.removeAllChildren()
+        let shine = SKShapeNode(ellipseOf: CGSize(width: d * 0.2, height: d * 0.1))
+        shine.fillColor = UIColor.white.withAlphaComponent(0.9)
+        shine.strokeColor = .clear
+        shine.zRotation = 0.6
+        shine.position = CGPoint(x: -d * 0.22, y: d * 0.26)
+        ice.addChild(shine)
+    }
+
     func apply(_ piece: Piece) {
         let wasHidden = !question.isHidden
         question.isHidden = !piece.hidden
@@ -331,9 +347,10 @@ final class JarNode: SKNode {
         shine.strokeColor = .clear
         shine.position = CGPoint(x: -size.width * 0.31, y: size.height * 0.04)
         addChild(shine)
-        // A slightly wider rim on top.
-        let rim = SKShapeNode(rectOf: CGSize(width: size.width * 1.06, height: max(5, size.width * 0.09)),
-                              cornerRadius: max(2.5, size.width * 0.045))
+        // The mouth of the jar: a ring seen a little from above, with the opening showing through,
+        // so an empty or part-filled jar reads as open and never as lidded.
+        let mouth = CGSize(width: size.width * 1.06, height: max(9, size.width * 0.2))
+        let rim = SKShapeNode(ellipseOf: mouth)
         // A boss level's jars have gold rims.
         rim.fillColor = gold ? UIColor(hex: 0xFFC93C) : UIColor.white.withAlphaComponent(dark ? 0.55 : 0.95)
         rim.strokeColor = gold ? UIColor(hex: 0xC78A12) : UIColor(hex: 0x965A78).withAlphaComponent(0.28)
@@ -341,6 +358,12 @@ final class JarNode: SKNode {
         rim.position = CGPoint(x: 0, y: size.height / 2)
         rim.zPosition = 1
         addChild(rim)
+        let opening = SKShapeNode(ellipseOf: CGSize(width: mouth.width - 9, height: max(3, mouth.height - 7)))
+        opening.fillColor = dark ? UIColor(hex: 0x241A45).withAlphaComponent(0.55) : UIColor(hex: 0x965A78).withAlphaComponent(0.2)
+        opening.strokeColor = gold ? UIColor(hex: 0xC78A12).withAlphaComponent(0.6) : UIColor(hex: 0x965A78).withAlphaComponent(0.22)
+        opening.lineWidth = 1
+        opening.zPosition = 1
+        rim.addChild(opening)
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) is not used") }
@@ -360,6 +383,8 @@ final class JarNode: SKNode {
         switch world {
         case "sweetfactory": return String(localized: "Yum!")
         case "starlight": return String(localized: "Encore!")
+        case "bubblebath": return String(localized: "Splash!")
+        case "junglejam": return String(localized: "Wild!")
         case "christmas": return String(localized: "Ho ho!")
         default: return String(localized: "Sorted!")
         }
@@ -412,6 +437,51 @@ final class JarNode: SKNode {
             star.verticalAlignmentMode = .center
             star.position = CGPoint(x: 0, y: h * 1.25)
             node.addChild(star)
+        case "bubblebath":
+            // A soap-bubble dome on a white rim.
+            let dome = CGMutablePath()
+            dome.move(to: CGPoint(x: -w * 0.46, y: h * 0.3))
+            dome.addCurve(to: CGPoint(x: w * 0.46, y: h * 0.3), control1: CGPoint(x: -w * 0.46, y: h * 2.1),
+                          control2: CGPoint(x: w * 0.46, y: h * 2.1))
+            dome.closeSubpath()
+            let bubble = SKShapeNode(path: dome)
+            bubble.fillColor = UIColor(hex: 0xBFEFFF).withAlphaComponent(0.75)
+            bubble.strokeColor = .plum
+            bubble.lineWidth = 2.5
+            node.addChild(bubble)
+            node.addChild(cap(.white, height: h * 0.4))
+            let shine = SKShapeNode(ellipseOf: CGSize(width: w * 0.2, height: h * 0.24))
+            shine.fillColor = UIColor.white.withAlphaComponent(0.9)
+            shine.strokeColor = .clear
+            shine.zRotation = 0.5
+            shine.position = CGPoint(x: -w * 0.18, y: h * 1.15)
+            node.addChild(shine)
+        case "junglejam":
+            // A coconut-shell cap with a leaf on top.
+            let shell = CGMutablePath()
+            shell.move(to: CGPoint(x: -w / 2, y: 0))
+            shell.addCurve(to: CGPoint(x: w / 2, y: 0), control1: CGPoint(x: -w / 2, y: h * 1.5),
+                           control2: CGPoint(x: w / 2, y: h * 1.5))
+            shell.closeSubpath()
+            let coconut = SKShapeNode(path: shell)
+            coconut.fillColor = UIColor(hex: 0x9C6E42)
+            coconut.strokeColor = .plum
+            coconut.lineWidth = 2.5
+            node.addChild(coconut)
+            for k in 0..<3 {
+                let dot = SKShapeNode(circleOfRadius: h * 0.07)
+                dot.fillColor = UIColor(hex: 0x5E3F22)
+                dot.strokeColor = .clear
+                dot.position = CGPoint(x: (CGFloat(k) - 1) * w * 0.12, y: h * (k == 1 ? 0.62 : 0.48))
+                node.addChild(dot)
+            }
+            let leaf = SKShapeNode(ellipseOf: CGSize(width: w * 0.34, height: h * 0.3))
+            leaf.fillColor = UIColor(hex: 0x7CCB6B)
+            leaf.strokeColor = .plum
+            leaf.lineWidth = 2
+            leaf.zRotation = 0.5
+            leaf.position = CGPoint(x: w * 0.1, y: h * 1.2)
+            node.addChild(leaf)
         case "christmas":
             // A red cap with a white snow rim and a small bow.
             node.addChild(cap(UIColor(hex: 0xE5484D)))
@@ -529,6 +599,88 @@ final class JarNode: SKNode {
                 .removeFromParent(),
             ]))
         }
+    }
+}
+
+/// The vine that ties a Jungle Jam jar shut: two leafy ropes across the glass and a tag with the
+/// number of jars still to finish. Drawn about the jar's centre; what is inside stays in view.
+final class VineNode: SKNode {
+    private let ropes = SKNode()
+    private let tag = SKNode()
+    private let number = SKLabelNode(text: "")
+
+    init(size: CGSize, tag count: Int) {
+        super.init()
+        let w = size.width, h = size.height
+        let heights: [CGFloat] = [h * 0.24, -h * 0.2]
+        for (k, y) in heights.enumerated() {
+            let path = CGMutablePath()
+            path.move(to: CGPoint(x: -w / 2 - 5, y: y + 5))
+            path.addQuadCurve(to: CGPoint(x: w / 2 + 5, y: y + 5), control: CGPoint(x: 0, y: y - 9))
+            let rope = SKShapeNode(path: path)
+            rope.strokeColor = UIColor(hex: 0x3F8F4C)
+            rope.lineWidth = 6
+            rope.lineCap = .round
+            rope.fillColor = .clear
+            ropes.addChild(rope)
+            let side: CGFloat = k == 0 ? 1 : -1
+            for x in [-w * 0.3, w * 0.26] {
+                let leaf = SKShapeNode(ellipseOf: CGSize(width: 13, height: 7))
+                leaf.fillColor = UIColor(hex: 0x7CCB6B)
+                leaf.strokeColor = UIColor(hex: 0x3F8F4C)
+                leaf.lineWidth = 1.5
+                leaf.zRotation = x < 0 ? 0.7 : -0.7
+                leaf.position = CGPoint(x: x * side, y: y + 6)
+                ropes.addChild(leaf)
+            }
+        }
+        addChild(ropes)
+        let card = SKShapeNode(rect: CGRect(x: -15, y: -14, width: 30, height: 28), cornerRadius: 8)
+        card.fillColor = UIColor(hex: 0xFFF4D6)
+        card.strokeColor = .plum
+        card.lineWidth = 2.5
+        tag.addChild(card)
+        number.fontName = "AvenirNext-Heavy"
+        number.fontSize = 19
+        number.fontColor = .plum
+        number.verticalAlignmentMode = .center
+        number.horizontalAlignmentMode = .center
+        number.text = "\(count)"
+        tag.addChild(number)
+        tag.position = CGPoint(x: 0, y: h * 0.02)
+        addChild(tag)
+        isAccessibilityElement = false
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) is not used") }
+
+    /// The tag counts down with a little pop.
+    func set(_ count: Int) {
+        let text = "\(count)"
+        guard number.text != text else { return }
+        number.text = text
+        tag.run(.sequence([.scale(to: 1.35, duration: 0.1), .scale(to: 1, duration: 0.14)]))
+    }
+
+    /// A tap on a tied jar: the vine gives a little and holds.
+    func wobble() {
+        ropes.removeAction(forKey: "wobble")
+        ropes.yScale = 1
+        ropes.run(.sequence([.scaleY(to: 1.12, duration: 0.07), .scaleY(to: 0.94, duration: 0.09), .scaleY(to: 1, duration: 0.08)]), withKey: "wobble")
+    }
+
+    /// Snap: the ropes whip away to the sides and the tag drops. With Reduce Motion it fades.
+    func snap(calm: Bool) {
+        if calm {
+            run(.sequence([.fadeOut(withDuration: 0.4), .removeFromParent()]))
+            return
+        }
+        let away = SKAction.group([.scaleX(to: 0.1, duration: 0.25), .fadeOut(withDuration: 0.25)])
+        ropes.run(away)
+        let fall = SKAction.group([.moveBy(x: 0, y: -46, duration: 0.4), .rotate(byAngle: 0.9, duration: 0.4), .fadeOut(withDuration: 0.4)])
+        fall.timingMode = .easeIn
+        tag.run(fall)
+        run(.sequence([.wait(forDuration: 0.45), .removeFromParent()]))
     }
 }
 

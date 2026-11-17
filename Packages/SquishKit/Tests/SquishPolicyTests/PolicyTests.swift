@@ -333,9 +333,9 @@ final class CapsuleTests: XCTestCase {
     }
 
     func testRosterShape() {
-        XCTAssertEqual(roster.collectibles.count, 64)
-        XCTAssertEqual(Set(roster.collectibles.map(\.id)).count, 64, "ids are unique")
-        for world in ["toyshop", "sweetfactory", "starlight", "christmas"] {
+        XCTAssertEqual(roster.collectibles.count, 98)
+        XCTAssertEqual(Set(roster.collectibles.map(\.id)).count, 98, "ids are unique")
+        for world in ["toyshop", "sweetfactory", "starlight", "bubblebath", "junglejam", "christmas"] {
             XCTAssertEqual(roster.world(world, .common).count, 6)
             XCTAssertGreaterThanOrEqual(roster.world(world, .rare).count, 4)
             XCTAssertGreaterThanOrEqual(roster.world(world, .ultra).count, 2)

@@ -130,6 +130,8 @@ struct NewsCard: View {
             case "toyshop": return "Toy Shop complete!"
             case "sweetfactory": return "Sweet Factory complete!"
             case "starlight": return "Starlight Stage complete!"
+            case "bubblebath": return "Bubble Bath complete!"
+            case "junglejam": return "Jungle Jam complete!"
             default: return "World complete!"
             }
         case .unlocked(let extra):
@@ -160,6 +162,8 @@ struct NewsCard: View {
             switch next {
             case "sweetfactory": return "You sorted every jar. Sweet Factory is open!"
             case "starlight": return "You sorted every jar. Starlight Stage is open!"
+            case "bubblebath": return "You sorted every jar. Bubble Bath is open!"
+            case "junglejam": return "You sorted every jar. Jungle Jam is open!"
             default: return "You sorted every jar. What a star!"
             }
         case .starJar(_, let prize):

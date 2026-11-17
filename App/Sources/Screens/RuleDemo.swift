@@ -4,21 +4,23 @@ import SquishPolicy
 
 /// The twists a board can have. Each is shown once, on the first level that has it.
 enum BoardRule: String, CaseIterable {
-    case wrapped, duet, frozen, curtain
+    case wrapped, duet, frozen, curtain, bubble, vine
     /// Not a twist of one world: a run only moves as far as there is room. Taught early in Toy Shop.
     case partial
 
     /// The rules on this board, in the order they are taught.
-    static func rules(on board: Board) -> [BoardRule] {
+    /// - Parameter look: the world the board is dressed as. In Bubble Bath the ice is a bubble.
+    static func rules(on board: Board, look: String = "") -> [BoardRule] {
         var found: Set<BoardRule> = []
         for jar in board.jars {
             for piece in jar {
                 if piece.hidden { found.insert(.wrapped) }
                 if piece.bondedAbove { found.insert(.duet) }
-                if piece.frozen > 0 { found.insert(.frozen) }
+                if piece.frozen > 0 { found.insert(look == "bubblebath" ? .bubble : .frozen) }
             }
         }
         if !board.curtains.isEmpty { found.insert(.curtain) }
+        if board.hasVines { found.insert(.vine) }
         return BoardRule.allCases.filter { found.contains($0) }
     }
 
@@ -29,6 +31,8 @@ enum BoardRule: String, CaseIterable {
         case .frozen: return String(localized: "Frozen! Moves next to it melt the ice.")
         case .partial: return String(localized: "Only what fits moves!")
         case .curtain: return String(localized: "Finish the jar next door to raise the curtain!")
+        case .bubble: return String(localized: "Pop the bubble by moving next to it.")
+        case .vine: return String(localized: "Each finished jar counts the tag down. At 0 the vine snaps!")
         }
     }
 }
@@ -104,7 +108,8 @@ struct RuleDemo: View {
         switch rule {
         case .wrapped: wrappedStage
         case .duet: duetStage
-        case .frozen: frozenStage
+        case .frozen, .bubble: frozenStage
+        case .vine: vineStage
         case .partial: partialStage
         case .curtain: curtainStage
         }
@@ -187,13 +192,52 @@ struct RuleDemo: View {
         }
     }
 
+    // Vine: the last one hops in, the jar is finished, the tag counts down to 0 and the vine snaps.
+    private var vineStage: some View {
+        let moved = step >= 3
+        let open = step >= 4
+        return ZStack {
+            blob(actors[0], x: RuleDemo.xs[0], y: RuleDemo.ys[0])
+            blob(actors[0], x: RuleDemo.xs[0], y: RuleDemo.ys[1])
+            blob(actors[1], x: RuleDemo.xs[1], y: RuleDemo.ys[0])
+            blob(actors[1], x: RuleDemo.xs[2], y: RuleDemo.ys[0])
+            blob(actors[0], x: moved ? RuleDemo.xs[0] : RuleDemo.xs[2],
+                 y: moved ? RuleDemo.ys[2] : (step == 2 ? RuleDemo.ys[3] : RuleDemo.ys[1]))
+            if moved {
+                // The finished jar gets its lid.
+                Capsule().fill(Theme.butter).frame(width: 54, height: 9)
+                    .position(x: RuleDemo.xs[0], y: 40)
+                    .transition(.scale.combined(with: .opacity))
+            }
+            if !open {
+                ZStack {
+                    Capsule().fill(Color(hex: 0x3F8F4C)).frame(width: 60, height: 6).offset(y: -22)
+                    Capsule().fill(Color(hex: 0x3F8F4C)).frame(width: 60, height: 6).offset(y: 22)
+                    RoundedRectangle(cornerRadius: 7).fill(Color(hex: 0xFFF4D6))
+                        .overlay(RoundedRectangle(cornerRadius: 7).stroke(Theme.plum, lineWidth: 2))
+                        .overlay(Text(verbatim: moved ? "0" : "1").font(Theme.title(15)).foregroundStyle(Theme.plum))
+                        .frame(width: 28, height: 26)
+                }
+                .position(x: RuleDemo.xs[1], y: 96)
+                .transition(.scale(scale: 1.3).combined(with: .opacity))
+            }
+        }
+    }
+
     // Frozen: each move in or out of the jar next door melts one layer of ice.
     private var frozenStage: some View {
         let ice = step >= 4 ? 0 : (step >= 2 ? 1 : 2)
         let inMiddle = step >= 2 && step < 4
         return ZStack {
             blob(actors[1], x: RuleDemo.xs[0], y: RuleDemo.ys[0])
-            if ice > 0 {
+            if ice > 0, rule == .bubble {
+                Circle().fill(Color.white.opacity(0.55))
+                    .overlay(Circle().stroke(Color(hex: 0x8FD8F5), lineWidth: 2.5))
+                    .overlay(Text(verbatim: "\(ice)").font(Theme.title(16)).foregroundStyle(Theme.plum))
+                    .frame(width: 44, height: 44)
+                    .position(x: RuleDemo.xs[0], y: RuleDemo.ys[0])
+                    .transition(.scale(scale: 1.5).combined(with: .opacity))
+            } else if ice > 0 {
                 RoundedRectangle(cornerRadius: 10).fill(Color(uiColor: .ice).opacity(0.85))
                     .overlay(Text(verbatim: "\(ice)").font(Theme.title(16)).foregroundStyle(Theme.plum))
                     .frame(width: 38, height: 36)
@@ -231,13 +275,13 @@ struct RuleDemo: View {
         case (.duet, 1): spot = CGPoint(x: RuleDemo.xs[0], y: RuleDemo.ys[1])
         case (.duet, 2): spot = CGPoint(x: RuleDemo.xs[1], y: RuleDemo.ys[1])
         case (.duet, 3), (.duet, 4): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])
-        case (.frozen, 1): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])
-        case (.frozen, 2), (.frozen, 3): spot = CGPoint(x: RuleDemo.xs[1], y: RuleDemo.ys[1])
-        case (.frozen, 4): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])
+        case (.frozen, 1), (.bubble, 1): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])
+        case (.frozen, 2), (.frozen, 3), (.bubble, 2), (.bubble, 3): spot = CGPoint(x: RuleDemo.xs[1], y: RuleDemo.ys[1])
+        case (.frozen, 4), (.bubble, 4): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])
         case (.partial, 1), (.partial, 2): spot = CGPoint(x: RuleDemo.xs[0], y: RuleDemo.ys[2])
         case (.partial, 3): spot = CGPoint(x: RuleDemo.xs[1], y: RuleDemo.ys[2])
-        case (.curtain, 1), (.curtain, 2): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])
-        case (.curtain, 3): spot = CGPoint(x: RuleDemo.xs[0], y: RuleDemo.ys[2])
+        case (.curtain, 1), (.curtain, 2), (.vine, 1), (.vine, 2): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])
+        case (.curtain, 3), (.vine, 3): spot = CGPoint(x: RuleDemo.xs[0], y: RuleDemo.ys[2])
         default: spot = CGPoint(x: 130, y: 190)
         }
         let shown = step >= 1 && step <= 4

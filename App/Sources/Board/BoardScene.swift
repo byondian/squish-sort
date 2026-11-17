@@ -46,6 +46,9 @@ final class BoardScene: SKScene {
     var onCurtainDrum: (() -> Void)?
     var onCurtainUp: (() -> Void)?
     private var curtainNodes: [Int: CurtainNode] = [:]
+    /// A vine has snapped (Jungle Jam): the jar it tied is open.
+    var onVineSnap: (() -> Void)?
+    private var vineNodes: [Int: VineNode] = [:]
     /// Starlight Stage: lamps along the top and a little crowd along the bottom.
     private var stage: StageShowNode?
 
@@ -215,6 +218,7 @@ final class BoardScene: SKScene {
                 node.position = slot(j, i)
                 node.zPosition = 5
                 node.isLucky = piece.kind == luckyKind
+                if world == "bubblebath" { node.useBubble() }
                 node.apply(piece)
                 addChild(node)
                 nodes.append(node)
@@ -241,6 +245,15 @@ final class BoardScene: SKScene {
             curtain.zPosition = 8
             addChild(curtain)
             curtainNodes[j] = curtain
+        }
+        // Vine jars: tied shut until the number on the tag has been counted down.
+        vineNodes = [:]
+        for j in 0..<board.jarCount where board.vineTag(j) > 0 && j < geometry.centers.count {
+            let vine = VineNode(size: geometry.jarSize, tag: board.vineTag(j))
+            vine.position = geometry.centers[j]
+            vine.zPosition = 8
+            addChild(vine)
+            vineNodes[j] = vine
         }
         if feverOn { setFever(true) }
         showTutorialIfNeeded()
@@ -507,6 +520,7 @@ final class BoardScene: SKScene {
 
     private func shake(_ j: Int) {
         curtainNodes[j]?.ripple()
+        vineNodes[j]?.wobble()
         let jar = jarNodes[j]
         let x = geometry.centers[j].x
         jar.run(.sequence([
@@ -611,8 +625,27 @@ final class BoardScene: SKScene {
             }]))
         }
         for (n, j) in result.raisedCurtains.enumerated() { raiseCurtain(j, after: 0.7 + 0.25 * Double(n)) }
+        for (j, vine) in vineNodes where !result.snappedVines.contains(j) { vine.set(newBoard.vineTag(j)) }
+        for (n, j) in result.snappedVines.enumerated() { snapVine(j, after: 0.5 + 0.25 * Double(n)) }
         busy = false
         onMoveFinished?(result)
+    }
+
+    /// The tag has reached zero: the vine snaps and what was tied in bounces once.
+    private func snapVine(_ j: Int, after delay: Double) {
+        guard let vine = vineNodes.removeValue(forKey: j) else { return }
+        let calm = UIAccessibility.isReduceMotionEnabled
+        vine.set(0)
+        run(.sequence([
+            .wait(forDuration: delay),
+            .run { [weak self, weak vine] in
+                guard let self else { return }
+                self.onVineSnap?()
+                vine?.snap(calm: calm)
+                guard !calm, j < self.pieces.count else { return }
+                for node in self.pieces[j] { node.squeezeAndRelease() }
+            },
+        ]))
     }
 
     /// The jar next door is finished: a drumroll, the curtain lifts, a spotlight lands on the jar

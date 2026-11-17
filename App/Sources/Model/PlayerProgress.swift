@@ -6,7 +6,7 @@ import SquishPolicy
 /// Collectible ids are stable so the January accounts update can migrate them.
 struct PlayerProgress: Codable, Equatable {
     /// 2 since the worlds became 15, 20 and 25 levels long (build 3).
-    var version = 2
+    var version = 3
     /// Best stars per level id.
     var stars: [String: Int] = [:]
     /// Index into the play-order level list of the furthest unlocked level.
@@ -124,6 +124,17 @@ struct PlayerProgress: Codable, Equatable {
                 if !path.contains(gone) { stars[gone] = nil }
             }
         }
+    }
+
+    /// Saves from before Bubble Bath and Jungle Jam joined the path (story levels ended at 60, then
+    /// Keep Squishing). Anyone who was past Starlight Stage starts the new worlds at Bubble Bath 1:
+    /// their Keep Squishing stars are kept and those levels open again after Jungle Jam.
+    /// - Parameter path: ids of the story levels as they are now, in play order.
+    mutating func migrateNewWorlds(path: [String], oldStoryCount: Int = 60) {
+        guard version < 3 else { return }
+        version = 3
+        guard highestUnlocked >= oldStoryCount, let first = path.firstIndex(of: "bubblebath-01") else { return }
+        highestUnlocked = first
     }
 
     /// Every field is optional on disk, so adding fields never loses a player's progress.

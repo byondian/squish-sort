@@ -91,6 +91,8 @@ final class AppModel: ObservableObject {
         case "toyshop": return "Toy Shop"
         case "sweetfactory": return "Sweet Factory"
         case "starlight": return "Starlight Stage"
+        case "bubblebath": return "Bubble Bath"
+        case "junglejam": return "Jungle Jam"
         case LevelCatalog.endless: return "Keep Squishing"
         default: return christmasWorldName
         }
@@ -142,8 +144,9 @@ final class AppModel: ObservableObject {
     init() {
         var loaded = AppModel.isUITesting ? PlayerProgress() : store.load()
         levels = AppModel.loadLevels()
-        if loaded.version < 2 {
+        if loaded.version < 3 {
             loaded.migrate(path: levels.filter { LevelCatalog.worlds.contains($0.file.world) }.map(\.id))
+            loaded.migrateNewWorlds(path: levels.filter { LevelCatalog.worlds.contains($0.file.world) }.map(\.id))
             store.save(loaded)
         }
         progress = loaded
@@ -285,6 +288,8 @@ final class AppModel: ObservableObject {
         case "toyshop": return String(localized: "Toy Shop")
         case "sweetfactory": return String(localized: "Sweet Factory")
         case "starlight": return String(localized: "Starlight Stage")
+        case "bubblebath": return String(localized: "Bubble Bath")
+        case "junglejam": return String(localized: "Jungle Jam")
         default:
             return ["US", "CA"].contains(Locale.current.region?.identifier ?? "")
                 ? String(localized: "Santa's Workshop") : String(localized: "Santa's Grotto")
@@ -329,7 +334,7 @@ final class AppModel: ObservableObject {
         levels.indices.contains(index) && !LevelCatalog.path.contains(levels[index].file.world)
     }
 
-    /// The number on the board: 1 to 60 on the main path, 1 to 20 in a side world.
+    /// The number on the board: 1 upwards on the main path, 1 to 20 in a side world.
     func levelNumber(_ index: Int) -> Int {
         if isSideLevel(index) { return levels[index].file.index }
         // Keep Squishing counts on through every lap.

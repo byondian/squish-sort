@@ -290,24 +290,24 @@
         }
       }
     },
-    "%lld more levels. Opens after Starlight Stage.": {
+    "%lld more levels. Opens after Jungle Jam.": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "あと%lldレベル。スターライトステージのあとにひらくよ。"
+            "value": "あと%lldレベル。ジャングルジャムのあとにひらくよ。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "레벨 %lld개 더. 스타라이트 스테이지 다음에 열려요."
+            "value": "레벨 %lld개 더. 정글 잼 다음에 열려요."
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "還有 %lld 關。完成星光舞台後開放。"
+            "value": "還有 %lld 關。完成叢林果醬後開放。"
           }
         }
       }
@@ -1289,6 +1289,72 @@
         }
       }
     },
+    "Bubble Ballet": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バブルバレエ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "버블 발레"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "泡泡芭蕾"
+          }
+        }
+      }
+    },
+    "Bubble Bath": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あわあわバス"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "보글보글 욕실"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "泡泡浴室"
+          }
+        }
+      }
+    },
+    "Bubble Bath complete!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あわあわバス クリア！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "보글보글 욕실 완료!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "泡泡浴室完成！"
+          }
+        }
+      }
+    },
     "Bubblegum": {
       "localizations": {
         "ja": {
@@ -2121,6 +2187,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@的捏捏樂全部找到了"
+          }
+        }
+      }
+    },
+    "Each finished jar counts the tag down. At 0 the vine snaps!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ビンを1つそろえるたび、ふだの数字がへるよ。0でツルが切れる！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "병을 하나 완성할 때마다 꼬리표 숫자가 줄어요. 0이 되면 덩굴이 끊어져요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每完成一罐，吊牌數字就減一。到 0 藤蔓就會斷開！"
           }
         }
       }
@@ -3133,6 +3221,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "果凍"
+          }
+        }
+      }
+    },
+    "Jungle Jam": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ジャングルジャム"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "정글 잼"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "叢林果醬"
+          }
+        }
+      }
+    },
+    "Jungle Jam complete!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ジャングルジャム クリア！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "정글 잼 완료!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "叢林果醬完成！"
           }
         }
       }
@@ -4655,6 +4787,28 @@
         }
       }
     },
+    "Pop the bubble by moving next to it.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "となりで動かして、あわをわろう。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "옆에서 움직여서 비눗방울을 터뜨려요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在旁邊移動，就能戳破泡泡。"
+          }
+        }
+      }
+    },
     "Press and squish me": {
       "localizations": {
         "ja": {
@@ -5689,6 +5843,28 @@
         }
       }
     },
+    "Splash!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バシャーン！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "첨벙!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "嘩啦！"
+          }
+        }
+      }
+    },
     "Squeak": {
       "localizations": {
         "ja": {
@@ -6547,6 +6723,28 @@
         }
       }
     },
+    "Treetop Jam Session": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ツリートップ・ジャムセッション"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "나무 꼭대기 잼 세션"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "樹頂即興音樂會"
+          }
+        }
+      }
+    },
     "Tricks": {
       "localizations": {
         "ja": {
@@ -7009,6 +7207,28 @@
         }
       }
     },
+    "Wild!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ワイルド！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "와일드!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "好野！"
+          }
+        }
+      }
+    },
     "Win a capsule to fill the Squish Room": {
       "localizations": {
         "ja": {
@@ -7357,6 +7577,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "你有夥伴了！"
+          }
+        }
+      }
+    },
+    "You sorted every jar. Bubble Bath is open!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ぜんぶのビンをそろえたよ。あわあわバスがオープン！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모든 병을 정리했어. 보글보글 욕실이 열렸어!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你整理好所有罐子了。泡泡浴室開放了！"
+          }
+        }
+      }
+    },
+    "You sorted every jar. Jungle Jam is open!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ぜんぶのビンをそろえたよ。ジャングルジャムがオープン！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모든 병을 정리했어. 정글 잼이 열렸어!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你整理好所有罐子了。叢林果醬開放了！"
           }
         }
       }

@@ -1,13 +1,14 @@
 import SwiftUI
 import SquishLevels
 
-/// World map: the three worlds of the main path, plus Santa's Grotto once its door has been opened.
+/// World map: the story worlds of the main path, Keep Squishing, plus Santa's Grotto once its door has been opened.
 struct MapView: View {
     @EnvironmentObject var model: AppModel
 
     private var worlds: [(id: String, name: LocalizedStringKey)] { [
         ("toyshop", "Toy Shop"), ("sweetfactory", "Sweet Factory"),
-        ("starlight", "Starlight Stage"), (LevelCatalog.endless, "Keep Squishing"),
+        ("starlight", "Starlight Stage"), ("bubblebath", "Bubble Bath"), ("junglejam", "Jungle Jam"),
+        (LevelCatalog.endless, "Keep Squishing"),
         ("christmas", AppModel.christmasWorldName),
     ] }
 
@@ -58,7 +59,7 @@ struct MapView: View {
                                     Text("It never runs out. A capsule every fifth level.")
                                         .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.65))
                                 } else {
-                                    Text("\(model.endlessCount) more levels. Opens after Starlight Stage.")
+                                    Text("\(model.endlessCount) more levels. Opens after Jungle Jam.")
                                         .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.65))
                                         .accessibilityIdentifier("keep-squishing-locked")
                                 }

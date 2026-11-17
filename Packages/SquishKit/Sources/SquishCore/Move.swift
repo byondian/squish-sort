@@ -26,4 +26,6 @@ public struct MoveResult: Equatable, Sendable {
     public var duetLetGo = false
     /// Curtain jars that opened because the jar next door was finished on this move.
     public var raisedCurtains: [Int] = []
+    /// Vine jars whose tag reached zero on this move: the vine snaps and the jar is ordinary.
+    public var snappedVines: [Int] = []
 }

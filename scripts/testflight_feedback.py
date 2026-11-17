@@ -1,10 +1,12 @@
 """Prints what testers sent through TestFlight (screenshot notes and crash notes) for a look without
 App Store Connect. Tester names and emails are never printed. Run by .github/workflows/feedback.yml."""
+import re
 import base64, io, json, os, sys, time, urllib.request, urllib.error
 
 import jwt  # PyJWT
 
 APP_ID = "6835495515"
+EMAIL = re.compile(r"[^\s@]+@[^\s@]+")
 BASE = "https://api.appstoreconnect.apple.com"
 
 
@@ -57,7 +59,8 @@ for kind in ("betaFeedbackScreenshotSubmissions", "betaFeedbackCrashSubmissions"
             print(f"FEEDBACK-BEGIN {kind} {n} build={build}")
             for k in SAFE:
                 if a.get(k) not in (None, ""):
-                    print(f"  {k}: {a[k]}")
+                    # A tester may type their own address into a comment: it stays out of the log.
+                    print(f"  {k}: {EMAIL.sub('[email]', str(a[k]))}")
             for i, shot in enumerate(a.get("screenshots") or []):
                 if shot.get("url"):
                     picture(shot["url"], f"feedback-{kind[12:16]}-{n}-{i + 1}")
