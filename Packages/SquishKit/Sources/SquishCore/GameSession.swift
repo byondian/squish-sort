@@ -11,7 +11,9 @@ public struct GameSession: Sendable {
     public private(set) var par: Int
     /// Moves over the best answer that still earn three stars (nil: the roomy early rule).
     public let starSlack: Int?
-    public private(set) var board: Board
+    public private(set) var board: Board { didSet { deadEnd = board.isDeadEnd() } }
+    /// Worked out once each time the board changes, not on every read of `status`.
+    private var deadEnd = false
     public private(set) var history: [Board] = []
     /// Undos left this attempt; nil means unlimited (Remove Ads).
     public private(set) var undosLeft: Int?
@@ -27,6 +29,7 @@ public struct GameSession: Sendable {
         self.par = par
         self.starSlack = starSlack
         self.undosLeft = undoLimit
+        self.deadEnd = board.isDeadEnd()
     }
 
     /// Moves made, net of undos. Stars are judged on this.
@@ -35,7 +38,7 @@ public struct GameSession: Sendable {
     public var status: Status {
         if board.isWon { return .won(stars: Stars.rating(moves: moveCount, par: par, slack: starSlack)) }
         // Stuck is also a board whose last few moves lead nowhere: say so now, not one move later.
-        if board.isStuck || board.isDeadEnd() { return .stuck }
+        if board.isStuck || deadEnd { return .stuck }
         return .playing
     }
 

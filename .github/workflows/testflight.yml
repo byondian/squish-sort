@@ -11,7 +11,7 @@ on:
         required: false
         default: ""
       tester_tools:
-        description: "Keep the tester tools (turn off for the build that goes to App Review)"
+        description: "Keep the tester tools. NOT FOR REVIEW when on: turn off for the build that goes to App Review"
         type: boolean
         required: false
         default: true
@@ -55,6 +55,9 @@ jobs:
           if [ -n "$ADMOB_APP_ID" ] && [ -n "$ADMOB_INTERSTITIAL" ] && [ -n "$ADMOB_REWARDED" ]; then
             EXTRA+=("ADMOB_APP_ID=$ADMOB_APP_ID" "ADMOB_INTERSTITIAL=$ADMOB_INTERSTITIAL" "ADMOB_REWARDED=$ADMOB_REWARDED")
             echo "Ads: real ids"
+          elif [ "$TESTER_TOOLS" = "false" ]; then
+            echo "::error::This is the build for App Review, but the ADMOB_APP_ID, ADMOB_INTERSTITIAL and ADMOB_REWARDED secrets are not all set. It would ship test ads. Stopping."
+            exit 1
           else
             echo "Ads: Google's test ids (ADMOB_* secrets are not set)"
           fi

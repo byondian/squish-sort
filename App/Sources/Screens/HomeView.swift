@@ -90,8 +90,11 @@ struct HomeView: View {
                         .monospacedDigit()
                         .contentTransition(.numericText(value: Double(model.progress.wallet.balance)))
                         .animation(.easeOut(duration: 0.9), value: model.progress.wallet.balance)
-                    Image(systemName: "plus").font(.system(size: 12, weight: .heavy)).foregroundStyle(.white)
-                        .frame(width: 22, height: 22).background(Circle().fill(Theme.mint))
+                    // No nudge to buy coins for younger players: the pill is only a counter there.
+                    if !model.isGentleMode {
+                        Image(systemName: "plus").font(.system(size: 12, weight: .heavy)).foregroundStyle(.white)
+                            .frame(width: 22, height: 22).background(Circle().fill(Theme.mint))
+                    }
                 }
                 .scaleEffect(coinsLanded && coinsFlying ? 1.12 : 1)
                 .padding(.leading, 14).padding(.trailing, 8).frame(height: 44)
