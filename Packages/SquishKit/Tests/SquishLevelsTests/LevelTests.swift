@@ -84,6 +84,25 @@ final class LevelTests: XCTestCase {
 }
 
 final class SolverTests: XCTestCase {
+    func testSolverWaitsForTheCurtain() {
+        // A | curtain(B C) | A | C B | empty: the curtain jar opens once the A jar next to it is finished.
+        func jar(_ kinds: [UInt8]) -> [Piece] { kinds.map { Piece(kind: $0) } }
+        let jars = [jar([0]), jar([1, 2]), jar([0]), jar([2, 1]), jar([])]
+        let closed = Board(capacity: 2, jars: jars, curtains: [1])
+        let result = Solver.solve(closed)
+        XCTAssertEqual(result?.moves.count, 4)
+        XCTAssertEqual(result?.moves.first.map { Set([$0.from, $0.to]) }, [0, 2])
+        // The hint never points into or out of a closed curtain.
+        if case .move(let move) = Solver.hint(closed) {
+            XCTAssertFalse(move.from == 1 || move.to == 1)
+        } else {
+            XCTFail("a hint was expected")
+        }
+        // A curtain with no jar beside it that can ever be finished cannot be won.
+        let shut = Board(capacity: 2, jars: [jar([1, 2]), jar([2, 1]), jar([])], curtains: [0])
+        XCTAssertNil(Solver.solve(shut))
+    }
+
     func testLevelThreeSolvesInSeven() throws {
         let file = LevelFile(schema: 1, id: "toyshop-03", world: "toyshop", index: 3, beat: .easy, capacity: 4,
                              jars: [["r", "y", "y", "b"], ["y", "b", "b", "r"], ["b", "r", "r", "y"], [], []],

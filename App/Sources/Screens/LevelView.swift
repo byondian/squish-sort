@@ -85,6 +85,12 @@ final class LevelController: ObservableObject {
             model?.sounds.play("capsule_click")
             model?.haptics.land()
         }
+        scene.onCurtainDrum = { [weak model] in model?.sounds.play("drumroll", volume: 0.6) }
+        scene.onCurtainUp = { [weak model] in
+            model?.sounds.play("curtain")
+            model?.sounds.play("star_2", volume: 0.7)
+            model?.haptics.star()
+        }
         scene.onReject = { [weak model] in
             model?.haptics.reject()
             model?.sounds.play("reject")

@@ -532,8 +532,8 @@ final class AppModel: ObservableObject {
         var earned = false
         update {
             earned = $0.mystery.recordGuess(correct: correct, today: today)
-            // Any guess pays, right or wrong.
-            $0.wallet.earn(MysteryBag.prize(cluesUsed: clues))
+            // Any guess pays, right or wrong; a wrong one pays the smallest prize.
+            $0.wallet.earn(MysteryBag.prize(cluesUsed: clues, correct: correct))
         }
         sounds.play(correct ? "mystery_right" : "mystery_close")
         if earned {

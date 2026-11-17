@@ -100,7 +100,8 @@ struct RopeSquishy: View {
         let w = Double(size.width), h = Double(size.height)
         guard w > 20, h > 20 else { return }
         let floor = room ? h - 28 : h - 2
-        let side = room ? max(120, min(w * 0.70, (floor - 20) * 0.62, 340)) : min(w, h) * 0.84
+        let roomy: Double = max(120, min(w * 0.70, (floor - 20) * 0.62, 340))
+        let side: Double = room ? roomy : min(w, h) * 0.84
         holder.size = size
         holder.world = SquishRope.World(floor: floor, left: 6, right: w - 6)
         holder.rope = SquishRope(cubics: RopeSquishy.cubics, n: 30, size: side, x: w / 2, y: floor - side * 0.36,
@@ -142,8 +143,9 @@ struct RopeSquishy: View {
         path.move(to: CGPoint(x: p[0], y: p[1]))
         if n > 2 {
             for i in 1..<(n - 1) {
-                path.addQuadCurve(to: CGPoint(x: (p[i * 2] + p[i * 2 + 2]) / 2, y: (p[i * 2 + 1] + p[i * 2 + 3]) / 2),
-                                  control: CGPoint(x: p[i * 2], y: p[i * 2 + 1]))
+                let mx: Double = (p[i * 2] + p[i * 2 + 2]) / 2
+                let my: Double = (p[i * 2 + 1] + p[i * 2 + 3]) / 2
+                path.addQuadCurve(to: CGPoint(x: mx, y: my), control: CGPoint(x: p[i * 2], y: p[i * 2 + 1]))
             }
         }
         path.addLine(to: CGPoint(x: p[(n - 1) * 2], y: p[(n - 1) * 2 + 1]))
@@ -169,10 +171,13 @@ struct RopeSquishy: View {
                 maxX = max(maxX, p[i * 2])
                 low = max(low, p[i * 2 + 1])
             }
-            let lift = max(0, world.floor - low - 15 * k), sw = (maxX - minX) * 0.5 + 20 * k
-            let rx = sw * max(0.5, 1 - lift / (2 * rope.size)), ry = 9 * k * 0.5
-            ctx.fill(Path(ellipseIn: CGRect(x: (minX + maxX) / 2 - rx, y: world.floor - 2 - ry, width: rx * 2, height: ry * 2)),
-                     with: .color(Theme.plum.opacity(0.16 * max(0.25, 1 - lift / rope.size))))
+            let lift: Double = max(0, world.floor - low - 15 * k)
+            let sw: Double = (maxX - minX) * 0.5 + 20 * k
+            let rx: Double = sw * max(0.5, 1 - lift / (2 * rope.size)), ry: Double = 9 * k * 0.5
+            let mid: Double = (minX + maxX) / 2
+            let shade: Double = 0.16 * max(0.25, 1 - lift / rope.size)
+            ctx.fill(Path(ellipseIn: CGRect(x: mid - rx, y: world.floor - 2 - ry, width: rx * 2, height: ry * 2)),
+                     with: .color(Theme.plum.opacity(shade)))
         }
         let line = spine(rope)
         let round = { (width: Double) in StrokeStyle(lineWidth: width, lineCap: .round, lineJoin: .round) }
@@ -190,7 +195,8 @@ struct RopeSquishy: View {
         while turn > Double.pi { turn -= 2 * Double.pi }
         while turn < -Double.pi { turn += 2 * Double.pi }
         let c = cos(turn), s = sin(turn)
-        let hx = p[0] + (-4 * c + 2 * s) * k, hy = p[1] + (-4 * s - 2 * c) * k
+        let hx: Double = p[0] + (2 * s - 4 * c) * k
+        let hy: Double = p[1] - (4 * s + 2 * c) * k
         let m = rope.metric
         var head = ctx
         head.translateBy(x: hx, y: hy)

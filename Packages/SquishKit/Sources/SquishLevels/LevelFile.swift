@@ -22,11 +22,14 @@ public struct LevelFile: Codable, Equatable, Sendable {
         public var sticky: [[Int]]?
         /// [jar, position] or [jar, position, movesToThaw] (default 2).
         public var frozen: [[Int]]?
+        /// Jars that start behind a closed curtain.
+        public var curtains: [Int]?
 
-        public init(hidden: [[Int]]? = nil, sticky: [[Int]]? = nil, frozen: [[Int]]? = nil) {
+        public init(hidden: [[Int]]? = nil, sticky: [[Int]]? = nil, frozen: [[Int]]? = nil, curtains: [Int]? = nil) {
             self.hidden = hidden
             self.sticky = sticky
             self.frozen = frozen
+            self.curtains = curtains
         }
     }
 
@@ -113,6 +116,9 @@ public struct Level: Sendable {
         }
         self.file = file
         self.kinds = kinds
-        self.board = Board(capacity: file.capacity, jars: jars)
+        for j in m.curtains ?? [] where !file.jars.indices.contains(j) {
+            throw LevelError.invalid("\(file.id): curtain jar \(j) is not on the board")
+        }
+        self.board = Board(capacity: file.capacity, jars: jars, curtains: m.curtains ?? [])
     }
 }

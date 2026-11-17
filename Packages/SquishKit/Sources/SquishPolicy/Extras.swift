@@ -131,6 +131,8 @@ public struct MysteryBag: Equatable, Sendable {
     public static let prizes = [150, 100, 75, 50]
 
     public static func prize(cluesUsed: Int) -> Int { prizes[min(max(0, cluesUsed), prizes.count - 1)] }
+    /// A wrong guess pays the smallest prize whatever the clues, so guessing blind never beats thinking.
+    public static func prize(cluesUsed: Int, correct: Bool) -> Int { correct ? prize(cluesUsed: cluesUsed) : prizes[prizes.count - 1] }
 
     /// The same answer all day for one player. Secrets and locked worlds never appear.
     /// Once the easy days are over (`easy` false) and `shapes` is given, at least two of the other

@@ -302,8 +302,8 @@ struct MysteryBagView: View {
 
     private func guess(_ choice: Collectible) {
         guard guessedRight == nil else { return }
-        won = MysteryBag.prize(cluesUsed: poked.count)
         let right = model.guessMystery(choice.id, clues: poked.count)
+        won = MysteryBag.prize(cluesUsed: poked.count, correct: right)
         if right { model.haptics.win() } else { model.haptics.reject(); ruledOut = choice.id }
         withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) { guessedRight = right }
     }

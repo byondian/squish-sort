@@ -7,7 +7,8 @@ import SquishCore
 /// overestimates and the first solution found is optimal.
 ///
 /// Without frozen pieces jar order doesn't matter to solvability, so states are
-/// compared with jars sorted, which shrinks the search a lot.
+/// compared with jars sorted, which shrinks the search a lot. While a curtain is closed, which
+/// jar stands next to which matters again, so those positions are compared as they stand.
 public enum Solver {
     public struct Result: Sendable {
         public let moves: [Move]
@@ -47,6 +48,7 @@ public enum Solver {
 
         while let entry = heap.pop() {
             let current = boards[entry.node]
+            let free = canonical && current.curtains.isEmpty
             if let known = best[key(current, canonical: canonical)], known < entry.g { continue }
             if current.isWon {
                 var path: [Move] = []
@@ -60,7 +62,7 @@ public enum Solver {
             explored += 1
             if explored > maxStates || boards.count > maxNodes { return .gaveUp }
             for move in current.legalMoves {
-                if canonical && current.jars[move.to].isEmpty
+                if free && current.jars[move.to].isEmpty
                     && current.runLength(at: move.from) == current.jars[move.from].count {
                     continue // pouring a whole jar into an empty one changes nothing
                 }
@@ -114,9 +116,11 @@ public enum Solver {
 
     static func key(_ b: Board, canonical: Bool) -> [UInt8] {
         var parts = b.jars.map { jar in jar.map(\.code) }
-        if canonical { parts.sort { $0.lexicographicallyPrecedes($1) } }
+        if canonical && b.curtains.isEmpty { parts.sort { $0.lexicographicallyPrecedes($1) } }
         var out: [UInt8] = []
-        out.reserveCapacity(b.jars.count * (b.capacity + 1))
+        out.reserveCapacity(b.jars.count * (b.capacity + 1) + 3)
+        out.append(UInt8(b.curtains.count))
+        for j in b.curtains { out.append(UInt8(j)) }
         for p in parts {
             out.append(UInt8(p.count))
             out.append(contentsOf: p)

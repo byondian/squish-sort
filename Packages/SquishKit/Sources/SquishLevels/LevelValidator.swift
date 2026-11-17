@@ -47,6 +47,21 @@ public enum LevelValidator {
                 if b.bondedAbove { p.append("\(id): a piece can only be in one duet") }
             }
         }
+        // Curtain jars: at most two, each a full jar with nothing wrapped, frozen or paired inside,
+        // and never on a level with duets.
+        let curtains = board.curtains
+        if curtains.count > 2 { p.append("\(id): \(curtains.count) curtain jars, at most 2") }
+        if curtains.count != (file.mechanics?.curtains ?? []).count { p.append("\(id): a curtain jar is listed twice") }
+        for j in curtains {
+            let jar = board.jars[j]
+            if jar.count != file.capacity { p.append("\(id): curtain jar \(j) must start full") }
+            if jar.contains(where: { $0.hidden || $0.isFrozen || $0.bondedAbove }) {
+                p.append("\(id): curtain jar \(j) can't hold wrapped, frozen or duet pieces")
+            }
+        }
+        if !curtains.isEmpty, board.jars.contains(where: { $0.contains(where: { $0.bondedAbove }) }) {
+            p.append("\(id): curtain levels have no duets")
+        }
         return p
     }
 

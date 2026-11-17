@@ -40,6 +40,10 @@ final class BoardScene: SKScene {
     var darkBackground = false { didSet { if oldValue != darkBackground, size.width > 0, view != nil { rebuild() } } }
     /// The lid twists shut (a click and a tick).
     var onLidTwist: (() -> Void)?
+    /// A curtain is about to go up (the drumroll), and then goes up (the swish and the sting).
+    var onCurtainDrum: (() -> Void)?
+    var onCurtainUp: (() -> Void)?
+    private var curtainNodes: [Int: CurtainNode] = [:]
 
     init(board: Board, kinds: [String]) {
         self.board = board
@@ -213,6 +217,16 @@ final class BoardScene: SKScene {
             }
             pieces.append(nodes)
             if board.isComplete(j) { jar.putLid(animated: false, tint: nodes.first.map { SquishyStyle.forID($0.kindID).color }) }
+        }
+        // Curtain Call jars: a velvet curtain hangs in front of the jar and everything in it.
+        curtainNodes = [:]
+        for j in board.curtains where j < geometry.centers.count {
+            let size = CGSize(width: geometry.jarSize.width + 8, height: geometry.jarSize.height + geometry.piece * 0.35)
+            let curtain = CurtainNode(size: size)
+            curtain.position = CGPoint(x: geometry.centers[j].x, y: geometry.centers[j].y + size.height / 2 + 1)
+            curtain.zPosition = 8
+            addChild(curtain)
+            curtainNodes[j] = curtain
         }
         if feverOn { setFever(true) }
         showTutorialIfNeeded()
@@ -478,6 +492,7 @@ final class BoardScene: SKScene {
     }
 
     private func shake(_ j: Int) {
+        curtainNodes[j]?.ripple()
         let jar = jarNodes[j]
         let x = geometry.centers[j].x
         jar.run(.sequence([
@@ -576,8 +591,44 @@ final class BoardScene: SKScene {
                 }
             }]))
         }
+        for (n, j) in result.raisedCurtains.enumerated() { raiseCurtain(j, after: 0.7 + 0.25 * Double(n)) }
         busy = false
         onMoveFinished?(result)
+    }
+
+    /// The jar next door is finished: a drumroll, the curtain lifts, a spotlight lands on the jar
+    /// and what was hidden bounces once.
+    private func raiseCurtain(_ j: Int, after delay: Double) {
+        guard let curtain = curtainNodes.removeValue(forKey: j) else { return }
+        let calm = UIAccessibility.isReduceMotionEnabled
+        run(.sequence([
+            .wait(forDuration: delay),
+            .run { [weak self, weak curtain] in
+                self?.onCurtainDrum?()
+                if !calm { curtain?.tremble(seconds: 0.6) }
+            },
+            .wait(forDuration: 0.6),
+            .run { [weak self, weak curtain] in
+                guard let self else { return }
+                self.onCurtainUp?()
+                curtain?.rise(calm: calm)
+                guard j < self.geometry.centers.count, j < self.pieces.count else { return }
+                let centre = self.geometry.centers[j]
+                let light = SKShapeNode(ellipseOf: CGSize(width: self.geometry.jarSize.width * 1.5, height: self.geometry.jarSize.height * 1.25))
+                light.fillColor = UIColor(red: 1, green: 0.96, blue: 0.75, alpha: 0.5)
+                light.strokeColor = .clear
+                light.position = centre
+                light.zPosition = -2
+                light.alpha = 0
+                self.addChild(light)
+                light.run(.sequence([.fadeIn(withDuration: 0.25), .wait(forDuration: 0.7), .fadeOut(withDuration: 0.6), .removeFromParent()]))
+                guard !calm else { return }
+                self.run(.sequence([.wait(forDuration: 0.3), .run { [weak self] in
+                    guard let self, j < self.pieces.count else { return }
+                    for node in self.pieces[j] { node.squeezeAndRelease() }
+                }]))
+            },
+        ]))
     }
 
     private func sparkle(at p: CGPoint) {

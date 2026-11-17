@@ -24,4 +24,6 @@ public struct MoveResult: Equatable, Sendable {
     public let thawedJars: [Int]
     /// A duet landed on its bottom member's kind and let go.
     public var duetLetGo = false
+    /// Curtain jars that opened because the jar next door was finished on this move.
+    public var raisedCurtains: [Int] = []
 }

@@ -36,6 +36,9 @@ SHAPE = {
 FINALE = (8, 2, 3.2)
 # From this level of a world on, an earlier world's new thing mixes back in.
 MIX = {"starlight": (13, "hidden")}
+# Starlight Stage changes its twist half way: mixed duets up to level 12, Curtain Call jars from 13
+# (Ian, 17 Nov). Curtain levels have no duets.
+CURTAINS_FROM = {"starlight": 13}
 # Later worlds start a little bigger at the same positions.
 WORLD_BUMP = {0: 0, 1: 1, 2: 1, 3: 1}
 # Santa's Grotto is a side world that opens after main level 10, so it is
@@ -89,6 +92,9 @@ def mechanic_count(mech, pos):
         return 1 if pos <= 5 else (2 if pos < 15 else 3)
     if mech == "frozen":
         return min(1 + pos // 8, 3)
+    if mech == "curtain":
+        # one curtain at first, two from level 18
+        return 1 if pos < 18 else 2
     return 0
 
 
@@ -143,10 +149,16 @@ def random_board(rng, names, empties, mech, mcount, mix_hidden=0):
                 if len(picks) == mcount:
                     break
             mechanics["frozen"] = sorted(picks)
+        closed = []
+        if mech == "curtain":
+            # a curtain hides a full jar; the spare jars are never behind one
+            closed = sorted(rng.sample(range(len(jars)), min(mcount, len(jars))))
+            mechanics["curtains"] = closed
         if mix_hidden:
-            # wrapped pieces mixed into a duet world: never a duet piece, never the top of a jar
+            # wrapped pieces mixed into a duet world: never a duet piece, never the top of a jar,
+            # never behind a curtain
             taken = {(j, i) for j, i in sticky} | {(j, i + 1) for j, i in sticky}
-            spots = [[j, i] for j in range(len(jars)) for i in range(CAP - 1) if (j, i) not in taken]
+            spots = [[j, i] for j in range(len(jars)) for i in range(CAP - 1) if (j, i) not in taken and j not in closed]
             mechanics["hidden"] = sorted(rng.sample(spots, min(mix_hidden, len(spots))))
         jars = jars + [[] for _ in range(empties)]
         return jars, mechanics
@@ -233,6 +245,8 @@ def make_level(world_idx, pos):
             k = min(k, 7)
             mult = 9  # no target: the longest answer found wins
     names = kinds_for(world_idx, k)
+    if pos >= CURTAINS_FROM.get(world, 99):
+        mech = "curtain"
     rng = random.Random(f"{world}-{pos}")
     level = {
         "schema": 1, "id": f"{world}-{pos:02d}", "world": world, "index": pos,
@@ -265,9 +279,11 @@ def make_level(world_idx, pos):
             mcount = 1 if pos == 1 or (world_idx == SIDE_WORLD and pos == 2) else 2
         mix_from, mix_mech = MIX.get(world, (99, None))
         mix_hidden = min(2 + (pos - mix_from) // 2, 6) if pos >= mix_from and mix_mech == "hidden" else 0
+        if pos == CURTAINS_FROM.get(world, 99):
+            mix_hidden = 0  # the first curtain level shows the curtain alone
         # Duets need room: if no board can be solved, ask for fewer duets, then for one more spare jar.
         tries = [(mcount, empties)]
-        if mech == "sticky":
+        if mech in ("sticky", "curtain"):
             tries += [(m, empties) for m in range(mcount - 1, 0, -1)] + [(1, empties + 1)]
         for n, (mc, em) in enumerate(tries):
             try:
@@ -280,6 +296,8 @@ def make_level(world_idx, pos):
     level["mechanics"] = {"hidden": mechanics.get("hidden", []),
                           "sticky": mechanics.get("sticky", []),
                           "frozen": mechanics.get("frozen", [])}
+    if mechanics.get("curtains"):
+        level["mechanics"]["curtains"] = mechanics["curtains"]
     b, _ = board_from_level(level)
     sol, explored = solve(b, 3_000_000)
     if sol is None:
@@ -303,7 +321,8 @@ def dump(level):
         lines.append(f"    {json.dumps(jar)}{comma}")
     lines.append("  ],")
     m = level["mechanics"]
-    lines.append(f'  "mechanics": {{"hidden": {json.dumps(m["hidden"])}, "sticky": {json.dumps(m["sticky"])}, "frozen": {json.dumps(m["frozen"])}}},')
+    extra = f', "curtains": {json.dumps(m["curtains"])}' if m.get("curtains") else ""
+    lines.append(f'  "mechanics": {{"hidden": {json.dumps(m["hidden"])}, "sticky": {json.dumps(m["sticky"])}, "frozen": {json.dumps(m["frozen"])}{extra}}},')
     lines.append(f'  "par": {level["par"]},')
     lines.append(f'  "solution": {json.dumps(level["solution"])},')
     lines.append(f'  "capsule": {json.dumps(level["capsule"])},')

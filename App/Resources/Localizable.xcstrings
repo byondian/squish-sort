@@ -2059,6 +2059,28 @@
         }
       }
     },
+    "Finish the jar next door to raise the curtain!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "となりのびんを完成させて、カーテンを上げよう！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "옆 병을 완성하면 커튼이 올라가요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完成旁邊的罐子，布幕就會升起！"
+          }
+        }
+      }
+    },
     "Finishing Toy Shop opened the Maker. Make your very own squishy and give it a name.": {
       "localizations": {
         "ja": {

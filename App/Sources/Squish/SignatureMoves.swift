@@ -162,10 +162,13 @@ final class MoveSim {
 
     /// An art point (120-unit box) in the view, riding on the body.
     func place(_ a: (x: Double, y: Double), lifted: Double = 0) -> CGPoint {
-        let u = pulse.side / 120
-        let lx = (a.x - 60) * u, ly = (a.y + dy - 60 - lifted) * u
-        let c = cos(pulse.angle), s = sin(pulse.angle)
-        return CGPoint(x: pulse.x + c * lx - s * ly, y: pulse.y + s * lx + c * ly)
+        let u: Double = pulse.side / 120
+        let lx: Double = (a.x - 60) * u
+        let ly: Double = (a.y + dy - 60 - lifted) * u
+        let c: Double = cos(pulse.angle), s: Double = sin(pulse.angle)
+        let x: Double = pulse.x + c * lx - s * ly
+        let y: Double = pulse.y + s * lx + c * ly
+        return CGPoint(x: x, y: y)
     }
 
     private func buildLimbs() {
@@ -251,8 +254,12 @@ final class MoveSim {
         if specs.contains(where: { $0.effect == "GLOW" && $0.flag("cycleColours") }) { hue += 67 }
         if specs.contains(where: { $0.effect == "VORTEX" }) {
             let count = reduceMotion ? 4 : 10
-            orbit = (0..<count).map { i in
-                (Double(i) / Double(count) * 2 * Double.pi, 0.75 + Double(i % 3) * 0.12, 3.2 + Double(i % 4) * 0.5)
+            orbit = []
+            for i in 0..<count {
+                let angle: Double = Double(i) / Double(count) * 2 * Double.pi
+                let radius: Double = 0.75 + Double(i % 3) * 0.12
+                let speed: Double = 3.2 + Double(i % 4) * 0.5
+                orbit.append((angle: angle, radius: radius, speed: speed))
             }
         }
     }
@@ -268,8 +275,9 @@ final class MoveSim {
         if let spec = specs.first(where: { $0.effect == "VORTEX" }) {
             let centre = place(spec.point("centre") ?? (60, 60))
             for o in orbit {
-                let speed = pulse.side * 1.6
-                particles.append(Particle(x: Double(centre.x), y: Double(centre.y), vx: cos(o.angle) * speed, vy: sin(o.angle) * speed,
+                let speed: Double = pulse.side * 1.6
+                let vx: Double = cos(o.angle) * speed, vy: Double = sin(o.angle) * speed
+                particles.append(Particle(x: Double(centre.x), y: Double(centre.y), vx: vx, vy: vy,
                                           life: 0.7, span: 0.7, color: Theme.butter, glyph: "✦", size: pulse.side * 0.07, gravity: 0))
             }
             orbit = []
@@ -307,13 +315,19 @@ final class MoveSim {
         for i in 0..<count {
             // A fan upwards, wider for the heavy things.
             let spread = floaty ? 0.9 : 1.25
-            let a = -Double.pi / 2 + (Double(i) / Double(max(1, count - 1)) - 0.5) * 2 * spread + Double.random(in: -0.12...0.12)
-            let speed = u * Double.random(in: floaty ? 40...80 : 90...170)
-            let life = Double.random(in: floaty ? 1.0...1.5 : 0.7...1.1)
+            let share: Double = Double(i) / Double(max(1, count - 1)) - 0.5
+            let jitter: Double = Double.random(in: -0.12...0.12)
+            let a: Double = -Double.pi / 2 + share * 2 * spread + jitter
+            let fast: ClosedRange<Double> = floaty ? 40...80 : 90...170
+            let long: ClosedRange<Double> = floaty ? 1.0...1.5 : 0.7...1.1
+            let small: ClosedRange<Double> = glyph == nil ? 5...8 : 12...17
+            let speed: Double = u * Double.random(in: fast)
+            let life: Double = Double.random(in: long)
+            let grain: Double = u * Double.random(in: small)
+            let pull: Double = floaty ? -u * 20 : u * 260
             particles.append(Particle(x: Double(from.x), y: Double(from.y), vx: cos(a) * speed, vy: sin(a) * speed,
                                       life: life, span: life, color: colors.isEmpty ? .white : colors[i % colors.count],
-                                      glyph: glyph, size: u * Double.random(in: glyph == nil ? 5...8 : 12...17),
-                                      gravity: floaty ? -u * 20 : u * 260))
+                                      glyph: glyph, size: grain, gravity: pull))
         }
     }
 
@@ -331,10 +345,13 @@ final class MoveSim {
     func orbiters() -> [(at: CGPoint, scale: Double)] {
         guard let spec = specs.first(where: { $0.effect == "VORTEX" }) else { return [] }
         let centre = place(spec.point("centre") ?? (60, 60))
-        return orbit.map { o in
-            (CGPoint(x: Double(centre.x) + cos(o.angle) * o.radius * pulse.side * 0.7,
-                     y: Double(centre.y) + sin(o.angle) * o.radius * pulse.side * 0.55), 0.4 + o.radius)
+        var out: [(at: CGPoint, scale: Double)] = []
+        for o in orbit {
+            let x: Double = Double(centre.x) + cos(o.angle) * o.radius * pulse.side * 0.7
+            let y: Double = Double(centre.y) + sin(o.angle) * o.radius * pulse.side * 0.55
+            out.append((at: CGPoint(x: x, y: y), scale: 0.4 + o.radius))
         }
+        return out
     }
 }
 
@@ -435,7 +452,8 @@ struct MoveLayer: View {
         let u = sim.pulse.side / 120
         for spec in sim.specs where spec.effect == "GLOW" {
             let at = sim.place(spec.point("at") ?? (60, 50))
-            let r = (spec.num("radius") ?? 20) * u * (1.4 + sim.glow * 0.8)
+            let base: Double = spec.num("radius") ?? 20
+            let r: Double = base * u * (1.4 + sim.glow * 0.8)
             var light = ctx
             light.blendMode = .plusLighter
             if spec.flag("cycleColours") { light.addFilter(.hueRotation(.degrees(sim.hue))) }
@@ -467,16 +485,17 @@ struct MoveLayer: View {
         guard sim.melt > 0.02, let spec = sim.specs.first(where: { $0.effect == "MELT" }) else { return }
         let p = sim.pulse
         let color = Color(css: spec.str("puddle"), fallback: Theme.butter)
-        let w = p.side * (0.7 + 0.7 * sim.melt), h = p.side * 0.16 * sim.melt
-        let floor = p.y + p.side * 0.5 * (1 - 0.4 * sim.melt)
+        let w: Double = p.side * (0.7 + 0.7 * sim.melt), h: Double = p.side * 0.16 * sim.melt
+        let floor: Double = p.y + p.side * 0.5 * (1 - 0.4 * sim.melt)
         ctx.fill(Path(ellipseIn: CGRect(x: p.x - w / 2, y: floor - h / 2, width: w, height: h)), with: .color(color.opacity(0.9)))
         ctx.fill(Path(ellipseIn: CGRect(x: p.x - w * 0.3, y: floor - h * 0.35, width: w * 0.25, height: h * 0.25)),
                  with: .color(.white.opacity(0.5)))
         let u = p.side / 120
         for x in spec.numbers("drips") {
-            let dx = p.x + (x - 60) * u * 1.3
-            let r = 3.5 * u * sim.melt
-            ctx.fill(Path(ellipseIn: CGRect(x: dx - r, y: floor - h * 0.2 - r * 3 * (1 - sim.melt), width: r * 2, height: r * 2.6)),
+            let dx: Double = p.x + (x - 60) * u * 1.3
+            let r: Double = 3.5 * u * sim.melt
+            let top: Double = floor - h * 0.2 - r * 3 * (1 - sim.melt)
+            ctx.fill(Path(ellipseIn: CGRect(x: dx - r, y: top, width: r * 2, height: r * 2.6)),
                      with: .color(color))
         }
     }
@@ -488,7 +507,8 @@ struct MoveLayer: View {
         func strokes(_ color: Color, inset: Double, from: Int = 0) {
             for i in max(0, from)..<(n - 1) {
                 let t = Double(i) / Double(n - 1)
-                let width = max(1.5, (limb.width * (1 + (limb.taper - 1) * t) - inset) * u)
+                let wide: Double = limb.width * (1 + (limb.taper - 1) * t) - inset
+                let width: Double = max(1.5, wide * u)
                 var seg = Path()
                 seg.move(to: at(i))
                 seg.addLine(to: at(i + 1))

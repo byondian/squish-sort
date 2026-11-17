@@ -4,7 +4,7 @@ import SquishPolicy
 
 /// The twists a board can have. Each is shown once, on the first level that has it.
 enum BoardRule: String, CaseIterable {
-    case wrapped, duet, frozen
+    case wrapped, duet, frozen, curtain
     /// Not a twist of one world: a run only moves as far as there is room. Taught early in Toy Shop.
     case partial
 
@@ -18,6 +18,7 @@ enum BoardRule: String, CaseIterable {
                 if piece.frozen > 0 { found.insert(.frozen) }
             }
         }
+        if !board.curtains.isEmpty { found.insert(.curtain) }
         return BoardRule.allCases.filter { found.contains($0) }
     }
 
@@ -27,6 +28,7 @@ enum BoardRule: String, CaseIterable {
         case .duet: return String(localized: "Duet! They move together. Land the bottom one on its own kind and they let go.")
         case .frozen: return String(localized: "Frozen! Moves next to it melt the ice.")
         case .partial: return String(localized: "Only what fits moves!")
+        case .curtain: return String(localized: "Finish the jar next door to raise the curtain!")
         }
     }
 }
@@ -104,6 +106,36 @@ struct RuleDemo: View {
         case .duet: duetStage
         case .frozen: frozenStage
         case .partial: partialStage
+        case .curtain: curtainStage
+        }
+    }
+
+    // Curtain: the last one hops in next door, the jar is finished, and the curtain goes up.
+    private var curtainStage: some View {
+        let moved = step >= 3
+        let open = step >= 4
+        return ZStack {
+            blob(actors[0], x: RuleDemo.xs[0], y: RuleDemo.ys[0])
+            blob(actors[0], x: RuleDemo.xs[0], y: RuleDemo.ys[1])
+            blob(actors[1], x: RuleDemo.xs[1], y: RuleDemo.ys[0])
+            blob(actors[1], x: RuleDemo.xs[1], y: RuleDemo.ys[1])
+            blob(actors[1], x: RuleDemo.xs[2], y: RuleDemo.ys[0])
+            blob(actors[0], x: moved ? RuleDemo.xs[0] : RuleDemo.xs[2],
+                 y: moved ? RuleDemo.ys[2] : (step == 2 ? RuleDemo.ys[3] : RuleDemo.ys[1]))
+            if moved {
+                // The finished jar gets its lid.
+                Capsule().fill(Theme.butter).frame(width: 54, height: 9)
+                    .position(x: RuleDemo.xs[0], y: 40)
+                    .transition(.scale.combined(with: .opacity))
+            }
+            RoundedRectangle(cornerRadius: 6).fill(Color(red: 0.69, green: 0.13, blue: 0.33))
+                .overlay(Text(verbatim: "★").font(Theme.title(18)).foregroundStyle(Theme.butter))
+                .frame(width: 56, height: 112)
+                .scaleEffect(x: 1, y: open ? 0.05 : 1, anchor: .top)
+                .opacity(open ? 0 : 1)
+                .position(x: RuleDemo.xs[1], y: 96)
+            Capsule().fill(Theme.butter).frame(width: 62, height: 8).position(x: RuleDemo.xs[1], y: 40)
+                .opacity(step >= 5 ? 0 : 1)
         }
     }
 
@@ -204,6 +236,8 @@ struct RuleDemo: View {
         case (.frozen, 4): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])
         case (.partial, 1), (.partial, 2): spot = CGPoint(x: RuleDemo.xs[0], y: RuleDemo.ys[2])
         case (.partial, 3): spot = CGPoint(x: RuleDemo.xs[1], y: RuleDemo.ys[2])
+        case (.curtain, 1), (.curtain, 2): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])
+        case (.curtain, 3): spot = CGPoint(x: RuleDemo.xs[0], y: RuleDemo.ys[2])
         default: spot = CGPoint(x: 130, y: 190)
         }
         let shown = step >= 1 && step <= 4

@@ -531,3 +531,81 @@ final class JarNode: SKNode {
         }
     }
 }
+
+/// The velvet stage curtain in front of a Curtain Call jar. It hangs from its top edge, so it
+/// gathers upwards when it rises.
+final class CurtainNode: SKNode {
+    private let cloth = SKNode()
+
+    init(size: CGSize) {
+        super.init()
+        let w = size.width, h = size.height
+        // The cloth: a scalloped hem at the bottom.
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: -w / 2, y: 0))
+        path.addLine(to: CGPoint(x: w / 2, y: 0))
+        path.addLine(to: CGPoint(x: w / 2, y: -h + 6))
+        let folds = 4
+        let fold = w / CGFloat(folds)
+        for i in 0..<folds {
+            let x1 = w / 2 - fold * CGFloat(i + 1)
+            path.addQuadCurve(to: CGPoint(x: x1, y: -h + 6), control: CGPoint(x: x1 + fold / 2, y: -h - 4))
+        }
+        path.closeSubpath()
+        let velvet = SKShapeNode(path: path)
+        velvet.fillColor = UIColor(red: 0.69, green: 0.13, blue: 0.33, alpha: 1)
+        velvet.strokeColor = UIColor(red: 0.36, green: 0.07, blue: 0.22, alpha: 1)
+        velvet.lineWidth = 2
+        cloth.addChild(velvet)
+        // Pleats: darker stripes down each fold.
+        for i in 1..<folds {
+            let pleat = SKShapeNode(rect: CGRect(x: -w / 2 + fold * CGFloat(i) - 1.5, y: -h + 8, width: 3, height: h - 12), cornerRadius: 1.5)
+            pleat.fillColor = UIColor(red: 0.45, green: 0.08, blue: 0.25, alpha: 0.55)
+            pleat.strokeColor = .clear
+            cloth.addChild(pleat)
+        }
+        // A soft sheen and a gold rail with a star.
+        let sheen = SKShapeNode(rect: CGRect(x: -w / 2 + 4, y: -h * 0.8, width: fold * 0.3, height: h * 0.66), cornerRadius: 3)
+        sheen.fillColor = UIColor.white.withAlphaComponent(0.16)
+        sheen.strokeColor = .clear
+        cloth.addChild(sheen)
+        addChild(cloth)
+        let rail = SKShapeNode(rect: CGRect(x: -w / 2 - 3, y: -5, width: w + 6, height: 9), cornerRadius: 4.5)
+        rail.fillColor = UIColor(red: 1, green: 0.82, blue: 0.36, alpha: 1)
+        rail.strokeColor = UIColor(red: 0.72, green: 0.5, blue: 0.1, alpha: 1)
+        rail.lineWidth = 1.5
+        addChild(rail)
+        let star = SKLabelNode(text: "★")
+        star.fontSize = min(22, w * 0.42)
+        star.fontColor = UIColor(red: 1, green: 0.86, blue: 0.45, alpha: 1)
+        star.verticalAlignmentMode = .center
+        star.position = CGPoint(x: 0, y: -h * 0.48)
+        cloth.addChild(star)
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) is not used") }
+
+    /// A tap on a closed curtain: it sways and stays shut.
+    func ripple() {
+        cloth.removeAction(forKey: "ripple")
+        cloth.xScale = 1
+        cloth.run(.sequence([.scaleX(to: 0.92, duration: 0.07), .scaleX(to: 1.04, duration: 0.09), .scaleX(to: 1, duration: 0.08)]), withKey: "ripple")
+    }
+
+    func tremble(seconds: Double) {
+        let step = SKAction.sequence([.moveBy(x: 1.5, y: 0, duration: 0.03), .moveBy(x: -3, y: 0, duration: 0.06), .moveBy(x: 1.5, y: 0, duration: 0.03)])
+        cloth.run(.repeat(step, count: max(1, Int(seconds / 0.12))))
+    }
+
+    /// Up it goes, gathered to the rail, and away. With Reduce Motion it fades.
+    func rise(calm: Bool) {
+        if calm {
+            run(.sequence([.fadeOut(withDuration: 0.4), .removeFromParent()]))
+            return
+        }
+        let up = SKAction.scaleY(to: 0.06, duration: 0.45)
+        up.timingMode = .easeIn
+        cloth.run(up)
+        run(.sequence([.wait(forDuration: 0.45), .fadeOut(withDuration: 0.25), .removeFromParent()]))
+    }
+}
