@@ -140,8 +140,8 @@ final class BoardTests: XCTestCase {
     }
 
     func testDeadEndIsSeenBeforeTheLastMove() {
-        // The two Cs can still pair up, but after that nothing moves and the board is not won.
-        let dead = board(["AB", "BA", "C", "C"], capacity: 2)
+        // The only move passes one B back and forth for ever: no jar can ever be freed.
+        let dead = board(["AB", "ABB", "A"], capacity: 3)
         XCTAssertFalse(dead.isStuck)
         XCTAssertTrue(dead.isDeadEnd())
         XCTAssertEqual(GameSession(board: dead, par: 5).status, .stuck)

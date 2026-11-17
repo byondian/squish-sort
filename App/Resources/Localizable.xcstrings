@@ -1883,6 +1883,28 @@
         }
       }
     },
+    "EVERY %@ SQUISHY FOUND": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@のスクイーズをぜんぶ発見"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@의 스퀴시를 모두 찾았어요"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@的捏捏樂全部找到了"
+          }
+        }
+      }
+    },
     "Ears": {
       "localizations": {
         "ja": {
@@ -5601,6 +5623,28 @@
         }
       }
     },
+    "Tap again!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "もういちどタップ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "한 번 더 탭!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再點一下！"
+          }
+        }
+      }
+    },
     "Tap the trick under your Buddy at home to see it again.": {
       "localizations": {
         "ja": {
@@ -5619,6 +5663,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "在主畫面點夥伴下方的特技，就能再看一次。"
+          }
+        }
+      }
+    },
+    "Tap to open!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "タップしてあけよう！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "탭해서 열어요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "點一下打開！"
           }
         }
       }
