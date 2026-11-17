@@ -67,6 +67,7 @@ public enum LevelValidator {
         if vined.count > 2 { p.append("\(id): \(vined.count) vine jars, at most 2") }
         for j in vined {
             if board.isCurtained(j) { p.append("\(id): jar \(j) has both a vine and a curtain") }
+            if board.isComplete(j) { p.append("\(id): vine jar \(j) starts already finished") }
             if board.jars[j].contains(where: { $0.hidden || $0.isFrozen || $0.bondedAbove }) {
                 p.append("\(id): vine jar \(j) can't hold wrapped, frozen or duet pieces")
             }
