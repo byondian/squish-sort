@@ -509,18 +509,31 @@ final class AppModel: ObservableObject {
     }
 
     var mysteryBag: MysteryBag? {
-        MysteryBag.daily(day: today, playerSeed: progress.installID, roster: roster, worlds: openWorlds)
+        MysteryBag.daily(day: today, playerSeed: progress.installID, roster: roster, worlds: openWorlds,
+                         shapes: AppModel.shapes,
+                         seen: Set(roster.collectibles.filter { progress.collection.owns($0.id) }.map(\.id)),
+                         easy: progress.mystery.isLearning(today: today))
     }
 
+    /// Body shape groups, so the Mystery Bag's choices can look alike.
+    private static let shapes: [String: String] = {
+        guard let url = Bundle.main.url(forResource: "shapes", withExtension: "json", subdirectory: "Content"),
+              let data = try? Data(contentsOf: url),
+              let file = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return [:] }
+        return file["shapes"] as? [String: String] ?? [:]
+    }()
+
     /// One guess a day. A right guess moves the capsule bar on; a full bar is a free capsule.
-    func guessMystery(_ id: String) -> Bool {
+    /// Fewer clues used, bigger prize: every guess pays.
+    @discardableResult
+    func guessMystery(_ id: String, clues: Int = 3) -> Bool {
         guard let bag = mysteryBag, progress.mystery.canPlay(today: today) else { return false }
         let correct = bag.answer.id == id
         var earned = false
         update {
             earned = $0.mystery.recordGuess(correct: correct, today: today)
             // Any guess pays, right or wrong.
-            $0.wallet.earn(config.coins.mysteryGuess)
+            $0.wallet.earn(MysteryBag.prize(cluesUsed: clues))
         }
         sounds.play(correct ? "mystery_right" : "mystery_close")
         if earned {

@@ -725,6 +725,47 @@ final class ExtrasTests: XCTestCase {
         XCTAssertNil(MysteryBag.daily(day: "2026-12-01", playerSeed: "p1", roster: Roster(collectibles: []), worlds: worlds))
     }
 
+    func testMysteryBagChoicesShareTheAnswersShapeAfterTheEasyDays() throws {
+        let roster = try Roster.decode(content("roster.json"))
+        let file = try JSONSerialization.jsonObject(with: content("shapes.json")) as? [String: Any]
+        let shapes = try XCTUnwrap(file?["shapes"] as? [String: String])
+        for c in roster.collectibles { XCTAssertNotNil(shapes[c.id], "\(c.id) has a shape group") }
+        let worlds = ["toyshop", "sweetfactory", "starlight"]
+        let seen = Set(roster.collectibles.filter { $0.rarity == .common }.map(\.id))
+        for day in 1...28 {
+            let d = String(format: "2026-12-%02d", day)
+            let bag = try XCTUnwrap(MysteryBag.daily(day: d, playerSeed: "p1", roster: roster, worlds: worlds,
+                                                     shapes: shapes, seen: seen, easy: false))
+            XCTAssertEqual(bag, MysteryBag.daily(day: d, playerSeed: "p1", roster: roster, worlds: worlds,
+                                                 shapes: shapes, seen: seen, easy: false))
+            XCTAssertEqual(Set(bag.choices.map(\.id)).count, 4)
+            XCTAssertTrue(bag.choices.contains(bag.answer))
+            let alike = bag.choices.filter { $0 != bag.answer && shapes[$0.id] == shapes[bag.answer.id] }
+            XCTAssertGreaterThanOrEqual(alike.count, 2, "the shape alone never decides it")
+            for c in bag.choices {
+                XCTAssertNotEqual(c.rarity, .secret)
+                XCTAssertNotEqual(c.world, "christmas")
+            }
+            // The answer does not depend on what the player has seen, so it holds all day.
+            XCTAssertEqual(bag.answer, MysteryBag.daily(day: d, playerSeed: "p1", roster: roster, worlds: worlds,
+                                                        shapes: shapes, seen: [], easy: false)?.answer)
+        }
+    }
+
+    func testMysteryPrizeDropsWithCluesAndTheFirstDaysAreEasy() {
+        XCTAssertEqual([0, 1, 2, 3, 9].map { MysteryBag.prize(cluesUsed: $0) }, [150, 100, 75, 50, 50])
+        var s = MysteryState()
+        for day in ["2026-12-01", "2026-12-02", "2026-12-03"] {
+            XCTAssertTrue(s.isLearning(today: day))
+            _ = s.recordGuess(correct: false, today: day)
+            XCTAssertTrue(s.isLearning(today: day), "the bag does not change in the middle of a day")
+        }
+        XCTAssertFalse(s.isLearning(today: "2026-12-04"))
+        // A save from before this was counted has played already.
+        let old = try? JSONDecoder().decode(MysteryState.self, from: Data(#"{"steps": 1, "lastPlayedDay": "2026-11-16"}"#.utf8))
+        XCTAssertEqual(old?.isLearning(today: "2026-11-17"), false)
+    }
+
     func testMysteryBagIsOneGuessADayAndThreeRightGuessesEarnACapsule() {
         var s = MysteryState()
         XCTAssertFalse(s.recordGuess(correct: true, today: "2026-12-01"))

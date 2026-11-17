@@ -14,8 +14,10 @@ struct MysteryBagView: View {
     @State private var jiggle = false
     /// A wrong guess from earlier in this visit, greyed out for the extra guess.
     @State private var ruledOut: String?
-    /// Shape clue: the bag pulls tight round the toy for two seconds.
+    /// Shape clue: the bag pulls tight round the toy for a moment.
     @State private var tight = false
+    /// Coins the last guess paid.
+    @State private var won = 0
     /// Goes up by one for every squeak, so the sound rings play again.
     @State private var squeaks = 0
     @State private var lastTouch = Date.distantPast
@@ -96,7 +98,15 @@ struct MysteryBagView: View {
             HStack(alignment: .top, spacing: 12) {
                 if poked.contains(0) {
                     clue("Shape") {
-                        SquishyView(id: bag.answer.id, silhouette: true).frame(width: 84, height: 84).blur(radius: 5)
+                        // Felt, not kept: tap it to feel the shape again for a moment.
+                        Button { poke(0) } label: {
+                            VStack(spacing: 4) {
+                                Image(systemName: "hand.point.up.left.fill").font(.system(size: 26))
+                                Text("Shape").font(Theme.body(13))
+                            }
+                            .foregroundStyle(Theme.plum).frame(width: 84, height: 84)
+                        }
+                        .buttonStyle(PressSquish())
                     }
                 }
                 if poked.contains(1) {
@@ -121,6 +131,15 @@ struct MysteryBagView: View {
                     }
                 }
             }
+            // What a guess pays right now: it drops as clues are used.
+            Label { Text(verbatim: "+\(MysteryBag.prize(cluesUsed: poked.count))") } icon: { CoinIcon() }
+                .font(Theme.title(20)).foregroundStyle(Theme.plum)
+                .monospacedDigit()
+                .contentTransition(.numericText(value: Double(MysteryBag.prize(cluesUsed: poked.count))))
+                .animation(.easeOut(duration: 0.4), value: poked.count)
+                .padding(.horizontal, 16).padding(.vertical, 6)
+                .background(Capsule().fill(Theme.butter.opacity(0.6)))
+                .accessibilityIdentifier("mystery-prize")
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
                 ForEach(bag.choices) { choice in
                     Button { guess(choice) } label: {
@@ -149,7 +168,7 @@ struct MysteryBagView: View {
                 bagShape
             }
             Text(right ? LocalizedStringKey("Yes! You got it!") : LocalizedStringKey("So close!")).font(Theme.title(28)).foregroundStyle(Theme.plum)
-            Label { Text("+\(model.config.coins.mysteryGuess)") } icon: { CoinIcon() }
+            Label { Text(verbatim: "+\(won)") } icon: { CoinIcon() }
                 .font(Theme.body(17)).foregroundStyle(Theme.plum)
             if !right && model.offersExtraMysteryGuess {
                 // The answer stays hidden while one more guess is on offer.
@@ -192,8 +211,9 @@ struct MysteryBagView: View {
     @ViewBuilder private func bagArt(_ bag: MysteryBag) -> some View {
         ZStack {
             if tight {
-                Theme.grape.mask(SquishyView(id: bag.answer.id, silhouette: true).frame(width: 250, height: 250))
-                    .frame(width: 250, height: 250)
+                // Pulled tight, but through the stuffing: the outline is padded and rounded, so ears
+                // and tails are only bumps, and the toy lies at today's angle.
+                Theme.grape.mask(paddedOutline(bag)).frame(width: 250, height: 250)
             } else {
                 RoundedRectangle(cornerRadius: 56).fill(Theme.grape).frame(width: 240, height: 250)
                 RoundedRectangle(cornerRadius: 56).stroke(Theme.plum, lineWidth: 6).frame(width: 240, height: 250)
@@ -210,6 +230,22 @@ struct MysteryBagView: View {
             }
         }
         .frame(width: 300, height: 300)
+    }
+
+    /// The toy's outline with about 12 points of stuffing all round it.
+    private func paddedOutline(_ bag: MysteryBag) -> some View {
+        let shape = Image("squishy-\(bag.answer.id)").renderingMode(.template).resizable().scaledToFit()
+            .foregroundStyle(Color.black).frame(width: 190, height: 190)
+        return ZStack {
+            ForEach(0..<12, id: \.self) { k in
+                let a = Double(k) / 12 * 2 * Double.pi
+                shape.offset(x: CGFloat(cos(a)) * 14, y: CGFloat(sin(a)) * 14)
+            }
+            shape
+        }
+        .rotationEffect(.degrees(bag.turn))
+        .frame(width: 250, height: 250)
+        .blur(radius: 3)
     }
 
     /// A touch on the bag itself always squishes and sounds, and gives the next clue if one is left.
@@ -245,7 +281,7 @@ struct MysteryBagView: View {
         if index == 0 {
             // The bag pulls tight round the toy, then lets go.
             tight = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { tight = false }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { tight = false }
         }
         if let index {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { _ = poked.insert(index) }
@@ -266,7 +302,8 @@ struct MysteryBagView: View {
 
     private func guess(_ choice: Collectible) {
         guard guessedRight == nil else { return }
-        let right = model.guessMystery(choice.id)
+        won = MysteryBag.prize(cluesUsed: poked.count)
+        let right = model.guessMystery(choice.id, clues: poked.count)
         if right { model.haptics.win() } else { model.haptics.reject(); ruledOut = choice.id }
         withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) { guessedRight = right }
     }

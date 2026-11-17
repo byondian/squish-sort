@@ -112,6 +112,8 @@ public struct MysteryBag: Equatable, Sendable {
     public let answer: Collectible
     /// Four squishies in a stable shuffled order; one is the answer.
     public let choices: [Collectible]
+    /// How far the toy is turned inside the bag today, in degrees.
+    public let turn: Double
 
     /// Rarer squishies squeak lower.
     public var squeak: Squeak {
@@ -123,15 +125,42 @@ public struct MysteryBag: Equatable, Sendable {
     }
 
     public static let stepsPerCapsule = 3
+    /// The first days after the bag opens are easy: the choices all look different.
+    public static let easyDays = 3
+    /// Coins for a guess, by clues used: fewer clues, bigger prize. Every guess pays.
+    public static let prizes = [150, 100, 75, 50]
 
-    /// The same bag all day for one player. Secrets and locked worlds never appear.
-    public static func daily(day: String, playerSeed: String, roster: Roster, worlds: [String]) -> MysteryBag? {
+    public static func prize(cluesUsed: Int) -> Int { prizes[min(max(0, cluesUsed), prizes.count - 1)] }
+
+    /// The same answer all day for one player. Secrets and locked worlds never appear.
+    /// Once the easy days are over (`easy` false) and `shapes` is given, at least two of the other
+    /// choices have the answer's body shape, so the shape clue alone never decides it. The other
+    /// choices come from squishies the player has `seen` wherever there are enough of them.
+    public static func daily(day: String, playerSeed: String, roster: Roster, worlds: [String],
+                             shapes: [String: String] = [:], seen: Set<String> = [], easy: Bool = true) -> MysteryBag? {
         let pool = roster.collectibles.filter { worlds.contains($0.world) && $0.rarity != .secret }
         guard pool.count >= 4 else { return nil }
         var rng = SplitMix64(seed: stableHash(day + "|" + playerSeed))
-        let picked = Array(pool.shuffled(using: &rng).prefix(4))
-        let answer = picked[Int(rng.next() % 4)]
-        return MysteryBag(answer: answer, choices: picked)
+        let shuffled = pool.shuffled(using: &rng)
+        if easy || shapes.isEmpty {
+            let picked = Array(shuffled.prefix(4))
+            let answer = picked[Int(rng.next() % 4)]
+            return MysteryBag(answer: answer, choices: picked, turn: Double(rng.next() % 360))
+        }
+        let answer = shuffled[0]
+        let others = Array(shuffled.dropFirst())
+        let shape = shapes[answer.id]
+        let alike = others.filter { shape != nil && shapes[$0.id] == shape }
+        var decoys: [Collectible] = []
+        func take(_ from: [Collectible], upTo n: Int) {
+            for c in from where decoys.count < n && !decoys.contains(c) { decoys.append(c) }
+        }
+        take(alike.filter { seen.contains($0.id) }, upTo: 2)
+        take(alike, upTo: 2)
+        take(others.filter { seen.contains($0.id) }, upTo: 3)
+        take(others, upTo: 3)
+        let choices = ([answer] + decoys).shuffled(using: &rng)
+        return MysteryBag(answer: answer, choices: choices, turn: Double(rng.next() % 360))
     }
 
     /// FNV-1a: the same on every launch, unlike `hashValue`.
@@ -152,8 +181,18 @@ public struct MysteryState: Codable, Equatable, Sendable {
     /// The day of the last wrong guess, and of the last extra guess taken.
     public var wrongDay: String?
     public var extraGuessDay: String?
+    /// Days with a guess so far. Missing in older saves, which have played before.
+    public var daysPlayed: Int?
 
     public init() {}
+
+    /// The first few days are easy. Judged on the days before `today`, so the bag does not
+    /// change in the middle of a day.
+    public func isLearning(today: String) -> Bool {
+        let played = daysPlayed ?? (lastPlayedDay == nil && wrongDay == nil ? 0 : MysteryBag.easyDays)
+        let todays = (lastPlayedDay == today || wrongDay == today) ? 1 : 0
+        return played - todays < MysteryBag.easyDays
+    }
 
     public func canPlay(today: String) -> Bool { lastPlayedDay != today }
 
@@ -185,6 +224,7 @@ public struct MysteryState: Codable, Equatable, Sendable {
         // The extra guess comes from an opt-in ad (or Remove Ads), so it never
         // moves the capsule bar: nothing paid or watched ever leads to a capsule.
         let extraGuess = extraGuessDay == today
+        if !extraGuess { daysPlayed = (daysPlayed ?? (lastPlayedDay == nil && wrongDay == nil ? 0 : MysteryBag.easyDays)) + 1 }
         lastPlayedDay = today
         guard correct else {
             wrongDay = today
