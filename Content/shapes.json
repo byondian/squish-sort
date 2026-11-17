@@ -1,5 +1,5 @@
 {
-  "note": "Body shape groups for the Mystery Bag, measured from each squishy's outline (bumps along the top). Decoys share the answer's group.",
+  "note": "Body shape groups for the Mystery Bag, measured from each squishy's outline (bumps along the top). Decoys share the answer's group. Re-measure when a drawing changes (tools: render art/svg, count top bumps).",
   "shapes": {
     "axo": "bumpy",
     "birthday-cake": "bumpy",

@@ -186,7 +186,7 @@ def choose(rng, level, names, empties, mech, mcount, target, mix_hidden=0):
     """Best solvable random candidate: first one whose every opening move can still be won from,
     then by distance to target par (lowest par if no target)."""
     best = None
-    for _ in range(80):
+    for _ in range(int(os.environ.get("LEVELGEN_TRIES", "80"))):
         cand = random_board(rng, names, empties, mech, mcount, mix_hidden)
         if cand is None:
             continue
@@ -207,6 +207,8 @@ def choose(rng, level, names, empties, mech, mcount, target, mix_hidden=0):
             break
     if best is None:
         raise SystemExit(f"{level['id']}: no solvable candidate")
+    if best[0][0] > 0:
+        print(f"  {level['id']}: {best[0][0]} opening move(s) still lose the level", file=sys.stderr)
     return best[1], best[2]
 
 
