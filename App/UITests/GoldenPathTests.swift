@@ -75,6 +75,34 @@ final class GoldenPathTests: XCTestCase {
         print("GOLDEN-PATH screen:\n\(app.debugDescription)")
     }
 
+    /// Home's top bar on whatever phone the test runs on: the coin pill, the stamp pill and settings are
+    /// one height on one centre line, the side margins match, the bar sits just under the status bar
+    /// and the logo keeps clear of it.
+    func testHomeTopBarLinesUp() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-uiTesting", "-storeShot", "home"]
+        app.launch()
+        let coins = app.buttons["home-coins"], stamps = app.buttons["stamp-card"], settings = app.buttons["gearshape.fill"]
+        XCTAssertTrue(coins.waitForExistence(timeout: 20))
+        XCTAssertTrue(stamps.exists && settings.exists)
+        Thread.sleep(forTimeInterval: 1.5)
+        let screen = app.windows.firstMatch.frame
+        let c = coins.frame, s = stamps.frame, g = settings.frame
+        for f in [s, g] {
+            XCTAssertEqual(f.height, c.height, accuracy: 1, "one height")
+            XCTAssertEqual(f.midY, c.midY, accuracy: 1, "one centre line")
+        }
+        XCTAssertEqual(c.minX, 16, accuracy: 1, "left margin")
+        XCTAssertEqual(screen.maxX - g.maxX, 16, accuracy: 1, "right margin")
+        XCTAssertEqual(s.minX - c.maxX, 8, accuracy: 1, "gap between the pills")
+        XCTAssertLessThan(c.minY, 76, "the bar sits just under the status bar")
+        XCTAssertGreaterThan(c.minY, 18, "the bar stays clear of the status bar")
+        let logo = app.otherElements["home-logo"]
+        if logo.exists { XCTAssertGreaterThanOrEqual(logo.frame.minY - c.maxY, 12, "the logo keeps clear of the bar") }
+        keep(app.screenshot(), as: "squishy-home-top-bar")
+        app.terminate()
+    }
+
     /// Squishies whose signature move brings its own part (a top, a hat, a lid): a picture of each at
     /// rest in the Squish Room, so a part that sits in the wrong place is seen without a phone.
     func testPartsSitOnTheirSquishies() {

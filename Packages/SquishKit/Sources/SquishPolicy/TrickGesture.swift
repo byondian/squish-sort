@@ -28,9 +28,10 @@ public enum TrickGesture: Equatable, Sendable {
             }
             before = angle
         }
-        if abs(turned) >= 5.2 { return .circle }
+        // Most of the way round is enough: nobody closes a circle exactly with a finger.
+        if abs(turned) >= 4.4 { return .circle }
         let up = first.y - last.y, across = abs(last.x - first.x)
-        if seconds <= 0.5, up >= max(40, size * 0.25), across <= up * 0.6 { return .swipeUp }
+        if seconds <= 0.8, up >= max(30, size * 0.2), across <= up * 0.75 { return .swipeUp }
         return nil
     }
 }

@@ -11,10 +11,11 @@ struct MapView: View {
         ("christmas", AppModel.christmasWorldName),
     ] }
 
-    /// Keep Squishing shows once its first level is open; Santa's Grotto once its door has been opened.
+    /// Keep Squishing is always on the map, so the whole road shows from the first day (its levels
+    /// stay locked until the story is done). Santa's Grotto shows once its door has been opened.
     private func shows(_ world: String) -> Bool {
         if world == "christmas" { return model.progress.christmasEntered }
-        if world == LevelCatalog.endless { return model.endlessCount > 0 && model.progress.highestUnlocked >= model.storyLevelCount }
+        if world == LevelCatalog.endless { return model.endlessCount > 0 }
         return true
     }
 
@@ -53,8 +54,14 @@ struct MapView: View {
                                 if world.id != LevelCatalog.endless { starJar(world.id) }
                             }
                             if world.id == LevelCatalog.endless {
-                                Text("It never runs out. A capsule every fifth level.")
-                                    .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.65))
+                                if model.progress.highestUnlocked >= model.storyLevelCount {
+                                    Text("It never runs out. A capsule every fifth level.")
+                                        .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.65))
+                                } else {
+                                    Text("\(model.endlessCount) more levels. Opens after Starlight Stage.")
+                                        .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.65))
+                                        .accessibilityIdentifier("keep-squishing-locked")
+                                }
                             }
                             ShowPoster(world: world.id)
                             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 5), spacing: 10) {
