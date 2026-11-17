@@ -22,6 +22,8 @@ struct HomeView: View {
                 VStack(spacing: compact ? 6 : 10) {
                     topBar.dimmed(teaching)
                     JellyLogo(scale: compact ? 0.32 : 0.42).dimmed(teaching)
+                        .padding(.top, compact ? 6 : 14)
+                        .accessibilityElement().accessibilityIdentifier("home-logo")
                     if model.adventDoors > 0 { AdventShelf().dimmed(teaching) }
                     Spacer(minLength: 0)
                     if model.isExtraUnlocked(.buddy) {
@@ -47,7 +49,8 @@ struct HomeView: View {
                     }
                     .dimmed(teaching)
                 }
-                .padding(.horizontal, 16).padding(.top, 16).padding(.bottom, 12)
+                // The bar sits just under the status bar, with the same 16 points either side.
+                .padding(.horizontal, 16).padding(.top, 6).padding(.bottom, 12)
                 tabBar.dimmed(teaching)
             }
         }
@@ -88,13 +91,17 @@ struct HomeView: View {
         .onDisappear { model.trickTeaching = nil }
     }
 
+    /// Every item in the top bar is this tall and sits on one centre line (a UI test holds it to that).
+    static let barHeight: CGFloat = 44
+
     /// Coins (opens the coin shop), the stamp card, the festive door in season, and settings.
     private var topBar: some View {
-        HStack(spacing: 8) {
+        HStack(alignment: .center, spacing: 8) {
             // Under-13s (and players who gave no age) meet the grown-up check first, the same one Settings uses.
             Button { if model.isGentleMode { coinGate = true } else { model.screen = .shop } } label: {
                 HStack(spacing: 6) {
-                    Label { Text("\(model.progress.wallet.balance)") } icon: { CoinIcon() }
+                    CoinIcon().font(.system(size: 20))
+                    Text("\(model.progress.wallet.balance)")
                         .font(Theme.body(17)).foregroundStyle(Theme.plum)
                         .monospacedDigit()
                         .contentTransition(.numericText(value: Double(model.progress.wallet.balance)))
@@ -106,7 +113,8 @@ struct HomeView: View {
                     }
                 }
                 .scaleEffect(coinsLanded && coinsFlying ? 1.12 : 1)
-                .padding(.leading, 14).padding(.trailing, 8).frame(height: 44)
+                // The same inset on both ends: the coin on the left, the plus (or the number) on the right.
+                .padding(.leading, 11).padding(.trailing, model.isGentleMode ? 14 : 11).frame(height: HomeView.barHeight)
                 .background(Capsule().fill(.white))
             }
             .buttonStyle(PressSquish())
@@ -129,6 +137,7 @@ struct HomeView: View {
             }
             IconButton(system: "gearshape.fill") { model.screen = .settings }
         }
+        .frame(height: HomeView.barHeight)
     }
 
     /// Daily Jar: one board a day. Once it is won it just says so until tomorrow; nothing counts down.
@@ -315,7 +324,7 @@ struct HomeView: View {
                 Text(verbatim: "\(model.progress.stampCard.stamps)/\(StampCard.size)")
                     .font(Theme.body(15)).foregroundStyle(Theme.plum).monospacedDigit()
             }
-            .padding(.horizontal, 12).frame(height: 44)
+            .padding(.horizontal, 12).frame(height: HomeView.barHeight)
             .background(Capsule().fill(.white))
         }
         .buttonStyle(PressSquish())
