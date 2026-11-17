@@ -347,9 +347,10 @@ final class JarNode: SKNode {
         shine.strokeColor = .clear
         shine.position = CGPoint(x: -size.width * 0.31, y: size.height * 0.04)
         addChild(shine)
-        // A slightly wider rim on top.
-        let rim = SKShapeNode(rectOf: CGSize(width: size.width * 1.06, height: max(5, size.width * 0.09)),
-                              cornerRadius: max(2.5, size.width * 0.045))
+        // The mouth of the jar: a ring seen a little from above, with the opening showing through,
+        // so an empty or part-filled jar reads as open and never as lidded.
+        let mouth = CGSize(width: size.width * 1.06, height: max(9, size.width * 0.2))
+        let rim = SKShapeNode(ellipseOf: mouth)
         // A boss level's jars have gold rims.
         rim.fillColor = gold ? UIColor(hex: 0xFFC93C) : UIColor.white.withAlphaComponent(dark ? 0.55 : 0.95)
         rim.strokeColor = gold ? UIColor(hex: 0xC78A12) : UIColor(hex: 0x965A78).withAlphaComponent(0.28)
@@ -357,6 +358,12 @@ final class JarNode: SKNode {
         rim.position = CGPoint(x: 0, y: size.height / 2)
         rim.zPosition = 1
         addChild(rim)
+        let opening = SKShapeNode(ellipseOf: CGSize(width: mouth.width - 9, height: max(3, mouth.height - 7)))
+        opening.fillColor = dark ? UIColor(hex: 0x241A45).withAlphaComponent(0.55) : UIColor(hex: 0x965A78).withAlphaComponent(0.2)
+        opening.strokeColor = gold ? UIColor(hex: 0xC78A12).withAlphaComponent(0.6) : UIColor(hex: 0x965A78).withAlphaComponent(0.22)
+        opening.lineWidth = 1
+        opening.zPosition = 1
+        rim.addChild(opening)
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) is not used") }
