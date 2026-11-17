@@ -19,7 +19,7 @@ Early in the first play, before any ad can appear, the game asks for the player'
 Gentle mode is on for players under 13 (under 14 in Korea) and for anyone who skipped the age question. In gentle mode:
 
 - Ads are child-directed, non-personalised and general audience only.
-- The first ad between levels comes at level 12 or later, and ads are half as frequent.
+- The first ad between levels comes at level 12 or later, and ads are far less frequent than for older players (at most one every 4 to 8 levels; see [ads and tracking]({{h}}/ads)).
 - Apple's tracking prompt is never shown.
 - Game statistics (analytics) are never sent.
 - Purchases and the coin shop sit behind a grown-up check, and are only reachable from Settings.
@@ -33,6 +33,7 @@ Gentle mode is on for players under 13 (under 14 in Korea) and for anyone who sk
 
 - Remove Ads stops the automatic ads and is shared with your Family Sharing group.
 - Coins buy hints, extra jars, Extras (bows, hats and other things a squishy wears, which can be tried on for free first), Squishy Maker parts, themes and Buddy treats. Coins never buy squishies, and no purchase or ad ever gives a capsule.
+- The starter pack and the piggy bank (one-time and coin offers for players 13 and over) never appear in gentle mode or when the age is unknown.
 - Use Apple's **Ask to Buy** (Family Sharing) or **Screen Time > Content & Privacy Restrictions > iTunes & App Store Purchases** to stop in-app purchases completely.
 - Refunds are handled by Apple at [reportaproblem.apple.com](https://reportaproblem.apple.com).
 

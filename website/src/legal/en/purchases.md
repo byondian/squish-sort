@@ -3,7 +3,7 @@ title: Purchases and drop rates
 description: What you can buy in Squish Sort, what coins do, and the published capsule drop rates. Squishies are never for sale.
 ---
 :::summary
-- You can buy **Remove Ads** and **coin packs**. That's all.
+- You can buy **Remove Ads**, **coin packs**, a one-time **starter pack** and the **piggy bank**. That's all.
 - **Squishies and capsules are never for sale.** Capsules are earned only by playing, and paying never changes the odds.
 - Every level can be finished for free.
 :::
@@ -16,8 +16,12 @@ description: What you can buy in Squish Sort, what coins do, and the published c
 | 1,000 coins | Consumable | Coins to spend in the game |
 | 3,500 coins | Consumable | Coins to spend in the game |
 | 7,500 coins | Consumable | Coins to spend in the game |
+| Starter pack | One-time purchase, players 13 and over (14 in Korea) | 2,500 coins, 3 hints and the Golden Hour board, which is only in this pack. It can be bought once and comes back with Restore purchases |
+| Piggy bank | Consumable, players 13 and over (14 in Korea) | Every win drops a bonus into the piggy bank (half of that win's coins, on top of them, up to 4,000). From 2,000 coins it can be broken open in the shop to get everything inside. It never empties or expires, and not buying it loses nothing |
 
 Prices are shown in the App Store in your local currency. We do not show prices on this website.
+
+The starter pack and the piggy bank are shown only to players whose age the game knows to be 13 or over (14 or over in Korea). They never appear in gentle mode or when the age is unknown. There are no timers or "last chance" offers: the starter pack is mentioned once, after the first world, and then simply stays in the shop.
 
 ## What coins buy
 
@@ -30,6 +34,7 @@ Prices are shown in the App Store in your local currency. We do not show prices 
 | Squishy Buddy gift | 600 |
 | Extras (things a squishy wears, such as a bow, glasses or wings) | 300, 500 or 800 each. The crown and unicorn horn can only be earned by playing |
 | Squishy Maker parts, unlocked early | 150 for a colour, 300 for other parts. Finishing worlds still opens them for free. A few parts can only be earned by playing |
+| Extra Squishy Maker place | 2,500. The first place is free |
 
 ## Earning coins by playing
 
@@ -89,4 +94,4 @@ Two friendly rules on top:
 
 ## Refunds and restoring
 
-Purchases are made with Apple. For refunds, visit [reportaproblem.apple.com](https://reportaproblem.apple.com). To restore Remove Ads, open Settings in the game and tap **Restore purchases**. Coins already credited can't be restored after the app is deleted, because they are stored only on your device. The coin shop says so before you buy.
+Purchases are made with Apple. For refunds, visit [reportaproblem.apple.com](https://reportaproblem.apple.com). To restore Remove Ads or the starter pack, open Settings in the game and tap **Restore purchases**. A restored starter pack gives its coins only if they were never credited on this device. Coins already credited can't be restored after the app is deleted, because they are stored only on your device. The coin shop says so before you buy.

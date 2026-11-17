@@ -13,9 +13,17 @@ Ads that play by themselves (between levels) currently follow these limits:
 | Levels | At most |
 |---|---|
 | 1 to 6 | No ads |
-| 7 to 15 | One ad every 4 levels, and at least 4 minutes of play apart |
-| 16 to 30 | One ad every 3 levels, and at least 3 minutes of play apart |
-| 31 onwards | One ad every 2 levels, and at least 90 seconds of play apart |
+| 7 to 20 | One ad every 3 levels, and at least 150 seconds of play apart |
+| 21 onwards | One ad every 2 levels, and at least 90 seconds of play apart |
+
+In **gentle mode** (children), ads are much rarer:
+
+| Levels | At most |
+|---|---|
+| 1 to 11 | No ads |
+| 12 to 15 | One ad every 8 levels, and at least 8 minutes of play apart |
+| 16 to 30 | One ad every 6 levels, and at least 6 minutes of play apart |
+| 31 onwards | One ad every 4 levels, and at least 3 minutes of play apart |
 
 And always:
 
@@ -23,7 +31,6 @@ And always:
 - Only after a level is won: never mid-level and never after a fail.
 - Never after a boss level, after a level that gave a capsule, or when a win unlocks something new.
 - Watching an optional reward video resets the clock, so you get a break from ad breaks.
-- In **gentle mode**, the first ad comes at level 12 or later, and every gap is doubled.
 
 We may adjust these numbers, and if we do we'll update this page.
 

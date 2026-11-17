@@ -3,7 +3,7 @@ title: Terms of use
 description: The rules for playing Squish Sort and buying in-app items, in plain words.
 ---
 :::summary
-**The short version:** Squish Sort is free to play. You can buy Remove Ads and packs of coins through Apple. Coins and squishies have no cash value. Squishies are never for sale. Be kind, enjoy the squish, and your legal rights as a consumer always stay in place.
+**The short version:** Squish Sort is free to play. You can buy Remove Ads, packs of coins, a one-time starter pack and the piggy bank through Apple. Coins and squishies have no cash value. Squishies are never for sale. Be kind, enjoy the squish, and your legal rights as a consumer always stay in place.
 :::
 
 ## Who these terms are with
@@ -24,6 +24,7 @@ The app is licensed to you under Apple's [Licensed Application End User License 
 
 - **Remove Ads** is a one-time purchase. It stops the ads that play by themselves (between levels) and gives the optional video rewards with one tap instead of a video, under the same daily limit. It also gives unlimited undo, one free extra jar per level and 3 free hints a day. Remove Ads is shared with your Family Sharing group.
 - **Coin packs** are consumable. Coins are spent in the game on hints, extra jars, Extras (things a squishy wears), Squishy Maker parts, board themes and Squishy Buddy treats and gifts.
+- The **starter pack** (players 13 and over, 14 in Korea) is a one-time purchase of coins, hints and a board theme. The **piggy bank** (same ages) collects bonus coins as you win, and buying it gives you what is inside. Neither is shown in gentle mode. Coins also buy extra Squishy Maker places.
 - **Squishies and capsules can never be bought**, directly or with coins. Paying never changes what you find in capsules. See [purchases and drop rates]({{h}}/purchases).
 - Coins and squishies are a licence to use game content. They have no cash value, can't be exchanged for money or transferred between people, and are not your property.
 - Prices are shown in the App Store in your currency, including any taxes Apple collects.
