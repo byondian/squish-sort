@@ -22,7 +22,7 @@ struct HomeView: View {
                 VStack(spacing: compact ? 6 : 10) {
                     topBar.dimmed(teaching)
                     JellyLogo(scale: compact ? 0.32 : 0.42).dimmed(teaching)
-                        .padding(.top, compact ? 6 : 14)
+                        .padding(.top, compact ? 9 : 14)
                         .accessibilityElement().accessibilityIdentifier("home-logo")
                     if model.adventDoors > 0 { AdventShelf().dimmed(teaching) }
                     Spacer(minLength: 0)
