@@ -1270,9 +1270,10 @@ final class AppModel: ObservableObject {
         }
         if firstClear && level.file.capsule {
             openCapsule(world: level.look)
-        } else {
+        } else if !news.contains(where: { if case .starJar(_, let prize) = $0 { return prize >= 2 } else { return false } }) {
             openPendingCapsule()
         }
+        // A star jar's capsule waits for its own card ("You won a golden capsule"), then opens.
     }
 
     /// Opens the next earned capsule that is still waiting, if nothing else is
@@ -1664,6 +1665,7 @@ final class AppModel: ObservableObject {
         // A trick just learned is done straight away, as soon as its card is closed.
         if case .trick(let number) = read { trickToShow = number }
         if case .worldComplete = read { maybeAskForRating(at: .worldComplete) }
+        if case .starJar(_, let prize) = read, prize >= 2 { openPendingCapsule() }
         if case .teaser(let world, let number) = read {
             update { $0.teasersSeen[world] = max($0.teasersSeen[world] ?? 0, number) }
         }
@@ -1709,7 +1711,8 @@ final class AppModel: ObservableObject {
         // Ad tiers count every level cleared, on the main path and in side worlds.
         let win = LevelWin(level: max(progress.stars.count, isSideLevel(index) ? 0 : index + 1), attempts: attempts, isBoss: level.file.beat == .boss,
                            secondsIntoSession: Date().timeIntervalSince(sessionStart), hadReward: lastWinHadReward)
-        let show = progress.age != nil && config.adsEnabled
+        // Never after a tiny teaching level (a handful of moves): an ad there feels harsh.
+        let show = progress.age != nil && config.adsEnabled && level.par > 6
             && AdCadence.shouldShowInterstitial(after: win, state: progress.cadence, group: ageGroup,
                                                 ownsRemoveAds: ownsRemoveAds, config: config.adCadence)
         if show, ads.showInterstitial(done: { [weak self] in self?.next(after: index) }) {

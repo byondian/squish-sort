@@ -445,6 +445,11 @@ final class LevelController: ObservableObject {
             noWayThrough = false; hintGaveUp = false
             scene.reload(session.board, dropIn: true)
             scene.popWord(word, size: 0.95)
+            // The first shake-up ever says what just happened, once.
+            if !keepsStarLimit, !model.progress.rulesShown.contains("shakeup") {
+                model.update { $0.rulesShown.insert("shakeup") }
+                model.toast = String(localized: "Shake-up! Everyone swapped places. Your stars start fresh from here.")
+            }
             model.sounds.play("splat", or: "land_soft")
             model.haptics.win()
             then(true)
@@ -712,6 +717,12 @@ struct LevelView: View {
                     Spacer()
                 }
                 .transition(.opacity)
+                // It says its piece and goes: it must never stay pinned over a board that has moved on.
+                .task {
+                    try? await Task.sleep(nanoseconds: 4_000_000_000)
+                    controller.noWayThrough = false
+                    controller.hintGaveUp = false
+                }
             }
             if let outcome = controller.outcome {
                 Color.black.opacity(0.15).ignoresSafeArea()

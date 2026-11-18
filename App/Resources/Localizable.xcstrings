@@ -5777,6 +5777,28 @@
         }
       }
     },
+    "Shake-up! Everyone swapped places. Your stars start fresh from here.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "シャッフル！みんなの場所が入れかわったよ。スターはここから数えなおし。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "셰이크업! 모두 자리가 바뀌었어요. 별은 여기서부터 다시 세요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大洗牌！大家換了位置。星星從這裡重新計算。"
+          }
+        }
+      }
+    },
     "Shape": {
       "localizations": {
         "ja": {
