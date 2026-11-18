@@ -1412,11 +1412,15 @@ final class AppModel: ObservableObject {
     }
 
     /// Levels still to win before the next capsule level, counting from the level after `index`.
-    /// 0 means the next level is a capsule level. Nil when the world path has none left.
+    /// 0 means the next level is a capsule level. Nil when the world path has none left, and nil
+    /// when a level on the way was won before: a capsule comes once, on a level's first win, so a
+    /// replay must never promise one (Ian, 18 Nov: "capsule next level", then no capsule).
     func levelsToNextCapsule(after index: Int) -> Int? {
         let end = isSideLevel(index) ? levels.count : mainLevelCount
-        guard index + 1 < end else { return nil }
-        return levels[(index + 1)..<end].firstIndex { $0.file.capsule }.map { $0 - index - 1 }
+        guard index + 1 < end,
+              let next = levels[(index + 1)..<end].firstIndex(where: { $0.file.capsule }),
+              levels[(index + 1)...next].allSatisfy({ progress.stars[$0.id] == nil }) else { return nil }
+        return next - index - 1
     }
 
     /// The lucky squishy's kind on this level for this player, if it has one and it still pays.
