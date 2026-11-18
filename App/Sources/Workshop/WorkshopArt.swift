@@ -105,7 +105,7 @@ struct WorkshopSquishyView: View {
     @ViewBuilder private var mask: some View {
         ZStack {
             if design.mould == "draw-it", let outline = design.drawnOutline, outline.count > 2 {
-                DrawnOutline(points: outline).fill(Color.white)
+                DrawnOutline(points: outline).fill(.foreground)
             } else if let image = WorkshopArt.mould(design.mould) ?? WorkshopArt.mould("bun") {
                 Image(uiImage: image).renderingMode(.template).resizable().scaledToFit()
             }

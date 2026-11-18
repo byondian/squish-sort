@@ -74,6 +74,7 @@ struct WorkshopView: View {
     @State private var mixShare = 0.0
     @State private var glug = 0.0
     @State private var wave = 0.0
+    @State private var lastTick = Date()
     /// Pro: the next mould tapped goes on top of the first, as a head.
     @State private var onTop = false
     @State private var faceKind = "eyes"
@@ -186,7 +187,12 @@ struct WorkshopView: View {
                 drawingFace = false
             }
         }
-        .onReceive(clock) { _ in pourTick(1.0 / 30) }
+        .onReceive(clock) { now in
+            // Real time between ticks, so a slow frame pours as much goo as a fast one.
+            let dt = min(0.25, max(0, now.timeIntervalSince(lastTick)))
+            lastTick = now
+            pourTick(dt)
+        }
         .onAppear(perform: restore)
         .onDisappear(perform: keep)
     }
@@ -255,6 +261,7 @@ struct WorkshopView: View {
         .gesture(stageGesture)
         .accessibilityElement(children: station == .dress ? .contain : .ignore)
         .accessibilityLabel(Text("Squishy Workshop"))
+        .accessibilityValue(Text(verbatim: "\(Int((baked ? 1 : poured) * 100))%"))
         .accessibilityIdentifier("ws-stage")
     }
 
@@ -415,13 +422,15 @@ struct WorkshopView: View {
 
     /// The rest of a tray. A child sees a plain closed drawer; from 13 it says how many more there are.
     @ViewBuilder private func moreTile(count: Int) -> some View {
-        let face = VStack(spacing: 2) {
-            Image(systemName: "ellipsis").font(.system(size: 18, weight: .bold))
-            if !gentle { Text(verbatim: "+\(count)").font(Theme.body(12)) }
-        }
-        .foregroundStyle(Theme.plum.opacity(0.45))
-        .frame(maxWidth: .infinity).aspectRatio(1, contentMode: .fit)
-        .background(RoundedRectangle(cornerRadius: 14).fill(Color.white.opacity(0.6)))
+        let face = Color.clear.aspectRatio(1, contentMode: .fit)
+            .overlay {
+                VStack(spacing: 2) {
+                    Image(systemName: "ellipsis").font(.system(size: 18, weight: .bold))
+                    if !gentle { Text(verbatim: "+\(count)").font(Theme.body(12)) }
+                }
+                .foregroundStyle(Theme.plum.opacity(0.45))
+            }
+            .background(RoundedRectangle(cornerRadius: 14).fill(Color.white.opacity(0.6)))
         if gentle {
             face.accessibilityLabel(Text("More"))
         } else {
@@ -1006,6 +1015,7 @@ struct WorkshopView: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(!canOpen(s))
+                .accessibilityLabel(Text("Squishy Workshop"))
                 .accessibilityValue(Text(verbatim: "\(s.rawValue + 1)"))
                 .accessibilityIdentifier("ws-station-\(s.rawValue + 1)")
             }

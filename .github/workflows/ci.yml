@@ -62,7 +62,7 @@ jobs:
           fi
           xcodebuild test -project SquishSort.xcodeproj -scheme SquishSort -resultBundlePath ui.xcresult \
             -destination "id=$UDID" $PICK CODE_SIGNING_ALLOWED=NO \
-            | tee test.log | grep -E "Test Case|error:|TEST|FIRST-SQUISH" || true
+            | tee test.log | grep -E "Test Case|error:|TEST|FIRST-SQUISH|GOLDEN-PATH workshop" || true
           # Pictures the tests kept (the soft squishy at rest and just squeezed), for a look without a phone.
           xcrun xcresulttool export attachments --path ui.xcresult --output-path shots || true
           if ! grep -q "TEST SUCCEEDED" test.log; then
