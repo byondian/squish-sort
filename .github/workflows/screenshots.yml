@@ -1,7 +1,8 @@
 name: Store screenshots
 
-# Manual only: runs the app on the biggest iPhone simulator in four languages, takes the six
-# App Store pictures, puts the captions on and keeps them as a download (store-screenshots).
+# Manual only: runs the app on the biggest iPhone simulator and on a 13 inch iPad in four languages,
+# takes the six App Store pictures on each, puts the captions on and keeps them as a download
+# (store-screenshots, with the iPad set under store/ipad).
 on:
   workflow_dispatch:
 
@@ -31,10 +32,29 @@ jobs:
             | tee test.log | grep -E "Test Case|error:|TEST" || true
           xcrun xcresulttool export attachments --path shots.xcresult --output-path raw
           grep -q "TEST SUCCEEDED" test.log || { grep -E "error:|failed" test.log | head -40; exit 1; }
+      - name: Take the iPad pictures
+        run: |
+          set -o pipefail
+          # The 13 inch iPad: the one iPad size the App Store asks for.
+          UDID=$(xcrun simctl list devices available -j | python3 -c "
+          import json, sys
+          d = json.load(sys.stdin)['devices']
+          pads = [x for k, v in sorted(d.items(), reverse=True) if 'iOS' in k for x in v if x['name'].startswith('iPad')]
+          print(next((x['udid'] for n in ['13-inch', '12.9-inch'] for x in pads if n in x['name']), pads[0]['udid'] if pads else ''))")
+          if [ -z "$UDID" ]; then echo "::error::No iPad simulator on this runner."; exit 1; fi
+          echo "Simulator $UDID"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl status_bar "$UDID" override --time "9:41" --batteryState charged --batteryLevel 100 --wifiBars 3 || true
+          xcodebuild test -project SquishSort.xcodeproj -scheme SquishSort -resultBundlePath shots-ipad.xcresult \
+            -destination "id=$UDID" -only-testing:SquishSortUITests/StoreShotTests CODE_SIGNING_ALLOWED=NO \
+            | tee test-ipad.log | grep -E "Test Case|error:|TEST" || true
+          xcrun xcresulttool export attachments --path shots-ipad.xcresult --output-path raw-ipad
+          grep -q "TEST SUCCEEDED" test-ipad.log || { grep -E "error:|failed" test-ipad.log | head -40; exit 1; }
       - name: Put the captions on
         run: |
           python3 -m pip install --quiet --user --break-system-packages pillow==10.4.0
           python3 scripts/store_shots.py raw store
+          python3 scripts/store_shots.py raw-ipad store/ipad ipad
       - name: Keep the screenshots
         uses: actions/upload-artifact@v4
         with:
@@ -47,7 +67,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import base64, glob, subprocess
-          for src in sorted(glob.glob("store/*/*.png")):
+          for src in sorted(glob.glob("store/**/*.png", recursive=True)):
               out = "/tmp/small.jpg"
               subprocess.run(["sips", "-Z", "700", "-s", "format", "jpeg", "-s", "formatOptions", "55", src, "--out", out], check=False, capture_output=True)
               data = base64.b64encode(open(out, "rb").read()).decode()

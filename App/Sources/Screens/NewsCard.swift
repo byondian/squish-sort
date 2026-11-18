@@ -58,6 +58,7 @@ struct NewsCard: View {
             .background(RoundedRectangle(cornerRadius: 30).fill(Theme.marshmallow))
             .overlay(RoundedRectangle(cornerRadius: 30).stroke(Theme.plum.opacity(0.15), lineWidth: 2))
             .padding(30)
+            .frame(maxWidth: 560)
             .scaleEffect(burst ? 1 : 0.7)
         }
         .onAppear {

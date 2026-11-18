@@ -45,6 +45,13 @@ struct MysteryBagView: View {
         }
         .background(Theme.marshmallow.ignoresSafeArea())
         .onAppear { if bag == nil { bag = model.mysteryBag } }
+        // Left open overnight: the new day brings its new bag, not yesterday's "come back tomorrow".
+        .onChange(of: model.mysteryDay) { _, _ in
+            bag = model.mysteryBag
+            guessedRight = nil
+            ruledOut = nil
+            poked = []
+        }
     }
 
     private var stepsBar: some View {

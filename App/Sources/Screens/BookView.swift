@@ -41,6 +41,8 @@ struct BookView: View {
             }
         }
         .background(Theme.marshmallow.ignoresSafeArea())
+        // Leaving the Collection clears "NEW" from Home: every new squishy has been on screen.
+        .onDisappear { model.allCardsSeen() }
         .overlay { if claimed != nil { Confetti(count: 50, seconds: 2.5).ignoresSafeArea().id(claimed) } }
         .overlay {
             if let c = card {

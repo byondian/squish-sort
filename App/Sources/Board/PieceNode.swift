@@ -296,6 +296,7 @@ final class JarNode: SKNode {
     private let glass: SKShapeNode
     private let outline: SKShapeNode
     private var lid: SKNode?
+    var hasLid: Bool { lid != nil }
 
     /// Rounded more at the bottom than at the top, like a jam jar.
     private static func jarPath(_ size: CGSize, inset: CGFloat = 0) -> CGPath {

@@ -167,12 +167,13 @@ final class BoardScene: SKScene {
         let rows = BoardLayout.rows(jarCount: board.jarCount)
         let perRow = CGFloat(max(rows.map(\.count).max() ?? 1, 3))
         let margin: CGFloat = 14
-        let gap: CGFloat = 10
+        let gap: CGFloat = size.width >= 700 ? 22 : 10
         let cap = CGFloat(board.capacity)
         let maxJarWidth = (size.width - 2 * margin - gap * (perRow - 1)) / perRow
         let rowUnits = cap + 1.7 // jar plus room to lift above it
         let byHeight = (size.height - 2 * margin) / (CGFloat(rows.count) * rowUnits)
-        let piece = max(16, min(maxJarWidth / 1.25, byHeight, 70))
+        // An iPad has room for bigger squishies and wider gaps.
+        let piece = max(16, min(maxJarWidth / 1.25, byHeight, size.width >= 700 ? 104 : 70))
         let jarSize = CGSize(width: piece * 1.25, height: piece * (cap + 0.4))
         let rowHeight = piece * rowUnits
         var centers = Array(repeating: CGPoint.zero, count: board.jarCount)
@@ -425,13 +426,15 @@ final class BoardScene: SKScene {
     }
 
     /// A magic move: the scene lifts and lands `move` by itself, just as two taps would.
-    func playForPlayer(_ move: Move) {
-        guard !busy, board.isLegal(move) else { return }
+    /// False when the board is busy and nothing was started.
+    @discardableResult
+    func playForPlayer(_ move: Move) -> Bool {
+        guard !busy, board.isLegal(move) else { return false }
         endTutorial()
         clearHint()
         if lifted == move.from {
             tap(move.to)
-            return
+            return true
         }
         if let up = lifted { putBack(up) }
         lift(move.from)
@@ -440,6 +443,7 @@ final class BoardScene: SKScene {
             guard let self, !self.busy, self.lifted == move.from else { return }
             self.tap(move.to)
         }]))
+        return true
     }
 
     /// Same as a finger tap on jar `j` (used by UI tests and accessibility).
@@ -464,6 +468,9 @@ final class BoardScene: SKScene {
     override func update(_ currentTime: TimeInterval) {
         let dt = lastUpdate == 0 ? 1.0 / 60 : min(0.05, max(0, currentTime - lastUpdate))
         lastUpdate = currentTime
+        // What is drawn must be what the board holds. If they ever part (Ian, 18 Nov: a lid on a
+        // jar that showed three squishies), everything is drawn again from the board at once.
+        if !busy, size.width > 0, !matchesBoard { rebuild() }
         for (j, jar) in pieces.enumerated() {
             for (i, node) in jar.enumerated() {
                 node.advance(dt)
@@ -477,6 +484,17 @@ final class BoardScene: SKScene {
                 }
             }
         }
+    }
+
+    /// Every jar shows the board's own pieces in order, and a lid exactly when the jar is complete.
+    private var matchesBoard: Bool {
+        guard pieces.count == board.jarCount, jarNodes.count == board.jarCount else { return false }
+        for j in 0..<board.jarCount {
+            let jar = board.jars[j]
+            guard pieces[j].count == jar.count, jarNodes[j].hasLid == board.isComplete(j) else { return false }
+            for (i, piece) in jar.enumerated() where pieces[j][i].kindID != kinds[Int(piece.kind)] { return false }
+        }
+        return true
     }
 
     /// A piece has landed in `jar` at `index`: it squashes, and the whole stack under it gives a little.
@@ -500,6 +518,8 @@ final class BoardScene: SKScene {
         for (k, node) in pieces[j].suffix(n).enumerated() {
             node.removeAction(forKey: "wobble")
             node.removeAction(forKey: "travel")
+            // Picked up while still dropping in after a shuffle: it must not stay faded.
+            node.alpha = 1
             node.zPosition = 10
             let rise = SKAction.move(to: liftPoint(j, k), duration: 0.12)
             rise.timingMode = .easeOut

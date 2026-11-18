@@ -16,6 +16,7 @@ struct SquishSortApp: App {
 /// No title screen: the first thing a new player sees is Level 1.
 struct RootView: View {
     @EnvironmentObject var model: AppModel
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         ZStack {
@@ -27,20 +28,21 @@ struct RootView: View {
                 Text("Levels missing from the bundle").font(Theme.body())
             case .home:
                 HomeView()
+            // On an iPad these keep a comfortable reading width in the middle of the screen.
             case .map:
-                MapView()
+                MapView().frame(maxWidth: 760)
             case .mystery:
-                MysteryBagView()
+                MysteryBagView().frame(maxWidth: 760)
             case .maker:
-                MakerView()
+                MakerView().frame(maxWidth: 760)
             case .book:
-                BookView()
+                BookView().frame(maxWidth: 900)
             case .room:
                 SquishRoomView()
             case .settings:
-                SettingsView()
+                SettingsView().frame(maxWidth: 760)
             case .shop:
-                ShopView()
+                ShopView().frame(maxWidth: 760)
             }
         }
         .overlay {
@@ -81,5 +83,7 @@ struct RootView: View {
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: model.toast)
         .preferredColorScheme(.light)
+        // Back from the background, perhaps on a new day: Home and the Mystery Bag read the clock again.
+        .onChange(of: scenePhase) { _, phase in if phase == .active { model.cameBack() } }
     }
 }

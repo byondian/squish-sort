@@ -475,6 +475,37 @@ final class AppModel: ObservableObject {
         return !ids.isEmpty && ids.allSatisfy { progress.stars[$0] != nil }
     }
 
+    /// Stars a story world needs before the next one opens: half of what it has to give
+    /// (23 of 45 in Toy Shop, 30 of 60, 38 of 75, 45 of 90).
+    static let starGateShare = 0.5
+    func starGate(_ world: String) -> Int {
+        Int((Double(stars(inWorld: world).possible) * AppModel.starGateShare).rounded(.up))
+    }
+
+    /// The next story world is waiting for stars: the world that needs them, the world that opens,
+    /// and how many more. Nil when nothing is waiting.
+    var starGateWaiting: (from: String, next: String, more: Int)? {
+        let top = progress.highestUnlocked
+        guard levels.indices.contains(top), levels.indices.contains(top + 1), !isSideLevel(top),
+              progress.stars[levels[top].id] != nil else { return nil }
+        let world = levels[top].file.world, next = levels[top + 1].file.world
+        guard next != world, LevelCatalog.worlds.contains(next) else { return nil }
+        let more = starGate(world) - stars(inWorld: world).earned
+        return more > 0 ? (world, next, more) : nil
+    }
+
+    /// The stars are in: the waiting world opens.
+    private func openStarGateIfEarned() {
+        let top = progress.highestUnlocked
+        guard levels.indices.contains(top), levels.indices.contains(top + 1), !isSideLevel(top),
+              progress.stars[levels[top].id] != nil else { return }
+        let world = levels[top].file.world, next = levels[top + 1].file.world
+        guard next != world, LevelCatalog.worlds.contains(next), stars(inWorld: world).earned >= starGate(world) else { return }
+        update { $0.highestUnlocked = top + 1 }
+        sounds.play("unlock_new")
+        toast = String(localized: "A new world is open!")
+    }
+
     /// Stars earned in a world, and how many it has to give.
     func stars(inWorld world: String) -> (earned: Int, possible: Int) {
         let ids = levels.filter { $0.file.world == world }.map(\.id)
@@ -1018,9 +1049,10 @@ final class AppModel: ObservableObject {
         heartsChanged(from: before)
     }
 
-    /// How long a treat's puff lasts: a day for players of 13 and over. In gentle mode it is a short
-    /// happy reaction, so nothing asks a child to come back in time.
-    var puffSeconds: Double { isGentleMode ? BuddyState.puffSecondsGentle : BuddyState.puffSeconds }
+    /// How long a treat's puff lasts: the Buddy stays bigger and eases back over a day, for every
+    /// player (Ian, 18 Nov: it should stay bigger, then slowly get smaller). Nothing is said or shown
+    /// as it eases back and nothing earned is lost, so it asks nobody to come back in time.
+    var puffSeconds: Double { BuddyState.puffSeconds }
 
     // MARK: - The Buddy's daily gift
 
@@ -1146,6 +1178,13 @@ final class AppModel: ObservableObject {
             summary.buddyName = progress.buddy.name
         }
         let side = isSideLevel(index)
+        // The next story world waits for this world's stars (Ian, 18 Nov). A player already past
+        // the gate is never locked out again.
+        let bestNow = max(previousBest ?? 0, stars)
+        let opensWorld = !side && levels.indices.contains(index + 1) && levels[index + 1].file.world != level.file.world
+            && LevelCatalog.worlds.contains(levels[index + 1].file.world) && index + 1 > progress.highestUnlocked
+        let held = opensWorld
+            && self.stars(inWorld: level.file.world).earned - (previousBest ?? 0) + bestNow < starGate(level.file.world)
         var barFull = false
         update { p in
             p.stampCard = card
@@ -1161,12 +1200,14 @@ final class AppModel: ObservableObject {
             p.stars[level.id] = max(previousBest ?? 0, stars)
             if side {
                 p.christmasUnlocked = max(p.christmasUnlocked, min(level.file.index, LevelCatalog.levelCount(in: level.file.world) - 1))
-            } else {
+            } else if !held {
                 p.highestUnlocked = max(p.highestUnlocked, min(index + 1, max(0, mainLevelCount - 1)))
             }
             AdCadence.recordPlayTime(playSeconds, &p.cadence)
             AdCadence.recordWin(&p.cadence)
         }
+        // A replay may have earned the stars a waiting world needs.
+        if !side, !held { openStarGateIfEarned() }
         lastWin = summary
         levelCheer = buddyLine(stars >= 3 ? "win_3star" : "win")
         let unlockedExtra = Extra.allCases.filter { isExtraUnlocked($0) } != extrasBefore
@@ -1189,11 +1230,18 @@ final class AppModel: ObservableObject {
             }
         } else if !worldWasComplete, isWorldComplete(level.file.world) {
             let order = LevelCatalog.worlds
-            let next = order.firstIndex(of: level.file.world).flatMap { $0 + 1 < order.count ? order[$0 + 1] : nil }
+            // While the next world waits for stars, the card does not raise the curtain on it.
+            let next = held ? nil : order.firstIndex(of: level.file.world).flatMap { $0 + 1 < order.count ? order[$0 + 1] : nil }
             news.append(.worldComplete(world: level.file.world, next: next))
             update { $0.wallet.earn(config.coins.worldComplete) }
             // The world's big show follows its WORLD COMPLETE card.
             if !AppModel.isUITesting, ShowPlan.load(level.file.world) != nil { news.append(.finale(world: level.file.world)) }
+        } else if worldWasComplete, !AppModel.isUITesting, ShowPlan.load(level.file.world) != nil,
+                  !progress.finalesSeen.contains(level.file.world), !news.contains(.finale(world: level.file.world)) {
+            // The world was finished before its big show was ever watched (an older build, or the app
+            // was closed on the win card): the next win in it, a replay for stars too, brings both.
+            news.append(.worldComplete(world: level.file.world, next: nil))
+            news.append(.finale(world: level.file.world))
         } else if firstClear, level.file.beat == .boss, !AppModel.isUITesting {
             // A boss half way through a world gets its own cheer; the last boss has WORLD COMPLETE.
             news.append(.bossBeaten(world: level.file.world))
@@ -1222,9 +1270,10 @@ final class AppModel: ObservableObject {
         }
         if firstClear && level.file.capsule {
             openCapsule(world: level.look)
-        } else {
+        } else if !news.contains(where: { if case .starJar(_, let prize) = $0 { return prize >= 2 } else { return false } }) {
             openPendingCapsule()
         }
+        // A star jar's capsule waits for its own card ("You won a golden capsule"), then opens.
     }
 
     /// Opens the next earned capsule that is still waiting, if nothing else is
@@ -1315,6 +1364,17 @@ final class AppModel: ObservableObject {
         roster.collectibles.filter { progress.collection.owns($0.id) && !progress.seenCards.contains($0.id) }.count
     }
 
+    /// The player has looked through the Collection: nothing in it is new any more.
+    func allCardsSeen() {
+        let owned = Set(roster.collectibles.filter { progress.collection.owns($0.id) }.map(\.id))
+        guard !owned.isSubset(of: progress.seenCards) else { return }
+        update { $0.seenCards.formUnion(owned) }
+    }
+
+    /// The clock has moved on while the app was away (a new Mystery Bag day, a treat's puff easing
+    /// back): screens that read the time are drawn again.
+    func cameBack() { objectWillChange.send() }
+
     func cardSeen(_ id: String) {
         guard !progress.seenCards.contains(id) else { return }
         update { $0.seenCards.insert(id) }
@@ -1359,11 +1419,15 @@ final class AppModel: ObservableObject {
     }
 
     /// Levels still to win before the next capsule level, counting from the level after `index`.
-    /// 0 means the next level is a capsule level. Nil when the world path has none left.
+    /// 0 means the next level is a capsule level. Nil when the world path has none left, and nil
+    /// when a level on the way was won before: a capsule comes once, on a level's first win, so a
+    /// replay must never promise one (Ian, 18 Nov: "capsule next level", then no capsule).
     func levelsToNextCapsule(after index: Int) -> Int? {
         let end = isSideLevel(index) ? levels.count : mainLevelCount
-        guard index + 1 < end else { return nil }
-        return levels[(index + 1)..<end].firstIndex { $0.file.capsule }.map { $0 - index - 1 }
+        guard index + 1 < end,
+              let next = levels[(index + 1)..<end].firstIndex(where: { $0.file.capsule }),
+              levels[(index + 1)...next].allSatisfy({ progress.stars[$0.id] == nil }) else { return nil }
+        return next - index - 1
     }
 
     /// The lucky squishy's kind on this level for this player, if it has one and it still pays.
@@ -1601,11 +1665,14 @@ final class AppModel: ObservableObject {
         // A trick just learned is done straight away, as soon as its card is closed.
         if case .trick(let number) = read { trickToShow = number }
         if case .worldComplete = read { maybeAskForRating(at: .worldComplete) }
+        if case .starJar(_, let prize) = read, prize >= 2 { openPendingCapsule() }
         if case .teaser(let world, let number) = read {
             update { $0.teasersSeen[world] = max($0.teasersSeen[world] ?? 0, number) }
         }
         if case .finale(let world) = read, let plan = ShowPlan.load(world) {
             update {
+                // The big show ends the rehearsals: one that was missed is never left locked.
+                $0.teasersSeen[world] = max($0.teasersSeen[world] ?? 0, plan.teaserLevels.count)
                 $0.finalesSeen.insert(world)
                 $0.keepsakes.insert(plan.keepsake)
             }
@@ -1644,7 +1711,8 @@ final class AppModel: ObservableObject {
         // Ad tiers count every level cleared, on the main path and in side worlds.
         let win = LevelWin(level: max(progress.stars.count, isSideLevel(index) ? 0 : index + 1), attempts: attempts, isBoss: level.file.beat == .boss,
                            secondsIntoSession: Date().timeIntervalSince(sessionStart), hadReward: lastWinHadReward)
-        let show = progress.age != nil && config.adsEnabled
+        // Never after a tiny teaching level (a handful of moves): an ad there feels harsh.
+        let show = progress.age != nil && config.adsEnabled && level.par > 6
             && AdCadence.shouldShowInterstitial(after: win, state: progress.cadence, group: ageGroup,
                                                 ownsRemoveAds: ownsRemoveAds, config: config.adCadence)
         if show, ads.showInterstitial(done: { [weak self] in self?.next(after: index) }) {
@@ -1706,6 +1774,12 @@ final class AppModel: ObservableObject {
         if !progress.freeHintUsed || progress.hintTokens > 0 { return true }
         guard ownsRemoveAds else { return false }
         return progress.hintDay != today || progress.hintsUsedToday < 3
+    }
+
+    /// A lucky bonus hands over one magic move, when there is room for it.
+    func grantMagicMove() {
+        guard progress.magicMoves < Coins.maxMagicMoves else { return }
+        update { $0.magicMoves += 1 }
     }
 
     /// One magic move is used up. False when there is none.

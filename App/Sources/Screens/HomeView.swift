@@ -18,19 +18,21 @@ struct HomeView: View {
         GeometryReader { screen in
             // Small phones get a smaller logo and shorter buttons, so the Buddy keeps its room.
             let compact = screen.size.height < 720
+            // An iPad: everything in the middle is bigger, and the buttons keep a comfortable width.
+            let big = screen.size.width >= 700
             VStack(spacing: 0) {
                 VStack(spacing: compact ? 6 : 10) {
                     topBar.dimmed(teaching)
-                    JellyLogo(scale: compact ? 0.32 : 0.42).dimmed(teaching)
+                    JellyLogo(scale: big ? 0.64 : compact ? 0.32 : 0.42).dimmed(teaching)
                         .padding(.top, compact ? 9 : 14)
                         .accessibilityElement().accessibilityIdentifier("home-logo")
                     if model.adventDoors > 0 { AdventShelf().dimmed(teaching) }
                     Spacer(minLength: 0)
                     if model.isExtraUnlocked(.buddy) {
-                        BuddyHomeView(side: compact ? 160 : 200)
+                        BuddyHomeView(side: big ? 340 : compact ? 160 : 200)
                     } else {
                         SquishyView(id: model.progress.favouriteSquishy ?? "peach-bun", rarity: .rare)
-                            .frame(width: 170, height: 170)
+                            .frame(width: big ? 300 : 170, height: big ? 300 : 170)
                     }
                     Spacer(minLength: 0)
                     if let banner = model.eventBanner {
@@ -41,12 +43,13 @@ struct HomeView: View {
                             .background(Capsule().fill(Theme.butter))
                             .dimmed(teaching)
                     }
-                    if model.dailyJarOpen { dailyJarButton.dimmed(teaching) }
-                    playButton(height: compact ? 84 : 104).dimmed(teaching)
+                    if model.dailyJarOpen { dailyJarButton.frame(maxWidth: 620).dimmed(teaching) }
+                    playButton(height: big ? 124 : compact ? 84 : 104).frame(maxWidth: 620).dimmed(teaching)
                     HStack(spacing: 12) {
-                        collectionButton(height: compact ? 76 : 88)
-                        mysteryButton(height: compact ? 76 : 88)
+                        collectionButton(height: big ? 104 : compact ? 76 : 88)
+                        mysteryButton(height: big ? 104 : compact ? 76 : 88)
                     }
+                    .frame(maxWidth: 620)
                     .dimmed(teaching)
                 }
                 // The bar sits just under the status bar, with the same 16 points either side.
@@ -168,16 +171,26 @@ struct HomeView: View {
     /// The main button: straight into the level to play next, with how close the next capsule is.
     private func playButton(height: CGFloat) -> some View {
         let index = model.progress.highestUnlocked
-        return Button { model.screen = .level(index) } label: {
+        // The next world is waiting for stars: the button says how many and leads to the map.
+        let gate = model.starGateWaiting
+        return Button { model.screen = gate == nil ? .level(index) : .map } label: {
             HStack(spacing: 14) {
                 Image(systemName: "play.fill").font(.system(size: height * 0.28, weight: .heavy))
                     .foregroundStyle(Color(hex: 0xEE4689))
                     .frame(width: height * 0.6, height: height * 0.6)
                     .background(Circle().fill(.white))
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Level \(model.levelNumber(index))").font(Theme.title(height * 0.32)).foregroundStyle(.white)
+                    Group {
+                        if let gate { Text("\(gate.more) more stars") } else { Text("Level \(model.levelNumber(index))") }
+                    }
+                    .font(Theme.title(height * 0.32)).foregroundStyle(.white)
                         .lineLimit(1).minimumScaleFactor(0.6)
-                    if model.levels.indices.contains(index) {
+                    if let gate {
+                        Text("to open \(Text(AppModel.worldName(gate.next)))").font(Theme.body(13))
+                            .foregroundStyle(Color(hex: 0xEE4689))
+                            .padding(.horizontal, 10).padding(.vertical, 2)
+                            .background(Capsule().fill(.white))
+                    } else if model.levels.indices.contains(index) {
                         Text(AppModel.worldName(model.levels[index].file.world)).font(Theme.body(13))
                             .foregroundStyle(Color(hex: 0xEE4689))
                             .padding(.horizontal, 10).padding(.vertical, 2)
@@ -185,7 +198,7 @@ struct HomeView: View {
                     }
                 }
                 Spacer(minLength: 0)
-                if let before = model.levelsToNextCapsule(after: index - 1) {
+                if gate == nil, let before = model.levelsToNextCapsule(after: index - 1) {
                     // A capsule over three pips: one fills with each level won.
                     let toGo = before + 1
                     VStack(spacing: 6) {
@@ -232,9 +245,10 @@ struct HomeView: View {
         }
         .buttonStyle(JellyButtonStyle(colors: [Color(hex: 0xA9DCFF), Color(hex: 0x63B6F5), Color(hex: 0x4C9FE6)], rim: Color(hex: 0x2F7FC4), radius: 26))
         .overlay(alignment: .topTrailing) {
-            // Something new to look at, or a set prize waiting.
+            // "NEW" only for a squishy not looked at yet; a set prize waiting to be collected is a gift.
             if model.newSquishies > 0 || model.setGoalWaiting {
-                Text("NEW").font(Theme.body(11)).foregroundStyle(.white)
+                Group { if model.newSquishies > 0 { Text("NEW") } else { Text(verbatim: "🎁") } }
+                    .font(Theme.body(11)).foregroundStyle(.white)
                     .padding(.horizontal, 7).padding(.vertical, 3)
                     .background(Capsule().fill(Theme.bubblegum))
                     .overlay(Capsule().stroke(.white, lineWidth: 2))

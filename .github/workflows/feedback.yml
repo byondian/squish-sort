@@ -10,6 +10,9 @@ permissions:
 
 jobs:
   feedback:
+    # Actions logs of a public repository are public, and this job prints testers' notes and
+    # pictures into its log. It only ever runs while the repository is private.
+    if: github.event.repository.private
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
