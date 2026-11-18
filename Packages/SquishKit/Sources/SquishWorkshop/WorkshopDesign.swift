@@ -136,6 +136,8 @@ public struct WorkshopDesign: Codable, Equatable, Sendable {
     public var source: String
     /// Schema number of the save.
     public var v: Int = 2
+    /// Moves the player taught it by dragging it about (Pro). At most `TrickTraining.maxMoves`.
+    public var moves: [TaughtMove] = []
 
     public static let maxLayers = 3
     /// One from each of the eleven trays.
@@ -186,6 +188,7 @@ public struct WorkshopDesign: Codable, Equatable, Sendable {
         born = (try? c.decodeIfPresent(Double.self, forKey: .born)) ?? 0
         source = (try? c.decodeIfPresent(String.self, forKey: .source)) ?? "game"
         v = max(2, (try? c.decodeIfPresent(Int.self, forKey: .v)) ?? 2)
+        moves = (try? c.decodeIfPresent([TaughtMove].self, forKey: .moves)) ?? []
         tidy()
     }
 
@@ -200,6 +203,12 @@ public struct WorkshopDesign: Codable, Equatable, Sendable {
         parts = parts.map(WorkshopDesign.clamped)
         stickers = stickers.map(WorkshopDesign.clamped)
         pitch = min(1.25, max(0.8, pitch))
+        moves = moves.prefix(TrickTraining.maxMoves).map { move in
+            var m = move
+            m.path = Array(m.path.prefix(TrickTraining.maxPathPoints))
+            m.tries = min(TrickTraining.triesToLearn, max(1, m.tries))
+            return m
+        }
         if let strokes = drawnFace {
             drawnFace = strokes.prefix(WorkshopDesign.maxStrokes).map { Array($0.prefix(WorkshopDesign.maxStrokePoints)) }
         }

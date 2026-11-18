@@ -915,6 +915,28 @@
         }
       }
     },
+    "Again!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "もういっかい！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "한 번 더!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再一次！"
+          }
+        }
+      }
+    },
     "All commons": {
       "localizations": {
         "ja": {
@@ -3665,6 +3687,28 @@
         }
       }
     },
+    "It learned a trick!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "わざをおぼえた！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "재주를 배웠어요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "學會把戲了！"
+          }
+        }
+      }
+    },
     "It never runs out. A capsule every fifth level.": {
       "localizations": {
         "ja": {
@@ -6371,6 +6415,28 @@
         }
       }
     },
+    "Show me!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "やってみせて！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "보여 줘!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "示範給我看！"
+          }
+        }
+      }
+    },
     "Shuffle": {
       "localizations": {
         "ja": {
@@ -7489,6 +7555,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "點一下打開！"
+          }
+        }
+      }
+    },
+    "Teach a trick": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "わざをおしえる"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "재주 가르치기"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "教把戲"
           }
         }
       }

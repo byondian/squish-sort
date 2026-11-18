@@ -315,4 +315,38 @@ final class WorkshopTests: XCTestCase {
         }
         XCTAssertNil(recipes.design(for: "not-a-squishy"))
     }
+
+    func testTheFirstShowingIsTheMoveAndItIsTidyByTheThirdTry() throws {
+        XCTAssertNil(TrickTraining.record([WorkshopPoint(x: 0.5, y: 0.5)], seconds: 1), "a tap is not a move")
+        XCTAssertNil(TrickTraining.record([WorkshopPoint(x: 0.5, y: 0.5), WorkshopPoint(x: 0.51, y: 0.5)], seconds: 1))
+        let raw = (0...30).map { WorkshopPoint(x: 0.2 + 0.02 * Double($0), y: 0.5 + 0.2 * sin(Double($0) / 5)) }
+        var move = try XCTUnwrap(TrickTraining.record(raw, seconds: 9))
+        XCTAssertEqual(move.path.count, TrickTraining.pathPoints)
+        XCTAssertEqual(move.path.first, raw.first)
+        XCTAssertEqual(move.path.last?.x ?? 0, raw.last?.x ?? 1, accuracy: 0.0001)
+        XCTAssertEqual(move.seconds, TrickTraining.maxSeconds)
+        XCTAssertFalse(move.learned)
+        func drift(_ m: TaughtMove) -> Double {
+            zip(TrickTraining.replay(m, seed: 3), m.path).map { abs($0.x - $1.x) + abs($0.y - $1.y) }.max() ?? 0
+        }
+        let clumsy = drift(move)
+        XCTAssertGreaterThan(clumsy, 0.02)
+        XCTAssertEqual(TrickTraining.replay(move, seed: 3).first, move.path.first, "it sets off where the move does")
+        move.tries = 2
+        XCTAssertLessThan(drift(move), clumsy)
+        XCTAssertGreaterThan(drift(move), 0)
+        move.tries = 3
+        XCTAssertTrue(move.learned)
+        XCTAssertEqual(TrickTraining.replay(move, seed: 3), move.path)
+        // Saved with the squishy, three at most, and only with Workshop Pro.
+        var d = WorkshopDesign()
+        d.moves = Array(repeating: move, count: 5)
+        let back = try JSONDecoder().decode(WorkshopDesign.self, from: JSONEncoder().encode(d))
+        XCTAssertEqual(back.moves.count, TrickTraining.maxMoves)
+        XCTAssertEqual(back.moves[0], move)
+        let palette = MakerParts.palette
+        XCTAssertFalse(WorkshopGate.allowed(back, palette: palette, WorkshopAccess(pro: false)))
+        XCTAssertTrue(WorkshopGate.allowed(back, palette: palette, WorkshopAccess(pro: true)))
+        XCTAssertTrue(WorkshopGate.freeCopy(of: back, palette: palette, WorkshopAccess(pro: false)).moves.isEmpty)
+    }
 }

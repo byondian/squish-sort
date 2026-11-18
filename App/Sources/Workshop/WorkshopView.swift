@@ -93,6 +93,7 @@ struct WorkshopView: View {
     @State private var typing = false
     @State private var drawingShape = false
     @State private var mixer = false
+    @State private var training: MadeSquishy?
     @State private var drawingFace = false
 
     private let clock = Timer.publish(every: 1.0 / 30, on: .main, in: .common).autoconnect()
@@ -147,6 +148,14 @@ struct WorkshopView: View {
                 station = .life
             } cancel: {
                 mixer = false
+            }
+            .environmentObject(model)
+        }
+        .fullScreenCover(item: $training) { made in
+            TrainingView(made: made) {
+                // What it learned is saved with it; the belt shows the saved one if it is the same squishy.
+                if made.id == id, let saved = model.progress.made.first(where: { $0.id == id })?.design { design.moves = saved.moves }
+                training = nil
             }
             .environmentObject(model)
         }
@@ -1336,6 +1345,13 @@ struct WorkshopView: View {
                             shelfButton("pencil", "Edit", "ws-edit") {
                                 edit(made)
                                 shelf = false
+                            }
+                            // Teaching a move comes with Remove Ads, and needs a squishy made in the Workshop.
+                            if model.config.workshopTraining, access.pro, made.design != nil {
+                                shelfButton("graduationcap.fill", "Teach a trick", "ws-train") {
+                                    shelf = false
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { training = made }
+                                }
                             }
                             if model.isExtraUnlocked(.squishRoom) {
                                 shelfButton("hand.tap.fill", "Squeeze", "ws-shelf-squeeze") {

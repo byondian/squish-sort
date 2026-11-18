@@ -146,7 +146,8 @@ public enum WorkshopGate {
     /// with a Pro part is never saved by a player without Pro.
     public static func allowed(_ d: WorkshopDesign, palette: [UInt32], _ a: WorkshopAccess) -> Bool {
         if a.pro { return true }
-        guard mouldOpen(d.mould, a), d.mould2 == nil, d.fx.isEmpty, d.drawnFace == nil, d.drawnOutline == nil else { return false }
+        guard mouldOpen(d.mould, a), d.mould2 == nil, d.fx.isEmpty, d.drawnFace == nil, d.drawnOutline == nil,
+              d.moves.isEmpty else { return false }
         guard d.layers.count <= freeLayers,
               d.layers.allSatisfy({ freePatterns.contains($0.pattern) && colourOpen($0.colour, palette: palette, a) }) else { return false }
         guard eyesOpen(d.face.eyes, a), mouthOpen(d.face.mouth, a), noseOpen(d.face.nose, a),
@@ -164,6 +165,7 @@ public enum WorkshopGate {
         out.fx = []
         out.drawnFace = nil
         out.drawnOutline = nil
+        out.moves = []
         out.layers = out.layers.prefix(freeLayers).map { layer in
             var l = layer
             if !freePatterns.contains(l.pattern) { l.pattern = "plain" }
@@ -625,5 +627,79 @@ public struct MixerRecipes: Sendable {
             if colours.count > 1, colours[1] != main { d.layers.append(GooLayer(colour: colours[1], amount: 0.3)) }
         }
         return d
+    }
+}
+
+/// A move the player taught a made squishy by dragging it about.
+public struct TaughtMove: Codable, Equatable, Sendable, Identifiable {
+    public var id: String
+    /// The picture on its chip: one of `TrickTraining.icons`.
+    public var icon: String
+    /// Where the squishy went, 0...1 across the training pad, at even steps in time.
+    public var path: [WorkshopPoint]
+    /// How long the move takes, in seconds.
+    public var seconds: Double
+    /// How many times it has been shown: learned on the third.
+    public var tries: Int
+
+    public init(id: String = UUID().uuidString, icon: String = "star", path: [WorkshopPoint], seconds: Double, tries: Int = 1) {
+        self.id = id
+        self.icon = icon
+        self.path = path
+        self.seconds = min(TrickTraining.maxSeconds, max(0.4, seconds))
+        self.tries = tries
+    }
+
+    public var learned: Bool { tries >= TrickTraining.triesToLearn }
+}
+
+/// Teaching a move: the first time it is shown is the move. The squishy copies it clumsily at
+/// first and tidily by the third try, whatever the player does on the second and third tries.
+/// Nothing is averaged, practice never costs or earns anything, and a half-learned move is kept.
+public enum TrickTraining {
+    public static let maxMoves = 3
+    public static let triesToLearn = 3
+    public static let pathPoints = 120
+    public static let maxPathPoints = 240
+    public static let maxSeconds = 4.0
+    public static let icons = ["star", "heart", "loop", "zigzag"]
+
+    /// The first showing, made into a move: 120 points at even steps. Nil when the squishy was
+    /// hardly moved at all (a tap is not a move).
+    public static func record(_ raw: [WorkshopPoint], seconds: Double) -> TaughtMove? {
+        guard raw.count >= 2 else { return nil }
+        var travelled = 0.0
+        for i in 1..<raw.count {
+            travelled += ((raw[i].x - raw[i - 1].x) * (raw[i].x - raw[i - 1].x) + (raw[i].y - raw[i - 1].y) * (raw[i].y - raw[i - 1].y)).squareRoot()
+        }
+        guard travelled > 0.08 else { return nil }
+        let path = (0..<pathPoints).map { k -> WorkshopPoint in
+            let at = Double(k) / Double(pathPoints - 1) * Double(raw.count - 1)
+            let i = min(raw.count - 2, Int(at))
+            let t = at - Double(i)
+            return WorkshopPoint(x: min(1, max(0, raw[i].x + (raw[i + 1].x - raw[i].x) * t)),
+                                 y: min(1, max(0, raw[i].y + (raw[i + 1].y - raw[i].y) * t)))
+        }
+        return TaughtMove(path: path, seconds: seconds)
+    }
+
+    /// How clumsy the copy is after this many showings: all over the place, half as much, spot on.
+    public static func wobble(afterTries tries: Int) -> Double {
+        tries <= 1 ? 1 : (tries == 2 ? 0.5 : 0)
+    }
+
+    /// The path the squishy takes when it copies the move now.
+    public static func replay(_ move: TaughtMove, seed: Int) -> [WorkshopPoint] {
+        let w = wobble(afterTries: move.tries)
+        guard w > 0 else { return move.path }
+        let phase = Double(seed % 628) / 100
+        return move.path.enumerated().map { i, p in
+            let t = Double(i) / Double(max(1, move.path.count - 1))
+            // No wobble at the very start and end, so it sets off and lands where the move does.
+            let ease = sin(t * Double.pi)
+            let dx = 0.07 * w * ease * sin(t * 17 + phase)
+            let dy = 0.07 * w * ease * cos(t * 13 + phase * 1.7)
+            return WorkshopPoint(x: min(1, max(0, p.x + dx)), y: min(1, max(0, p.y + dy)))
+        }
     }
 }
