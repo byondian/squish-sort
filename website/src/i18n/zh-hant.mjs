@@ -1,4 +1,5 @@
 export default {
+  wsLink: '捏捏工坊：給小小孩的軟軟製作 App',
   meta: {
     title: 'Squish Sort：iPhone 和 iPad 療癒軟軟分類遊戲',
     description: '分類軟軟、裝滿罐子，把壓力捏走。350 多個軟綿療癒的關卡，之後還有無盡謎題、12 月的聖誕老人小屋，還有 98 款原創軟軟等你收集。iPhone 和 iPad 免費下載。',

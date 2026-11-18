@@ -1,5 +1,6 @@
 // Dutch. Game names stay in English to match the app.
 export default {
+  wsLink: 'Squishy Workshop: de maak-een-squishy-app voor de kleintjes',
   meta: {
     title: 'Squish Sort: het squishy-sorteerspel voor iPhone en iPad',
     description: 'Sorteer de squishies, vul de potten en knijp de stress weg. Meer dan 350 schattige, voldoening gevende levels en daarna eindeloos puzzels, Santa’s Grotto in december en 98 originele squishies om te verzamelen. Gratis op iPhone en iPad.',

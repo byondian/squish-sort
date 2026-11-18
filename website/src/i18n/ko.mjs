@@ -1,4 +1,5 @@
 export default {
+  wsLink: '말랑이 공방: 어린아이를 위한 스퀴시 만들기 앱',
   meta: {
     title: 'Squish Sort: iPhone·iPad 스퀴시 정리 게임',
     description: '스퀴시를 분류하고 병을 채우며 스트레스를 꾹꾹 풀어 보세요. 말랑하고 기분 좋은 350개 이상의 레벨과 그 뒤의 끝없는 퍼즐, 12월의 산타의 집, 모을 수 있는 오리지널 스퀴시 98종. iPhone·iPad에서 무료.',

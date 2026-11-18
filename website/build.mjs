@@ -81,7 +81,7 @@ function footer(code) {
   const t = T[code];
   const legal = SITE.legalPages.map(s => `<li><a href="${href(code, s)}">${esc(t.legalNames[s][0])}</a></li>`).join('');
   return `<footer><div class="foot">
-<div><h4>${esc(t.footer.game)}</h4><ul style="columns:1"><li><a href="${href(code)}">${esc(t.footer.links.home)}</a></li><li><a href="${href(code)}#play">${esc(t.footer.links.demo)}</a></li><li><a href="${href(code, 'support')}">${esc(t.footer.links.support)}</a></li><li><a href="${href(code, 'shop')}">${esc(t.footer.links.shop)}</a></li><li><a href="${href('en', 'partners')}"${code === 'en' ? '' : ' lang="en"'}>Partner with us</a></li></ul></div>
+<div><h4>${esc(t.footer.game)}</h4><ul style="columns:1"><li><a href="${href(code)}">${esc(t.footer.links.home)}</a></li><li><a href="${href(code)}#play">${esc(t.footer.links.demo)}</a></li><li><a href="${href(code, 'support')}">${esc(t.footer.links.support)}</a></li><li><a href="${href(code, 'shop')}">${esc(t.footer.links.shop)}</a></li><li><a href="${href('en', 'workshop')}"${code === 'en' ? '' : ' lang="en"'}>Squishy Workshop</a></li><li><a href="${href('en', 'partners')}"${code === 'en' ? '' : ' lang="en"'}>Partner with us</a></li></ul></div>
 <div><h4>${esc(t.footer.legal)}</h4><ul>${legal}<li><a href="${href(code, 'legal')}">${esc(t.footer.links.legalHub)}</a></li></ul></div>
 </div><p class="fine">${esc(t.footer.fine)}</p></footer>`;
 }
@@ -168,6 +168,7 @@ ${waveTo('#EEE7FF', true)}
 <section class="band">
   <p class="kicker">${esc(t.extras.kicker)}</p><h2>${esc(t.extras.title)}</h2>
   <div class="promises">${t.extras.list.map(([e, h, p]) => `<div class="promise"><span class="dot" aria-hidden="true">${e}</span><div><h3>${esc(h)}</h3><p>${esc(p)}</p></div></div>`).join('')}</div>
+  <p style="margin-top:22px"><a class="btn soft" href="${href('en', 'workshop')}"${code === 'en' ? '' : ' hreflang="en"'}>🎨 ${esc(t.wsLink)} →</a></p>
 </section>
 ${waveTo('#DDF7EE')}
 <section class="band mint">
@@ -285,6 +286,39 @@ function shop(code) {
 <h2>${esc(s.safetyTitle)}</h2><ul>${s.safety.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
 </div></main>` + footer(code) + end(`<script src="/assets/shop.js?v=${V}" defer></script>`);
 }
+// ---------- Squishy Workshop (the kids app), English only for now ----------
+function workshopPage() {
+  const code = 'en';
+  const W = {
+    title: 'Squishy Workshop', lede: 'A calm make-a-squishy app for children aged 5 and under. No ads, no accounts and nothing collected.',
+    steps: [['🫧', 'Pick a shape', 'Buns, beans, clouds and more, in soft squishy foam.'], ['🎨', 'Pour the colour', 'Tip in the goo and watch it swirl.'],
+      ['😊', 'Give it a face', 'Eyes, smiles, cheeks, ears, hats and wings.'], ['🎡', 'Spin a name', 'A name wheel picks one, so nobody has to type.'],
+      ['🏠', 'Take it home', 'Every squishy gets a voice and a place in its room.']],
+    parents: ['Made for the App Store’s Kids category, ages 5 and under.', 'No ads, no analytics, no tracking and no third-party code.', 'No accounts, no chat and nothing to type. Data Not Collected.', 'Free to try. One optional one-time purchase unlocks everything, behind a grown-up check, with Family Sharing on.'],
+    older: 'Older players can build squishies in the Workshop inside Squish Sort too. Remove Ads there includes Workshop Pro.',
+  };
+  const pile = ['peach-bun', 'capy', 'sparkle-unicorn', 'axo', 'gummy-bear', 'jelly'];
+  return head(code, { title: 'Squishy Workshop: make-a-squishy for little ones', description: W.lede, slug: 'workshop', canon: '/workshop' }) + bar(code) + `
+<main id="main" class="doc"><img class="peek" src="/assets/sq/fan-sign-hamster.webp" alt="" width="120" height="120">
+<p class="kicker">A new app from the makers of Squish Sort</p><h1>${esc(W.title)}</h1><p class="lede">${esc(W.lede)}</p>
+<p><span class="soon" role="note">Coming soon to the App Store<small>For iPhone and iPad</small></span></p>
+<p class="ws-pile" aria-hidden="true">${pile.map(id => `<img src="/assets/sq/${id}.webp" alt="" width="72" height="72" loading="lazy">`).join('')}</p>
+<h2>How it works</h2><ol class="how3">${W.steps.map(([e, a, b]) => `<li><span class="n" aria-hidden="true">${e}</span><div><strong>${esc(a)}.</strong> ${esc(b)}</div></li>`).join('')}</ol>
+<h2>For grown-ups</h2><ul>${W.parents.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+<p><a class="btn soft" href="${href(code, 'workshop/privacy')}">Squishy Workshop privacy policy →</a></p>
+<h2>Bigger kids</h2><p>${esc(W.older)} <a href="${href(code)}">Meet Squish Sort →</a></p>
+</main>` + footer(code) + end();
+}
+function workshopPrivacy() {
+  const code = 'en', t = T.en;
+  const raw = fs.readFileSync(path.join(SRC, 'workshop', 'privacy.en.md'), 'utf8');
+  const m = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/), meta = {};
+  for (const l of m[1].split('\n')) { const k = l.indexOf(':'); meta[l.slice(0, k).trim()] = l.slice(k + 1).trim(); }
+  const { html } = md(m[2], vars('en'));
+  return head(code, { title: meta.title, description: meta.description, slug: 'workshop/privacy', canon: '/workshop/privacy' }) + bar(code) + `
+<main id="main" class="doc"><img class="peek" src="/assets/sq/snooze.webp" alt="" width="120" height="120">
+<h1>${esc(meta.title)}</h1><p class="meta">${esc(t.doc.updated)}: ${SITE.updated}</p>${html}</main>` + footer(code) + end();
+}
 function notFound() {
   const t = T.en.notFound;
   return head('en', { title: t.title, description: t.text, noindex: true }) + bar('en') + `<main id="main" class="doc" style="text-align:center"><img src="/assets/sq/gloop.webp" alt="" width="160" height="160" style="margin:20px auto"><h1>${esc(t.title)}</h1><p>${esc(t.text)}</p><p><a class="btn" href="/">${esc(t.home)}</a></p></main>` + footer('en') + end();
@@ -299,6 +333,7 @@ for (const l of SITE.langs) {
   write(pageFile(c, 'support'), support(c)); urls.push(href(c, 'support'));
   write(pageFile(c, 'shop'), shop(c)); urls.push(href(c, 'shop'));
   if (c === 'en') { write(pageFile(c, 'partners'), partners()); urls.push(href(c, 'partners')); }
+  if (c === 'en') { write(pageFile(c, 'workshop'), workshopPage()); write(pageFile(c, 'workshop/privacy'), workshopPrivacy()); urls.push(href(c, 'workshop'), href(c, 'workshop/privacy')); }
   for (const s of SITE.legalPages) { write(pageFile(c, s), docPage(c, s)); if (l.legal) urls.push(href(c, s)); }
 }
 write('404.html', notFound());

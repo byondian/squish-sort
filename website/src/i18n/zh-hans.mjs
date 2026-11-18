@@ -1,5 +1,6 @@
 // Simplified Chinese. Game names stay in English to match the app.
 export default {
+  wsLink: 'Squishy Workshop：给小朋友的捏捏乐制作 App',
   meta: {
     title: 'Squish Sort：iPhone 和 iPad 上的捏捏乐分类游戏',
     description: '给捏捏乐分类，装满罐子，把压力捏走。350 多个可爱又解压的关卡，之后还有无尽谜题，12 月还有 Santa’s Grotto，98 个原创捏捏乐等你收集。iPhone 和 iPad 免费下载。',

@@ -1,5 +1,6 @@
 // Indonesian. Game names stay in English to match the app.
 export default {
+  wsLink: 'Squishy Workshop: aplikasi membuat squishy untuk si kecil',
   meta: {
     title: 'Squish Sort: game menyortir squishy untuk iPhone dan iPad',
     description: 'Sortir squishy, isi toplesnya, dan remas stres sampai hilang. Lebih dari 350 level yang imut dan memuaskan, lalu teka-teki tanpa batas, Santa’s Grotto di bulan Desember, dan 98 squishy orisinal untuk dikoleksi. Gratis di iPhone dan iPad.',

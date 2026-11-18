@@ -1,5 +1,6 @@
 // Polish. Game names stay in English to match the app.
 export default {
+  wsLink: 'Squishy Workshop: aplikacja do robienia squishy dla maluchów',
   meta: {
     title: 'Squish Sort: gra w sortowanie squishy na iPhone’a i iPada',
     description: 'Sortuj squishy, napełniaj słoiki i wyciskaj stres. Ponad 350 uroczych, satysfakcjonujących poziomów, a potem niekończące się łamigłówki, Santa’s Grotto w grudniu i 98 oryginalne squishy do zebrania. Za darmo na iPhone’a i iPada.',

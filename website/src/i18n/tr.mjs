@@ -1,5 +1,6 @@
 // Turkish. Game names stay in English to match the app.
 export default {
+  wsLink: 'Squishy Workshop: küçükler için squishy yapma uygulaması',
   meta: {
     title: 'Squish Sort: iPhone ve iPad için squishy sıralama oyunu',
     description: 'Squishy’leri sırala, kavanozları doldur ve stresi sıkıp at. 350’den fazla sevimli ve tatmin edici bölüm, ardından sonsuz bulmacalar, aralıkta Santa’s Grotto ve toplanacak 98 orijinal squishy. iPhone ve iPad’de ücretsiz.',

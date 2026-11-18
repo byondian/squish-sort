@@ -1,5 +1,6 @@
 // Thai. Game names stay in English to match the app.
 export default {
+  wsLink: 'Squishy Workshop: แอปสร้างสกุชชี่สำหรับเด็กเล็ก',
   meta: {
     title: 'Squish Sort: เกมจัดเรียงสกุชชี่สำหรับ iPhone และ iPad',
     description: 'จัดเรียงสกุชชี่ เติมโหลให้เต็ม แล้วบีบความเครียดให้หายไป มากกว่า 350 ด่านน่ารักและฟินสุด ๆ ตามด้วยปริศนาไม่รู้จบ มี Santa’s Grotto ในเดือนธันวาคม และสกุชชี่ออริจินัล 98 ตัวให้สะสม เล่นฟรีบน iPhone และ iPad',

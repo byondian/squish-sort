@@ -1,4 +1,5 @@
 export default {
+  wsLink: 'Squishy Workshop: the make-a-squishy app for little ones',
   meta: {
     title: 'Squish Sort: the squishy sorting game for iPhone and iPad',
     description: 'Sort the squishies, fill the jars and squeeze the stress away. Over 350 soft, satisfying levels, endless puzzles after that, Santa’s Grotto in December and 98 original squishies to collect. Free on iPhone and iPad.',

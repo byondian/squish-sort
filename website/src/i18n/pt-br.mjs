@@ -1,5 +1,6 @@
 // Portuguese (Brazil). Game names stay in English to match the app.
 export default {
+  wsLink: 'Squishy Workshop: o app de criar squishies para os pequenos',
   meta: {
     title: 'Squish Sort: o jogo de organizar squishies para iPhone e iPad',
     description: 'Organize os squishies, encha os potes e esprema o estresse para longe. Mais de 350 fases fofas e satisfatórias e, depois, quebra-cabeças sem fim, Santa’s Grotto em dezembro e 98 squishies originais para colecionar. Grátis no iPhone e iPad.',

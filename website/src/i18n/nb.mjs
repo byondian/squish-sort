@@ -1,5 +1,6 @@
 // Norwegian Bokmål. Game names stay in English to match the app.
 export default {
+  wsLink: 'Squishy Workshop: lag-en-squishy-appen for de minste',
   meta: {
     title: 'Squish Sort: squishy-sorteringsspillet for iPhone og iPad',
     description: 'Sorter squishiene, fyll glassene og klem bort stresset. Over 350 søte, tilfredsstillende nivåer og uendelig med oppgaver etterpå, Santa’s Grotto i desember og 98 originale squishier å samle. Gratis på iPhone og iPad.',
