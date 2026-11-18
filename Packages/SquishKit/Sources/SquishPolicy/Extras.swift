@@ -264,8 +264,11 @@ public struct MadeSquishy: Codable, Equatable, Identifiable, Sendable {
     public var ears: Ears
     public var accessory: Accessory
     /// Made in the Squishy Workshop: its full design. Nil for a squishy from the old Maker, which
-    /// keeps today's look.
+    /// keeps today's look. Not part of the progress save: each design is a file of its own
+    /// (`MadeStore`), because the progress file is rewritten on every change.
     public var design: WorkshopDesign?
+
+    private enum CodingKeys: String, CodingKey { case id, name, shape, color, eyes, mouth, ears, accessory }
 
     public init(id: String, name: String = "", shape: Shape = .bun, color: Int = 0, eyes: Eyes = .dots,
                 mouth: Mouth = .smile, ears: Ears = .none, accessory: Accessory = .none, design: WorkshopDesign? = nil) {

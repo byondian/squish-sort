@@ -4,15 +4,15 @@ import Foundation
 public struct WorkshopAccess: Equatable, Sendable {
     /// Workshop Pro (in Squish Sort: comes with Remove Ads).
     public var pro: Bool
-    /// How many of the six classic moulds are open (today's unlock rule: more with each world finished).
-    public var classicMoulds: Int
-    /// How many palette colours are open.
-    public var colours: Int
+    /// Story worlds finished: more of the free parts open with each one.
+    public var worlds: Int
+    /// Single wearables bought with coins, as "category/part".
+    public var owned: Set<String>
 
-    public init(pro: Bool, classicMoulds: Int = 6, colours: Int = 12) {
+    public init(pro: Bool, worlds: Int = 99, owned: Set<String> = []) {
         self.pro = pro
-        self.classicMoulds = classicMoulds
-        self.colours = colours
+        self.worlds = max(0, worlds)
+        self.owned = owned
     }
 }
 
@@ -85,25 +85,61 @@ public enum WorkshopGate {
     public static let freeVoices = WorkshopCatalog.voiceIDs
     public static let freeDances = ["bouncer", "wiggler"]
     public static let freeLayers = 2
-    public static let freeParts_max = 3
     /// The 12 palette colours the Maker always had come first in the catalogue.
     public static let freeColourCount = 12
+    /// Shelf places: three free, more for coins up to eight, fifty with Pro.
+    public static let freeSlots = 3
+    public static let coinSlots = 8
     public static let proSlots = 50
+    /// Won, never bought, by everyone: the crown after three worlds, the unicorn horn after four.
+    public static let winOnly: [String: Int] = ["hats-and-headwear/crown": 3, "horns-and-antlers/unicorn": 4]
 
-    public static func mouldOpen(_ id: String, _ a: WorkshopAccess) -> Bool {
-        if a.pro { return true }
-        guard let i = freeMoulds.firstIndex(of: id) else { return false }
-        return i < a.classicMoulds
+    /// How many of a free list are open: two to start, one more with each world finished.
+    static func open(_ total: Int, _ a: WorkshopAccess, base: Int = 2, perWorld: Int = 1) -> Int {
+        min(total, base + a.worlds * perWorld)
     }
 
+    private static func listed(_ id: String, _ list: [String], _ a: WorkshopAccess) -> Bool {
+        if a.pro { return true }
+        guard let i = list.firstIndex(of: id) else { return false }
+        return i < open(list.count, a)
+    }
+
+    public static func mouldOpen(_ id: String, _ a: WorkshopAccess) -> Bool { listed(id, freeMoulds, a) }
+    public static func eyesOpen(_ id: String, _ a: WorkshopAccess) -> Bool { listed(id, freeEyes, a) }
+    public static func mouthOpen(_ id: String, _ a: WorkshopAccess) -> Bool { listed(id, freeMouths, a) }
+    public static func noseOpen(_ id: String, _ a: WorkshopAccess) -> Bool { listed(id, freeNoses, a) }
+    public static func browsOpen(_ id: String, _ a: WorkshopAccess) -> Bool { listed(id, freeBrows, a) }
+    public static func cheeksOpen(_ id: String, _ a: WorkshopAccess) -> Bool { listed(id, freeCheeks, a) }
+    public static func patternOpen(_ id: String, _ a: WorkshopAccess) -> Bool { a.pro || freePatterns.contains(id) }
+    public static func danceOpen(_ id: String, _ a: WorkshopAccess) -> Bool { a.pro || freeDances.contains(id) }
+
     public static func partOpen(category: String, part: String, _ a: WorkshopAccess) -> Bool {
-        a.pro || (freeParts[category]?.contains(part) ?? false)
+        let key = category + "/" + part
+        if let worlds = winOnly[key] { return a.worlds >= worlds }
+        if a.pro || a.owned.contains(key) { return true }
+        guard let list = freeParts[category], let i = list.firstIndex(of: part) else { return false }
+        return i < open(list.count, a)
+    }
+
+    /// What one wearable costs a free player in coins. Nil when it is not sold (won only, or open already).
+    public static func coinPrice(category: String, part: String, _ a: WorkshopAccess) -> Int? {
+        guard !partOpen(category: category, part: part, a), winOnly[category + "/" + part] == nil else { return nil }
+        switch category {
+        case "wings": return 800
+        case "hats-and-headwear", "antennae-and-hair", "tails", "arms-and-feet", "held-items": return 500
+        default: return 300
+        }
     }
 
     public static func colourOpen(_ colour: UInt32, palette: [UInt32], _ a: WorkshopAccess) -> Bool {
         if a.pro { return true }
         guard let i = palette.firstIndex(of: colour & 0xFFFFFF) else { return false }
-        return i < min(freeColourCount, a.colours)
+        return i < open(min(freeColourCount, palette.count), a, base: 5, perWorld: 2)
+    }
+
+    public static func slots(bought: Int, _ a: WorkshopAccess) -> Int {
+        a.pro ? proSlots : min(coinSlots, max(freeSlots, bought))
     }
 
     /// True when a free player could have made every bit of this design. Used on save: a design
@@ -113,9 +149,9 @@ public enum WorkshopGate {
         guard mouldOpen(d.mould, a), d.mould2 == nil, d.fx.isEmpty, d.drawnFace == nil, d.drawnOutline == nil else { return false }
         guard d.layers.count <= freeLayers,
               d.layers.allSatisfy({ freePatterns.contains($0.pattern) && colourOpen($0.colour, palette: palette, a) }) else { return false }
-        guard freeEyes.contains(d.face.eyes), freeMouths.contains(d.face.mouth), freeNoses.contains(d.face.nose),
-              freeBrows.contains(d.face.brows), freeCheeks.contains(d.face.cheeks) else { return false }
-        guard d.stickers.isEmpty, d.parts.allSatisfy({ partOpen(category: $0.category, part: $0.part, a) }) else { return false }
+        guard eyesOpen(d.face.eyes, a), mouthOpen(d.face.mouth, a), noseOpen(d.face.nose, a),
+              browsOpen(d.face.brows, a), cheeksOpen(d.face.cheeks, a) else { return false }
+        guard (d.parts + d.stickers).allSatisfy({ partOpen(category: $0.category, part: $0.part, a) }) else { return false }
         return freeVoices.contains(d.voice) && freeDances.contains(d.dance)
     }
 
@@ -134,12 +170,12 @@ public enum WorkshopGate {
             if !colourOpen(l.colour, palette: palette, a) { l.colour = palette.first ?? 0xFF9EB5 }
             return l
         }
-        if !freeEyes.contains(out.face.eyes) { out.face.eyes = freeEyes[0] }
-        if !freeMouths.contains(out.face.mouth) { out.face.mouth = freeMouths[0] }
-        if !freeNoses.contains(out.face.nose) { out.face.nose = "none" }
-        if !freeBrows.contains(out.face.brows) { out.face.brows = "none" }
-        if !freeCheeks.contains(out.face.cheeks) { out.face.cheeks = "none" }
-        out.stickers = []
+        if !eyesOpen(out.face.eyes, a) { out.face.eyes = freeEyes[0] }
+        if !mouthOpen(out.face.mouth, a) { out.face.mouth = freeMouths[0] }
+        if !noseOpen(out.face.nose, a) { out.face.nose = "none" }
+        if !browsOpen(out.face.brows, a) { out.face.brows = "none" }
+        if !cheeksOpen(out.face.cheeks, a) { out.face.cheeks = "none" }
+        out.stickers = out.stickers.filter { partOpen(category: $0.category, part: $0.part, a) }
         out.parts = out.parts.filter { partOpen(category: $0.category, part: $0.part, a) }
         if !freeDances.contains(out.dance) { out.dance = freeDances[0] }
         out.tidy()
@@ -147,41 +183,82 @@ public enum WorkshopGate {
     }
 }
 
-/// Real colour mixing: the two colours are averaged in linear light, then nudged the way paint
-/// behaves, so blue and yellow make green (plain light-mixing would make grey).
+/// Goo mixes like paint: blue and yellow make green. A line-for-line port of the design side's
+/// reference (content/workshop-colour-mix.py); its printed table is the test table.
+/// Hue is mixed on the painter's wheel (red, yellow, blue), lightness is averaged, and hue and
+/// saturation are weighted by how much colour is really there, so white, grey and near-black only tint.
 public enum GooMix {
+    /// RGB hue to painter's-wheel hue: red 0 to 0, orange 30 to 60, yellow 60 to 120, green 120 to 180,
+    /// blue 240 to 240, purple 280 to 300.
+    private static let wheel: [(Double, Double)] = [(0, 0), (30, 60), (60, 120), (120, 180), (240, 240), (280, 300), (360, 360)]
+
+    private static func mod(_ a: Double, _ n: Double) -> Double {
+        let r = a.truncatingRemainder(dividingBy: n)
+        return r < 0 ? r + n : r
+    }
+
+    private static func map(_ hue: Double, _ pts: [(Double, Double)]) -> Double {
+        let h = mod(hue, 360)
+        for k in 0..<(pts.count - 1) {
+            let (a, b) = pts[k], (c, d) = pts[k + 1]
+            if a <= h, h <= c { return b + (h - a) / (c - a) * (d - b) }
+        }
+        return h
+    }
+
+    private static func toWheel(_ h: Double) -> Double { map(h, wheel) }
+    private static func fromWheel(_ h: Double) -> Double { map(h, wheel.map { ($0.1, $0.0) }) }
+
+    /// Hue in degrees, lightness and saturation 0...1 (Python's colorsys.rgb_to_hls).
+    static func hls(_ c: UInt32) -> (h: Double, l: Double, s: Double) {
+        let v = rgb(c)
+        let r = v[0], g = v[1], b = v[2]
+        let maxc = max(r, g, b), minc = min(r, g, b)
+        let sumc = maxc + minc, rangec = maxc - minc
+        let l = sumc / 2
+        if minc == maxc { return (0, l, 0) }
+        let s = l <= 0.5 ? rangec / sumc : rangec / (2 - maxc - minc)
+        let rc = (maxc - r) / rangec, gc = (maxc - g) / rangec, bc = (maxc - b) / rangec
+        let h: Double
+        if r == maxc { h = bc - gc } else if g == maxc { h = 2 + rc - bc } else { h = 4 + gc - rc }
+        return (mod(h / 6, 1) * 360, l, s)
+    }
+
+    /// Python's colorsys.hls_to_rgb, with the hue in degrees.
+    static func fromHLS(h: Double, l: Double, s: Double) -> [Double] {
+        if s == 0 { return [l, l, l] }
+        let m2 = l <= 0.5 ? l * (1 + s) : l + s - l * s
+        let m1 = 2 * l - m2
+        func v(_ raw: Double) -> Double {
+            let hue = mod(raw, 1)
+            if hue < 1.0 / 6 { return m1 + (m2 - m1) * hue * 6 }
+            if hue < 0.5 { return m2 }
+            if hue < 2.0 / 3 { return m1 + (m2 - m1) * (2.0 / 3 - hue) * 6 }
+            return m1
+        }
+        let hue = h / 360
+        return [v(hue + 1.0 / 3), v(hue), v(hue - 1.0 / 3)]
+    }
+
+    /// `share` is how much of the mix is `b`: 0.5 for equal pours.
     public static func mix(_ a: UInt32, _ b: UInt32, share: Double = 0.5) -> UInt32 {
         let t = min(1, max(0, share))
-        let x = rgb(a), y = rgb(b)
-        // Paint mixes by what each pigment soaks up: mix the "ink" (1 - light) geometrically.
-        var out = [Double](repeating: 0, count: 3)
-        for i in 0..<3 {
-            let la = linear(x[i]), lb = linear(y[i])
-            let additive = la * (1 - t) + lb * t
-            let subtractive = pow(max(la, 0.0005), 1 - t) * pow(max(lb, 0.0005), t)
-            // Half way between the two models reads right for children's paint.
-            out[i] = gamma(additive * 0.35 + subtractive * 0.65)
-        }
-        // Mixing two strong colours loses light; lift the result back to the brighter parent's level.
-        let peak = max(out[0], out[1], out[2])
-        let want = max(x.max() ?? 1, y.max() ?? 1) * 0.92
-        if peak > 0.001, peak < want {
-            let k = want / peak
-            out = out.map { min(1, $0 * k) }
-        }
-        // Keep it as vivid as its parents: paint mixes do not turn to milk.
-        func saturation(_ v: [Double]) -> Double {
-            let mx = v.max() ?? 0
-            return mx <= 0 ? 0 : (mx - (v.min() ?? 0)) / mx
-        }
-        let s = saturation(out)
-        let target = (saturation(x) * (1 - t) + saturation(y) * t) * 0.9
-        if s > 0.02, s < target {
-            let mx = out.max() ?? 1
-            let k = target / s
-            out = out.map { max(0, mx - (mx - $0) * k) }
-        }
-        return hex(out)
+        // The reference takes two amounts; equal pours are 1 and 1.
+        let wa = 2 * (1 - t), wb = 2 * t
+        let (h1, l1, s1) = hls(a), (h2, l2, s2) = hls(b)
+        // Chroma: white, grey and near-black barely pull the hue.
+        let c1 = s1 * (1 - abs(2 * l1 - 1)) * wa + 1e-4
+        let c2 = s2 * (1 - abs(2 * l2 - 1)) * wb + 1e-4
+        let tc = c2 / (c1 + c2)
+        let p1 = toWheel(h1), p2 = toWheel(h2)
+        var d = mod(p2 - p1 + 180, 360) - 180
+        let h = fromWheel(mod(p1 + d * tc, 360))
+        let l = l1 + (l2 - l1) * t
+        var s = s1 + (s2 - s1) * tc
+        d *= min(tc, 1 - tc) * 2
+        // Opposite hues make mud, like paint: saturation drops as the hues get further apart.
+        s *= 1 - 0.6 * pow(abs(d) / 180, 2)
+        return hex(fromHLS(h: h, l: l, s: s))
     }
 
     public static func rgb(_ c: UInt32) -> [Double] {
@@ -194,20 +271,6 @@ public enum GooMix {
         let b = UInt32((min(1, max(0, v[2])) * 255).rounded())
         return (r << 16) | (g << 8) | b
     }
-
-    /// 0 red, 120 green, 240 blue. Greys return nil.
-    public static func hue(_ c: UInt32) -> Double? {
-        let v = rgb(c)
-        let mx = v.max() ?? 0, mn = v.min() ?? 0
-        guard mx - mn > 0.08 else { return nil }
-        var h: Double
-        if mx == v[0] { h = (v[1] - v[2]) / (mx - mn) } else if mx == v[1] { h = 2 + (v[2] - v[0]) / (mx - mn) } else { h = 4 + (v[0] - v[1]) / (mx - mn) }
-        h *= 60
-        return h < 0 ? h + 360 : h
-    }
-
-    private static func linear(_ v: Double) -> Double { v <= 0.04045 ? v / 12.92 : pow((v + 0.055) / 1.055, 2.4) }
-    private static func gamma(_ v: Double) -> Double { v <= 0.0031308 ? v * 12.92 : 1.055 * pow(v, 1 / 2.4) - 0.055 }
 }
 
 /// The four stats on a made squishy's birthday card, each 1...10, from what it is made of.
@@ -232,7 +295,7 @@ public struct WorkshopStats: Equatable, Sendable {
         // Big, long moulds stretch further.
         if ["long-cat", "bean", "pear", "dino", "fish", "moon"].contains(d.mould) { t += 1 }
         if d.mould2 != nil { t += 1 }
-        var c = 2 + d.parts.count + (d.stickers.isEmpty ? 0 : 1) + (d.fx.isEmpty ? 0 : 1)
+        var c = 2 + min(6, d.parts.count) + (d.stickers.isEmpty ? 0 : 1) + (d.fx.isEmpty ? 0 : 1)
         s = min(10, s); b = min(10, b); t = min(10, t); c = min(10, c)
         // Over the cap: charm gives way first, then the rest in turn.
         var over = s + b + t + c - WorkshopStats.cap
@@ -342,9 +405,9 @@ public enum WorkshopSurprise {
             GooLayer(colour: colours.isEmpty ? 0xFF9EB5 : colours[Int(rng.next() % UInt64(colours.count))],
                      pattern: i == 0 ? "plain" : pick(patterns, fallback: "plain"), seed: Int(rng.next() % 1000))
         }
-        d.face.eyes = pick(a.pro ? catalog.eyes : WorkshopGate.freeEyes, fallback: "dots")
-        d.face.mouth = pick(a.pro ? catalog.mouths : WorkshopGate.freeMouths, fallback: "smile")
-        d.face.cheeks = pick(a.pro ? catalog.cheeks : WorkshopGate.freeCheeks, fallback: "none")
+        d.face.eyes = pick(catalog.eyes.filter { WorkshopGate.eyesOpen($0, a) }, fallback: "dots")
+        d.face.mouth = pick(catalog.mouths.filter { WorkshopGate.mouthOpen($0, a) }, fallback: "smile")
+        d.face.cheeks = pick(catalog.cheeks.filter { WorkshopGate.cheeksOpen($0, a) }, fallback: "none")
         // One part on top of the head, from a tray this player has open.
         let trays = ["ears", "horns-and-antlers"].flatMap { cat in
             catalog.items(in: cat).filter { WorkshopGate.partOpen(category: cat, part: $0, a) }.map { (cat, $0) }

@@ -34,6 +34,14 @@ public struct GooLayer: Codable, Equatable, Sendable {
     }
 }
 
+/// A made squishy's saved designs, one file each (Application Support/made in the app). The
+/// player's progress keeps only the ids and their order.
+public protocol MadeStore {
+    func load(id: String) -> WorkshopDesign?
+    func save(_ design: WorkshopDesign, id: String)
+    func delete(id: String)
+}
+
 /// A part or sticker put on the body.
 public struct Placed: Codable, Equatable, Sendable, Identifiable {
     public var id: String
@@ -114,9 +122,12 @@ public struct WorkshopDesign: Codable, Equatable, Sendable {
     public var born: Double
     /// "game" or "workshop-app".
     public var source: String
+    /// Schema number of the save.
+    public var v: Int = 2
 
     public static let maxLayers = 3
-    public static let maxParts = 6
+    /// One from each of the eleven trays.
+    public static let maxParts = 11
     public static let maxStickers = 8
     public static let maxStrokes = 12
     public static let maxStrokePoints = 64
@@ -162,6 +173,7 @@ public struct WorkshopDesign: Codable, Equatable, Sendable {
         food = (try? c.decodeIfPresent(String.self, forKey: .food)) ?? nil
         born = (try? c.decodeIfPresent(Double.self, forKey: .born)) ?? 0
         source = (try? c.decodeIfPresent(String.self, forKey: .source)) ?? "game"
+        v = max(2, (try? c.decodeIfPresent(Int.self, forKey: .v)) ?? 2)
         tidy()
     }
 
@@ -169,13 +181,30 @@ public struct WorkshopDesign: Codable, Equatable, Sendable {
     public mutating func tidy() {
         if layers.isEmpty { layers = [GooLayer(colour: 0xFF9EB5)] }
         layers = Array(layers.prefix(WorkshopDesign.maxLayers))
-        parts = Array(parts.prefix(WorkshopDesign.maxParts))
+        // One wearable from each tray: a newer one takes the place of the one before it.
+        var seen = Set<String>()
+        parts = Array(parts.reversed().filter { seen.insert($0.category).inserted }.reversed())
         stickers = Array(stickers.prefix(WorkshopDesign.maxStickers))
+        parts = parts.map(WorkshopDesign.clamped)
+        stickers = stickers.map(WorkshopDesign.clamped)
         pitch = min(1.25, max(0.8, pitch))
         if let strokes = drawnFace {
             drawnFace = strokes.prefix(WorkshopDesign.maxStrokes).map { Array($0.prefix(WorkshopDesign.maxStrokePoints)) }
         }
     }
+
+    /// A part's centre stays on the body box grown by a fifth, and its size inside its range.
+    public static func clamped(_ p: Placed) -> Placed {
+        var q = p
+        let lo = 0.5 - bodyShare / 2 * 1.2, hi = 0.5 + bodyShare / 2 * 1.2
+        q.x = min(hi, max(lo, p.x))
+        q.y = min(hi, max(lo, p.y))
+        q.scale = min(Placed.maxScale, max(Placed.minScale, p.scale))
+        return q
+    }
+
+    /// The body fills the middle of the picture; the rest is room for ears, hats and wings.
+    public static let bodyShare = 0.64
 
     /// The colour the body mostly is: its top layer.
     public var mainColour: UInt32 { layers.last?.colour ?? 0xFF9EB5 }

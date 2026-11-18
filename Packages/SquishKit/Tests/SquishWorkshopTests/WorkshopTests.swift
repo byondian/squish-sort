@@ -60,27 +60,50 @@ final class WorkshopTests: XCTestCase {
         XCTAssertEqual(thin.mould, "bear")
         XCTAssertEqual(thin.goo, .jelly)
         XCTAssertEqual(thin.layers.count, 1)
-        // A new save goes round.
-        var full = MadeSquishy(id: "b2", name: "Mimi", design: thin)
-        full.design?.parts = [Placed(id: "p", category: "wings", part: "angel")]
+        // A design goes round on its own, unknown part ids and all; the progress save leaves it out.
+        var design = thin
+        design.parts = [Placed(id: "p", category: "wings", part: "a-part-from-a-newer-build")]
+        design.tidy()
+        XCTAssertEqual(try JSONDecoder().decode(WorkshopDesign.self, from: JSONEncoder().encode(design)), design)
+        XCTAssertEqual(design.v, 2)
+        let full = MadeSquishy(id: "b2", name: "Mimi", design: design)
         let back = try JSONDecoder().decode(MadeSquishy.self, from: JSONEncoder().encode(full))
-        XCTAssertEqual(back, full)
+        XCTAssertNil(back.design)
+        XCTAssertEqual(back.name, "Mimi")
+        // One wearable from each tray, and a part never leaves the body's reach.
+        var crowded = WorkshopDesign()
+        crowded.parts = [Placed(id: "1", category: "ears", part: "cat"), Placed(id: "2", category: "ears", part: "bear", x: 5, y: -3, scale: 9),
+                         Placed(id: "3", category: "wings", part: "bee")]
+        crowded.tidy()
+        XCTAssertEqual(crowded.parts.map(\.id), ["2", "3"])
+        XCTAssertTrue((0...1).contains(crowded.parts[0].x) && (0...1).contains(crowded.parts[0].y))
+        XCTAssertEqual(crowded.parts[0].scale, Placed.maxScale)
     }
 
-    func testColourMixing() {
-        func hue(_ a: UInt32, _ b: UInt32) -> Double { GooMix.hue(GooMix.mix(a, b)) ?? -1 }
-        // Blue and yellow make green.
-        XCTAssertTrue((80...170).contains(hue(0x4A9FE8, 0xFFD86B)))
-        XCTAssertTrue((80...170).contains(hue(0x7CC8FF, 0xFFD86B)))
-        // Red and yellow make orange; blue and red make purple.
-        XCTAssertTrue((8...45).contains(hue(0xFF5A6E, 0xFFD86B)))
-        XCTAssertTrue((255...320).contains(hue(0x4A9FE8, 0xFF5A6E)))
-        // Red and white make pink: still red-ish, and lighter than the red.
-        let pink = GooMix.rgb(GooMix.mix(0xFF5A6E, 0xFFFFFF))
-        XCTAssertTrue(pink[0] > 0.95 && pink[1] > 0.5 && pink[2] > 0.5 && pink[0] > pink[1])
-        // A colour mixed with itself stays itself, and a share of nothing changes nothing.
-        XCTAssertEqual(GooMix.mix(0x7FE0C4, 0x7FE0C4), 0x7FE0C4)
-        XCTAssertEqual(GooMix.mix(0x4A9FE8, 0xFFD86B, share: 0), 0x4A9FE8)
+    func testColourMixingMatchesTheReferenceTable() {
+        // content/workshop-colour-mix.py prints this table. One step of rounding either way is allowed.
+        let table: [(UInt32, UInt32, UInt32)] = [
+            (0x7CC8FF, 0xFFD86B, 0xB7EA88), // blue + yellow = green
+            (0x4A9FE8, 0xFFD86B, 0x98DC72), // strong blue + yellow = green
+            (0xFF5A6E, 0xFFFFFF, 0xFFADB7), // red + white = pink
+            (0xFF5A6E, 0x4A9FE8, 0xAA6ADC), // red + blue = purple
+            (0xFF5A6E, 0xFFD86B, 0xF4996E), // red + yellow = orange
+            (0xFF9EB5, 0x7CC8FF, 0xBE99F3), // pink + blue = lilac
+            (0xFFD86B, 0x2E2E3A, 0xE0BC09), // yellow + dark = olive
+            (0xFFFFFF, 0x2E2E3A, 0x8E8EA5), // white + dark = grey
+            (0xFFA25C, 0x7FE0C4, 0xE3D87A), // orange + mint = muddy yellow-green
+            (0x9ED67F, 0xFF5A6E, 0xE0A477), // green + red = brown
+        ]
+        func close(_ x: UInt32, _ y: UInt32) -> Bool {
+            let a = GooMix.rgb(x), b = GooMix.rgb(y)
+            return zip(a, b).allSatisfy { abs($0 - $1) <= 1.01 / 255 }
+        }
+        for (a, b, want) in table {
+            let got = GooMix.mix(a, b)
+            XCTAssertTrue(close(got, want), String(format: "%06X + %06X = %06X, want %06X", a, b, got, want))
+        }
+        // A colour mixed with itself stays itself.
+        XCTAssertTrue(close(GooMix.mix(0x7FE0C4, 0x7FE0C4), 0x7FE0C4))
     }
 
     func testAFreeSaveNeverHoldsAProPart() throws {
@@ -98,6 +121,7 @@ final class WorkshopTests: XCTestCase {
         d = WorkshopDesign(); d.face.eyes = "anime"; cases.append(d)
         d = WorkshopDesign(); d.parts = [Placed(category: "wings", part: "angel")]; cases.append(d)
         d = WorkshopDesign(); d.stickers = [Placed(category: "stickers-and-patterns", part: "star")]; cases.append(d)
+        d = WorkshopDesign(); d.parts = [Placed(category: "ears", part: "dragon-fin")]; cases.append(d)
         d = WorkshopDesign(); d.drawnFace = [[WorkshopPoint(x: 0, y: 0)]]; cases.append(d)
         d = WorkshopDesign(); d.dance = "spinner"; cases.append(d)
         for design in cases {
@@ -106,9 +130,26 @@ final class WorkshopTests: XCTestCase {
             // With Pro gone the look can still be edited, from a copy that is free all through.
             XCTAssertTrue(WorkshopGate.allowed(WorkshopGate.freeCopy(of: design, palette: c.colours, free), palette: c.colours, free))
         }
-        // Today's unlock rule still holds for the classic moulds.
-        XCTAssertFalse(WorkshopGate.mouldOpen("cloud", WorkshopAccess(pro: false, classicMoulds: 2)))
-        XCTAssertTrue(WorkshopGate.mouldOpen("egg", WorkshopAccess(pro: false, classicMoulds: 2)))
+        // Free parts open with the worlds finished, as the Maker's did: two to start, one more each world.
+        let start = WorkshopAccess(pro: false, worlds: 0)
+        XCTAssertTrue(WorkshopGate.mouldOpen("egg", start))
+        XCTAssertFalse(WorkshopGate.mouldOpen("cloud", start))
+        XCTAssertTrue(WorkshopGate.mouldOpen("cloud", WorkshopAccess(pro: false, worlds: 4)))
+        XCTAssertTrue(WorkshopGate.allowed(WorkshopDesign(), palette: c.colours, start))
+        // One wearable bought with coins is open; a Pro owner is never asked for coins; the crown is won, never sold.
+        XCTAssertEqual(WorkshopGate.coinPrice(category: "wings", part: "angel", free), 800)
+        XCTAssertEqual(WorkshopGate.coinPrice(category: "hats-and-headwear", part: "party-hat", free), 500)
+        XCTAssertEqual(WorkshopGate.coinPrice(category: "glasses-and-face-wear", part: "round", free), 300)
+        XCTAssertNil(WorkshopGate.coinPrice(category: "wings", part: "angel", pro))
+        let bought = WorkshopAccess(pro: false, owned: ["wings/angel"])
+        XCTAssertTrue(WorkshopGate.partOpen(category: "wings", part: "angel", bought))
+        XCTAssertNil(WorkshopGate.coinPrice(category: "wings", part: "angel", bought))
+        XCTAssertNil(WorkshopGate.coinPrice(category: "hats-and-headwear", part: "crown", start))
+        XCTAssertFalse(WorkshopGate.partOpen(category: "hats-and-headwear", part: "crown", WorkshopAccess(pro: true, worlds: 2)))
+        XCTAssertTrue(WorkshopGate.partOpen(category: "hats-and-headwear", part: "crown", WorkshopAccess(pro: false, worlds: 3)))
+        XCTAssertEqual(WorkshopGate.slots(bought: 1, free), 3)
+        XCTAssertEqual(WorkshopGate.slots(bought: 20, free), 8)
+        XCTAssertEqual(WorkshopGate.slots(bought: 1, pro), 50)
         // Surprise me only ever uses open parts.
         var rng = SplitMix64(seed: 7)
         for _ in 0..<200 {
@@ -121,14 +162,16 @@ final class WorkshopTests: XCTestCase {
 
     func testTheMixerOnlyEverMakesAMadeDesign() {
         var a = WorkshopDesign(mould: "cat")
-        a.parts = (0..<4).map { Placed(id: "a\($0)", category: "ears", part: "cat") }
+        a.parts = [Placed(id: "a0", category: "hats-and-headwear", part: "hat"), Placed(id: "a1", category: "ears", part: "cat"),
+                   Placed(id: "a2", category: "tails", part: "fox")]
         var b = WorkshopDesign(mould: "star")
         b.layers = [GooLayer(colour: 0x4A9FE8), GooLayer(colour: 0xFFD86B, pattern: "stripes")]
-        b.parts = (0..<4).map { Placed(id: "b\($0)", category: "wings", part: "bee") }
+        b.parts = [Placed(id: "b0", category: "wings", part: "bee"), Placed(id: "b1", category: "neck-and-body", part: "bow"),
+                   Placed(id: "b2", category: "held-items", part: "balloon")]
         let out = SquishyMixer.mix(.made(a), .made(b), seed: 1)
         XCTAssertEqual(out.mould, "cat")
         XCTAssertEqual(out.layers, b.layers)
-        XCTAssertEqual(out.parts.map(\.part), ["cat", "cat", "bee", "bee"])
+        XCTAssertEqual(out.parts.map(\.part), ["hat", "cat", "bee", "bow"])
         XCTAssertEqual(Set(out.parts.map(\.id)).count, 4)
         XCTAssertEqual(out.source, "game")
         // A collectible only lends its colour.
@@ -148,7 +191,7 @@ final class WorkshopTests: XCTestCase {
         for goo in Goo.allCases {
             for mould in c.moulds {
                 var d = WorkshopDesign(mould: mould, mould2: "bun", goo: goo)
-                d.parts = (0..<6).map { Placed(id: "\($0)", category: "ears", part: "cat") }
+                d.parts = c.parts.map { Placed(id: $0.category, category: $0.category, part: $0.items[0]) }
                 d.stickers = [Placed(category: "stickers-and-patterns", part: "star")]
                 d.fx = ["glitter"]
                 let s = WorkshopStats(d)
