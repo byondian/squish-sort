@@ -878,6 +878,9 @@ final class ExtrasTests: XCTestCase {
         XCTAssertFalse(gate.isLocked(now: 110))
         XCTAssertTrue(gate.submit(" \(gate.a * gate.b) ", now: 110, using: &rng))
         XCTAssertFalse(gate.submit("abc", now: 200, using: &rng))
+        // Only the digits count, whatever else a keyboard adds around them.
+        XCTAssertTrue(gate.submit("\(gate.a * gate.b).", now: 300, using: &rng))
+        XCTAssertFalse(gate.submit("", now: 300, using: &rng))
     }
 
     func testSquishyShopLinkIsNeverShownToChildrenOrUnknownAges() {

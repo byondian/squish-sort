@@ -104,12 +104,15 @@ jobs:
         run: |
           set -o pipefail
           if [ "$KIDS" = "true" ]; then
-            # The kids app has no ads, no tester tools and no ad ids at all.
+            # The kids app has no ads and no ad ids at all. Tester builds add one switch for the tester
+            # (everything unlocked); the build for App Review is made with tester_tools off.
             echo "Squishy Workshop (kids app)"
+            KIDS_EXTRA=()
+            if [ "$TESTER_TOOLS" != "false" ]; then KIDS_EXTRA+=("TESTER_FLAG=TESTER"); echo "Tester switch: in"; else echo "Tester switch: out"; fi
             xcodebuild archive -project SquishSort.xcodeproj -scheme SquishyWorkshop \
               -configuration Release -destination 'generic/platform=iOS' \
               -archivePath "$RUNNER_TEMP/SquishSort.xcarchive" \
-              CURRENT_PROJECT_VERSION=${{ github.run_number }} \
+              CURRENT_PROJECT_VERSION=${{ github.run_number }} "${KIDS_EXTRA[@]}" \
               -allowProvisioningUpdates \
               -authenticationKeyPath "$RUNNER_TEMP/keys/AuthKey.p8" \
               -authenticationKeyID "$ASC_KEY_ID" \

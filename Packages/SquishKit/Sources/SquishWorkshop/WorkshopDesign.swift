@@ -138,6 +138,8 @@ public struct WorkshopDesign: Codable, Equatable, Sendable {
     public var v: Int = 2
     /// Moves the player taught it by dragging it about (Pro). At most `TrickTraining.maxMoves`.
     public var moves: [TaughtMove] = []
+    /// Squishy Workshop only: the name of the picture lifted from a drawing on paper, laid over the goo.
+    public var skin: String?
 
     public static let maxLayers = 3
     /// One from each of the eleven trays.
@@ -189,6 +191,10 @@ public struct WorkshopDesign: Codable, Equatable, Sendable {
         source = (try? c.decodeIfPresent(String.self, forKey: .source)) ?? "game"
         v = max(2, (try? c.decodeIfPresent(Int.self, forKey: .v)) ?? 2)
         moves = (try? c.decodeIfPresent([TaughtMove].self, forKey: .moves)) ?? []
+        skin = ((try? c.decodeIfPresent(String.self, forKey: .skin)) ?? nil).flatMap { name in
+            // Only ever a plain file name made by the app.
+            name.count <= 64 && name.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "-" }) ? name : nil
+        }
         tidy()
     }
 

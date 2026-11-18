@@ -109,6 +109,9 @@ struct SettingsView: View {
                                 }
                             }
                         }
+                        Toggle(isOn: Binding(get: { model.testerOwnsEverything }, set: { model.testerSetOwnsEverything($0) })) {
+                            Text(verbatim: "Tester: paid version (no ads, Workshop Pro)")
+                        }
                         Button(role: .destructive) { model.testerReset() } label: {
                             Text(verbatim: "Tester: reset all progress")
                         }

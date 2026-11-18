@@ -16,6 +16,7 @@ struct KidsRoomView: View {
     @State private var wiggles = 0
     @State private var gate = false
     @State private var grownUps = false
+    @State private var passed = false
 
     private static let madeTab = "made"
 
@@ -43,11 +44,17 @@ struct KidsRoomView: View {
             toys
         }
         .background(KidsBackdrop(scene: scene).ignoresSafeArea())
-        .fullScreenCover(isPresented: $gate) {
+        // The Grown-ups corner opens only once the gate has finished closing, so it is never lost.
+        .fullScreenCover(isPresented: $gate, onDismiss: {
+            if passed { passed = false; grownUps = true }
+        }) {
             KidsGate(onPass: {
+                passed = true
                 gate = false
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { grownUps = true }
-            }, onCancel: { gate = false })
+            }, onCancel: {
+                passed = false
+                gate = false
+            })
         }
         .sheet(isPresented: $grownUps) {
             GrownUpsView().environmentObject(model).environmentObject(model.purchases)
@@ -112,18 +119,25 @@ struct KidsRoomView: View {
         ZStack(alignment: .bottomTrailing) {
             if let id = current {
                 SoftSquishy(toy: id, look: morphedInto ?? id, feel: model.feel(for: id), mode: .room, wiggles: wiggles,
-                            mates: Array(shown.dropLast()),
+                            mates: Array(shown.dropLast()), gravityScale: scene.gravityScale, bounce: scene.bounce,
                             onLetGo: { depth in morph(depth: depth) },
                             onDoubleTap: { model.haptics.reject(); wiggles += 1 }) {
                     SquishRefView(ref: morphedInto ?? id)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                // A new room is a new place: the squishies drop in again with that room's weight and bounce.
+                .id(scene)
                 .accessibilityElement()
                 .accessibilityLabel(Text(verbatim: model.displayName(for: id)))
                 .accessibilityIdentifier("room-squishy")
             } else {
                 Color.clear.frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+            RoomPoppables(scene: scene, big: big) {
+                model.sounds.play("pop")
+                model.haptics.lift()
+            }
+            .id(scene)
             // The one big door: into the Workshop to make a new squishy.
             Button { model.screen = .maker } label: {
                 Image(systemName: "wand.and.stars")

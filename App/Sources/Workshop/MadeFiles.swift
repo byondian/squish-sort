@@ -16,12 +16,34 @@ final class MadeFiles: MadeStore {
     static let pictureSide: CGFloat = 512
     static let thumbSide: CGFloat = 128
 
-    init() {
+    static var folder: URL {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         // UI tests start from nothing every time, like the progress they run with.
-        dir = base.appendingPathComponent(AppModel.isUITesting ? "made-uitest" : "made", isDirectory: true)
+        return base.appendingPathComponent(AppModel.isUITesting ? "made-uitest" : "made", isDirectory: true)
+    }
+
+    init() {
+        dir = MadeFiles.folder
         if AppModel.isUITesting { try? FileManager.default.removeItem(at: dir) }
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        sweepSkins()
+    }
+
+    /// Pictures from drawings that no saved squishy wears any more (a squishy that was never
+    /// finished, or one whose shape was changed) are thrown away after a day.
+    private func sweepSkins() {
+        let files = (try? FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: [.contentModificationDateKey])) ?? []
+        let skins = files.filter { $0.lastPathComponent.hasPrefix(PhotoSkins.prefix) }
+        guard !skins.isEmpty else { return }
+        var worn = Set<String>()
+        for url in files where url.pathExtension == "json" {
+            if let data = try? Data(contentsOf: url), let design = try? JSONDecoder().decode(WorkshopDesign.self, from: data),
+               let skin = design.skin { worn.insert(PhotoSkins.prefix + skin + ".png") }
+        }
+        for url in skins where !worn.contains(url.lastPathComponent) {
+            let changed = (try? url.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate ?? .distantPast
+            if Date().timeIntervalSince(changed) > 86_400 { try? FileManager.default.removeItem(at: url) }
+        }
     }
 
     private func file(_ id: String, _ ending: String) -> URL {
@@ -41,6 +63,7 @@ final class MadeFiles: MadeStore {
     }
 
     func delete(id: String) {
+        if let skin = load(id: id)?.skin { PhotoSkins.remove(skin) }
         for ending in [".json", "-\(MadeFiles.look).png", "-\(MadeFiles.look)-small.png"] {
             try? FileManager.default.removeItem(at: file(id, ending))
         }
@@ -70,5 +93,39 @@ final class MadeFiles: MadeStore {
         guard let image = UIImage(contentsOfFile: url.path) else { return nil }
         pictures[key] = image
         return image
+    }
+}
+
+/// Pictures lifted from drawings on paper (Squishy Workshop): one PNG each, kept beside the made
+/// squishies. A design only holds the picture's name.
+@MainActor
+enum PhotoSkins {
+    static let prefix = "skin-"
+    private static var cache: [String: UIImage] = [:]
+
+    private static func file(_ name: String) -> URL {
+        let safe = name.filter { $0.isLetter || $0.isNumber || $0 == "-" }
+        return MadeFiles.folder.appendingPathComponent(prefix + safe + ".png")
+    }
+
+    static func image(_ name: String) -> UIImage? {
+        if let hit = cache[name] { return hit }
+        guard let image = UIImage(contentsOfFile: file(name).path) else { return nil }
+        cache[name] = image
+        return image
+    }
+
+    /// Keeps a picture and gives back the name to put in the design.
+    static func keep(_ image: UIImage) -> String? {
+        let name = UUID().uuidString
+        try? FileManager.default.createDirectory(at: MadeFiles.folder, withIntermediateDirectories: true)
+        guard let data = image.pngData(), (try? data.write(to: file(name), options: [.atomic])) != nil else { return nil }
+        cache[name] = image
+        return name
+    }
+
+    static func remove(_ name: String) {
+        cache[name] = nil
+        try? FileManager.default.removeItem(at: file(name))
     }
 }

@@ -253,6 +253,51 @@ final class WorkshopTests: XCTestCase {
         XCTAssertEqual(old, GooLayer(colour: 255, seed: 4))
     }
 
+    func testADrawingOnPaperIsLiftedOffThePhoto() {
+        // A photo of a page: light paper with a shadow across it, a dark table down the left edge,
+        // a speck, and a ring drawn in pen a little right of the middle.
+        let n = 96
+        var luma = [Double](repeating: 0, count: n * n)
+        for y in 0..<n {
+            for x in 0..<n {
+                var v = 0.92 - 0.3 * Double(x) / Double(n)
+                if x < 8 { v = 0.15 }
+                let d = (Double(x - 56) * Double(x - 56) + Double(y - 48) * Double(y - 48)).squareRoot()
+                if d > 17, d < 21 { v = 0.12 }
+                luma[y * n + x] = v
+            }
+        }
+        luma[10 * n + 80] = 0.1
+        let ink = DrawnShape.ink(luma: luma, grid: n)
+        XCTAssertTrue(ink[48 * n + 56 + 19], "the pen line is ink")
+        XCTAssertFalse(ink[48 * n + 3], "the table is not the drawing")
+        XCTAssertFalse(ink[48 * n + 90], "a shadow is not ink")
+        XCTAssertFalse(ink[10 * n + 80], "a speck is left out")
+        let traced = DrawnShape.traced(ink: ink, grid: n)
+        XCTAssertEqual(traced.outline.count, 64)
+        let box = try? XCTUnwrap(traced.box)
+        XCTAssertEqual(((box?.minX ?? 0) + (box?.maxX ?? 0)) / 2, 56.0 / 96, accuracy: 0.04)
+        XCTAssertEqual((box?.maxX ?? 0) - (box?.minX ?? 0), 42.0 / 96, accuracy: 0.06)
+        // The ring fills the pad as a filled round shape.
+        let xs = traced.outline.map(\.x)
+        XCTAssertGreaterThan((xs.max() ?? 0) - (xs.min() ?? 0), 0.7)
+        // The square of the photo that fills the pad holds the whole drawing.
+        let fit = box?.fitted
+        XCTAssertLessThan(fit?.x ?? 1, box?.minX ?? 0)
+        XCTAssertGreaterThan((fit?.x ?? 0) + (fit?.side ?? 0), box?.maxX ?? 1)
+        // A blank page gives no box and a ball.
+        let blank = DrawnShape.traced(ink: DrawnShape.ink(luma: [Double](repeating: 0.9, count: n * n), grid: n), grid: n)
+        XCTAssertNil(blank.box)
+        XCTAssertEqual(blank.outline.count, 64)
+        // A design with a picture on it is a paid one, and the picture's name is only ever a plain file name.
+        var d = WorkshopDesign()
+        d.skin = "abc-123"
+        let round = try? JSONDecoder().decode(WorkshopDesign.self, from: JSONEncoder().encode(d))
+        XCTAssertEqual(round?.skin, "abc-123")
+        let bad = try? JSONDecoder().decode(WorkshopDesign.self, from: Data(#"{"skin":"../../x"}"#.utf8))
+        XCTAssertNil(bad?.skin)
+    }
+
     func testAnyScribbleBecomesAMouldAndNothingIsAnError() {
         // Nothing drawn at all: a ball.
         XCTAssertEqual(DrawnShape.outline(strokes: []).count, 64)

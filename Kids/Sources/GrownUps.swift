@@ -70,6 +70,14 @@ struct GrownUpsView: View {
                     Button("Close") { dismiss() }.buttonStyle(SquishButtonStyle(fill: .white, text: Theme.plum))
                         .accessibilityIdentifier("kids-grownups-close")
                 }
+                if AppModel.isTesterBuild {
+                    // Tester builds only: never in the build that goes to App Review.
+                    card {
+                        Toggle(isOn: Binding(get: { model.testerOwnsEverything }, set: { model.testerSetOwnsEverything($0) })) {
+                            Text(verbatim: "Tester: everything unlocked").font(Theme.body(17)).foregroundStyle(Theme.plum)
+                        }
+                    }
+                }
                 card {
                     if model.ownsRemoveAds {
                         Text("Everything is unlocked. Thank you!").font(Theme.body(17)).foregroundStyle(Theme.plum)

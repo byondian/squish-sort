@@ -1047,6 +1047,28 @@
         }
       }
     },
+    "Ask a grown-up to help": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "おとなのひとに てつだってもらおう"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "어른에게 도와 달라고 하세요"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "請大人幫忙"
+          }
+        }
+      }
+    },
     "BIG ONE": {
       "localizations": {
         "ja": {
@@ -5711,6 +5733,28 @@
         }
       }
     },
+    "Pick a photo": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "しゃしんをえらぶ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "사진 고르기"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選擇照片"
+          }
+        }
+      }
+    },
     "Piggy bank": {
       "localizations": {
         "ja": {
@@ -7713,6 +7757,50 @@
         }
       }
     },
+    "Take a photo": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "しゃしんをとる"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "사진 찍기"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拍照"
+          }
+        }
+      }
+    },
+    "Take a photo of your drawing to turn it into a squishy": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "かいた絵のしゃしんをとると、スクイーズになるよ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "그린 그림을 사진으로 찍으면 스퀴시가 돼요"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拍下你畫的圖，就能變成軟軟"
+          }
+        }
+      }
+    },
     "Tap again": {
       "localizations": {
         "ja": {
@@ -8127,6 +8215,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "把戲"
+          }
+        }
+      }
+    },
+    "Try a drawing!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "絵をかいてみよう！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "그림을 그려 보세요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "畫一張圖試試看！"
           }
         }
       }
