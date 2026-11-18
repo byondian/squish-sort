@@ -19,6 +19,7 @@ struct SquishyWorkshopApp: App {
 /// One level deep: the room is home, and the Workshop is one big door in it.
 struct KidsRootView: View {
     @EnvironmentObject var model: AppModel
+    @State private var grownUps = false
 
     var body: some View {
         ZStack {
@@ -30,6 +31,16 @@ struct KidsRootView: View {
             }
         }
         .animation(.easeOut(duration: 0.2), value: model.screen)
+        // Anything closed in the Workshop leads here: the gate first, then the Grown-ups corner.
+        .fullScreenCover(isPresented: $model.grownUpAsk) {
+            KidsGate(onPass: {
+                model.grownUpAsk = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { grownUps = true }
+            }, onCancel: { model.grownUpAsk = false })
+        }
+        .sheet(isPresented: $grownUps) {
+            GrownUpsView().environmentObject(model).environmentObject(model.purchases)
+        }
         .preferredColorScheme(.light)
     }
 }

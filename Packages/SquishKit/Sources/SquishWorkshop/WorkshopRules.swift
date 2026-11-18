@@ -147,7 +147,7 @@ public enum WorkshopGate {
     public static func allowed(_ d: WorkshopDesign, palette: [UInt32], _ a: WorkshopAccess) -> Bool {
         if a.pro { return true }
         guard mouldOpen(d.mould, a), d.mould2 == nil, d.fx.isEmpty, d.drawnFace == nil, d.drawnOutline == nil,
-              d.moves.isEmpty else { return false }
+              d.skin == nil, d.moves.isEmpty else { return false }
         guard d.layers.count <= freeLayers,
               d.layers.allSatisfy({ freePatterns.contains($0.pattern) && colourOpen($0.colour, palette: palette, a) }) else { return false }
         guard eyesOpen(d.face.eyes, a), mouthOpen(d.face.mouth, a), noseOpen(d.face.nose, a),
@@ -165,6 +165,7 @@ public enum WorkshopGate {
         out.fx = []
         out.drawnFace = nil
         out.drawnOutline = nil
+        out.skin = nil
         out.moves = []
         out.layers = out.layers.prefix(freeLayers).map { layer in
             var l = layer
@@ -507,6 +508,27 @@ extension DrawnShape {
                 last = p
             }
         }
+        return traced(ink: ink, grid: n, points: count).outline
+    }
+
+    /// The box a traced drawing took up on its grid, 0...1 across it, before it was fitted to the pad.
+    public struct Box: Equatable, Sendable {
+        public var minX, minY, maxX, maxY: Double
+        /// The square of the grid that ends up filling the whole pad once the drawing is fitted.
+        public var fitted: (x: Double, y: Double, side: Double) {
+            let side = max(maxX - minX, maxY - minY, 0.001) / DrawnShape.fitShare
+            return ((minX + maxX) / 2 - side / 2, (minY + maxY) / 2 - side / 2, side)
+        }
+    }
+
+    /// A fitted drawing takes this share of the pad.
+    public static let fitShare = 0.9
+
+    /// The mould of whatever is inked on a square grid: everything that cannot be reached from
+    /// outside is the shape, and its outer edge is the mould. `box` is nil when nothing was inked
+    /// (the mould is a ball then).
+    public static func traced(ink: [Bool], grid n: Int, points count: Int = 64) -> (outline: [WorkshopPoint], box: Box?) {
+        guard n > 0, ink.count == n * n else { return (ball(count), nil) }
         // Flood the outside from the edges, on a grid one cell bigger all round.
         let m = n + 2
         var outside = [Bool](repeating: false, count: m * m)
@@ -544,7 +566,7 @@ extension DrawnShape {
             }
             if size > bestSize { bestSize = size; best = next; bestStart = start }
         }
-        guard best > 0 else { return ball(count) }
+        guard best > 0 else { return (ball(count), nil) }
         func mine(_ x: Int, _ y: Int) -> Bool { x >= 0 && y >= 0 && x < m && y < m && label[y * m + x] == best }
         // Walk round the outer edge, clockwise, starting from the top-left cell (its left side is outside).
         let dirs = [(-1, 0), (-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1)]
@@ -571,15 +593,73 @@ extension DrawnShape {
             guardCount += 1
             if !moved { break }
         } while !(cx == sx && cy == sy) && guardCount < 4 * m * m
-        guard edge.count >= 8 else { return ball(count) }
+        guard edge.count >= 8 else { return (ball(count), nil) }
         // Fill the pad: the drawing's box is scaled to most of it, keeping its proportions.
         let xs = edge.map(\.x), ys = edge.map(\.y)
         let minX = xs.min() ?? 0, maxX = xs.max() ?? 1, minY = ys.min() ?? 0, maxY = ys.max() ?? 1
         let span = max(maxX - minX, maxY - minY, 0.001)
-        let k = 0.9 / span
+        let k = fitShare / span
         let mx = (minX + maxX) / 2, my = (minY + maxY) / 2
         let fitted = edge.map { WorkshopPoint(x: 0.5 + ($0.x - mx) * k, y: 0.5 + ($0.y - my) * k) }
-        return mould(from: fitted, points: count) ?? ball(count)
+        guard let shape = mould(from: fitted, points: count) else { return (ball(count), nil) }
+        return (shape, Box(minX: minX, minY: minY, maxX: maxX, maxY: maxY))
+    }
+
+    /// Finds the drawing in a photo of paper. `luma` is how light each cell of a square grid is,
+    /// 0 (black) to 1 (white). A cell is ink when it is clearly darker than the paper around it, so
+    /// a shadow across the page is not ink. Ink that runs off the edge of the photo (the table, the
+    /// edge of the page) is left out, and so are specks.
+    public static func ink(luma: [Double], grid n: Int) -> [Bool] {
+        guard n > 2, luma.count == n * n else { return [] }
+        // The paper around each cell: the mean of a wide box, from a summed table.
+        var sums = [Double](repeating: 0, count: (n + 1) * (n + 1))
+        for y in 0..<n {
+            var row = 0.0
+            for x in 0..<n {
+                row += luma[y * n + x]
+                sums[(y + 1) * (n + 1) + x + 1] = sums[y * (n + 1) + x + 1] + row
+            }
+        }
+        let reach = max(2, n / 6)
+        var ink = [Bool](repeating: false, count: n * n)
+        for y in 0..<n {
+            for x in 0..<n {
+                let x0 = max(0, x - reach), x1 = min(n, x + reach + 1), y0 = max(0, y - reach), y1 = min(n, y + reach + 1)
+                let total = sums[y1 * (n + 1) + x1] - sums[y0 * (n + 1) + x1] - sums[y1 * (n + 1) + x0] + sums[y0 * (n + 1) + x0]
+                let around = total / Double((x1 - x0) * (y1 - y0))
+                ink[y * n + x] = luma[y * n + x] < around * 0.86 - 0.02
+            }
+        }
+        // Ink joined to the photo's edge is not the drawing.
+        var stack: [Int] = []
+        for i in 0..<n {
+            for at in [i, (n - 1) * n + i, i * n, i * n + n - 1] where ink[at] {
+                ink[at] = false
+                stack.append(at)
+            }
+        }
+        while let at = stack.popLast() {
+            let x = at % n, y = at / n
+            for (dx, dy) in [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, -1), (1, -1), (-1, 1)] {
+                let nx = x + dx, ny = y + dy
+                guard nx >= 0, ny >= 0, nx < n, ny < n, ink[ny * n + nx] else { continue }
+                ink[ny * n + nx] = false
+                stack.append(ny * n + nx)
+            }
+        }
+        // Specks: a cell of ink with no ink beside it.
+        var out = ink
+        for y in 0..<n {
+            for x in 0..<n where ink[y * n + x] {
+                var beside = 0
+                for (dx, dy) in [(1, 0), (-1, 0), (0, 1), (0, -1)] {
+                    let nx = x + dx, ny = y + dy
+                    if nx >= 0, ny >= 0, nx < n, ny < n, ink[ny * n + nx] { beside += 1 }
+                }
+                if beside == 0 { out[y * n + x] = false }
+            }
+        }
+        return out
     }
 
     static func ball(_ count: Int) -> [WorkshopPoint] {

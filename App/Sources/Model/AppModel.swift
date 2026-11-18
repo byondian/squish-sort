@@ -1027,6 +1027,9 @@ final class AppModel: ObservableObject {
     /// The squishy the Squish Room should open with (set by "Squeeze me" buttons, used once).
     var roomStart: String?
 
+    /// Squishy Workshop: something closed was tapped, so the grown-up gate should come up.
+    @Published var grownUpAsk = false
+
     /// Opens the Squish Room with this squishy in hand.
     func squeeze(_ ref: String) {
         guard isExtraUnlocked(.squishRoom), squeezables.contains(ref) else { return }

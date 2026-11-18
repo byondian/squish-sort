@@ -52,6 +52,80 @@ enum KidsScene: String, CaseIterable, Identifiable {
 
     /// The Bounce House sends a thrown squishy off the walls again and again.
     var bounce: Double? { self == .bounceHouse ? 0.85 : nil }
+
+    /// What floats in this room for a finger to pop: blocks, bubbles, balloons, stars, snowflakes.
+    var popIcon: String {
+        switch self {
+        case .playMat: return "star.fill"
+        case .bathTime: return "bubbles.and.sparkles.fill"
+        case .bounceHouse: return "balloon.fill"
+        case .bedtime: return "moon.stars.fill"
+        case .snowDay: return "snowflake"
+        }
+    }
+
+    var popColours: [Color] {
+        switch self {
+        case .playMat: return [Theme.bubblegum, Theme.sky, Theme.mint, Theme.grape]
+        case .bathTime: return [.white]
+        case .bounceHouse: return [Theme.sky, Theme.mint, Theme.grape, Theme.bubblegum]
+        case .bedtime: return [Theme.butter]
+        case .snowDay: return [.white]
+        }
+    }
+}
+
+/// A few things floating at the top of the room. A tap pops one with a sound, and another drifts
+/// in a moment later. Nothing is counted and nothing runs out.
+struct RoomPoppables: View {
+    let scene: KidsScene
+    var big: CGFloat = 1
+    let popped: () -> Void
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// How many times each place has been popped: the next one comes in a little to one side.
+    @State private var rounds = [0, 0, 0, 0]
+    @State private var gone: Set<Int> = []
+    @State private var bob = false
+
+    var body: some View {
+        GeometryReader { geo in
+            ForEach(0..<4, id: \.self) { i in
+                let size = 58 * big
+                let shift = CGFloat((rounds[i] * 37 + i * 11) % 9 - 4) / 100
+                let x = geo.size.width * (0.14 + 0.24 * CGFloat(i) + shift)
+                let y = size * 0.8 + CGFloat((i * 53 + rounds[i] * 29) % 40) * big
+                Button { pop(i) } label: {
+                    Image(systemName: scene.popIcon)
+                        .font(.system(size: size * 0.62, weight: .bold))
+                        .foregroundStyle(scene.popColours[(i + rounds[i]) % scene.popColours.count])
+                        .shadow(color: Theme.plum.opacity(0.18), radius: 3, y: 2)
+                        .frame(width: size, height: size)
+                        .contentShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .scaleEffect(gone.contains(i) ? 1.7 : 1)
+                .opacity(gone.contains(i) ? 0 : 1)
+                .offset(y: bob && !reduceMotion ? -8 : 8)
+                .animation(reduceMotion ? nil : .easeInOut(duration: 1.6 + 0.25 * Double(i)).repeatForever(autoreverses: true), value: bob)
+                .animation(.easeOut(duration: 0.22), value: gone)
+                .position(x: x, y: y)
+                .disabled(gone.contains(i))
+                .accessibilityLabel(Text(scene.name))
+                .accessibilityIdentifier("kids-pop-\(i)")
+            }
+        }
+        .onAppear { bob = true }
+    }
+
+    private func pop(_ i: Int) {
+        guard !gone.contains(i) else { return }
+        gone.insert(i)
+        popped()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
+            rounds[i] += 1
+            gone.remove(i)
+        }
+    }
 }
 
 /// What is behind the squishies in each room. Nothing here can be touched.

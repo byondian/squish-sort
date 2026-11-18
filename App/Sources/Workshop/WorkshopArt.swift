@@ -89,6 +89,12 @@ struct WorkshopSquishyView: View {
                 GooFill(design: design, fill: fill, wave: wave)
                     .frame(width: body, height: body)
                     .mask { mask.frame(width: body, height: body) }
+                if let name = design.skin, let picture = PhotoSkins.image(name) {
+                    // A drawing from paper: its lines and colours sit on the goo like felt pen, and the paper is clear.
+                    Image(uiImage: picture).resizable().frame(width: body, height: body)
+                        .blendMode(.multiply)
+                        .mask { mask.frame(width: body, height: body) }
+                }
                 if showsFace {
                     face(body: body)
                 }

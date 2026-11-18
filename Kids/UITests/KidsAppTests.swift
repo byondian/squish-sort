@@ -54,6 +54,33 @@ final class KidsAppTests: XCTestCase {
         Thread.sleep(forTimeInterval: 0.8)
         keep(app.screenshot(), as: "squishy-kids-3-workshop")
         XCTAssertFalse(app.buttons["ws-see-shop"].exists)
+        // The photo of a drawing is closed until a grown-up opens everything: it leads to the gate.
+        button("ws-photo-shape", in: app).tap()
+        XCTAssertTrue(app.descendants(matching: .any)["kids-gate-hold"].waitForExistence(timeout: 5), "a closed tool leads to the grown-up gate")
+        XCTAssertFalse(app.buttons["photo-camera"].exists)
+    }
+
+    /// Unlocked: a drawing on paper becomes the squishy's shape, with its own colours on the goo.
+    func testADrawingOnPaperBecomesASquishy() {
+        let app = launch(["-kidsUnlocked", "-kidsTestDrawing"])
+        button("kids-door", in: app).tap()
+        button("ws-photo-shape", in: app).tap()
+        XCTAssertTrue(app.buttons["photo-pick"].waitForExistence(timeout: 5), "a photo can be picked without the camera")
+        keep(app.screenshot(), as: "squishy-kids-6-photo-ask")
+        button("photo-camera", in: app).tap()
+        let stage = app.descendants(matching: .any)["ws-stage"]
+        XCTAssertTrue(stage.waitForExistence(timeout: 15), "back at the mould with the drawing in it")
+        XCTAssertFalse(app.descendants(matching: .any)["photo-try-again"].exists, "the drawing was found")
+        Thread.sleep(forTimeInterval: 0.8)
+        keep(app.screenshot(), as: "squishy-kids-7-photo-mould")
+        button("ws-next", in: app).tap()
+        for _ in 0..<5 where !app.buttons["ws-next"].isEnabled { stage.press(forDuration: 2.0) }
+        XCTAssertTrue(app.buttons["ws-next"].isEnabled, "the drawn mould fills with goo")
+        app.buttons["ws-next"].tap()
+        button("ws-bake", in: app).tap()
+        XCTAssertTrue(app.buttons["ws-redo"].waitForExistence(timeout: 8), "the drawn squishy pops out of the oven")
+        Thread.sleep(forTimeInterval: 0.8)
+        keep(app.screenshot(), as: "squishy-kids-8-photo-squishy")
     }
 
     /// The gate: hold for three seconds, then a sum. Behind it, the one purchase and no way out by accident.

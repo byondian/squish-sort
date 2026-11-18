@@ -126,6 +126,11 @@ struct KidsRoomView: View {
             } else {
                 Color.clear.frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+            RoomPoppables(scene: scene, big: big) {
+                model.sounds.play("pop")
+                model.haptics.lift()
+            }
+            .id(scene)
             // The one big door: into the Workshop to make a new squishy.
             Button { model.screen = .maker } label: {
                 Image(systemName: "wand.and.stars")

@@ -96,9 +96,14 @@ struct WorkshopView: View {
     @State private var mixer = false
     @State private var training: MadeSquishy?
     @State private var drawingFace = false
+    /// Squishy Workshop: turning a photo of a drawing on paper into the shape.
+    @State private var photoShape = false
 
     private let clock = Timer.publish(every: 1.0 / 30, on: .main, in: .common).autoconnect()
-    private static let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 5)
+    /// Squishy Workshop is for small hands: three big tiles across on a phone, and bigger buttons everywhere.
+    private static let columns = Array(repeating: GridItem(.flexible(), spacing: AppModel.isKidsApp ? 12 : 8),
+                                       count: AppModel.isKidsApp && UIDevice.current.userInterfaceIdiom != .pad ? 3 : 5)
+    private static let kid: CGFloat = AppModel.isKidsApp ? 1.35 : 1
 
     /// A new squishy starts as an empty mould.
     static var blank: WorkshopDesign {
@@ -167,6 +172,7 @@ struct WorkshopView: View {
                     design.drawnOutline = DrawnShape.outline(strokes: strokes, brush: brush)
                     design.mould = "draw-it"
                     design.mould2 = nil
+                    design.skin = nil
                     unbake()
                     model.sounds.play("pop")
                 }
@@ -187,6 +193,26 @@ struct WorkshopView: View {
                 drawingFace = false
             }
         }
+        #if KIDS
+        .fullScreenCover(isPresented: $photoShape) {
+            PhotoDrawingView { lifted in
+                // The drawing is the mould and its own colours are on it; it brings its own face.
+                if let skin = PhotoSkins.keep(lifted.picture) {
+                    design.drawnOutline = lifted.outline
+                    design.mould = "draw-it"
+                    design.mould2 = nil
+                    design.skin = skin
+                    design.drawnFace = nil
+                    design.face = WorkshopFace(eyes: "none", mouth: "none")
+                    unbake()
+                    model.sounds.play("pop")
+                }
+                photoShape = false
+            } cancel: {
+                photoShape = false
+            }
+        }
+        #endif
         .onReceive(clock) { now in
             // Real time between ticks, so a slow frame pours as much goo as a fast one.
             let dt = min(0.25, max(0, now.timeIntervalSince(lastTick)))
@@ -207,15 +233,15 @@ struct WorkshopView: View {
                 .lineLimit(1).minimumScaleFactor(0.6)
             Spacer()
             Button(action: surprise) {
-                Image(systemName: "dice.fill").font(.system(size: 18, weight: .bold)).foregroundStyle(Theme.plum)
-                    .frame(width: 44, height: 44).background(Circle().fill(Theme.butter))
+                Image(systemName: "dice.fill").font(.system(size: 18 * WorkshopView.kid, weight: .bold)).foregroundStyle(Theme.plum)
+                    .frame(width: 44 * WorkshopView.kid, height: 44 * WorkshopView.kid).background(Circle().fill(Theme.butter))
             }
             .buttonStyle(PressSquish())
             .accessibilityLabel(Text("Surprise me"))
             .accessibilityIdentifier("ws-surprise")
             Button { shelf = true } label: {
-                Image(systemName: "books.vertical.fill").font(.system(size: 18, weight: .bold)).foregroundStyle(Theme.plum)
-                    .frame(width: 44, height: 44).background(Circle().fill(.white))
+                Image(systemName: "books.vertical.fill").font(.system(size: 18 * WorkshopView.kid, weight: .bold)).foregroundStyle(Theme.plum)
+                    .frame(width: 44 * WorkshopView.kid, height: 44 * WorkshopView.kid).background(Circle().fill(.white))
                     .overlay(alignment: .topTrailing) {
                         if !model.progress.made.isEmpty {
                             Text(verbatim: "\(model.progress.made.count)").font(Theme.body(11)).foregroundStyle(.white)
@@ -432,7 +458,13 @@ struct WorkshopView: View {
                 .foregroundStyle(Theme.plum.opacity(0.45))
             }
             .background(RoundedRectangle(cornerRadius: 14).fill(Color.white.opacity(0.6)))
-        if gentle {
+        if AppModel.isKidsApp {
+            // The closed drawer is a grown-up matter: the gate, never a price.
+            Button { model.grownUpAsk = true } label: { face }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text("More"))
+                .accessibilityIdentifier("ws-more")
+        } else if gentle {
             face.accessibilityLabel(Text("More"))
         } else {
             Button { note = .pro } label: { face }
@@ -499,6 +531,7 @@ struct WorkshopView: View {
                 }
                 proSwitch("Head on top", icon: "square.stack.fill", isOn: $onTop, key: "ws-on-top")
             }
+            if AppModel.isKidsApp { photoButton }
             grid("Shape", key: "mould", tiles) { m in
                 if let image = WorkshopArt.mould(m) {
                     Image(uiImage: image).renderingMode(.template).resizable().scaledToFit().foregroundStyle(Theme.plum.opacity(0.8))
@@ -507,13 +540,36 @@ struct WorkshopView: View {
                 if onTop {
                     design.mould2 = design.mould2 == m ? nil : m
                 } else {
+                    // A picture from paper belongs to its own shape; a new mould gets the usual face back.
+                    if design.skin != nil { design.face = WorkshopFace() }
                     design.mould = m
                     design.drawnOutline = nil
+                    design.skin = nil
                 }
                 unbake()
                 model.sounds.play("pop")
             }
         }
+    }
+
+    /// Squishy Workshop: a drawing on paper becomes the squishy. Closed until a grown-up opens everything.
+    private var photoButton: some View {
+        Button {
+            if access.pro { photoShape = true } else { model.grownUpAsk = true }
+        } label: {
+            HStack(spacing: 14) {
+                Image(systemName: "pencil.and.scribble").font(.system(size: 30, weight: .bold))
+                Image(systemName: "arrow.right").font(.system(size: 18, weight: .heavy)).opacity(0.6)
+                Image(systemName: "camera.fill").font(.system(size: 30, weight: .bold))
+                if !access.pro { Image(systemName: "lock.fill").font(.system(size: 16, weight: .bold)).opacity(0.6) }
+            }
+            .foregroundStyle(design.skin != nil ? Color.white : Theme.plum)
+            .frame(maxWidth: .infinity).frame(height: 72)
+            .background(RoundedRectangle(cornerRadius: 22).fill(design.skin != nil ? Theme.grape : Color.white))
+        }
+        .buttonStyle(PressSquish())
+        .accessibilityLabel(Text("Take a photo of your drawing to turn it into a squishy"))
+        .accessibilityIdentifier("ws-photo-shape")
     }
 
     // Station 2: the goo.
@@ -1000,8 +1056,8 @@ struct WorkshopView: View {
     private var belt: some View {
         HStack(spacing: 6) {
             Button { if let s = Station(rawValue: station.rawValue - 1) { go(s) } } label: {
-                Image(systemName: "arrow.left").font(.system(size: 20, weight: .heavy)).foregroundStyle(Theme.plum)
-                    .frame(width: 48, height: 48).background(Circle().fill(.white))
+                Image(systemName: "arrow.left").font(.system(size: 20 * WorkshopView.kid, weight: .heavy)).foregroundStyle(Theme.plum)
+                    .frame(width: 48 * WorkshopView.kid, height: 48 * WorkshopView.kid).background(Circle().fill(.white))
             }
             .buttonStyle(PressSquish())
             .opacity(station == .mould ? 0.3 : 1)
@@ -1011,9 +1067,9 @@ struct WorkshopView: View {
             ForEach(Station.allCases, id: \.rawValue) { s in
                 Button { go(s) } label: {
                     Image(systemName: s == .bake && !design.goo.baked ? "snowflake" : s.icon)
-                        .font(.system(size: 15, weight: .bold))
+                        .font(.system(size: 15 * WorkshopView.kid, weight: .bold))
                         .foregroundStyle(s == station ? Color.white : Theme.plum.opacity(canOpen(s) ? 0.8 : 0.3))
-                        .frame(maxWidth: .infinity).frame(height: 40)
+                        .frame(maxWidth: .infinity).frame(height: 40 * WorkshopView.kid)
                         .background(RoundedRectangle(cornerRadius: 14).fill(s == station ? Theme.bubblegum : Color.white.opacity(0.7)))
                 }
                 .buttonStyle(.plain)
@@ -1025,8 +1081,8 @@ struct WorkshopView: View {
             let next = Station(rawValue: station.rawValue + 1)
             let ready = next.map(canOpen) ?? false
             Button { if let next { go(next) } } label: {
-                Image(systemName: "arrow.right").font(.system(size: 20, weight: .heavy)).foregroundStyle(.white)
-                    .frame(width: 48, height: 48).background(Circle().fill(Theme.bubblegum))
+                Image(systemName: "arrow.right").font(.system(size: 20 * WorkshopView.kid, weight: .heavy)).foregroundStyle(.white)
+                    .frame(width: 48 * WorkshopView.kid, height: 48 * WorkshopView.kid).background(Circle().fill(Theme.bubblegum))
             }
             .buttonStyle(PressSquish())
             .opacity(ready ? 1 : 0.3)
