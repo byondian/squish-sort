@@ -468,6 +468,9 @@ final class BoardScene: SKScene {
     override func update(_ currentTime: TimeInterval) {
         let dt = lastUpdate == 0 ? 1.0 / 60 : min(0.05, max(0, currentTime - lastUpdate))
         lastUpdate = currentTime
+        // What is drawn must be what the board holds. If they ever part (Ian, 18 Nov: a lid on a
+        // jar that showed three squishies), everything is drawn again from the board at once.
+        if !busy, size.width > 0, !matchesBoard { rebuild() }
         for (j, jar) in pieces.enumerated() {
             for (i, node) in jar.enumerated() {
                 node.advance(dt)
@@ -481,6 +484,17 @@ final class BoardScene: SKScene {
                 }
             }
         }
+    }
+
+    /// Every jar shows the board's own pieces in order, and a lid exactly when the jar is complete.
+    private var matchesBoard: Bool {
+        guard pieces.count == board.jarCount, jarNodes.count == board.jarCount else { return false }
+        for j in 0..<board.jarCount {
+            let jar = board.jars[j]
+            guard pieces[j].count == jar.count, jarNodes[j].hasLid == board.isComplete(j) else { return false }
+            for (i, piece) in jar.enumerated() where pieces[j][i].kindID != kinds[Int(piece.kind)] { return false }
+        }
+        return true
     }
 
     /// A piece has landed in `jar` at `index`: it squashes, and the whole stack under it gives a little.
@@ -504,6 +518,8 @@ final class BoardScene: SKScene {
         for (k, node) in pieces[j].suffix(n).enumerated() {
             node.removeAction(forKey: "wobble")
             node.removeAction(forKey: "travel")
+            // Picked up while still dropping in after a shuffle: it must not stay faded.
+            node.alpha = 1
             node.zPosition = 10
             let rise = SKAction.move(to: liftPoint(j, k), duration: 0.12)
             rise.timingMode = .easeOut
