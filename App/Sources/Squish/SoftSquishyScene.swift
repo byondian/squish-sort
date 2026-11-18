@@ -145,6 +145,8 @@ final class SoftSquishyScene: SKScene {
         let id: String
         let image: UIImage
         let feel: SquishFeel
+        /// Its quick-tap trick from the moves file ("spin", "hop"...), if it has one.
+        var trick: String?
     }
 
     /// Everything one toy on screen needs.
@@ -152,6 +154,7 @@ final class SoftSquishyScene: SKScene {
         let id: String
         var image: UIImage
         var feel: SquishFeel
+        var trick: String?
         let mask: SquishMask?
         var body: SquishBody?
         let sprite = SKSpriteNode()
@@ -176,6 +179,7 @@ final class SoftSquishyScene: SKScene {
             id = toy.id
             image = toy.image
             feel = toy.feel
+            trick = toy.trick
             mask = SquishMask(image: toy.image)
             sprite.texture = SKTexture(image: toy.image)
             shadow.fillColor = UIColor(red: 0.23, green: 0.16, blue: 0.35, alpha: 1)
@@ -202,6 +206,8 @@ final class SoftSquishyScene: SKScene {
     var onGesture: ((TrickGesture) -> Bool)?
     /// Each frame: where the main body is and how hard it is squeezed, for the signature moves drawn over it.
     var onPulse: ((SquishPulse) -> Void)?
+    /// The same for each of the other toys in the room, by id.
+    var onMatePulse: ((String, SquishPulse) -> Void)?
     /// Each finger's path since it went down, on or beside the toy.
     private var paths: [Int: (points: [(x: Double, y: Double)], began: TimeInterval)] = [:]
 
@@ -224,6 +230,8 @@ final class SoftSquishyScene: SKScene {
     private static let pokeID = -1
     /// Where each finger went down, and how big its contact patch was then.
     private var touchStarts: [Int: (x: Double, y: Double, radius: Double)] = [:]
+    /// When each finger went down, to tell a quick tap from a squeeze.
+    private var touchBegan: [Int: TimeInterval] = [:]
     private var drawTick = 0
     private let motion = SquishMotion.shared
 
@@ -254,6 +262,7 @@ final class SoftSquishyScene: SKScene {
         touchTimes = [:]
         touchStarts = [:]
         touchOwner = [:]
+        touchBegan = [:]
         paths = [:]
         motion.stop(self)
         pokeEnds = nil
@@ -281,6 +290,7 @@ final class SoftSquishyScene: SKScene {
             if !fresh.contains(toy.id), let kept = old.first(where: { $0.id == toy.id }) {
                 kept.image = toy.image
                 kept.feel = toy.feel
+                kept.trick = toy.trick
                 kept.sprite.texture = SKTexture(image: toy.image)
                 next.append(kept)
             } else {
@@ -331,6 +341,7 @@ final class SoftSquishyScene: SKScene {
         touchTimes = [:]
         touchStarts = [:]
         touchOwner = [:]
+        touchBegan = [:]
         paths = [:]
         pokeEnds = nil
         carried = 0
@@ -441,6 +452,7 @@ final class SoftSquishyScene: SKScene {
             }
             touchTimes[id] = touch.timestamp
             touchStarts[id] = (held.x, held.y, Double(touch.majorRadius))
+            touchBegan[id] = touch.timestamp
             owner.waitsForPop = false
             owner.stillFor = 0
             onTouch?()
@@ -476,6 +488,7 @@ final class SoftSquishyScene: SKScene {
             let owner = touchOwner.removeValue(forKey: id)
             guard touchTimes.removeValue(forKey: id) != nil else { continue }
             touchStarts[id] = nil
+            let began = touchBegan.removeValue(forKey: id)
             guard let owner, let body = owner.body else { continue }
             let depth = body.metric.D
             let dent = body.metric.Z
@@ -488,6 +501,9 @@ final class SoftSquishyScene: SKScene {
                 sounds?.pop(volume: volume, pan: pan, enabled: soundOn())
             }
             if owner === pieces.first { onLetGo?(depth) }
+            // With several toys out, a quick tap makes the tapped one do its trick by itself.
+            // (Alone, the view around the toy does the trick.)
+            if pieces.count > 1, let began, touch.timestamp - began < 0.28 { trick(owner) }
         }
     }
 
@@ -498,6 +514,19 @@ final class SoftSquishyScene: SKScene {
         if body.grab(SoftSquishyScene.pokeID, x: (b.x0 + b.x1) / 2, y: b.y0 + (b.y1 - b.y0) * 0.12) {
             pokeEnds = lastTime + 0.2
         }
+    }
+
+    /// A toy's own quick-tap trick, done on its sprite and body so the others stay as they are.
+    private func trick(_ piece: Piece) {
+        guard let name = piece.trick, let body = piece.body, !piece.sprite.hasActions() else { return }
+        if name == "spin", !reduceMotion {
+            let sprite = piece.sprite
+            sprite.run(.sequence([.rotate(byAngle: -2 * .pi, duration: 0.6), .run { sprite.zRotation = 0 }]))
+        } else if !body.metric.air {
+            // Everything else is a hop: a real one, so it can land on a neighbour.
+            body.bump(dx: 0, dy: 0, dvx: 0, dvy: -side * (reduceMotion ? 1.2 : 2.6), other: (x: 0, y: 0, r: 0), press: 0)
+        }
+        piece.stillFor = 0
     }
 
     /// The tickle: a quick shake.
@@ -528,15 +557,11 @@ final class SoftSquishyScene: SKScene {
         }
         if steps == 8 { carried = 0 }
         feedback(dt)
-        let m = body.metric
-        if let onPulse {
-            let c = body.centre(), held = touchOwner.values.contains { $0 === main }
-            // The moves are drawn from the middle of the picture, which is not the middle of the
-            // body when the art is lopsided (Cream Puff's base is only its lower half).
-            let ox: Double = (0.5 - body.c0.x) * side, oy: Double = (0.5 - body.c0.y) * side
-            let ct: Double = cos(body.theta), st: Double = sin(body.theta)
-            onPulse(SquishPulse(squeeze: min(1, max(m.D / 0.15, held ? 0.35 : 0)), held: held,
-                                x: c.x + ct * ox - st * oy, y: c.y + st * ox + ct * oy, side: side, angle: body.theta))
+        if let onPulse { onPulse(pulse(of: main, body)) }
+        if let onMatePulse {
+            for piece in pieces.dropFirst() {
+                if let b = piece.body { onMatePulse(piece.id, pulse(of: piece, b)) }
+            }
         }
         drawTick &+= 1
         var sliding = false
@@ -557,6 +582,18 @@ final class SoftSquishyScene: SKScene {
         // Untouched and settled, only the slow breath and the phone's lean are left to show:
         // a third of the frames is plenty for those, and easier on the battery.
         for piece in pieces where piece.stillFor < 1 || (sliding && piece === main) || drawTick % 3 == 0 { draw(piece) }
+    }
+
+    /// Where a toy is and how hard it is squeezed, for the signature moves drawn over it.
+    private func pulse(of piece: Piece, _ body: SquishBody) -> SquishPulse {
+        let m = body.metric
+        let c = body.centre(), held = touchOwner.values.contains { $0 === piece }
+        // The moves are drawn from the middle of the picture, which is not the middle of the
+        // body when the art is lopsided (Cream Puff's base is only its lower half).
+        let ox: Double = (0.5 - body.c0.x) * side, oy: Double = (0.5 - body.c0.y) * side
+        let ct: Double = cos(body.theta), st: Double = sin(body.theta)
+        return SquishPulse(squeeze: min(1, max(m.D / 0.15, held ? 0.35 : 0)), held: held,
+                           x: c.x + ct * ox - st * oy, y: c.y + st * ox + ct * oy, side: side, angle: body.theta)
     }
 
     /// Toys in the Squish Room bump into each other: they are moved apart, a thrown one bounces off,
