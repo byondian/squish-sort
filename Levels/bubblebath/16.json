@@ -13,6 +13,7 @@
     ["quacky", "soapy", "starla", "soapy"],
     ["shelly", "bubbly", "soapy", "quacky"],
     [],
+    [],
     []
   ],
   "mechanics": {"hidden": [], "sticky": [[1, 0], [3, 2]], "frozen": [[0, 1], [3, 0]]},

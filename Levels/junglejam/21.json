@@ -14,6 +14,7 @@
     ["blu", "dotty", "leafy", "bongo"],
     ["leafy", "leafy", "dotty", "nana"],
     [],
+    [],
     []
   ],
   "mechanics": {"hidden": [[1, 2], [2, 2], [3, 2], [5, 2]], "sticky": [], "frozen": [], "vines": [[0, 1], [4, 2]]},

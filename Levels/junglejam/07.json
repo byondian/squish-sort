@@ -12,6 +12,7 @@
     ["tuki", "tuki", "pina", "bongo"],
     ["bongo", "dotty", "nana", "pina"],
     ["nana", "bongo", "leafy", "leafy"],
+    [],
     []
   ],
   "mechanics": {"hidden": [], "sticky": [], "frozen": [], "vines": [[2, 1]]},

@@ -26,11 +26,11 @@ public enum LevelCatalog {
     public static func levelCount(in world: String) -> Int { lengths[world] ?? 20 }
     public static var mainLevelCount: Int { worlds.reduce(0) { $0 + levelCount(in: $1) } }
 
-    /// A capsule every 3rd level of a world and on its last level.
+    /// A capsule every 3rd level of a world, on every boss (each 10th level) and on its last level.
     public static func isCapsuleLevel(index: Int, world: String) -> Bool {
         // Keep Squishing: every fifth level.
         if world == endless { return index % 5 == 0 }
-        return index % 3 == 0 || index == levelCount(in: world)
+        return index % 3 == 0 || index % 10 == 0 || index == levelCount(in: world)
     }
 
     /// Reads every Levels/<world>/<nn>.json under `root`, in play order.

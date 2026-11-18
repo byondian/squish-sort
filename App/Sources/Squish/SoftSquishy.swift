@@ -23,6 +23,9 @@ struct SoftSquishy<Art: View>: View {
     var wiggles = 0
     /// Slides back to the middle after being thrown (the Buddy on Home).
     var comesHome = false
+    /// Other squishies out in the room with this one (Squish Room only). They can be squeezed and thrown
+    /// too, and they bump into each other. The signature moves and the callbacks belong to `toy`.
+    var mates: [String] = []
     var onTouch: (() -> Void)?
     var onLetGo: ((Double) -> Void)?
     var onDoubleTap: (() -> Void)?
@@ -34,6 +37,38 @@ struct SoftSquishy<Art: View>: View {
         let scene = SoftSquishyScene()
         let pulse = MovePulse()
         var sim: MoveSim?
+        /// The toys last handed to the scene, so only a new arrival drops in.
+        var shown: Set<String> = []
+        /// The other toys' own moves and where each one is.
+        var mateSims: [String: MoveSim] = [:]
+        var matePulses: [String: MovePulse] = [:]
+    }
+
+    /// The other toys out in the room that are drawn by this scene.
+    private var roomMates: [String] {
+        guard mode == .room else { return [] }
+        var seen = Set([toy])
+        return mates.filter { !SignatureMoves.shared.isRope($0) && seen.insert($0).inserted }
+    }
+
+    /// Each mate's own moves (sparkles, limbs, glow), drawn where that mate is.
+    private func mateLayers() -> [String] {
+        let ids = roomMates
+        holder.mateSims = holder.mateSims.filter { ids.contains($0.key) }
+        holder.matePulses = holder.matePulses.filter { ids.contains($0.key) }
+        var with: [String] = []
+        for id in ids {
+            let specs = SignatureMoves.shared.moves(for: id)
+            guard !specs.isEmpty else { continue }
+            if holder.mateSims[id] == nil { holder.mateSims[id] = MoveSim(id: id, specs: specs) }
+            if holder.matePulses[id] == nil { holder.matePulses[id] = MovePulse() }
+            with.append(id)
+        }
+        return with
+    }
+
+    private func trick(of id: String) -> String? {
+        SignatureMoves.shared.moves(for: id).first { $0.effect == "TRICK" }.map { $0.str("trick") ?? "hop" }
     }
 
     /// The squishy's own signature moves. A morphed look has none.
@@ -61,15 +96,26 @@ struct SoftSquishy<Art: View>: View {
         let _ = connect()
         let specs = self.specs
         let sim = self.sim(specs)
+        let layered = mateLayers()
+        let together = !roomMates.isEmpty
         return ZStack {
             if let sim { MoveLayer(sim: sim, pulse: holder.pulse, behind: true) }
+            ForEach(layered, id: \.self) { id in
+                if let sim = holder.mateSims[id], let pulse = holder.matePulses[id] { MoveLayer(sim: sim, pulse: pulse, behind: true) }
+            }
             SpriteView(scene: holder.scene, options: [.allowsTransparency])
             if let sim { MoveLayer(sim: sim, pulse: holder.pulse, behind: false) }
+            ForEach(layered, id: \.self) { id in
+                if let sim = holder.mateSims[id], let pulse = holder.matePulses[id] { MoveLayer(sim: sim, pulse: pulse, behind: false) }
+            }
         }
-        .modifier(MoveBodyEffect(specs: specs, pulse: holder.pulse, tricks: onGesture == nil))
+        // The puff, spin and flip turn the whole view, so they are for a toy on its own.
+        // With several out, each toy does its trick inside the scene instead.
+        .modifier(MoveBodyEffect(specs: together ? [] : specs, pulse: holder.pulse, tricks: onGesture == nil))
             .onAppear { show(drop: true) }
             .onDisappear { holder.scene.goQuiet() }
             .onChange(of: toy) { _, _ in show(drop: true) }
+            .onChange(of: mates) { _, _ in show(drop: true) }
             .onChange(of: look) { _, _ in
                 if let image = picture() { holder.scene.redraw(image: image) }
             }
@@ -96,6 +142,8 @@ struct SoftSquishy<Art: View>: View {
         scene.onGesture = onGesture
         let pulse = holder.pulse
         scene.onPulse = specs.isEmpty ? nil : { pulse.take($0) }
+        let box = self.holder
+        scene.onMatePulse = mode == .room ? { id, next in box.matePulses[id]?.take(next) } : nil
     }
 
     private func picture() -> UIImage? {
@@ -114,9 +162,27 @@ struct SoftSquishy<Art: View>: View {
         return renderer.uiImage
     }
 
+    private func matePicture(_ ref: String) -> UIImage? {
+        let renderer = ImageRenderer(content: SquishRefView(ref: ref).environmentObject(model).frame(width: 300, height: 300))
+        renderer.scale = min(max(displayScale, 1), 3)
+        renderer.isOpaque = false
+        return renderer.uiImage
+    }
+
     private func show(drop: Bool) {
         connect()
         guard let image = picture() else { return }
-        holder.scene.show(image: image, feel: feel, drop: drop)
+        guard mode == .room else {
+            holder.scene.show(image: image, feel: feel, drop: drop)
+            return
+        }
+        var toys = [SoftSquishyScene.Toy(id: toy, image: image, feel: feel, trick: look == toy ? trick(of: toy) : nil)]
+        // A long squishy is a rope with a view of its own, so it is never one of several.
+        for mate in mates where mate != toy && !SignatureMoves.shared.isRope(mate) && !toys.contains(where: { $0.id == mate }) {
+            if let art = matePicture(mate) { toys.append(SoftSquishyScene.Toy(id: mate, image: art, feel: model.feel(for: mate), trick: trick(of: mate))) }
+        }
+        let ids = Set(toys.map(\.id))
+        holder.scene.show(toys: toys, fresh: ids.subtracting(holder.shown), drop: drop)
+        holder.shown = ids
     }
 }

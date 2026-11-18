@@ -88,6 +88,35 @@ public enum Coins {
         streak >= 2 ? min(rules.streakCap, (streak - 1) * rules.streakStep) : 0
     }
 
+    /// Magic moves: the game plays the best next move for the player. Never more than this many are held.
+    public static let maxMagicMoves = 3
+    /// A first-try streak earns them on every third win: 1 at a streak of 3, 2 at 6, 3 at 9 and after.
+    public static func magicMovesEarned(streak: Int) -> Int {
+        streak > 0 && streak % 3 == 0 ? min(3, streak / 3) : 0
+    }
+
+    /// Lucky bonuses: free surprises while playing. They are never sold, never follow an ad and never
+    /// depend on a purchase, and at most one of each kind comes in a try.
+    public enum LuckyBonus: String, CaseIterable, Sendable { case magicMove, hint }
+    public static let luckyBonusFromLevel = 6
+    /// One finished jar in this many brings a bonus.
+    public static let luckyBonusOneIn = 6
+    /// One stuck board in this many is rescued by a free magic shuffle.
+    public static let magicShuffleOneIn = 3
+
+    /// A jar was just finished: maybe a bonus. A magic move when there is room for one, or else a hint.
+    public static func luckyBonus<R: RandomNumberGenerator>(levelNumber: Int, alreadyThisTry: Bool, magicHeld: Int,
+                                                            rng: inout R) -> LuckyBonus? {
+        guard levelNumber >= luckyBonusFromLevel, !alreadyThisTry, rng.next() % UInt64(luckyBonusOneIn) == 0 else { return nil }
+        if magicHeld >= maxMagicMoves { return .hint }
+        return rng.next() % 2 == 0 ? .magicMove : .hint
+    }
+
+    /// The board has no move left: maybe a free magic shuffle steps in before the stuck card.
+    public static func magicShuffle<R: RandomNumberGenerator>(levelNumber: Int, alreadyThisTry: Bool, rng: inout R) -> Bool {
+        levelNumber >= luckyBonusFromLevel && !alreadyThisTry && rng.next() % UInt64(magicShuffleOneIn) == 0
+    }
+
     /// The lucky squishy's kind for this level, or nil when the level has none.
     /// A stable hash of the install seed and level id, so a restart never re-rolls it.
     public static func luckyKind(levelNumber: Int, levelID: String, installSeed: String, kinds: Int,

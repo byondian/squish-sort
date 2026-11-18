@@ -124,6 +124,7 @@ struct MakerView: View {
                     .padding(24)
                     .background(RoundedRectangle(cornerRadius: 30).fill(Theme.marshmallow))
                     .padding(30)
+                    .frame(maxWidth: 560)
                     .transition(.scale(scale: 0.7).combined(with: .opacity))
                 }
             }

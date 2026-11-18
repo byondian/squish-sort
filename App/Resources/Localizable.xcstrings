@@ -312,6 +312,50 @@
         }
       }
     },
+    "%lld more stars": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スターあと%lldこ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "별 %lld개 더"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "還差 %lld 顆星星"
+          }
+        }
+      }
+    },
+    "%lld more stars open %@": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スターあと%1$lldこで%2$@がひらくよ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "별 %1$lld개 더 모으면 %2$@이(가) 열려요"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再拿 %1$lld 顆星星就能開啟%2$@"
+          }
+        }
+      }
+    },
     "%lld more swaps for a new one": {
       "localizations": {
         "ja": {
@@ -779,6 +823,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "送你一個放在捏捏房間的紀念品！"
+          }
+        }
+      }
+    },
+    "A new world is open!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新しいワールドがひらいたよ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "새로운 월드가 열렸어요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新世界開放了！"
           }
         }
       }
@@ -1685,24 +1751,24 @@
         }
       }
     },
-    "Coins are saved on this iPhone only.": {
+    "Coins are saved on this device only.": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "コインはこのiPhoneにだけ保存されます。"
+            "value": "コインはこのデバイスにだけ保存されます。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "코인은 이 iPhone에만 저장돼요."
+            "value": "코인은 이 기기에만 저장돼요."
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "金幣只會儲存在這支 iPhone 上。"
+            "value": "金幣只會儲存在這部裝置上。"
           }
         }
       }
@@ -2011,6 +2077,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "刪除"
+          }
+        }
+      }
+    },
+    "Do it for me: %lld coins": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "かわりに動かして：%lldコイン"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "대신 옮겨 줘: %lld코인"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "幫我走一步：%lld 金幣"
           }
         }
       }
@@ -2407,6 +2495,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "手感"
+          }
+        }
+      }
+    },
+    "Fill a jar to stop it": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "びんをいっぱいにすると止められるよ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "병 하나를 채우면 막을 수 있어요"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "裝滿一個罐子就能阻止"
           }
         }
       }
@@ -3159,6 +3269,94 @@
         }
       }
     },
+    "It comes in a capsule. %lld more stars in this world win one.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "カプセルから出るよ。このワールドでスターをあと%lldこ集めると、カプセルがもらえるよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "캡슐에서 나와요. 이 월드에서 별 %lld개를 더 모으면 캡슐을 받아요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "它在扭蛋裡。在這個世界再拿 %lld 顆星就能得到一顆。"
+          }
+        }
+      }
+    },
+    "It comes in a capsule. Guess the Mystery Bag or fill your stamp card to win one.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "カプセルから出るよ。ミステリーバッグを当てるか、スタンプカードをいっぱいにするとカプセルがもらえるよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "캡슐에서 나와요. 미스터리 백을 맞히거나 스탬프 카드를 채우면 캡슐을 받아요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "它在扭蛋裡。猜中神秘袋或集滿集點卡就能得到一顆。"
+          }
+        }
+      }
+    },
+    "It comes in a capsule. Win level %lld to open the next one.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "カプセルから出るよ。レベル%lldをクリアすると、つぎのカプセルがひらくよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "캡슐에서 나와요. 레벨 %lld을 깨면 다음 캡슐을 열 수 있어요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "它在扭蛋裡。通過第 %lld 關就能打開下一顆。"
+          }
+        }
+      }
+    },
+    "It hides in this world's jars. Play its levels to find it.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このワールドのびんにかくれているよ。レベルをあそんで見つけよう。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 월드의 병 속에 숨어 있어요. 레벨을 플레이해서 찾아봐요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "它躲在這個世界的罐子裡。玩這裡的關卡就能找到。"
+          }
+        }
+      }
+    },
     "It never runs out. A capsule every fifth level.": {
       "localizations": {
         "ja": {
@@ -3489,6 +3687,28 @@
         }
       }
     },
+    "Lucky hint!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ラッキーヒント！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "럭키 힌트!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "幸運提示！"
+          }
+        }
+      }
+    },
     "Lucky!": {
       "localizations": {
         "ja": {
@@ -3507,6 +3727,94 @@
           "stringUnit": {
             "state": "translated",
             "value": "幸運！"
+          }
+        }
+      }
+    },
+    "Magic": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "まほう"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마법"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "魔法"
+          }
+        }
+      }
+    },
+    "Magic move!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "まほうの一手！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마법의 한 수!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "魔法步數！"
+          }
+        }
+      }
+    },
+    "Magic moves +%lld": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "まほうの一手 +%lld"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마법의 한 수 +%lld"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "魔法步數 +%lld"
+          }
+        }
+      }
+    },
+    "Magic shuffle!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "まほうのシャッフル！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마법 섞기!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "魔法洗牌！"
           }
         }
       }
@@ -5425,6 +5733,28 @@
         }
       }
     },
+    "Shake-up stopped!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "シャッフルを止めた！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "셰이크업을 막았어요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "成功阻止大洗牌！"
+          }
+        }
+      }
+    },
     "Shake-up!": {
       "localizations": {
         "ja": {
@@ -5443,6 +5773,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "大洗牌！"
+          }
+        }
+      }
+    },
+    "Shake-up! Everyone swapped places. Your stars start fresh from here.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "シャッフル！みんなの場所が入れかわったよ。スターはここから数えなおし。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "셰이크업! 모두 자리가 바뀌었어요. 별은 여기서부터 다시 세요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大洗牌！大家換了位置。星星從這裡重新計算。"
           }
         }
       }
@@ -6261,6 +6613,28 @@
         }
       }
     },
+    "Stop it: %lld coins": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "止める：%lldコイン"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "막기: %lld코인"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "阻止它：%lld 金幣"
+          }
+        }
+      }
+    },
     "Stretch": {
       "localizations": {
         "ja": {
@@ -6455,6 +6829,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "再點一下！"
+          }
+        }
+      }
+    },
+    "Tap another squishy to bring it in too": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "もうひとつタップして、いっしょに入れよう"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다른 스퀴시를 탭해서 함께 넣어 보세요"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再點一個軟軟，讓它也進來"
           }
         }
       }
@@ -7159,6 +7555,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "看廣告"
+          }
+        }
+      }
+    },
+    "Watch the big show!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大きなショーを見よう！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "큰 쇼를 보러 가요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "來看大表演！"
           }
         }
       }
@@ -7995,6 +8413,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "新！"
+          }
+        }
+      }
+    },
+    "to open %@": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@がひらくよ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 열기"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "就能開啟%@"
           }
         }
       }

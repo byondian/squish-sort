@@ -33,7 +33,8 @@ final class LevelController: ObservableObject {
     private var lastMoveWasFever = false
     /// Free moves left before each move in the session's history, so undo gives them back.
     private var feverBefore: [Int] = []
-    /// Shake-up: the move count at which the pieces are shuffled. Nil when there is none (left).
+    /// Shake-up: the move count at which the pieces are shuffled. Nil when there is none (left),
+    /// or once a jar has been filled in time, which calls it off.
     @Published private(set) var shakeAt: Int?
     @Published private(set) var shaking = false
     /// The finale's giant: 0 watching, 1 gasp, 2 nervous (one jar to go), 3 cheer.
@@ -52,6 +53,11 @@ final class LevelController: ObservableObject {
     @Published private(set) var thinking = false
     /// The hint search found no way to win from here. Nothing is charged for that.
     @Published var noWayThrough = false
+    /// The magic move on its way to the board, and whether coins pay for it.
+    private var magicPending: (move: Move, paid: Bool)?
+    /// Lucky bonuses: one from a finished jar and one magic shuffle at most in a try.
+    private var luckyUsed = false
+    private var rescueUsed = false
     /// The hint search ran out of room without an answer. Nothing is charged for that either.
     @Published var hintGaveUp = false
     /// A hint found for the current board, waiting to be paid for or shown.
@@ -167,7 +173,14 @@ final class LevelController: ObservableObject {
         let ontoMatch = session.board.jars.indices.contains(move.to) && !session.board.jars[move.to].isEmpty
         let free = feverLeft > 0
         let before = feverLeft
+        // A magic move is only used up (or paid for) when it really lands.
+        let pending = magicPending
+        magicPending = nil
         guard !shaking, let result = session.play(move, free: free) else { return nil }
+        if let pending, pending.move == move, let model {
+            if pending.paid { _ = model.spend(.hint) } else { model.useMagicMove() }
+            model.sounds.play("trick", or: "star_2")
+        }
         feverBefore.append(before)
         lastMoveWasFever = free
         if free { feverLeft -= 1 }
@@ -215,12 +228,46 @@ final class LevelController: ObservableObject {
         }
     }
 
+    /// Now and then a finished jar brings a free surprise: a magic move or a hint. Never sold, never
+    /// after an ad, the same for every player; not on the jar that wins the level.
+    private func luckyBonus(atJar jar: Int) {
+        guard let model, !AppModel.isUITesting, !model.playingDaily, !session.board.isWon else { return }
+        var rng = SystemRandomNumberGenerator()
+        guard let bonus = Coins.luckyBonus(levelNumber: index + 1, alreadyThisTry: luckyUsed,
+                                           magicHeld: model.progress.magicMoves, rng: &rng) else { return }
+        luckyUsed = true
+        model.sounds.play("lucky")
+        model.haptics.star()
+        switch bonus {
+        case .magicMove:
+            model.grantMagicMove()
+            scene.popLabel(String(localized: "Magic move!"), atJar: jar)
+        case .hint:
+            scene.popLabel(String(localized: "Lucky hint!"), atJar: jar)
+            // Once the jar has settled, the next good move lights up. Nothing is charged.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in self?.luckyHint() }
+        }
+    }
+
+    private func luckyHint() {
+        guard !thinking, !shaking, outcome == nil else { return }
+        let board = session.board
+        Task {
+            let found = await Task.detached(priority: .userInitiated) { Solver.hint(board) }.value
+            guard board == session.board, outcome == nil, case .move(let move) = found else { return }
+            scene.showHint(move)
+        }
+    }
+
     /// Commons join the book the first time a jar of them is completed.
     private func jarCompleted(_ jar: Int) {
         guard let model, let piece = session.board.jars[jar].first, level.kinds.indices.contains(Int(piece.kind)) else { return }
         model.jarSorted(kind: level.kinds[Int(piece.kind)])
         jarsDone += 1
         model.sounds.jarComplete(number: jarsDone)
+        luckyBonus(atJar: jar)
+        // A jar filled before the countdown runs out calls the shake-up off for this try.
+        if shakeAt != nil, !session.board.isWon { shakeStopped() }
         if level.file.beat == .boss {
             bossMood = 1
             let oneLeft = session.board.jars.indices.filter { session.board.isComplete($0) }.count == level.kinds.count - 1
@@ -282,6 +329,32 @@ final class LevelController: ObservableObject {
         shake(word: String(localized: "Shake-up!"), keepsStarLimit: false) { _ in }
     }
 
+    private func shakeStopped() {
+        shakeAt = nil
+        scene.popWord(String(localized: "Shake-up stopped!"), size: 0.8)
+        model?.sounds.play("star_2")
+        model?.haptics.star()
+    }
+
+    /// Coins call the shake-up off too, for the price of a hint. Never offered in gentle mode:
+    /// paying to dodge a setback is a pressure mechanic, and filling a jar stops it for free.
+    var canPayToStopShake: Bool {
+        guard let model, shakeAt != nil, outcome == nil, !shaking else { return false }
+        return !model.isGentleMode && session.status == .playing
+    }
+
+    func payToStopShake() {
+        guard let model, canPayToStopShake else { return }
+        guard model.spend(.hint) else {
+            // No shop offer from the board: just say what is in the purse.
+            shuffleShort = true
+            model.haptics.reject()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) { [weak self] in self?.shuffleShort = false }
+            return
+        }
+        shakeStopped()
+    }
+
     /// The Shuffle button: the first shuffle on a level is free, later ones cost coins. The moves so far
     /// stay counted and the star limit does not move. Nothing is charged when no new layout is found.
     func shuffle() {
@@ -323,9 +396,10 @@ final class LevelController: ObservableObject {
     }
 
     /// Everything trembles, then the pieces in unfinished jars fly to new spots.
-    private func shake(word: String, keepsStarLimit: Bool, then: @escaping (Bool) -> Void) {
+    private func shake(word: String, keepsStarLimit: Bool, kindest: Bool = false, then: @escaping (Bool) -> Void) {
         guard let model else { return }
         shaking = true
+        magicPending = nil
         chain.end()
         feverLeft = 0
         feverBefore = []
@@ -343,16 +417,19 @@ final class LevelController: ObservableObject {
                 var rng = SystemRandomNumberGenerator()
                 // Never hold the board for long: stop looking after about a second and a half.
                 let deadline = Date().addingTimeInterval(1.5)
+                var best: (board: Board, best: Int)?
                 for _ in 0..<14 {
                     if Date() > deadline { break }
                     let next = board.shakenUp(using: &rng)
                     if next == board || next.isWon || next.isStuck { continue }
                     if next.jars.indices.contains(where: { next.isComplete($0) && !board.isComplete($0) }) { continue }
                     if let result = Solver.solve(next, maxStates: 60_000), result.moves.count >= 2 {
-                        return (next, result.moves.count)
+                        // A magic shuffle keeps looking for the layout with the fewest moves left.
+                        if !kindest { return (next, result.moves.count) }
+                        if best == nil || result.moves.count < best!.best { best = (next, result.moves.count) }
                     }
                 }
-                return nil
+                return best
             }.value
             try? await Task.sleep(nanoseconds: 1_100_000_000)
             shaking = false
@@ -368,6 +445,11 @@ final class LevelController: ObservableObject {
             noWayThrough = false; hintGaveUp = false
             scene.reload(session.board, dropIn: true)
             scene.popWord(word, size: 0.95)
+            // The first shake-up ever says what just happened, once.
+            if !keepsStarLimit, !model.progress.rulesShown.contains("shakeup") {
+                model.update { $0.rulesShown.insert("shakeup") }
+                model.toast = String(localized: "Shake-up! Everyone swapped places. Your stars start fresh from here.")
+            }
             model.sounds.play("splat", or: "land_soft")
             model.haptics.win()
             then(true)
@@ -396,6 +478,21 @@ final class LevelController: ObservableObject {
             model.won(index: index, moves: session.moveCount, stars: stars, attempts: attempts, playSeconds: seconds,
                       pot: pot.coins)
         case .stuck:
+            // Now and then a free magic shuffle steps in: the pieces land in the kindest layout found,
+            // and the try carries on. It is not counted as a fail.
+            var rng = SystemRandomNumberGenerator()
+            if !AppModel.isUITesting, !model.playingDaily,
+               Coins.magicShuffle(levelNumber: index + 1, alreadyThisTry: rescueUsed, rng: &rng) {
+                rescueUsed = true
+                model.sounds.play("lucky")
+                shake(word: String(localized: "Magic shuffle!"), keepsStarLimit: true, kindest: true) { [weak self] done in
+                    guard let self, !done, self.outcome == nil, self.session.status == .stuck else { return }
+                    self.outcome = .stuck
+                    self.scene.sigh()
+                    model.failed(playSeconds: seconds)
+                }
+                break
+            }
             scene.sigh()
             model.failed(playSeconds: seconds)
             // The board stays in plain view for a moment first, so the player can see for
@@ -419,6 +516,7 @@ final class LevelController: ObservableObject {
             scene.setFever(before > 0)
         }
         noWayThrough = false; hintGaveUp = false
+        magicPending = nil
         outcome = nil
         scene.reload(session.board)
     }
@@ -467,6 +565,27 @@ final class LevelController: ObservableObject {
         }
     }
 
+    /// A magic move: the best next move is worked out and played for the player. Free with a magic
+    /// move in hand, or for the price of a hint.
+    func magic(paid: Bool = false) {
+        guard let model, !thinking, !shaking, outcome == nil else { return }
+        guard paid ? model.progress.wallet.canAfford(.hint) : model.progress.magicMoves > 0 else { return }
+        chain.end()
+        thinking = true
+        let board = session.board
+        Task {
+            let found = await Task.detached(priority: .userInitiated) { Solver.hint(board) }.value
+            thinking = false
+            guard board == session.board, outcome == nil else { return }
+            guard case .move(let move) = found else {
+                if found == .unwinnable { noWayThrough = true } else { hintGaveUp = true }
+                return
+            }
+            magicPending = (move, paid)
+            if !scene.playForPlayer(move) { magicPending = nil }
+        }
+    }
+
     private func showHint() {
         guard let found = foundHint, found.board == session.board else { return }
         scene.showHint(found.move)
@@ -489,6 +608,9 @@ final class LevelController: ObservableObject {
         videoShuffleUsed = false
         bossMood = 0
         shufflesUsed = 0
+        luckyUsed = false
+        rescueUsed = false
+        magicPending = nil
         noWayThrough = false; hintGaveUp = false
         outcome = nil
         scene.reload(session.board)
@@ -546,10 +668,11 @@ struct LevelView: View {
         ZStack {
             VStack(spacing: 8) {
                 header
+                // The board has the whole width, on an iPad too; the bars keep a comfortable one.
                 SpriteView(scene: controller.scene, options: [.allowsTransparency])
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .overlay(alignment: .top) { if AppModel.isUITesting { testTaps } }
-                helpers
+                helpers.frame(maxWidth: 620)
             }
             .padding(.horizontal, 12)
             if isFinale {
@@ -576,6 +699,7 @@ struct LevelView: View {
                 .padding(24)
                 .background(RoundedRectangle(cornerRadius: 28).fill(Theme.marshmallow))
                 .padding(30)
+                .frame(maxWidth: 520)
             }
             if let item = controller.choosing {
                 // The hint's payment bubble.
@@ -593,6 +717,12 @@ struct LevelView: View {
                     Spacer()
                 }
                 .transition(.opacity)
+                // It says its piece and goes: it must never stay pinned over a board that has moved on.
+                .task {
+                    try? await Task.sleep(nanoseconds: 4_000_000_000)
+                    controller.noWayThrough = false
+                    controller.hintGaveUp = false
+                }
             }
             if let outcome = controller.outcome {
                 Color.black.opacity(0.15).ignoresSafeArea()
@@ -713,6 +843,13 @@ struct LevelView: View {
                     Label { Text("Use \(item.price) coins") } icon: { CoinIcon() }.frame(maxWidth: .infinity)
                 }
                 .buttonStyle(SquishButtonStyle(fill: Theme.butter, text: Theme.plum))
+                // Or have the move played for you, for the same coins.
+                Button { controller.choosing = nil; controller.magic(paid: true) } label: {
+                    Label { Text("Do it for me: \(item.price) coins") } icon: { Image(systemName: "wand.and.stars") }
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(SquishButtonStyle(fill: Theme.sky, text: Theme.plum))
+                .accessibilityIdentifier("helper-do-it")
             } else if !model.isGentleMode {
                 // Under-13s never get a shop offer from the board.
                 Button { controller.choosing = nil; model.screen = .shop } label: {
@@ -728,6 +865,7 @@ struct LevelView: View {
         .padding(22)
         .background(RoundedRectangle(cornerRadius: 28).fill(Theme.marshmallow))
         .padding(30)
+        .frame(maxWidth: 520)
         .transition(.scale(scale: 0.8).combined(with: .opacity))
     }
 
@@ -754,6 +892,7 @@ struct LevelView: View {
                 }
             }
             VStack(spacing: 2) {
+                Group {
                 // A pink jelly pill with the level, and the world's name under it.
                 HStack(spacing: 6) {
                     if isBoss {
@@ -797,12 +936,34 @@ struct LevelView: View {
                         .padding(.horizontal, 10).padding(.vertical, 3)
                         .background(Capsule().fill(LinearGradient(colors: [Color(hex: 0xFFB13D), Color(hex: 0xFF7EB6)], startPoint: .leading, endPoint: .trailing)))
                         .transition(.scale.combined(with: .opacity))
-                } else if let left = controller.shakeIn {
-                    Label { Text("Shake-up in \(left)") } icon: { Image(systemName: "tornado") }
-                        .font(Theme.body(13)).foregroundStyle(Theme.plum)
-                        .padding(.horizontal, 10).padding(.vertical, 3)
-                        .background(Capsule().fill(left <= 3 ? Theme.butter : Color.white.opacity(0.7)))
                 }
+                }
+                .allowsHitTesting(false)
+                if controller.feverLeft == 0, let left = controller.shakeIn {
+                    // The countdown, and under it the way to call the shake-up off.
+                    VStack(spacing: 0) {
+                        Label { Text("Shake-up in \(left)") } icon: { Image(systemName: "tornado") }
+                            .font(Theme.body(13))
+                        Text("Fill a jar to stop it").font(Theme.body(10)).opacity(0.75)
+                    }
+                    .foregroundStyle(Theme.plum).lineLimit(1).minimumScaleFactor(0.7)
+                    .padding(.horizontal, 12).padding(.vertical, 3)
+                    .background(Capsule().fill(left <= 3 ? Theme.butter : Color.white.opacity(0.7)))
+                    .accessibilityElement(children: .combine)
+                    .allowsHitTesting(false)
+                    // Or coins stop it, for the price of a hint. Not in gentle mode.
+                    if controller.canPayToStopShake {
+                        Button { controller.payToStopShake() } label: {
+                            Label { Text("Stop it: \(Coins.Item.hint.price) coins") } icon: { CoinIcon() }
+                                .font(Theme.body(12)).foregroundStyle(Theme.plum).lineLimit(1).minimumScaleFactor(0.7)
+                                .padding(.horizontal, 12).padding(.vertical, 4)
+                                .background(Capsule().fill(Theme.butter))
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("stop-shake")
+                    }
+                }
+                Group {
                 // The level pot: coins thrown by finished jars, banked on the win.
                 if controller.pot.paysCoins {
                     // Says what it is until the first jar pays, then just the number.
@@ -814,10 +975,11 @@ struct LevelView: View {
                         .animation(.spring(response: 0.3, dampingFraction: 0.6), value: controller.pot.coins)
                         .accessibilityIdentifier("level-pot")
                 }
+                }
+                .allowsHitTesting(false)
             }
             .foregroundStyle(Theme.plum)
             .frame(maxWidth: .infinity)
-            .allowsHitTesting(false)
         }
         .padding(.top, 8)
     }
@@ -852,7 +1014,14 @@ struct LevelView: View {
                     .accessibilityIdentifier("helper-shuffle")
             }
             if pathNumber >= 4 {
-                helper(String(localized: "Hint"), "lightbulb.fill", Theme.butter, enabled: controller.canHint) { controller.hint() }
+                if model.progress.magicMoves > 0 {
+                    // Magic moves in hand: the button plays the best next move itself, and counts them down.
+                    helper(String(localized: "Magic"), "wand.and.stars", Theme.sky, enabled: controller.canHint,
+                           badge: model.progress.magicMoves) { controller.magic() }
+                        .accessibilityIdentifier("helper-magic")
+                } else {
+                    helper(String(localized: "Hint"), "lightbulb.fill", Theme.butter, enabled: controller.canHint) { controller.hint() }
+                }
             }
             if starsSlipped {
                 // A nudge, never a loss: the level can still be finished as it is.
@@ -1095,6 +1264,14 @@ struct WinCard: View {
                         .background(Capsule().fill(Theme.bubblegum))
                         .transition(.scale(scale: 0.3).combined(with: .opacity))
                 }
+                if summary.magicEarned > 0 {
+                    // Earned by a first-try streak or a boss: the game will play that many moves for you.
+                    Label("Magic moves +\(summary.magicEarned)", systemImage: "wand.and.stars")
+                        .font(Theme.body(16)).foregroundStyle(Theme.plum)
+                        .padding(.horizontal, 12).padding(.vertical, 4)
+                        .background(Capsule().fill(Theme.sky))
+                        .accessibilityIdentifier("win-magic")
+                }
                 if summary.dailyBonus > 0 {
                     Text("First win today: +\(summary.dailyBonus)").font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.7))
                 }
@@ -1266,5 +1443,6 @@ struct StuckCard: View {
         .padding(28)
         .background(RoundedRectangle(cornerRadius: 32).fill(Theme.marshmallow))
         .padding(30)
+        .frame(maxWidth: 560)
     }
 }

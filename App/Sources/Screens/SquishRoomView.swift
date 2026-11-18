@@ -6,7 +6,8 @@ import SquishSoft
 /// suits gentle mode. Morph Squad squishies change shape on a squeeze.
 struct SquishRoomView: View {
     @EnvironmentObject var model: AppModel
-    @State private var selected: String?
+    /// The squishies out in the room, newest last. Empty until one is picked: then it is the first on the shelf.
+    @State private var out: [String] = []
     /// What a Morph Squad squishy currently looks like, if it has changed.
     @State private var morphedInto: String?
     @State private var wiggles = 0
@@ -16,14 +17,36 @@ struct SquishRoomView: View {
         ("Cream", Color("Marshmallow")), ("Night", Color(red: 0.2, green: 0.17, blue: 0.32)), ("Clouds", Color(red: 0.86, green: 0.93, blue: 1)),
     ]
 
-    private var current: String? { selected ?? model.squeezables.first }
+    /// How many can be out at once: two on an iPhone, four on an iPad.
+    private var most: Int { UIDevice.current.userInterfaceIdiom == .pad ? 4 : 2 }
+    private var shown: [String] { out.isEmpty ? Array(model.squeezables.prefix(1)) : out }
+    /// The newest one out: it is named, and it is the one that morphs and does its moves.
+    private var current: String? { shown.last }
+
+    /// A tap on the shelf brings that squishy in beside the others; a tap on one that is out puts it away.
+    private func pick(_ item: String) {
+        var now = shown
+        let moves = SignatureMoves.shared
+        if let i = now.firstIndex(of: item) {
+            guard now.count > 1 else { return }
+            now.remove(at: i)
+        } else if moves.isRope(item) || now.contains(where: { moves.isRope($0) }) {
+            // A long, stretchy squishy needs the room to itself.
+            now = [item]
+        } else {
+            if now.count >= most { now.removeFirst() }
+            now.append(item)
+        }
+        out = now
+        morphedInto = nil
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             TopBar(title: "Squish Room")
             if let id = current {
                 // Soft all the way through: knead it, pull it, pinch it, pick it up and throw it.
-                SoftSquishy(toy: id, look: morphedInto ?? id, feel: model.feel(for: id), mode: .room, wiggles: wiggles,
+                SoftSquishy(toy: id, look: morphedInto ?? id, feel: model.feel(for: id), mode: .room, wiggles: wiggles, mates: Array(shown.dropLast()),
                             onLetGo: { depth in morph(depth: depth) }, onDoubleTap: { tickle() }) {
                     SquishRefView(ref: morphedInto ?? id)
                         .colorMultiply(morphedInto == nil ? .white : Color(red: 0.86, green: 0.82, blue: 1))
@@ -35,7 +58,12 @@ struct SquishRoomView: View {
                 .overlay(alignment: .topTrailing) { ClipControl(clips: model.clips, seconds: 8).padding(12) }
                 Text(verbatim: model.displayName(for: id)).font(Theme.title(22))
                     .foregroundStyle(mood == 1 ? Color.white : Theme.plum)
-                    .padding(.bottom, 10)
+                    .padding(.bottom, shown.count == 1 && model.squeezables.count > 1 ? 2 : 10)
+                if shown.count == 1, model.squeezables.count > 1 {
+                    Text("Tap another squishy to bring it in too")
+                        .font(Theme.body(13)).foregroundStyle((mood == 1 ? Color.white : Theme.plum).opacity(0.7))
+                        .padding(.bottom, 8)
+                }
             } else {
                 Spacer()
             }
@@ -63,10 +91,10 @@ struct SquishRoomView: View {
                 HStack(spacing: 10) {
                     ForEach(model.squeezables, id: \.self) { item in
                         SquishRefView(ref: item).frame(width: 60, height: 60)
-                            .onTapGesture {
-                                selected = item
-                                morphedInto = nil
-                            }
+                            // A ring shows which ones are out in the room.
+                            .background(Circle().fill(Color.white.opacity(shown.contains(item) ? 0.85 : 0)))
+                            .overlay(Circle().stroke(Theme.bubblegum, lineWidth: shown.contains(item) ? 3 : 0))
+                            .onTapGesture { pick(item) }
                     }
                 }
                 .padding(16)
@@ -76,7 +104,7 @@ struct SquishRoomView: View {
         .onAppear {
             // Came here from a "Squeeze me" button: start with that squishy.
             if let start = model.roomStart {
-                selected = start
+                out = [start]
                 model.roomStart = nil
             }
         }

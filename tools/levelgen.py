@@ -67,8 +67,8 @@ def squeeze(world, pos, beat):
 
 
 def capsule_level(pos, last=20):
-    """Every 3rd level of a world, plus its last level."""
-    return pos % 3 == 0 or pos == last
+    """Every 3rd level of a world, every boss (each 10th level), plus its last level."""
+    return pos % 3 == 0 or pos % 10 == 0 or pos == last
 
 
 # Commons borrowed for 7- and 8-kind levels, picked so no two pieces on a

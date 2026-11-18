@@ -48,6 +48,7 @@ struct ParentalGate: View {
                 Button("Close", action: onCancel).buttonStyle(SquishButtonStyle(fill: .white, text: Theme.plum))
             }
             .padding(28)
+            .frame(maxWidth: 560)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .background(Theme.marshmallow.ignoresSafeArea())

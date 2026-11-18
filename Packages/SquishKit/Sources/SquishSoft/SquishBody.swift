@@ -345,6 +345,50 @@ public final class SquishBody {
         for i in v.indices { v[i] = 0 }
     }
 
+    /// The whole body's speed, in points a second.
+    /// Not part of the reference engine: the Squish Room uses it when two toys meet.
+    public func velocity() -> (x: Double, y: Double) {
+        var x = 0.0, y = 0.0
+        for k in 0..<count where sim[k] {
+            x += Double(v[k * 2])
+            y += Double(v[k * 2 + 1])
+        }
+        return (x / m, y / m)
+    }
+
+    /// A round stand-in for the body's outline: its middle and a radius, for toys bumping into each other.
+    public func hull() -> (x: Double, y: Double, r: Double) {
+        let b = bounds(), c = centre()
+        return (c.x, c.y, ((b.x1 - b.x0) + (b.y1 - b.y0 - footPad)) / 4 * 0.92)
+    }
+
+    /// Another toy is in the way (Squish Room). The whole body moves by (dx, dy) and its speed changes by
+    /// (dvx, dvy); then every point still inside the other toy's hull is pressed part of the way out of it,
+    /// so the body dents where the two meet and springs back by itself.
+    /// Not part of the reference engine.
+    public func bump(dx: Double, dy: Double, dvx: Double, dvy: Double, other: (x: Double, y: Double, r: Double), press: Double) {
+        for k in 0..<count {
+            p[k * 2] += Float(dx)
+            p[k * 2 + 1] += Float(dy)
+            g[k * 2] += Float(dx)
+            g[k * 2 + 1] += Float(dy)
+            v[k * 2] += Float(dvx)
+            v[k * 2 + 1] += Float(dvy)
+        }
+        guard press > 0, other.r > 0 else { return }
+        // Never more than a small part of the toy at once, so a hard throw cannot fold it.
+        let cap = size * 0.06
+        for k in 0..<count where sim[k] {
+            let rx = Double(p[k * 2]) - other.x, ry = Double(p[k * 2 + 1]) - other.y
+            let d = (rx * rx + ry * ry).squareRoot()
+            guard d < other.r, d > 0.001 else { continue }
+            let out = min(cap, (other.r - d) * press) / d
+            p[k * 2] += Float(rx * out)
+            p[k * 2 + 1] += Float(ry * out)
+        }
+        metric.impact = max(metric.impact, (dvx * dvx + dvy * dvy).squareRoot() / size)
+    }
+
     /// The landing has been heard and felt: start listening for the next one.
     public func clearImpact() { metric.impact = 0 }
 
