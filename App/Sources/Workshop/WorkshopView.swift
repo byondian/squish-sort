@@ -555,7 +555,9 @@ struct WorkshopView: View {
     /// Squishy Workshop: a drawing on paper becomes the squishy. Closed until a grown-up opens everything.
     private var photoButton: some View {
         Button {
-            if access.pro { photoShape = true } else { model.grownUpAsk = true }
+            // The camera and the family's photos are a grown-up matter every time: the gate first, then the photo.
+            model.afterGate = access.pro ? { photoShape = true } : nil
+            model.grownUpAsk = true
         } label: {
             HStack(spacing: 14) {
                 Image(systemName: "pencil.and.scribble").font(.system(size: 30, weight: .bold))

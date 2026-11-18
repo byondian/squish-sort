@@ -1029,6 +1029,8 @@ final class AppModel: ObservableObject {
 
     /// Squishy Workshop: something closed was tapped, so the grown-up gate should come up.
     @Published var grownUpAsk = false
+    /// What a grown-up asked to open once they are through the gate. Nil opens the Grown-ups corner.
+    var afterGate: (() -> Void)?
 
     /// Opens the Squish Room with this squishy in hand.
     func squeeze(_ ref: String) {

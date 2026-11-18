@@ -35,8 +35,15 @@ struct KidsRootView: View {
         .fullScreenCover(isPresented: $model.grownUpAsk) {
             KidsGate(onPass: {
                 model.grownUpAsk = false
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { grownUps = true }
-            }, onCancel: { model.grownUpAsk = false })
+                let then = model.afterGate
+                model.afterGate = nil
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                    if let then { then() } else { grownUps = true }
+                }
+            }, onCancel: {
+                model.afterGate = nil
+                model.grownUpAsk = false
+            })
         }
         .sheet(isPresented: $grownUps) {
             GrownUpsView().environmentObject(model).environmentObject(model.purchases)
