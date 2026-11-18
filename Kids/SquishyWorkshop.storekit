@@ -1,0 +1,31 @@
+{
+  "identifier": "7C2A9E41",
+  "nonRenewingSubscriptions": [],
+  "products": [
+    {
+      "displayPrice": "2.99",
+      "familyShareable": true,
+      "internalID": "9100001",
+      "localizations": [
+        {
+          "description": "Every squishy, all five rooms and the whole Workshop. No ads ever.",
+          "displayName": "Unlock everything",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.ianatkinson.squishyworkshop.unlock",
+      "referenceName": "Unlock everything",
+      "type": "NonConsumable"
+    }
+  ],
+  "settings": {
+    "_developerTeamID": "WVLPAK48UN",
+    "_locale": "en_US",
+    "_storefront": "GBR"
+  },
+  "subscriptionGroups": [],
+  "version": {
+    "major": 4,
+    "minor": 0
+  }
+}

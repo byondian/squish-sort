@@ -1,5 +1,6 @@
 import SwiftUI
 
+#if !KIDS
 @main
 struct SquishSortApp: App {
     @StateObject private var model = AppModel()
@@ -12,6 +13,7 @@ struct SquishSortApp: App {
         }
     }
 }
+#endif
 
 /// No title screen: the first thing a new player sees is Level 1.
 struct RootView: View {

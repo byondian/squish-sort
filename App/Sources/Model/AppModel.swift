@@ -1,4 +1,6 @@
+#if !KIDS
 import AppTrackingTransparency
+#endif
 import Foundation
 import StoreKit
 import SwiftUI
@@ -155,6 +157,11 @@ final class AppModel: ObservableObject {
             loaded.migrateNewWorlds(path: levels.filter { LevelCatalog.worlds.contains($0.file.world) }.map(\.id))
             store.save(loaded)
         }
+        #if KIDS
+        // Every player of Squishy Workshop is treated as a small child: no age question, no prices,
+        // no typing, no offers. Grown-up things sit behind the gate in the Grown-ups corner.
+        loaded.age = AgeProfile(group: .child, source: .parentSetGentleMode, storefront: "")
+        #endif
         progress = loaded
         roster = AppModel.loadRoster()
         let words = AppModel.loadBios()
@@ -171,7 +178,11 @@ final class AppModel: ObservableObject {
         sounds.buddyVoice = loaded.buddyVoiceOn
         sounds.musicLevel = loaded.musicOn ? Float(loaded.musicLevel) : 0
         // New players land straight on Level 1; the home screen arrives with the first capsule.
+        #if KIDS
+        screen = .home
+        #else
         screen = loaded.highestUnlocked >= 3 ? .home : .level(min(loaded.highestUnlocked, max(0, levels.count - 1)))
+        #endif
         // A save that already holds every other squishy of a world is owed that world's secret.
         for world in LevelCatalog.worlds + [ChristmasWorld.id] { queueSecretIfWon(world: world) }
         repairBuddyName()
@@ -199,9 +210,11 @@ final class AppModel: ObservableObject {
                 ads.update(policy: currentAdPolicy)
             }
         }
+        #if !KIDS
         Task {
             if let fresh = await RemoteConfig.fetch() { config = AppModel.forThisBuild(fresh) }
         }
+        #endif
     }
 
     #if DEBUG
@@ -360,7 +373,18 @@ final class AppModel: ObservableObject {
     /// The creator build (TestFlight workflow, "creator" on) is for partners who film the game before
     /// launch: it has no tester tools and shows no ads at all, so no test ad ends up in a video.
     static func forThisBuild(_ config: GameConfig) -> GameConfig {
-        #if CREATOR
+        #if KIDS
+        // Squishy Workshop: no ads, no counting, no offers, no shop and no link out, whatever a config says.
+        var kids = GameConfig()
+        kids.adsEnabled = false
+        kids.telemetryEnabled = false
+        kids.offersEnabled = false
+        kids.squishyShopEnabled = false
+        kids.dailyJarEnabled = false
+        kids.mysteryBagEnabled = false
+        kids.event = nil
+        return kids
+        #elseif CREATOR
         var quiet = config
         quiet.adsEnabled = false
         return quiet
@@ -486,7 +510,11 @@ final class AppModel: ObservableObject {
     var showsCornerButtons: Bool { progress.highestUnlocked >= 3 }
 
     /// Where "back" and "home" lead: the home screen once it exists, else the current level.
+    #if KIDS
+    var homeScreen: Screen { .home }
+    #else
     var homeScreen: Screen { showsCornerButtons ? .home : .level(progress.highestUnlocked) }
+    #endif
 
     // MARK: - Extras
 
@@ -611,6 +639,10 @@ final class AppModel: ObservableObject {
     var worldsCompleted: Int { LevelCatalog.allWorlds.filter { isWorldComplete($0) }.count }
 
     func isExtraUnlocked(_ extra: Extra) -> Bool {
+        #if KIDS
+        // The room and the Workshop are the whole app: both are open from the first second.
+        if extra == .maker || extra == .squishRoom { return true }
+        #endif
         Extras.isUnlocked(extra, capsulesOpened: progress.collection.totalCapsules, levelsWon: levelsWon,
                           firstWorldComplete: isWorldComplete(LevelCatalog.worlds[0]), ownsRemoveAds: ownsRemoveAds, config: config)
     }
@@ -630,6 +662,28 @@ final class AppModel: ObservableObject {
 
     /// Everything that can be squeezed or be a Buddy: starter toys, owned squishies, made ones.
     var squeezables: [String] {
+        #if KIDS
+        return kidsShelf.flatMap { $0.squishies } + progress.made.map(\.ref)
+        #else
+        return gameSqueezables
+        #endif
+    }
+
+    #if KIDS
+    /// The first world's squishies are free to play with; "Unlock everything" opens every world.
+    static let kidsFreeWorld = LevelCatalog.worlds[0]
+
+    /// The toy shelf in Squishy Workshop, one group per world. Nothing is won or collected here:
+    /// every squishy of an open world is simply there.
+    var kidsShelf: [(world: String, open: Bool, squishies: [String])] {
+        LevelCatalog.allWorlds.map { world in
+            let open = ownsRemoveAds || world == AppModel.kidsFreeWorld
+            return (world, open, open ? roster.collectibles.filter { $0.world == world }.map(\.id) : [])
+        }
+    }
+    #endif
+
+    private var gameSqueezables: [String] {
         roster.squishRoomToys.map(\.id)
             + roster.collectibles.filter { progress.collection.owns($0.id) }.map(\.id)
             + (isExtraUnlocked(.maker) ? progress.made.map(\.ref) : [])
@@ -1142,11 +1196,24 @@ final class AppModel: ObservableObject {
     }
 
     /// Re-derived from the current storefront every time (unknown storefront = strictest).
+    #if KIDS
+    var ageGroup: AgeGroup { .child }
+    #else
     var ageGroup: AgeGroup { AgePolicy.group(of: progress.age, storefront: storefront) }
+    #endif
     var isGentleMode: Bool { ageGroup == .child }
     /// Sharing a clip of a big moment: 13 and over only (14 in Korea), never before the age step.
     var canShareClips: Bool { progress.age != nil && !isGentleMode && !AppModel.isUITesting && clips.available }
+    #if KIDS
+    static let isKidsApp = true
+    /// In Squishy Workshop this is the one purchase, "Unlock everything". UI tests can start unlocked.
+    var ownsRemoveAds: Bool {
+        purchases.ownsRemoveAds || (AppModel.isUITesting && ProcessInfo.processInfo.arguments.contains("-kidsUnlocked"))
+    }
+    #else
+    static let isKidsApp = false
     var ownsRemoveAds: Bool { purchases.ownsRemoveAds }
+    #endif
 
     func update(_ change: (inout PlayerProgress) -> Void) {
         change(&progress)
@@ -1644,7 +1711,11 @@ final class AppModel: ObservableObject {
 
     // MARK: - Ads
 
+    #if KIDS
+    private var trackingAllowed: Bool { false }
+    #else
     private var trackingAllowed: Bool { ATTrackingManager.trackingAuthorizationStatus == .authorized }
+    #endif
 
     var currentAdPolicy: AdRequestPolicy {
         AdPolicy.requestPolicy(profile: progress.age, storefront: storefront, consent: ads.consentStatus,
@@ -1675,10 +1746,12 @@ final class AppModel: ObservableObject {
         guard trackingExplainer else { return }
         trackingExplainer = false
         update { $0.trackingAsked = true }
+        #if !KIDS
         Task {
             _ = await ATTrackingManager.requestTrackingAuthorization()
             ads.update(policy: currentAdPolicy)
         }
+        #endif
     }
 
     // MARK: - Coins

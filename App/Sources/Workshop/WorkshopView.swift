@@ -380,8 +380,9 @@ struct WorkshopView: View {
     private func grid<Art: View>(_ group: LocalizedStringKey, key: String, _ tiles: [Tile],
                                  @ViewBuilder art: @escaping (String) -> Art, tap: @escaping (String) -> Void) -> some View {
         let open = tiles.filter { $0.lock == .open }
-        let reachable = tiles.filter { $0.lock != .open && $0.lock != .pro }
-        let pro = tiles.filter { $0.lock == .pro }
+        // Squishy Workshop has no worlds to finish and no coins: what is not open waits in the closed drawer.
+        let reachable = AppModel.isKidsApp ? [] : tiles.filter { $0.lock != .open && $0.lock != .pro }
+        let pro = tiles.filter { AppModel.isKidsApp ? $0.lock != .open : $0.lock == .pro }
         let shownPro = gentle ? [] : Array(pro.prefix(4))
         let shown = open + reachable + shownPro
         return LazyVGrid(columns: WorkshopView.columns, spacing: 8) {
@@ -1371,9 +1372,12 @@ struct WorkshopView: View {
                                     model.squeeze(made.ref)
                                 }
                             }
-                            shelfButton("trash.fill", "Delete", "ws-delete") {
-                                if made.id == id { startNew() }
-                                model.deleteMade(made.id)
+                            // In Squishy Workshop a child can't delete anything: that is in the Grown-ups corner.
+                            if !AppModel.isKidsApp {
+                                shelfButton("trash.fill", "Delete", "ws-delete") {
+                                    if made.id == id { startNew() }
+                                    model.deleteMade(made.id)
+                                }
                             }
                         }
                         .padding(10)

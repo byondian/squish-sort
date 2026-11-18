@@ -202,6 +202,7 @@ final class GoldenPathTests: XCTestCase {
         print("GOLDEN-PATH workshop poured after 1 s: \(stage.value ?? "?")")
         stage.press(forDuration: 3.0)
         print("GOLDEN-PATH workshop poured after 4 s: \(stage.value ?? "?")")
+        for _ in 0..<3 where !app.buttons["ws-next"].isEnabled { stage.press(forDuration: 2.0) }
         XCTAssertTrue(app.buttons["ws-next"].isEnabled, "a full mould moves on")
         keep(app.screenshot(), as: "squishy-workshop-2-poured")
         app.buttons["ws-next"].tap()
@@ -256,7 +257,8 @@ final class GoldenPathTests: XCTestCase {
         app.buttons["ws-next"].tap()
         let stage = app.descendants(matching: .any)["ws-stage"]
         XCTAssertTrue(stage.waitForExistence(timeout: 5))
-        stage.press(forDuration: 3.5)
+        // A slow simulator starts pouring late: keep holding until the mould is full.
+        for _ in 0..<4 where !app.buttons["ws-next"].isEnabled { stage.press(forDuration: 3.0) }
         XCTAssertFalse(app.buttons["ws-mix"].exists)
         app.buttons["ws-next"].tap()
         workshopButton("ws-bake", in: app, "oven").tap()

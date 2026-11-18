@@ -1223,6 +1223,50 @@
         }
       }
     },
+    "Bath Time": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "おふろタイム"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "목욕 시간"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "洗澡時間"
+          }
+        }
+      }
+    },
+    "Bedtime": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "おやすみタイム"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "잘 시간"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "睡覺時間"
+          }
+        }
+      }
+    },
     "Big show after the last level!": {
       "localizations": {
         "ja": {
@@ -1395,6 +1439,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "彈跳"
+          }
+        }
+      }
+    },
+    "Bounce House": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ふわふわハウス"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "바운스 하우스"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "彈跳屋"
           }
         }
       }
@@ -2631,6 +2697,28 @@
         }
       }
     },
+    "Every squishy from every world, all five rooms and the whole Workshop. One payment, no ads ever.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すべてのワールドのスクイーズ、5つのおへや、工房のすべて。お支払いは1回だけ、広告は一切ありません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모든 월드의 스퀴시, 다섯 개의 방, 공방 전체. 한 번만 결제하면 되고 광고는 전혀 없습니다."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有世界的軟軟、五個房間和完整工坊。一次付費，永遠沒有廣告。"
+          }
+        }
+      }
+    },
     "Every star in this world! You won a golden capsule.": {
       "localizations": {
         "ja": {
@@ -2671,6 +2759,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "每次過關都會存入獎勵金幣，金幣不會減少。存到 %lld 金幣就能打開。"
+          }
+        }
+      }
+    },
+    "Everything is unlocked. Thank you!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すべてアンロックされています。ありがとうございます！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모두 잠금 해제되었습니다. 감사합니다!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已全部解鎖，謝謝！"
           }
         }
       }
@@ -2891,6 +3001,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "泡綿"
+          }
+        }
+      }
+    },
+    "For grown-ups": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "おとなの方へ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "어른용"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "給大人"
           }
         }
       }
@@ -3489,6 +3621,28 @@
         }
       }
     },
+    "Hold the button for 3 seconds": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ボタンを3秒間おしつづけてください"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "버튼을 3초 동안 길게 누르세요"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "請按住按鈕 3 秒"
+          }
+        }
+      }
+    },
     "Home": {
       "localizations": {
         "ja": {
@@ -4079,6 +4233,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "幸運！"
+          }
+        }
+      }
+    },
+    "Made squishies": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "つくったスクイーズ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "만든 스퀴시"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "做好的軟軟"
           }
         }
       }
@@ -5029,6 +5205,28 @@
         }
       }
     },
+    "No ads. Nothing is collected.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "広告なし。データは一切収集しません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "광고 없음. 어떤 데이터도 수집하지 않습니다."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "沒有廣告，不收集任何資料。"
+          }
+        }
+      }
+    },
     "No squishy has a jar it can go to. A shuffle gets things moving again.": {
       "localizations": {
         "ja": {
@@ -5575,6 +5773,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "開始遊戲"
+          }
+        }
+      }
+    },
+    "Play Mat": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "プレイマット"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "놀이 매트"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "遊戲墊"
           }
         }
       }
@@ -6613,6 +6833,28 @@
         }
       }
     },
+    "Snow Day": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ゆきの日"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "눈 오는 날"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下雪天"
+          }
+        }
+      }
+    },
     "So close!": {
       "localizations": {
         "ja": {
@@ -7005,6 +7247,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "軟軟房間"
+          }
+        }
+      }
+    },
+    "Squish Sort is the puzzle game these squishies come from (for ages 9 and over).": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Squish Sort は、このスクイーズたちが登場するパズルゲームです（9歳以上対象）。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Squish Sort는 이 스퀴시들이 나오는 퍼즐 게임입니다(9세 이상)."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Squish Sort 是這些軟軟登場的益智遊戲（適合 9 歲以上）。"
           }
         }
       }
@@ -8149,6 +8413,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "復原"
+          }
+        }
+      }
+    },
+    "Unlock everything": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すべてをアンロック"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모두 잠금 해제"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "解鎖全部內容"
           }
         }
       }
