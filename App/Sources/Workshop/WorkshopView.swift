@@ -972,6 +972,8 @@ struct WorkshopView: View {
         .frame(maxWidth: .infinity)
         .background(RoundedRectangle(cornerRadius: 18).fill(.white))
         .padding(.horizontal, 12)
+        // Kept as a group, so the buttons inside keep their own names for the UI tests.
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("ws-note")
     }
 
