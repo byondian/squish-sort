@@ -1236,6 +1236,12 @@ final class AppModel: ObservableObject {
             update { $0.wallet.earn(config.coins.worldComplete) }
             // The world's big show follows its WORLD COMPLETE card.
             if !AppModel.isUITesting, ShowPlan.load(level.file.world) != nil { news.append(.finale(world: level.file.world)) }
+        } else if worldWasComplete, !AppModel.isUITesting, ShowPlan.load(level.file.world) != nil,
+                  !progress.finalesSeen.contains(level.file.world), !news.contains(.finale(world: level.file.world)) {
+            // The world was finished before its big show was ever watched (an older build, or the app
+            // was closed on the win card): the next win in it, a replay for stars too, brings both.
+            news.append(.worldComplete(world: level.file.world, next: nil))
+            news.append(.finale(world: level.file.world))
         } else if firstClear, level.file.beat == .boss, !AppModel.isUITesting {
             // A boss half way through a world gets its own cheer; the last boss has WORLD COMPLETE.
             news.append(.bossBeaten(world: level.file.world))
@@ -1663,6 +1669,8 @@ final class AppModel: ObservableObject {
         }
         if case .finale(let world) = read, let plan = ShowPlan.load(world) {
             update {
+                // The big show ends the rehearsals: one that was missed is never left locked.
+                $0.teasersSeen[world] = max($0.teasersSeen[world] ?? 0, plan.teaserLevels.count)
                 $0.finalesSeen.insert(world)
                 $0.keepsakes.insert(plan.keepsake)
             }

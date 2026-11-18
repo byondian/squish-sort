@@ -619,6 +619,14 @@ struct ShowPoster: View {
                     }
                     .buttonStyle(SquishButtonStyle(fill: Theme.grape))
                     .accessibilityIdentifier("show-replay-\(world)")
+                } else if model.isWorldComplete(world) {
+                    // Finished, but the show was never watched: it is waiting right here.
+                    Button { model.showingNews = .finale(world: world) } label: {
+                        Label { Text("Watch the big show!") } icon: { Image(systemName: "star.fill") }
+                            .font(Theme.body(13))
+                    }
+                    .buttonStyle(SquishButtonStyle(fill: Theme.bubblegum))
+                    .accessibilityIdentifier("show-watch-\(world)")
                 } else {
                     Text("Big show after the last level!").font(Theme.body(12)).foregroundStyle(Theme.plum.opacity(0.75))
                 }

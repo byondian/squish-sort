@@ -7537,6 +7537,28 @@
         }
       }
     },
+    "Watch the big show!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大きなショーを見よう！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "큰 쇼를 보러 가요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "來看大表演！"
+          }
+        }
+      }
+    },
     "What is %lld × %lld?": {
       "localizations": {
         "ja": {
