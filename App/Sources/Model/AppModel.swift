@@ -862,7 +862,8 @@ final class AppModel: ObservableObject {
     }
 
     /// One more place on the Workshop shelf, for coins. Workshop Pro has fifty and never pays.
-    var canBuyMakerSlot: Bool { !ownsRemoveAds && shelfPlaces < WorkshopGate.coinSlots }
+    /// Squishy Workshop has no coins and no levels, so a full shelf there never shows a price.
+    var canBuyMakerSlot: Bool { !AppModel.isKidsApp && !ownsRemoveAds && shelfPlaces < WorkshopGate.coinSlots }
 
     @discardableResult
     func buyMakerSlot() -> Bool {

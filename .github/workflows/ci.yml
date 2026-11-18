@@ -191,6 +191,9 @@ jobs:
           # Nothing from Google, no tracking framework and no advertising identifier may be in the Kids app.
           if otool -L "$APP/SquishyWorkshop" | grep -iE "GoogleMobileAds|UserMessagingPlatform|AppTrackingTransparency|AdSupport"; then exit 1; fi
           if find "$APP" -iname "*Google*" -o -iname "*UserMessaging*" | grep .; then exit 1; fi
+          # Swift packages link statically, so the app's own symbols are checked as well.
+          if nm -gU "$APP/SquishyWorkshop" | grep -E "GADMobileAds|GADRequest|UMPConsent|ASIdentifierManager|ATTrackingManager"; then exit 1; fi
+          if nm -u "$APP/SquishyWorkshop" | grep -E "ASIdentifierManager|ATTrackingManager"; then exit 1; fi
           if strings "$APP/SquishyWorkshop" | grep -E "GADMobileAds|ca-app-pub|ATTrackingManager|advertisingIdentifier"; then exit 1; fi
           if /usr/libexec/PlistBuddy -c "Print" "$APP/Info.plist" | grep -E "GADApplicationIdentifier|NSUserTrackingUsageDescription|SKAdNetworkItems"; then exit 1; fi
           echo "clean"
