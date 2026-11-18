@@ -20,6 +20,11 @@ on:
         type: boolean
         required: false
         default: false
+      kids:
+        description: "Upload Squishy Workshop (the kids app) instead of Squish Sort. Needs its app record in App Store Connect first"
+        type: boolean
+        required: false
+        default: false
       clean_certificates:
         description: "Revoke the old Apple Development certificates earlier builds left behind (needs Ian's go; never touches distribution certificates)"
         type: boolean
@@ -95,8 +100,22 @@ jobs:
           ADMOB_REWARDED: ${{ secrets.ADMOB_REWARDED }}
           TESTER_TOOLS: ${{ inputs.tester_tools }}
           CREATOR: ${{ inputs.creator }}
+          KIDS: ${{ inputs.kids }}
         run: |
           set -o pipefail
+          if [ "$KIDS" = "true" ]; then
+            # The kids app has no ads, no tester tools and no ad ids at all.
+            echo "Squishy Workshop (kids app)"
+            xcodebuild archive -project SquishSort.xcodeproj -scheme SquishyWorkshop \
+              -configuration Release -destination 'generic/platform=iOS' \
+              -archivePath "$RUNNER_TEMP/SquishSort.xcarchive" \
+              CURRENT_PROJECT_VERSION=${{ github.run_number }} \
+              -allowProvisioningUpdates \
+              -authenticationKeyPath "$RUNNER_TEMP/keys/AuthKey.p8" \
+              -authenticationKeyID "$ASC_KEY_ID" \
+              -authenticationKeyIssuerID "$ASC_ISSUER_ID" | tail -40
+            exit 0
+          fi
           # Real ad ids when all three are set as repo secrets; Google's test ids otherwise.
           EXTRA=()
           if [ -n "$ADMOB_APP_ID" ] && [ -n "$ADMOB_INTERSTITIAL" ] && [ -n "$ADMOB_REWARDED" ]; then
