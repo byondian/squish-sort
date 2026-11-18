@@ -15,6 +15,7 @@ export const SITE = {
     country: 'Luxembourg',
   },
   email: { support: 'support@squishsort.app', privacy: 'privacy@squishsort.app' },
+  byondianUrl: '', // Byondian website for the partners page footer: Ian to give the address
   updated: '2026-11-16',
   langs: [
     // legal: true = the legal pages are written and reviewed in this language.

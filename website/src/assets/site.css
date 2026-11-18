@@ -298,3 +298,8 @@ details.faq summary::-webkit-details-marker{display:none}
 @media (max-width:900px){.logo.big{align-items:center}.logo.big .ln+.ln{padding-left:0}}
 .lang summary{white-space:nowrap}
 @media (max-width:440px){.logo.mini{display:none}}
+.partners .kicker{margin-top:6px}
+.how3{list-style:none;padding:0!important;display:grid;gap:12px}
+.how3 li{display:flex;gap:14px;align-items:flex-start;background:#fff;border-radius:var(--r);padding:16px 18px;box-shadow:0 6px 0 rgba(59,42,74,.06);max-width:none}
+.how3 .n{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font:700 17px var(--title);color:#fff;background:var(--gum)}
+.fine-print{margin-top:32px;color:var(--plum-2);font-size:15px}

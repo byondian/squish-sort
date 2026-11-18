@@ -20,18 +20,21 @@ export default async function handler(req, res) {
   if (list.length >= 5) return res.status(429).json({ error: 'slow down' });
   list.push(now); hits.set(ip, list);
 
-  const name = line(b.name, 80), email = line(b.email, 200), topic = line(b.topic, 60), device = line(b.device, 80);
+  const name = line(b.name, 80), email = line(b.email, 200), topic = line(b.topic, 60), device = line(b.device, 80), channel = line(b.channel, 200);
+  const partner = b.kind === 'partner';
   const message = clean(b.message, 5000), lang = clean(b.lang, 10);
   if (!message || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || (lang === 'ko' && !b.consent)) return res.status(400).json({ error: 'invalid' });
   if (!process.env.RESEND_API_KEY) return res.status(503).json({ error: 'not configured' });
 
-  const text = `${message}\n\n--\nFrom: ${name || '-'} <${email}>\nTopic: ${topic}\nDevice: ${device || '-'}\nSite language: ${lang}`;
+  const text = partner
+    ? `${message}\n\n--\nFrom: ${name || '-'} <${email}>\nWhere they post: ${channel || '-'}\nSent from: squishsort.app/partners`
+    : `${message}\n\n--\nFrom: ${name || '-'} <${email}>\nTopic: ${topic}\nDevice: ${device || '-'}\nSite language: ${lang}`;
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       from: FROM, to: [TO], reply_to: email,
-      subject: `[Support] ${topic}${name ? ': ' + name : ''}`.slice(0, 140),
+      subject: (partner ? `[Partner] ${name || email}` : `[Support] ${topic}${name ? ': ' + name : ''}`).slice(0, 140),
       text, html: `<pre style="font:14px/1.5 system-ui;white-space:pre-wrap">${esc(text)}</pre>`,
     }),
   });

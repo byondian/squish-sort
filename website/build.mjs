@@ -81,7 +81,7 @@ function footer(code) {
   const t = T[code];
   const legal = SITE.legalPages.map(s => `<li><a href="${href(code, s)}">${esc(t.legalNames[s][0])}</a></li>`).join('');
   return `<footer><div class="foot">
-<div><h4>${esc(t.footer.game)}</h4><ul style="columns:1"><li><a href="${href(code)}">${esc(t.footer.links.home)}</a></li><li><a href="${href(code)}#play">${esc(t.footer.links.demo)}</a></li><li><a href="${href(code, 'support')}">${esc(t.footer.links.support)}</a></li><li><a href="${href(code, 'shop')}">${esc(t.footer.links.shop)}</a></li></ul></div>
+<div><h4>${esc(t.footer.game)}</h4><ul style="columns:1"><li><a href="${href(code)}">${esc(t.footer.links.home)}</a></li><li><a href="${href(code)}#play">${esc(t.footer.links.demo)}</a></li><li><a href="${href(code, 'support')}">${esc(t.footer.links.support)}</a></li><li><a href="${href(code, 'shop')}">${esc(t.footer.links.shop)}</a></li><li><a href="${href('en', 'partners')}"${code === 'en' ? '' : ' lang="en"'}>Partner with us</a></li></ul></div>
 <div><h4>${esc(t.footer.legal)}</h4><ul>${legal}<li><a href="${href(code, 'legal')}">${esc(t.footer.links.legalHub)}</a></li></ul></div>
 </div><p class="fine">${esc(t.footer.fine)}</p></footer>`;
 }
@@ -231,6 +231,41 @@ function support(code) {
 </form>
 <p>${sub(s.direct)}</p></main>` + footer(code) + end(`<script src="/assets/contact.js?v=${V}" defer></script>`);
 }
+function partners() {
+  const code = 'en', t = T.en, s = t.support;
+  const P = {
+    title: 'Partner with us', lede: 'Not a paid post. We build a new game every week. You bring the audience. We share the revenue.',
+    how: [['We build.', 'A new mobile game or app most weeks. Squish Sort went from a name to a 365-level game on testers’ phones in three days.'],
+      ['You share it your way.', 'Early builds, ready-made clips and your own tracked link.'],
+      ['We both earn.', 'A share of revenue from every game you help launch, for as long as the partnership runs.']],
+    gets: ['Revenue share on every title you promote, not a one-off fee', 'Early TestFlight builds before anyone else', 'Your own original character in the game, designed with you', 'A say in what we make next, built around what your audience asks for'],
+    who: 'Creators on TikTok, YouTube Shorts or Instagram Reels who make squishy, ASMR, satisfying, cosy-game or mobile-game content. 10k followers is plenty. Fit matters more than size.',
+    rules: ['Every partner post is labelled as an ad or paid partnership.', 'No fake reviews and no paying viewers to install.', 'Either side can stop with 30 days’ notice; revenue already earned is still paid.'],
+  };
+  const owner = SITE.byondianUrl ? `<a href="${esc(SITE.byondianUrl)}" rel="noopener">Byondian</a>` : 'Byondian';
+  const f = { sending: s.sending, ok: 'Thanks! We read every message and will reply by email.', err: s.err.replace('{email}', SITE.email.support), send: 'Send' };
+  return head(code, { title: 'Partner with us | Squish Sort', description: P.lede, slug: 'partners', canon: '/partners' }) + bar(code) + `
+<main id="main" class="doc partners"><img class="peek" src="/assets/sq/sparkle-unicorn.webp" alt="" width="120" height="120">
+<p class="kicker">For creators</p><h1>${esc(P.title)}</h1><p class="lede">${esc(P.lede)}</p>
+<p><a class="btn" href="#contact">Get in touch</a></p>
+<h2>How it works</h2><ol class="how3">${P.how.map(([a, b], i) => `<li><span class="n">${i + 1}</span><div><strong>${esc(a)}</strong> ${esc(b)}</div></li>`).join('')}</ol>
+<h2>What partners get</h2><ul>${P.gets.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+<h2>Who we’re looking for</h2><p>${esc(P.who)}</p>
+<h2>The ground rules</h2><ul>${P.rules.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+<h2 id="contact">Get in touch</h2>
+<form class="contact" id="contact-form" novalidate data-t='${esc(JSON.stringify(f))}'>
+  <input type="hidden" name="lang" value="en"><input type="hidden" name="t" value=""><input type="hidden" name="kind" value="partner"><input type="hidden" name="topic" value="Partner">
+  <label class="hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off"></label>
+  <div class="row"><label>Your name<input name="name" maxlength="80" autocomplete="name"></label>
+  <label>Email address for our reply<input name="email" type="email" required maxlength="200" autocomplete="email" inputmode="email"></label></div>
+  <label>Where you post (a link to your profile)<input name="channel" maxlength="200" inputmode="url"></label>
+  <label>Tell us about your content<textarea name="message" required maxlength="5000"></textarea></label>
+  <p class="note">This form is for adults (18 and over). We use these details only to reply to you. <a href="${href(code, 'privacy')}#support">See the privacy policy →</a></p>
+  <button class="btn" type="submit">${esc(f.send)}</button>
+  <p class="status" role="status" aria-live="polite"></p>
+</form>
+<p class="fine-print">Made by Ian, an independent developer. ${owner}</p></main>` + footer(code) + end(`<script src="/assets/contact.js?v=${V}" defer></script>`);
+}
 function shop(code) {
   const t = T[code], s = t.shop;
   const data = { items: s.items, go: s.go, soon: s.soon, gateNo: s.gateNo };
@@ -259,6 +294,7 @@ for (const l of SITE.langs) {
   write(pageFile(c, 'legal'), legalHub(c)); urls.push(href(c, 'legal'));
   write(pageFile(c, 'support'), support(c)); urls.push(href(c, 'support'));
   write(pageFile(c, 'shop'), shop(c)); urls.push(href(c, 'shop'));
+  if (c === 'en') { write(pageFile(c, 'partners'), partners()); urls.push(href(c, 'partners')); }
   for (const s of SITE.legalPages) { write(pageFile(c, s), docPage(c, s)); if (l.legal) urls.push(href(c, s)); }
 }
 write('404.html', notFound());
