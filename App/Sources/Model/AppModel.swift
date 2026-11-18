@@ -395,14 +395,16 @@ final class AppModel: ObservableObject {
 
     // MARK: - Tester tools (tester and debug builds only)
 
-    /// True in debug builds, and in TestFlight builds made with the tester tools (the TESTER flag
-    /// and a sandbox receipt). The build that goes to App Review is made without the flag, so the
-    /// tools are not in it at all. They stay hidden until the version line in Settings is tapped seven times.
+    /// True in debug builds, and in TestFlight builds made with the tester tools (the TESTER flag).
+    /// The build that goes to App Review is made without the flag, so the tools are not in it at all.
+    /// As a second lock they are off for an App Store install (its receipt is named "receipt"); a
+    /// missing receipt does not switch them off, because a TestFlight install may have none yet.
+    /// They stay hidden until the version line in Settings is tapped seven times.
     static var isTesterBuild: Bool {
         #if DEBUG
         return true
         #elseif TESTER
-        return Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
+        return Bundle.main.appStoreReceiptURL?.lastPathComponent != "receipt"
         #else
         return false
         #endif
