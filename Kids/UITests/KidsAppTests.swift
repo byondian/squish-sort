@@ -54,7 +54,6 @@ final class KidsAppTests: XCTestCase {
         Thread.sleep(forTimeInterval: 0.8)
         keep(app.screenshot(), as: "squishy-kids-3-workshop")
         XCTAssertFalse(app.buttons["ws-see-shop"].exists)
-        app.terminate()
     }
 
     /// The gate: hold for three seconds, then a sum. Behind it, the one purchase and no way out by accident.
@@ -78,7 +77,6 @@ final class KidsAppTests: XCTestCase {
         XCTAssertTrue(app.buttons["kids-unlock"].waitForExistence(timeout: 8), "the unlock is behind the gate")
         Thread.sleep(forTimeInterval: 0.8)
         keep(app.screenshot(), as: "squishy-kids-4-grownups")
-        app.terminate()
     }
 
     /// Unlocked: every room and every world is open.
@@ -93,6 +91,5 @@ final class KidsAppTests: XCTestCase {
         toys.element(boundBy: 0).tap()
         Thread.sleep(forTimeInterval: 1.0)
         keep(app.screenshot(), as: "squishy-kids-5-snow")
-        app.terminate()
     }
 }
