@@ -35,7 +35,7 @@ jobs:
     runs-on: macos-15
     needs: rules-and-levels
     if: github.event_name == 'workflow_dispatch'
-    timeout-minutes: 45
+    timeout-minutes: 80
     steps:
       - uses: actions/checkout@v5
       - name: Select the newest Xcode
