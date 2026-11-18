@@ -38,7 +38,7 @@ jobs:
     name: App build and golden path UI test (gate 3)
     # The only Mac job: it builds the app and runs it, so a separate build job would pay twice.
     runs-on: macos-15
-    needs: rules-and-levels
+    # It does not wait for the Linux gates: free Macs can take a long time to arrive, so it queues at once.
     if: github.event_name == 'workflow_dispatch'
     timeout-minutes: 80
     steps:
