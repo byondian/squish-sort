@@ -16,6 +16,7 @@ struct SquishSortApp: App {
 /// No title screen: the first thing a new player sees is Level 1.
 struct RootView: View {
     @EnvironmentObject var model: AppModel
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         ZStack {
@@ -82,5 +83,7 @@ struct RootView: View {
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: model.toast)
         .preferredColorScheme(.light)
+        // Back from the background, perhaps on a new day: Home and the Mystery Bag read the clock again.
+        .onChange(of: scenePhase) { _, phase in if phase == .active { model.cameBack() } }
     }
 }

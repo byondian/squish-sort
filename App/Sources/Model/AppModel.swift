@@ -1018,9 +1018,10 @@ final class AppModel: ObservableObject {
         heartsChanged(from: before)
     }
 
-    /// How long a treat's puff lasts: a day for players of 13 and over. In gentle mode it is a short
-    /// happy reaction, so nothing asks a child to come back in time.
-    var puffSeconds: Double { isGentleMode ? BuddyState.puffSecondsGentle : BuddyState.puffSeconds }
+    /// How long a treat's puff lasts: the Buddy stays bigger and eases back over a day, for every
+    /// player (Ian, 18 Nov: it should stay bigger, then slowly get smaller). Nothing is said or shown
+    /// as it eases back and nothing earned is lost, so it asks nobody to come back in time.
+    var puffSeconds: Double { BuddyState.puffSeconds }
 
     // MARK: - The Buddy's daily gift
 
@@ -1314,6 +1315,17 @@ final class AppModel: ObservableObject {
     var newSquishies: Int {
         roster.collectibles.filter { progress.collection.owns($0.id) && !progress.seenCards.contains($0.id) }.count
     }
+
+    /// The player has looked through the Collection: nothing in it is new any more.
+    func allCardsSeen() {
+        let owned = Set(roster.collectibles.filter { progress.collection.owns($0.id) }.map(\.id))
+        guard !owned.isSubset(of: progress.seenCards) else { return }
+        update { $0.seenCards.formUnion(owned) }
+    }
+
+    /// The clock has moved on while the app was away (a new Mystery Bag day, a treat's puff easing
+    /// back): screens that read the time are drawn again.
+    func cameBack() { objectWillChange.send() }
 
     func cardSeen(_ id: String) {
         guard !progress.seenCards.contains(id) else { return }
