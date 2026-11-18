@@ -2015,6 +2015,28 @@
         }
       }
     },
+    "Do it for me: %lld coins": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "かわりに動かして：%lldコイン"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "대신 옮겨 줘: %lld코인"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "幫我走一步：%lld 金幣"
+          }
+        }
+      }
+    },
     "Done today": {
       "localizations": {
         "ja": {
@@ -3159,6 +3181,94 @@
         }
       }
     },
+    "It comes in a capsule. %lld more stars in this world win one.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "カプセルから出るよ。このワールドでスターをあと%lldこ集めると、カプセルがもらえるよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "캡슐에서 나와요. 이 월드에서 별 %lld개를 더 모으면 캡슐을 받아요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "它在扭蛋裡。在這個世界再拿 %lld 顆星就能得到一顆。"
+          }
+        }
+      }
+    },
+    "It comes in a capsule. Guess the Mystery Bag or fill your stamp card to win one.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "カプセルから出るよ。ミステリーバッグを当てるか、スタンプカードをいっぱいにするとカプセルがもらえるよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "캡슐에서 나와요. 미스터리 백을 맞히거나 스탬프 카드를 채우면 캡슐을 받아요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "它在扭蛋裡。猜中神秘袋或集滿集點卡就能得到一顆。"
+          }
+        }
+      }
+    },
+    "It comes in a capsule. Win level %lld to open the next one.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "カプセルから出るよ。レベル%lldをクリアすると、つぎのカプセルがひらくよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "캡슐에서 나와요. 레벨 %lld을 깨면 다음 캡슐을 열 수 있어요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "它在扭蛋裡。通過第 %lld 關就能打開下一顆。"
+          }
+        }
+      }
+    },
+    "It hides in this world's jars. Play its levels to find it.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このワールドのびんにかくれているよ。レベルをあそんで見つけよう。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 월드의 병 속에 숨어 있어요. 레벨을 플레이해서 찾아봐요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "它躲在這個世界的罐子裡。玩這裡的關卡就能找到。"
+          }
+        }
+      }
+    },
     "It never runs out. A capsule every fifth level.": {
       "localizations": {
         "ja": {
@@ -3507,6 +3617,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "幸運！"
+          }
+        }
+      }
+    },
+    "Magic": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "まほう"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마법"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "魔法"
+          }
+        }
+      }
+    },
+    "Magic moves +%lld": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "まほうの一手 +%lld"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마법의 한 수 +%lld"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "魔法步數 +%lld"
           }
         }
       }

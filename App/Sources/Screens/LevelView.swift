@@ -52,6 +52,8 @@ final class LevelController: ObservableObject {
     @Published private(set) var thinking = false
     /// The hint search found no way to win from here. Nothing is charged for that.
     @Published var noWayThrough = false
+    /// The magic move on its way to the board, and whether coins pay for it.
+    private var magicPending: (move: Move, paid: Bool)?
     /// The hint search ran out of room without an answer. Nothing is charged for that either.
     @Published var hintGaveUp = false
     /// A hint found for the current board, waiting to be paid for or shown.
@@ -167,7 +169,14 @@ final class LevelController: ObservableObject {
         let ontoMatch = session.board.jars.indices.contains(move.to) && !session.board.jars[move.to].isEmpty
         let free = feverLeft > 0
         let before = feverLeft
+        // A magic move is only used up (or paid for) when it really lands.
+        let pending = magicPending
+        magicPending = nil
         guard !shaking, let result = session.play(move, free: free) else { return nil }
+        if let pending, pending.move == move, let model {
+            if pending.paid { _ = model.spend(.hint) } else { model.useMagicMove() }
+            model.sounds.play("trick", or: "star_2")
+        }
         feverBefore.append(before)
         lastMoveWasFever = free
         if free { feverLeft -= 1 }
@@ -467,6 +476,27 @@ final class LevelController: ObservableObject {
         }
     }
 
+    /// A magic move: the best next move is worked out and played for the player. Free with a magic
+    /// move in hand, or for the price of a hint.
+    func magic(paid: Bool = false) {
+        guard let model, !thinking, !shaking, outcome == nil else { return }
+        guard paid ? model.progress.wallet.canAfford(.hint) : model.progress.magicMoves > 0 else { return }
+        chain.end()
+        thinking = true
+        let board = session.board
+        Task {
+            let found = await Task.detached(priority: .userInitiated) { Solver.hint(board) }.value
+            thinking = false
+            guard board == session.board, outcome == nil else { return }
+            guard case .move(let move) = found else {
+                if found == .unwinnable { noWayThrough = true } else { hintGaveUp = true }
+                return
+            }
+            magicPending = (move, paid)
+            scene.playForPlayer(move)
+        }
+    }
+
     private func showHint() {
         guard let found = foundHint, found.board == session.board else { return }
         scene.showHint(found.move)
@@ -713,6 +743,13 @@ struct LevelView: View {
                     Label { Text("Use \(item.price) coins") } icon: { CoinIcon() }.frame(maxWidth: .infinity)
                 }
                 .buttonStyle(SquishButtonStyle(fill: Theme.butter, text: Theme.plum))
+                // Or have the move played for you, for the same coins.
+                Button { controller.choosing = nil; controller.magic(paid: true) } label: {
+                    Label { Text("Do it for me: \(item.price) coins") } icon: { Image(systemName: "wand.and.stars") }
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(SquishButtonStyle(fill: Theme.sky, text: Theme.plum))
+                .accessibilityIdentifier("helper-do-it")
             } else if !model.isGentleMode {
                 // Under-13s never get a shop offer from the board.
                 Button { controller.choosing = nil; model.screen = .shop } label: {
@@ -852,7 +889,14 @@ struct LevelView: View {
                     .accessibilityIdentifier("helper-shuffle")
             }
             if pathNumber >= 4 {
-                helper(String(localized: "Hint"), "lightbulb.fill", Theme.butter, enabled: controller.canHint) { controller.hint() }
+                if model.progress.magicMoves > 0 {
+                    // Magic moves in hand: the button plays the best next move itself, and counts them down.
+                    helper(String(localized: "Magic"), "wand.and.stars", Theme.sky, enabled: controller.canHint,
+                           badge: model.progress.magicMoves) { controller.magic() }
+                        .accessibilityIdentifier("helper-magic")
+                } else {
+                    helper(String(localized: "Hint"), "lightbulb.fill", Theme.butter, enabled: controller.canHint) { controller.hint() }
+                }
             }
             if starsSlipped {
                 // A nudge, never a loss: the level can still be finished as it is.
@@ -1094,6 +1138,14 @@ struct WinCard: View {
                         .padding(.horizontal, 12).padding(.vertical, 4)
                         .background(Capsule().fill(Theme.bubblegum))
                         .transition(.scale(scale: 0.3).combined(with: .opacity))
+                }
+                if summary.magicEarned > 0 {
+                    // Earned by a first-try streak or a boss: the game will play that many moves for you.
+                    Label("Magic moves +\(summary.magicEarned)", systemImage: "wand.and.stars")
+                        .font(Theme.body(16)).foregroundStyle(Theme.plum)
+                        .padding(.horizontal, 12).padding(.vertical, 4)
+                        .background(Capsule().fill(Theme.sky))
+                        .accessibilityIdentifier("win-magic")
                 }
                 if summary.dailyBonus > 0 {
                     Text("First win today: +\(summary.dailyBonus)").font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.7))

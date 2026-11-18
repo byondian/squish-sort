@@ -92,6 +92,8 @@ struct PlayerProgress: Codable, Equatable {
     var starterCardShown = false
     /// Hints from the starter pack, used when there is no free one.
     var hintTokens = 0
+    /// Magic moves waiting to be used: the game plays the best next move. Earned by streaks and bosses.
+    var magicMoves = 0
 
     init() {}
 
@@ -198,6 +200,7 @@ struct PlayerProgress: Codable, Equatable {
         starterPackOwned = v(.starterPackOwned, d.starterPackOwned)
         starterCardShown = v(.starterCardShown, d.starterCardShown)
         hintTokens = max(0, v(.hintTokens, d.hintTokens))
+        magicMoves = min(Coins.maxMagicMoves, max(0, v(.magicMoves, d.magicMoves)))
     }
 
     static func today(_ date: Date = Date()) -> String {
