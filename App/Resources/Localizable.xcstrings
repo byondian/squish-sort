@@ -2433,6 +2433,28 @@
         }
       }
     },
+    "Fill a jar to stop it": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "びんをいっぱいにすると止められるよ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "병 하나를 채우면 막을 수 있어요"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "裝滿一個罐子就能阻止"
+          }
+        }
+      }
+    },
     "Finish the jar next door to raise the curtain!": {
       "localizations": {
         "ja": {
@@ -5641,6 +5663,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "再 %lld 步大洗牌"
+          }
+        }
+      }
+    },
+    "Shake-up stopped!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "シャッフルを止めた！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "셰이크업을 막았어요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "成功阻止大洗牌！"
           }
         }
       }

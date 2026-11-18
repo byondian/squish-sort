@@ -33,7 +33,8 @@ final class LevelController: ObservableObject {
     private var lastMoveWasFever = false
     /// Free moves left before each move in the session's history, so undo gives them back.
     private var feverBefore: [Int] = []
-    /// Shake-up: the move count at which the pieces are shuffled. Nil when there is none (left).
+    /// Shake-up: the move count at which the pieces are shuffled. Nil when there is none (left),
+    /// or once a jar has been filled in time, which calls it off.
     @Published private(set) var shakeAt: Int?
     @Published private(set) var shaking = false
     /// The finale's giant: 0 watching, 1 gasp, 2 nervous (one jar to go), 3 cheer.
@@ -265,6 +266,13 @@ final class LevelController: ObservableObject {
         jarsDone += 1
         model.sounds.jarComplete(number: jarsDone)
         luckyBonus(atJar: jar)
+        // A jar filled before the countdown runs out calls the shake-up off for this try.
+        if shakeAt != nil, !session.board.isWon {
+            shakeAt = nil
+            scene.popWord(String(localized: "Shake-up stopped!"), size: 0.8)
+            model.sounds.play("star_2")
+            model.haptics.star()
+        }
         if level.file.beat == .boss {
             bossMood = 1
             let oneLeft = session.board.jars.indices.filter { session.board.isComplete($0) }.count == level.kinds.count - 1
@@ -893,10 +901,16 @@ struct LevelView: View {
                         .background(Capsule().fill(LinearGradient(colors: [Color(hex: 0xFFB13D), Color(hex: 0xFF7EB6)], startPoint: .leading, endPoint: .trailing)))
                         .transition(.scale.combined(with: .opacity))
                 } else if let left = controller.shakeIn {
-                    Label { Text("Shake-up in \(left)") } icon: { Image(systemName: "tornado") }
-                        .font(Theme.body(13)).foregroundStyle(Theme.plum)
-                        .padding(.horizontal, 10).padding(.vertical, 3)
-                        .background(Capsule().fill(left <= 3 ? Theme.butter : Color.white.opacity(0.7)))
+                    // The countdown, and under it the way to call the shake-up off.
+                    VStack(spacing: 0) {
+                        Label { Text("Shake-up in \(left)") } icon: { Image(systemName: "tornado") }
+                            .font(Theme.body(13))
+                        Text("Fill a jar to stop it").font(Theme.body(10)).opacity(0.75)
+                    }
+                    .foregroundStyle(Theme.plum).lineLimit(1).minimumScaleFactor(0.7)
+                    .padding(.horizontal, 12).padding(.vertical, 3)
+                    .background(Capsule().fill(left <= 3 ? Theme.butter : Color.white.opacity(0.7)))
+                    .accessibilityElement(children: .combine)
                 }
                 // The level pot: coins thrown by finished jars, banked on the win.
                 if controller.pot.paysCoins {
