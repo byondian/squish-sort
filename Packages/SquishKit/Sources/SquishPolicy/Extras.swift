@@ -637,7 +637,9 @@ public struct ParentalGateState: Equatable, Sendable {
     /// the cooldown and swaps in a new question.
     public mutating func submit<R: RandomNumberGenerator>(_ answer: String, now: Double, using rng: inout R) -> Bool {
         guard !isLocked(now: now) else { return false }
-        if Int(answer.trimmingCharacters(in: .whitespaces)) == a * b { return true }
+        // Only the digits count: a keyboard may add a space, a full stop or digits from another script.
+        let digits = answer.compactMap { $0.wholeNumberValue }
+        if !digits.isEmpty, digits.count <= 6, digits.reduce(0, { $0 * 10 + $1 }) == a * b { return true }
         lockedUntil = now + ParentalGateState.cooldown
         let old = (a, b)
         repeat {

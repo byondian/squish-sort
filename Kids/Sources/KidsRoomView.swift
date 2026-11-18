@@ -16,6 +16,7 @@ struct KidsRoomView: View {
     @State private var wiggles = 0
     @State private var gate = false
     @State private var grownUps = false
+    @State private var passed = false
 
     private static let madeTab = "made"
 
@@ -43,11 +44,17 @@ struct KidsRoomView: View {
             toys
         }
         .background(KidsBackdrop(scene: scene).ignoresSafeArea())
-        .fullScreenCover(isPresented: $gate) {
+        // The Grown-ups corner opens only once the gate has finished closing, so it is never lost.
+        .fullScreenCover(isPresented: $gate, onDismiss: {
+            if passed { passed = false; grownUps = true }
+        }) {
             KidsGate(onPass: {
+                passed = true
                 gate = false
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { grownUps = true }
-            }, onCancel: { gate = false })
+            }, onCancel: {
+                passed = false
+                gate = false
+            })
         }
         .sheet(isPresented: $grownUps) {
             GrownUpsView().environmentObject(model).environmentObject(model.purchases)

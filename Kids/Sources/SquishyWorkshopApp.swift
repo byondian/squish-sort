@@ -20,6 +20,7 @@ struct SquishyWorkshopApp: App {
 struct KidsRootView: View {
     @EnvironmentObject var model: AppModel
     @State private var grownUps = false
+    @State private var passed = false
 
     var body: some View {
         ZStack {
@@ -32,16 +33,19 @@ struct KidsRootView: View {
         }
         .animation(.easeOut(duration: 0.2), value: model.screen)
         // Anything closed in the Workshop leads here: the gate first, then the Grown-ups corner.
-        .fullScreenCover(isPresented: $model.grownUpAsk) {
+        // What follows the gate opens only once the gate has finished closing, so it is never lost.
+        .fullScreenCover(isPresented: $model.grownUpAsk, onDismiss: {
+            guard passed else { model.afterGate = nil; return }
+            passed = false
+            let then = model.afterGate
+            model.afterGate = nil
+            if let then { then() } else { grownUps = true }
+        }) {
             KidsGate(onPass: {
+                passed = true
                 model.grownUpAsk = false
-                let then = model.afterGate
-                model.afterGate = nil
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
-                    if let then { then() } else { grownUps = true }
-                }
             }, onCancel: {
-                model.afterGate = nil
+                passed = false
                 model.grownUpAsk = false
             })
         }
