@@ -174,6 +174,104 @@ final class GoldenPathTests: XCTestCase {
         next("capsule-next")
     }
 
+    private func workshopButton(_ id: String, in app: XCUIApplication, _ what: String) -> XCUIElement {
+        let button = app.buttons[id]
+        if !button.waitForExistence(timeout: 8) {
+            print("GOLDEN-PATH \(what): \(id) missing; screen:\n\(app.debugDescription)")
+            XCTFail("\(what): \(id) missing")
+        }
+        return button
+    }
+
+    /// The Squishy Workshop from an empty mould to the shelf: mould, pour, bake, face, dress up,
+    /// voice and name, the birthday card, then Surprise me. Also run by CI on an iPad.
+    func testWorkshopMakesASquishy() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-uiTesting", "-storeShot", "workshop"]
+        app.launch()
+        workshopButton("ws-mould-egg", in: app, "mould station").tap()
+        XCTAssertFalse(app.buttons["ws-station-3"].isEnabled, "no baking before the goo is poured")
+        workshopButton("ws-next", in: app, "to the goo").tap()
+        workshopButton("ws-goo-foam", in: app, "goo station").tap()
+        XCTAssertFalse(app.buttons["ws-next"].isEnabled, "an empty mould cannot move on")
+        // Hold a finger on the mould: the goo pours while it is held.
+        let stage = app.descendants(matching: .any)["ws-stage"]
+        XCTAssertTrue(stage.waitForExistence(timeout: 5))
+        stage.press(forDuration: 1.0)
+        keep(app.screenshot(), as: "squishy-workshop-1-half-poured")
+        stage.press(forDuration: 3.0)
+        XCTAssertTrue(app.buttons["ws-next"].isEnabled, "a full mould moves on")
+        keep(app.screenshot(), as: "squishy-workshop-2-poured")
+        app.buttons["ws-next"].tap()
+        workshopButton("ws-bake", in: app, "oven").tap()
+        // It pops out; then the belt moves on to the face.
+        XCTAssertTrue(app.buttons["ws-redo"].waitForExistence(timeout: 8), "the squishy pops out of the oven")
+        app.buttons["ws-next"].tap()
+        workshopButton("ws-eyes-big-shine", in: app, "face station").tap()
+        workshopButton("ws-face-mouths", in: app, "face station").tap()
+        workshopButton("ws-mouths-big-smile", in: app, "mouths").tap()
+        app.buttons["ws-next"].tap()
+        workshopButton("ws-part-bear", in: app, "dress up").tap()
+        XCTAssertTrue(app.descendants(matching: .any)["ws-placed-ears"].waitForExistence(timeout: 5), "the ears are on")
+        keep(app.screenshot(), as: "squishy-workshop-3-dressed")
+        // A part that is not open says how to get it, and the squishy is kept while the player looks.
+        workshopButton("ws-tray-wings", in: app, "wings tray").tap()
+        workshopButton("ws-part-angel", in: app, "wings").tap()
+        XCTAssertTrue(app.buttons["ws-buy-part"].waitForExistence(timeout: 5), "from 13, a wearable can be bought with coins")
+        app.buttons["ws-next"].tap()
+        workshopButton("ws-voice-honk", in: app, "voices").tap()
+        let wheel = workshopButton("ws-spin", in: app, "name wheel")
+        if !wheel.isHittable { app.swipeUp() }
+        wheel.tap()
+        keep(app.screenshot(), as: "squishy-workshop-4-life")
+        let done = workshopButton("ws-done", in: app, "done")
+        if !done.isHittable { app.swipeUp() }
+        done.tap()
+        XCTAssertTrue(app.staticTexts["ws-card-name"].waitForExistence(timeout: 8), "the birthday card")
+        Thread.sleep(forTimeInterval: 0.8)
+        keep(app.screenshot(), as: "squishy-workshop-5-card")
+        workshopButton("ws-another", in: app, "card").tap()
+        // Surprise me lands at the oven.
+        workshopButton("ws-surprise", in: app, "surprise").tap()
+        workshopButton("ws-bake", in: app, "surprise oven").tap()
+        XCTAssertTrue(app.buttons["ws-redo"].waitForExistence(timeout: 8))
+        keep(app.screenshot(), as: "squishy-workshop-6-surprise")
+        // The first one is on the shelf.
+        app.buttons["ws-shelf"].tap()
+        XCTAssertTrue(app.buttons["ws-edit"].waitForExistence(timeout: 5), "the saved squishy is on the shelf")
+        app.terminate()
+    }
+
+    /// A child (or an unknown age) sees no price, no coin price and no way to the shop in the Workshop.
+    func testWorkshopShowsAChildNoPricesAndNoShop() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-uiTesting", "-storeShot", "workshop-child"]
+        app.launch()
+        _ = workshopButton("ws-mould-bun", in: app, "mould station")
+        XCTAssertFalse(app.buttons["ws-more"].exists, "the closed drawer cannot be tapped")
+        XCTAssertFalse(app.buttons["ws-on-top"].exists, "no locked Pro tool")
+        keep(app.screenshot(), as: "squishy-workshop-7-child")
+        app.buttons["ws-next"].tap()
+        let stage = app.descendants(matching: .any)["ws-stage"]
+        XCTAssertTrue(stage.waitForExistence(timeout: 5))
+        stage.press(forDuration: 3.5)
+        XCTAssertFalse(app.buttons["ws-mix"].exists)
+        app.buttons["ws-next"].tap()
+        workshopButton("ws-bake", in: app, "oven").tap()
+        XCTAssertTrue(app.buttons["ws-redo"].waitForExistence(timeout: 8))
+        app.buttons["ws-next"].tap()
+        app.buttons["ws-next"].tap()
+        workshopButton("ws-tray-wings", in: app, "wings tray").tap()
+        Thread.sleep(forTimeInterval: 0.5)
+        XCTAssertFalse(app.buttons["ws-part-angel"].exists, "parts that come with Remove Ads are not shown to a child")
+        XCTAssertFalse(app.buttons["ws-see-shop"].exists)
+        XCTAssertFalse(app.buttons["ws-buy-part"].exists)
+        app.buttons["ws-next"].tap()
+        XCTAssertFalse(app.buttons["ws-type-name"].exists, "a child has the name wheel only")
+        XCTAssertTrue(app.buttons["ws-spin"].waitForExistence(timeout: 5))
+        app.terminate()
+    }
+
     /// Also run by CI on an older iOS, to catch a launch crash from newer frameworks.
     func testLaunchShowsLevelOne() {
         XCTAssertTrue(app.staticTexts["Level 1"].waitForExistence(timeout: 30), "Level 1 is the first screen")

@@ -7,6 +7,7 @@ import SquishCore
 import SquishLevels
 import SquishPolicy
 import SquishSoft
+import SquishWorkshop
 
 /// App state: levels, progress, collection, age, purchases.
 @MainActor
@@ -146,6 +147,8 @@ final class AppModel: ObservableObject {
 
     init() {
         var loaded = AppModel.isUITesting ? PlayerProgress() : store.load()
+        // Each made squishy's Workshop design is a file of its own; one from the old Maker has none.
+        for i in loaded.made.indices { loaded.made[i].design = MadeFiles.shared.load(id: loaded.made[i].id) }
         levels = AppModel.loadLevels()
         if loaded.version < 3 {
             loaded.migrate(path: levels.filter { LevelCatalog.worlds.contains($0.file.world) }.map(\.id))
@@ -248,6 +251,13 @@ final class AppModel: ObservableObject {
             screen = .map
         case "book":
             screen = .book
+        case "workshop", "workshop-child":
+            // The Workshop for a player of 13 or over, and as a child sees it (no prices, no shop).
+            update { p in
+                p.collection.totalCapsules = max(1, p.collection.totalCapsules)
+                if shot == "workshop-child" { p.age = AgeProfile(group: .child, source: .birthYear, storefront: "GBR") }
+            }
+            screen = .maker
         default:
             // "room:<id>" opens the Squish Room on one squishy, for the pictures the checks keep.
             if shot.hasPrefix("room:") {
@@ -590,7 +600,7 @@ final class AppModel: ObservableObject {
 
     func isExtraUnlocked(_ extra: Extra) -> Bool {
         Extras.isUnlocked(extra, capsulesOpened: progress.collection.totalCapsules, levelsWon: levelsWon,
-                          firstWorldComplete: isWorldComplete(LevelCatalog.worlds[0]), config: config)
+                          firstWorldComplete: isWorldComplete(LevelCatalog.worlds[0]), ownsRemoveAds: ownsRemoveAds, config: config)
     }
 
     func isNew(_ extra: Extra) -> Bool { isExtraUnlocked(extra) && !progress.seenExtras.contains(extra.rawValue) }
@@ -621,6 +631,8 @@ final class AppModel: ObservableObject {
 
     /// How a squeezable thing squishes. Made squishies, like anything with no feel of its own, are jelly.
     func feel(for ref: String) -> SquishFeel {
+        // A made squishy feels like the goo it was poured from.
+        if let made = progress.made.first(where: { $0.ref == ref }) { return SquishFeel(named: made.design?.goo.rawValue) }
         if let c = roster.collectible(ref) { return SquishFeel(named: c.feel) }
         return SquishFeel(named: roster.squishRoomToys.first { $0.id == ref }?.feel)
     }
@@ -741,31 +753,62 @@ final class AppModel: ObservableObject {
         return open.contains(current) ? current : (open.first ?? LevelCatalog.worlds[0])
     }
 
-    // MARK: - Squishy Maker
+    // MARK: - Squishy Workshop
+
+    /// What this player has open in the Workshop. Remove Ads includes Workshop Pro.
+    var workshopAccess: WorkshopAccess {
+        WorkshopAccess(pro: ownsRemoveAds, worlds: worldsCompleted, owned: progress.workshopParts)
+    }
+
+    /// Places on the Workshop shelf: three free, more for coins up to eight, fifty with Pro.
+    var shelfPlaces: Int { WorkshopGate.slots(bought: progress.makerSlots, workshopAccess) }
 
     /// False when the name is empty or rude, a part is still locked, or the shelf is full.
     func saveMade(_ draft: MadeSquishy) -> Bool {
-        guard isExtraUnlocked(.maker), let name = NameFilter.clean(draft.name),
-              MakerParts.isAllowed(draft, worldsCompleted: worldsCompleted) else { return false }
+        guard isExtraUnlocked(.maker), let name = NameFilter.clean(draft.name) else { return false }
         var made = draft
         made.name = name
+        let saved = progress.made.first { $0.id == made.id }
+        if var design = made.design {
+            design.tidy()
+            // A look made with Pro stays after Pro is lost, but only as it was: a changed design has to be allowed.
+            let palette = WorkshopArt.catalog?.colours ?? MakerParts.palette
+            guard saved?.design == design || WorkshopGate.allowed(design, palette: palette, workshopAccess) else { return false }
+            if design.born == 0 { design.born = saved?.design?.born ?? Date().timeIntervalSince1970 }
+            made.design = design
+        } else {
+            guard MakerParts.isAllowed(made, worldsCompleted: worldsCompleted) else { return false }
+        }
         if let i = progress.made.firstIndex(where: { $0.id == made.id }) {
             update { $0.made[i] = made }
         } else {
-            guard progress.made.count < min(progress.makerSlots, MakerParts.maxMade) else { return false }
+            guard progress.made.count < shelfPlaces else { return false }
             update { $0.made.append(made) }
         }
+        if let design = made.design { MadeFiles.shared.save(design, id: made.id) }
         return true
     }
 
-    /// One more place on the Maker shelf, for coins. The first place is free.
-    var canBuyMakerSlot: Bool { progress.makerSlots < MakerParts.maxMade }
+    /// One more place on the Workshop shelf, for coins. Workshop Pro has fifty and never pays.
+    var canBuyMakerSlot: Bool { !ownsRemoveAds && shelfPlaces < WorkshopGate.coinSlots }
 
     @discardableResult
     func buyMakerSlot() -> Bool {
         guard canBuyMakerSlot, progress.wallet.balance >= MakerSlots.price else { return false }
         update { p in
-            if p.wallet.spend(MakerSlots.price) { p.makerSlots += 1 }
+            if p.wallet.spend(MakerSlots.price) { p.makerSlots = max(MakerSlots.free, p.makerSlots) + 1 }
+        }
+        sounds.play("unlock_new")
+        return true
+    }
+
+    /// One wearable for coins, for a player of 13 or over without Workshop Pro. Kept for good.
+    @discardableResult
+    func buyWorkshopPart(category: String, part: String) -> Bool {
+        guard !isGentleMode, let price = WorkshopGate.coinPrice(category: category, part: part, workshopAccess),
+              progress.wallet.balance >= price else { return false }
+        update { p in
+            if p.wallet.spend(price) { p.workshopParts.insert(category + "/" + part) }
         }
         sounds.play("unlock_new")
         return true
@@ -875,6 +918,7 @@ final class AppModel: ObservableObject {
             if let made = p.made.first(where: { $0.id == id }), p.buddy.squishy == made.ref { p.buddy.squishy = nil }
             p.made.removeAll { $0.id == id }
         }
+        MadeFiles.shared.delete(id: id)
     }
 
     // MARK: - Squishy Buddy
@@ -1260,7 +1304,7 @@ final class AppModel: ObservableObject {
         }
         awardStarJars()
         // The Buddy is met in the first capsule itself ("Is this your Buddy?"), so it has no card.
-        for extra in [Extra.mysteryBag, .maker] where isExtraUnlocked(extra) && !extrasBefore.contains(extra) {
+        for extra in [Extra.mysteryBag] where isExtraUnlocked(extra) && !extrasBefore.contains(extra) {
             news.append(.unlocked(extra))
         }
         // A full capsule bar opens its capsule after the level's own, never on top of it.

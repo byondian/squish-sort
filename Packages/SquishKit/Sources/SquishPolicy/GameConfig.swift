@@ -21,6 +21,10 @@ public struct GameConfig: Codable, Equatable, Sendable {
     public var mysteryBagEnabled = true
     public var makerEnabled = true
     public var buddyEnabled = true
+    /// Off switches for three Workshop Pro tools: drawing a shape or face, the Mixer, teaching a move.
+    public var workshopDraw = true
+    public var workshopMixer = true
+    public var workshopTraining = true
     /// The link to the website's Squishy Shop (affiliate listings of real toys).
     public var squishyShopEnabled = true
     /// The paid extras for 13 and over (starter pack, piggy bank) and the Daily Jar can be switched off.
@@ -49,6 +53,9 @@ public struct GameConfig: Codable, Equatable, Sendable {
         mysteryBagEnabled = try c.decodeIfPresent(Bool.self, forKey: .mysteryBagEnabled) ?? d.mysteryBagEnabled
         makerEnabled = try c.decodeIfPresent(Bool.self, forKey: .makerEnabled) ?? d.makerEnabled
         buddyEnabled = try c.decodeIfPresent(Bool.self, forKey: .buddyEnabled) ?? d.buddyEnabled
+        workshopDraw = try c.decodeIfPresent(Bool.self, forKey: .workshopDraw) ?? d.workshopDraw
+        workshopMixer = try c.decodeIfPresent(Bool.self, forKey: .workshopMixer) ?? d.workshopMixer
+        workshopTraining = try c.decodeIfPresent(Bool.self, forKey: .workshopTraining) ?? d.workshopTraining
         squishyShopEnabled = try c.decodeIfPresent(Bool.self, forKey: .squishyShopEnabled) ?? d.squishyShopEnabled
         offersEnabled = try c.decodeIfPresent(Bool.self, forKey: .offersEnabled) ?? d.offersEnabled
         dailyJarEnabled = try c.decodeIfPresent(Bool.self, forKey: .dailyJarEnabled) ?? d.dailyJarEnabled

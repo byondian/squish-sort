@@ -1,6 +1,7 @@
 import SwiftUI
 import UIKit
 import SquishPolicy
+import SquishWorkshop
 
 /// Any squeezable thing by reference: a collectible, a starter toy or a made squishy.
 struct SquishRefView: View {
@@ -23,6 +24,24 @@ struct MadeSquishyView: View {
     var squash: CGFloat = 0
 
     var body: some View {
+        if let design = made.design {
+            // Made in the Workshop: its baked picture, or its parts while there is no picture yet.
+            Group {
+                if let image = MadeFiles.shared.picture(made.id) {
+                    Image(uiImage: image).resizable().scaledToFit()
+                } else {
+                    WorkshopSquishyView(design: design)
+                }
+            }
+            .scaleEffect(x: 1 + squash * 0.25, y: 1 - squash * 0.35, anchor: .bottom)
+            .accessibilityLabel(Text(verbatim: made.name))
+        } else {
+            classic
+        }
+    }
+
+    /// A squishy from the first Maker, drawn from its six parts as it always was.
+    private var classic: some View {
         Canvas { ctx, size in
             let d = min(size.width, size.height) * 0.56
             // Anchored at the bottom centre, like the launch art.

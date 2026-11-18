@@ -84,8 +84,10 @@ struct PlayerProgress: Codable, Equatable {
     var endlessLaps = 0
     /// yyyy-MM-dd of the last Daily Jar won.
     var dailyJarDay: String?
-    /// Places on the Maker shelf: the first is free, more are bought with coins.
+    /// Places on the Workshop shelf: three are free, more are bought with coins.
     var makerSlots = MakerSlots.free
+    /// Workshop wearables bought one at a time with coins, as "tray/part".
+    var workshopParts: Set<String> = []
     var piggy = PiggyBank()
     var starterPackOwned = false
     /// The one soft starter pack card (after the first world) has been shown.
@@ -195,7 +197,8 @@ struct PlayerProgress: Codable, Equatable {
         endlessLaps = max(0, v(.endlessLaps, d.endlessLaps))
         dailyJarDay = (try? c.decodeIfPresent(String.self, forKey: .dailyJarDay)) ?? nil
         // A save from before places had a price keeps a place for everything it already made.
-        makerSlots = v(.makerSlots, MakerSlots.starting(alreadyMade: made.count))
+        makerSlots = max(MakerSlots.free, v(.makerSlots, MakerSlots.starting(alreadyMade: made.count)))
+        workshopParts = v(.workshopParts, d.workshopParts)
         piggy = v(.piggy, d.piggy)
         starterPackOwned = v(.starterPackOwned, d.starterPackOwned)
         starterCardShown = v(.starterCardShown, d.starterCardShown)

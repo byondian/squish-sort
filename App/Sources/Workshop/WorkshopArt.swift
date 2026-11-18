@@ -63,6 +63,8 @@ struct WorkshopSquishyView: View {
     /// Before it is baked the mould shows as a pale tray around the goo.
     var showsMould = false
     var showsFace = true
+    /// Moves the wavy top of the goo while it is being poured.
+    var wave: Double?
 
     private static let plum = Color(uiColor: .plum)
     /// The body takes this share of the picture, so ears and hats have room around it.
@@ -84,7 +86,7 @@ struct WorkshopSquishyView: View {
                 if showsMould {
                     mask.frame(width: body, height: body).foregroundStyle(Color.white.opacity(0.9))
                 }
-                GooFill(design: design, fill: fill)
+                GooFill(design: design, fill: fill, wave: wave)
                     .frame(width: body, height: body)
                     .mask { mask.frame(width: body, height: body) }
                 if showsFace {
@@ -184,25 +186,29 @@ struct DrawnStrokes: Shape {
 struct GooFill: View {
     let design: WorkshopDesign
     var fill: Double = 1
+    /// While pouring the top of the goo is wavy; this moves the wave along. Nil is a flat top.
+    var wave: Double?
 
     var body: some View {
         Canvas { ctx, size in
             let layers = design.layers
-            let n = max(1, layers.count)
+            let bands = design.bands
+            let level = CGFloat(min(1, max(0, fill)))
             // The goo's top edge: the mould fills from the bottom.
-            let top = size.height * (1 - min(1, max(0, fill)))
+            let top = size.height * (1 - level)
+            var goo = ctx
+            goo.clip(to: GooFill.surface(top: top, size: size, wave: level < 1 ? wave : nil))
             for (i, layer) in layers.enumerated() {
-                // Each layer sits on the one below; the first one fills the whole mould.
-                let y0 = i == 0 ? top : max(top, size.height * (1 - CGFloat(n - i) / CGFloat(n)) * 0.92)
-                let y1 = size.height
-                let band = CGRect(x: 0, y: y0, width: size.width, height: max(0, (i == 0 ? y1 : bandBottom(i, n, size)) - y0))
+                let y1 = size.height * (1 - CGFloat(bands[i].from) * level)
+                // The top layer runs up past the wave so no gap shows under it.
+                let y0 = i == layers.count - 1 ? 0 : size.height * (1 - CGFloat(bands[i].to) * level)
+                let band = CGRect(x: 0, y: y0, width: size.width, height: max(0, y1 - y0))
                 guard band.height > 0 else { continue }
-                var inner = ctx
+                var inner = goo
                 inner.clip(to: Path(band))
                 GooFill.paint(layer, below: i > 0 ? layers[i - 1].colour : nil, in: band, size: size, ctx: &inner)
             }
-            var fxCtx = ctx
-            fxCtx.clip(to: Path(CGRect(x: 0, y: top, width: size.width, height: size.height - top)))
+            var fxCtx = goo
             GooFill.effects(design.fx, seed: design.layers.first?.seed ?? 0, size: size, ctx: &fxCtx)
             // A soft shine top left and a shade along the bottom make it read as a puffy toy.
             let shine = Path(ellipseIn: CGRect(x: size.width * 0.2, y: size.height * 0.2, width: size.width * 0.26, height: size.height * 0.14))
@@ -213,9 +219,20 @@ struct GooFill: View {
         }
     }
 
-    /// Layers above the first cover the top part of the body, each a band higher than the last.
-    private func bandBottom(_ i: Int, _ n: Int, _ size: CGSize) -> CGFloat {
-        i == n - 1 ? size.height * (1 - CGFloat(n - i) / CGFloat(n)) * 0.92 + size.height / CGFloat(n) : size.height * (1 - CGFloat(n - i - 1) / CGFloat(n)) * 0.92
+    /// Everything under the goo's top edge. The edge is a gentle wave while it is being poured.
+    static func surface(top: CGFloat, size: CGSize, wave: Double?) -> Path {
+        guard let wave else { return Path(CGRect(x: 0, y: top, width: size.width, height: max(0, size.height - top))) }
+        var p = Path()
+        p.move(to: CGPoint(x: 0, y: size.height))
+        let steps = 24
+        for k in 0...steps {
+            let x = size.width * CGFloat(k) / CGFloat(steps)
+            let y = top + size.height * 0.015 * CGFloat(sin(wave * 6 + Double(k) * 0.8))
+            p.addLine(to: CGPoint(x: x, y: y))
+        }
+        p.addLine(to: CGPoint(x: size.width, y: size.height))
+        p.closeSubpath()
+        return p
     }
 
     private static func random(_ seed: inout UInt64) -> CGFloat {

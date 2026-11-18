@@ -299,7 +299,7 @@ struct HomeView: View {
             tab("Home", "house.fill", selected: true) {}
             tab("Levels", "circle.grid.3x3.fill") { model.screen = .map }
             tab("Squish Room", "hand.tap.fill", extra: .squishRoom) { model.open(.squishRoom) }
-            tab("Maker", "paintbrush.fill", extra: .maker) { model.open(.maker) }
+            tab("Workshop", "paintbrush.fill", extra: .maker) { model.open(.maker) }
         }
         .padding(.horizontal, 10).padding(.top, 8).padding(.bottom, 2)
         .frame(maxWidth: .infinity)

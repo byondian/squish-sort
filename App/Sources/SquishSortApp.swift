@@ -34,7 +34,7 @@ struct RootView: View {
             case .mystery:
                 MysteryBagView().frame(maxWidth: 760)
             case .maker:
-                MakerView().frame(maxWidth: 760)
+                WorkshopView().frame(maxWidth: 760)
             case .book:
                 BookView().frame(maxWidth: 900)
             case .room:

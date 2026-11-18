@@ -14,12 +14,15 @@ public enum Extras {
     ///   - capsulesOpened: capsules opened so far, any world.
     ///   - levelsWon: how many levels of the play order are finished.
     ///   - firstWorldComplete: every level of the first world is finished.
+    ///   - ownsRemoveAds: Remove Ads includes Workshop Pro, so its owner has the Workshop at once.
     public static func isUnlocked(_ extra: Extra, capsulesOpened: Int, levelsWon: Int,
-                                  firstWorldComplete: Bool, config: GameConfig = GameConfig()) -> Bool {
+                                  firstWorldComplete: Bool, ownsRemoveAds: Bool = false,
+                                  config: GameConfig = GameConfig()) -> Bool {
         switch extra {
         case .squishRoom: return config.squishRoomEnabled && capsulesOpened >= 1
         case .mysteryBag: return config.mysteryBagEnabled && levelsWon >= mysteryBagAfterLevel
-        case .maker: return config.makerEnabled && firstWorldComplete
+        // The Squishy Workshop arrives with the first capsule, next to the Squish Room.
+        case .maker: return config.makerEnabled && (capsulesOpened >= 1 || ownsRemoveAds)
         case .buddy: return config.buddyEnabled && capsulesOpened >= 1
         }
     }
@@ -307,6 +310,16 @@ public struct MadeSquishy: Codable, Equatable, Identifiable, Sendable {
         case .cat, .bear, .bunny: d.parts.append(Placed(id: "ears", category: "ears", part: ears.rawValue, x: 0.5, y: 0.24))
         case .horns: d.parts.append(Placed(id: "ears", category: "horns-and-antlers", part: "little-horns", x: 0.5, y: 0.24))
         }
+        switch accessory {
+        case .none: break
+        case .bow: d.parts.append(Placed(id: "extra", category: "hats-and-headwear", part: "bow-headband", x: 0.5, y: 0.22))
+        case .crown: d.parts.append(Placed(id: "extra", category: "hats-and-headwear", part: "crown", x: 0.5, y: 0.2))
+        case .headphones: d.parts.append(Placed(id: "extra", category: "hats-and-headwear", part: "headphones", x: 0.5, y: 0.3))
+        // An old save with horns and a unicorn horn keeps the unicorn horn: one from each tray.
+        case .unicornHorn: d.parts.append(Placed(id: "extra", category: "horns-and-antlers", part: "unicorn", x: 0.5, y: 0.2))
+        case .leaf: d.parts.append(Placed(id: "extra", category: "antennae-and-hair", part: "sprout", x: 0.5, y: 0.2))
+        }
+        d.tidy()
         return d
     }
 

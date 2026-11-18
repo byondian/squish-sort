@@ -26,16 +26,28 @@ public struct GooLayer: Codable, Equatable, Sendable {
     /// A pattern id from the catalogue ("plain", "stripes", "ombre", "marble", ...).
     public var pattern: String
     public var seed: Int
+    /// How much of this goo was poured, next to the other layers. Equal amounts make equal bands.
+    public var amount: Double
 
-    public init(colour: UInt32, pattern: String = "plain", seed: Int = 0) {
+    public init(colour: UInt32, pattern: String = "plain", seed: Int = 0, amount: Double = 1) {
         self.colour = colour & 0xFFFFFF
         self.pattern = pattern
         self.seed = seed
+        self.amount = max(0, amount)
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        colour = ((try? c.decodeIfPresent(UInt32.self, forKey: .colour)) ?? 0xFF9EB5) & 0xFFFFFF
+        pattern = (try? c.decodeIfPresent(String.self, forKey: .pattern)) ?? "plain"
+        seed = (try? c.decodeIfPresent(Int.self, forKey: .seed)) ?? 0
+        amount = max(0, (try? c.decodeIfPresent(Double.self, forKey: .amount)) ?? 1)
     }
 }
 
 /// A made squishy's saved designs, one file each (Application Support/made in the app). The
 /// player's progress keeps only the ids and their order.
+@MainActor
 public protocol MadeStore {
     func load(id: String) -> WorkshopDesign?
     func save(_ design: WorkshopDesign, id: String)
@@ -205,6 +217,18 @@ public struct WorkshopDesign: Codable, Equatable, Sendable {
 
     /// The body fills the middle of the picture; the rest is room for ears, hats and wings.
     public static let bodyShare = 0.64
+
+    /// Where each layer's band starts and ends, as shares of the mould from the bottom (0) to the
+    /// top (1). Layers with no goo at all share the mould equally.
+    public var bands: [(from: Double, to: Double)] {
+        let total = layers.reduce(0) { $0 + $1.amount }
+        var at = 0.0
+        return layers.map { layer in
+            let share = total > 0 ? layer.amount / total : 1 / Double(max(1, layers.count))
+            defer { at += share }
+            return (at, at + share)
+        }
+    }
 
     /// The colour the body mostly is: its top layer.
     public var mainColour: UInt32 { layers.last?.colour ?? 0xFF9EB5 }

@@ -54,7 +54,7 @@ final class WorkshopTests: XCTestCase {
         XCTAssertEqual(d.layers, [GooLayer(colour: MakerParts.palette[3])])
         XCTAssertEqual(d.face.eyes, "wink")
         XCTAssertEqual(d.face.mouth, "cat-w")
-        XCTAssertEqual(d.parts.map(\.part), ["bunny"])
+        XCTAssertEqual(d.parts.map(\.part), ["bunny", "bow-headband"])
         // And a design with fields missing takes the defaults.
         let thin = try JSONDecoder().decode(WorkshopDesign.self, from: Data(#"{"mould":"bear"}"#.utf8))
         XCTAssertEqual(thin.mould, "bear")
@@ -240,5 +240,16 @@ final class WorkshopTests: XCTestCase {
         let thick = DrawnShape.mould(from: sliver) ?? []
         let ys = thick.map(\.y)
         XCTAssertTrue((ys.max() ?? 0) - (ys.min() ?? 0) >= 0.24)
+    }
+
+    func testGooLayersShareTheMouldByHowMuchWasPoured() throws {
+        var d = WorkshopDesign()
+        d.layers = [GooLayer(colour: 0xFF0000, amount: 0.75), GooLayer(colour: 0x0000FF, amount: 0.25)]
+        XCTAssertEqual(d.bands.map(\.to), [0.75, 1.0])
+        d.layers = [GooLayer(colour: 1), GooLayer(colour: 2), GooLayer(colour: 3)]
+        XCTAssertEqual(d.bands[1].from, 1.0 / 3, accuracy: 0.0001)
+        // A layer saved before amounts existed counts as one share.
+        let old = try JSONDecoder().decode(GooLayer.self, from: Data(#"{"colour":255,"pattern":"plain","seed":4}"#.utf8))
+        XCTAssertEqual(old, GooLayer(colour: 255, seed: 4))
     }
 }
