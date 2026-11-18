@@ -53,7 +53,13 @@ struct GrownUpsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var busy = false
 
-    static let privacyURL = URL(string: "https://squishsort.app/workshop/privacy")!
+    static let supportURL = URL(string: "https://squishsort.app/support")!
+
+    /// The policy in the app's language: /ja, /ko and /zh-hant have their own pages.
+    private var privacyURL: URL {
+        let prefix = ["ja": "/ja", "ko": "/ko", "zh-Hant": "/zh-hant"][model.language] ?? ""
+        return URL(string: "https://squishsort.app\(prefix)/workshop/privacy")!
+    }
 
     var body: some View {
         ScrollView {
@@ -118,10 +124,14 @@ struct GrownUpsView: View {
                 }
                 card {
                     Text("No ads. Nothing is collected.").font(Theme.body(15)).foregroundStyle(Theme.plum)
-                    Link(destination: Self.privacyURL) {
+                    Link(destination: privacyURL) {
                         Text("Privacy policy").font(Theme.body(15)).underline()
                     }
                     .accessibilityIdentifier("kids-privacy")
+                    Link(destination: Self.supportURL) {
+                        Text("Support").font(Theme.body(15)).underline()
+                    }
+                    .accessibilityIdentifier("kids-support")
                     Text("Squish Sort is the puzzle game these squishies come from (for ages 9 and over).")
                         .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.7))
                 }
