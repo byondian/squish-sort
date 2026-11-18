@@ -32,7 +32,7 @@ These are saved only on your device. We do not receive them, and they are delete
 
 - Game progress, stars, levels completed and settings (such as sound).
 - Your squishy collection, spares, capsules opened and coin balance.
-- Names you give your Squishy Buddy or squishies you make in the Squishy Maker. Names are filtered for rude words and never leave the device.
+- Names you give your Squishy Buddy or squishies you make in the Squishy Workshop, and anything you draw there. Names are filtered for rude words. Names and drawings never leave the device.
 - Your age group (child, teen or adult), for players 13 and over a minimum age between 13 and 18 (for example "at least 15"), how it was set (Apple's age range, the age question, a parent's choice or a skipped question) and your App Store country at the time. **Your year of birth is used once to work out the group and is not stored.**
 - A random install number, used only to make daily puzzles and lucky squishies the same each time you open the game. It never leaves the device.
 - Your answer to the Buddy's "How are you today?" question is not stored at all.

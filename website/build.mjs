@@ -147,6 +147,10 @@ ${waveTo('#FFE3EF')}
   </div>
 </section>
 ${waveTo('#FFE3EF', true)}
+<section class="band" id="clips">
+  <p class="kicker">${esc(t.clips.kicker)}</p><h2>${esc(t.clips.title)}</h2>
+  <div class="clips">${t.clips.list.map(([h, d], i) => `<figure class="clip"><div class="phone"><video src="/assets/clips/clip${i + 1}.mp4?v=${V}" poster="/assets/clips/clip${i + 1}.webp" muted loop playsinline preload="none" aria-label="${esc(h)}"></video><button class="vsnd" type="button" aria-pressed="false">🔇 <span>${esc(t.clips.sound)}</span></button></div><figcaption><h3>${esc(h)}</h3><p>${esc(d)}</p></figcaption></figure>`).join('')}</div>
+</section>
 <section class="band" id="squishies">
   <p class="kicker">${esc(t.collect.kicker)}</p><h2>${esc(t.collect.title)}</h2><p class="lede">${esc(t.collect.lede)}</p>
   ${row(all.slice(0, half))}${row(all.slice(half))}
@@ -177,7 +181,7 @@ ${waveTo('#DDF7EE', true)}
   <h2>${esc(t.final.title)}</h2><p class="lede" style="margin:0 auto 22px">${esc(t.final.text)}</p>
   <div class="cta-row" style="justify-content:center">${storeCta(code, 'footer', true)}</div>
 </section>
-</main>` + footer(code) + end(`<script src="/assets/squish/squish-engine.js?v=${V}" defer></script><script src="/assets/squish/squish-audio.js?v=${V}" defer></script><script src="/assets/morph.js?v=${V}" defer></script><script src="/assets/demo.js?v=${V}" defer></script>`);
+</main>` + footer(code) + end(`<script src="/assets/squish/squish-engine.js?v=${V}" defer></script><script src="/assets/squish/squish-audio.js?v=${V}" defer></script><script src="/assets/morph.js?v=${V}" defer></script><script src="/assets/demo.js?v=${V}" defer></script><script src="/assets/clips.js?v=${V}" defer></script>`);
 }
 
 // ---------- documents ----------

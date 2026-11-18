@@ -303,3 +303,12 @@ details.faq summary::-webkit-details-marker{display:none}
 .how3 li{display:flex;gap:14px;align-items:flex-start;background:#fff;border-radius:var(--r);padding:16px 18px;box-shadow:0 6px 0 rgba(59,42,74,.06);max-width:none}
 .how3 .n{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font:700 17px var(--title);color:#fff;background:var(--gum)}
 .fine-print{margin-top:32px;color:var(--plum-2);font-size:15px}
+.clips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;margin-top:26px}
+.clip{margin:0;text-align:center}
+.clip .phone{position:relative;max-width:260px;margin:0 auto 16px;border-radius:34px;padding:8px;background:#3B2A4A;box-shadow:0 14px 0 rgba(59,42,74,.12)}
+.clip video{display:block;width:100%;aspect-ratio:444/960;border-radius:27px;background:#FFF4E8;object-fit:cover}
+.clip .vsnd{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);border:0;border-radius:99px;padding:7px 14px;font:700 14px var(--title);background:rgba(255,255,255,.92);color:var(--plum);cursor:pointer;white-space:nowrap;box-shadow:0 3px 0 rgba(59,42,74,.15)}
+.clip .vsnd[aria-pressed=true]{background:var(--gum);color:#fff}
+.clip h3{font-size:22px;margin:0 0 4px}
+.clip p{margin:0 auto;max-width:30ch}
+@media (max-width:760px){.clips{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:78%;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 4px 14px;margin-inline:-4px}.clip{scroll-snap-align:center}}

@@ -38,12 +38,12 @@ We may adjust these numbers, and if we do we'll update this page.
 
 ## Reward videos: always your choice
 
-Some buttons offer a reward for watching a short video: an extra jar or a hint when you're stuck, double coins after a first clear, one more Mystery Bag guess (it pays coins only and never moves the capsule bar), or the Buddy's daily gift of coins. They:
+Some buttons offer a reward for watching a short video: a shuffle or a hint when you're stuck, double coins after a first clear, one more Mystery Bag guess (it pays coins only and never moves the capsule bar), or the Buddy's daily gift of coins. They:
 
 - only play when you tap them, with at most 6 a day;
 - never give capsules or squishies, and never change capsule odds;
 - are given with one tap and no video to **Remove Ads** owners;
-- in **gentle mode**, are only offered for an extra jar or a hint, and the Buddy's daily gift is free with no video.
+- in **gentle mode**, are only offered for a shuffle or a hint, and the Buddy's daily gift is free with no video.
 
 ## Which ads you see
 

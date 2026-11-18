@@ -12,7 +12,7 @@ description: What you can buy in Squish Sort, what coins do, and the published c
 
 | Item | Type | What it does |
 |---|---|---|
-| Remove Ads | One-time purchase (Family Sharing on) | Stops the ads that play by themselves between levels and gives you the optional rewards (extra jar, hint, double coins and so on) with one tap instead of a video, under the same limit of 6 a day. It also gives unlimited undo (free players get 5 per level), one free extra jar per level (free players get 1 a day) and 3 free hints a day (everyone gets the first hint free) |
+| Remove Ads | One-time purchase (Family Sharing on) | Stops the ads that play by themselves between levels and gives you the optional rewards (hint, shuffle, double coins and so on) with one tap instead of a video, under the same limit of 6 a day. It also gives unlimited undo (free players get 5 per level), 3 free hints a day (everyone gets the first hint free) and **Workshop Pro**: every Workshop part, colour mixing, patterns and effects, the Mixer, drawing your own squishy, trick training and 50 shelf places. Workshop Pro is not sold on its own |
 | 1,000 coins | Consumable | Coins to spend in the game |
 | 3,500 coins | Consumable | Coins to spend in the game |
 | 7,500 coins | Consumable | Coins to spend in the game |
@@ -28,13 +28,15 @@ The starter pack and the piggy bank are shown only to players whose age the game
 | Item | Coins |
 |---|---|
 | Hint | 250 |
-| Extra jar | 400 |
+| "Do it for me" (the game plays the next move for you) | 250 |
+| Shuffle | 150. The first shuffle on each level is free |
+| Stopping a Shake-up early | 250. Filling a jar stops it for free. Not offered in gentle mode |
 | Board theme | 1,500 |
 | Squishy Buddy treat | 100 |
 | Squishy Buddy gift | 600 |
 | Extras (things a squishy wears, such as a bow, glasses or wings) | 300, 500 or 800 each. The crown and unicorn horn can only be earned by playing |
-| Squishy Maker parts, unlocked early | 150 for a colour, 300 for other parts. Finishing worlds still opens them for free. A few parts can only be earned by playing |
-| Extra Squishy Maker place | 2,500. The first place is free |
+| Squishy Workshop wearables, without Workshop Pro | 300, 500 or 800 each, and they can be tried on for free first. More free shapes, faces, colours and parts open as you finish worlds. Workshop Pro owners never pay coins for parts |
+| Extra Squishy Workshop shelf place | 2,500 each, up to 8 places. The first 3 places are free (Workshop Pro gives 50) |
 
 ## Earning coins by playing
 
@@ -51,7 +53,7 @@ Replaying a level does not pay the level's coins again, so coins can't be farmed
 
 **Capsules hold rare and ultra-rare squishies.** They are always free and can only be earned by playing:
 
-- **Clearing a capsule level for the first time:** every third level of a world and its last level: 5 capsules in the Toy Shop, 7 in the Sweet Factory, 9 in Starlight Stage, 10 in Bubble Bath, 12 in Jungle Jam and 7 in Santa's Grotto. After the story worlds, every fifth Keep Squishing level gives one too.
+- **Clearing a capsule level for the first time:** every third level of a world, every boss level and its last level: 6 capsules in the Toy Shop, 8 in the Sweet Factory, 11 in Starlight Stage, 12 in Bubble Bath, 14 in Jungle Jam and 8 in Santa's Grotto. After the story worlds, every fifth Keep Squishing level gives one too.
 - **The capsule bar:** three steps fill it and give a capsule. Steps come from a right first guess in the daily **Mystery Bag**, from the 7th stamp of the stamp card and from advent days 6, 12 and 18. An extra guess from a video or Remove Ads pays coins only and never moves the bar.
 - **The Christmas advent shelf:** the door for 24 December holds a Christmas capsule; other doors give 100 coins or 2 Buddy treats.
 - **Squishing spares:** three duplicate squishies can be swapped for a squishy you don't have yet.
