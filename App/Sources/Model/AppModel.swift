@@ -1220,12 +1220,24 @@ final class AppModel: ObservableObject {
     static let isKidsApp = true
     /// In Squishy Workshop this is the one purchase, "Unlock everything". UI tests can start unlocked.
     var ownsRemoveAds: Bool {
-        purchases.ownsRemoveAds || (AppModel.isUITesting && ProcessInfo.processInfo.arguments.contains("-kidsUnlocked"))
+        purchases.ownsRemoveAds || testerOwnsEverything
+            || (AppModel.isUITesting && ProcessInfo.processInfo.arguments.contains("-kidsUnlocked"))
     }
     #else
     static let isKidsApp = false
-    var ownsRemoveAds: Bool { purchases.ownsRemoveAds }
+    var ownsRemoveAds: Bool { purchases.ownsRemoveAds || testerOwnsEverything }
     #endif
+
+    /// Tester builds only (never the build for App Review): the tester plays as an owner of the one
+    /// purchase, so there are no ads and everything paid is open. On until switched off in the tester tools.
+    var testerOwnsEverything: Bool {
+        AppModel.isTesterBuild && !AppModel.isUITesting && !UserDefaults.standard.bool(forKey: "tester.playAsFree")
+    }
+
+    func testerSetOwnsEverything(_ on: Bool) {
+        objectWillChange.send()
+        UserDefaults.standard.set(!on, forKey: "tester.playAsFree")
+    }
 
     func update(_ change: (inout PlayerProgress) -> Void) {
         change(&progress)
