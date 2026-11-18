@@ -91,6 +91,9 @@ struct WorkshopView: View {
     @State private var card: MadeSquishy?
     @State private var problem = false
     @State private var typing = false
+    @State private var drawingShape = false
+    @State private var mixer = false
+    @State private var drawingFace = false
 
     private let clock = Timer.publish(every: 1.0 / 30, on: .main, in: .common).autoconnect()
     private static let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 5)
@@ -130,6 +133,50 @@ struct WorkshopView: View {
         .overlay { if let made = card { birthdayCard(made) } }
         .animation(.spring(response: 0.35, dampingFraction: 0.7), value: card)
         .sheet(isPresented: $shelf) { shelfView }
+        .sheet(isPresented: $mixer) {
+            MixerView { mixed in
+                // The new squishy goes straight to the last station for its voice and name.
+                mixer = false
+                id = UUID().uuidString
+                design = mixed
+                baked = true
+                note = nil
+                picked = nil
+                typing = false
+                spinName(quiet: true)
+                station = .life
+            } cancel: {
+                mixer = false
+            }
+            .environmentObject(model)
+        }
+        .fullScreenCover(isPresented: $drawingShape) {
+            DrawPad(kind: .shape) { strokes, brush in
+                // Whatever was drawn is the mould now; nothing drawn leaves the mould as it was.
+                if !strokes.isEmpty {
+                    design.drawnOutline = DrawnShape.outline(strokes: strokes, brush: brush)
+                    design.mould = "draw-it"
+                    design.mould2 = nil
+                    unbake()
+                    model.sounds.play("pop")
+                }
+                drawingShape = false
+            } cancel: {
+                drawingShape = false
+            }
+        }
+        .fullScreenCover(isPresented: $drawingFace) {
+            DrawPad(kind: .face, design: design) { strokes, _ in
+                // The pad shows the whole picture; the face is kept in the body's own box.
+                let share = WorkshopDesign.bodyShare
+                let onBody = strokes.map { $0.map { WorkshopPoint(x: ($0.x - (1 - share) / 2) / share, y: ($0.y - (1 - share) / 2) / share) } }
+                let face = DrawnShape.face(strokes: onBody)
+                design.drawnFace = face.isEmpty ? nil : face
+                drawingFace = false
+            } cancel: {
+                drawingFace = false
+            }
+        }
         .onReceive(clock) { _ in pourTick(1.0 / 30) }
         .onAppear(perform: restore)
         .onDisappear(perform: keep)
@@ -397,20 +444,24 @@ struct WorkshopView: View {
         Text(text).font(Theme.title(16)).foregroundStyle(Theme.plum).frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// A tool that comes with Remove Ads: a switch for its owner, a locked chip from 13, nothing for a child.
-    @ViewBuilder private func proSwitch(_ text: LocalizedStringKey, icon: String, isOn: Binding<Bool>, key: String) -> some View {
+    /// A tool that comes with Remove Ads: it works for its owner, is a locked chip from 13, and is not there for a child.
+    @ViewBuilder private func proTool(_ text: LocalizedStringKey, icon: String, isOn: Bool, key: String, action: @escaping () -> Void) -> some View {
         if access.pro || !gentle {
             Button {
-                if access.pro { isOn.wrappedValue.toggle() } else { note = .pro }
+                if access.pro { action() } else { note = .pro }
             } label: {
                 Label(text, systemImage: access.pro ? icon : "lock.fill").font(Theme.body(14))
-                    .foregroundStyle(isOn.wrappedValue ? Color.white : Theme.plum)
+                    .foregroundStyle(isOn ? Color.white : Theme.plum)
                     .padding(.horizontal, 12).padding(.vertical, 8)
-                    .background(Capsule().fill(isOn.wrappedValue ? Theme.grape : Color.white))
+                    .background(Capsule().fill(isOn ? Theme.grape : Color.white))
             }
             .buttonStyle(PressSquish())
             .accessibilityIdentifier(key)
         }
+    }
+
+    private func proSwitch(_ text: LocalizedStringKey, icon: String, isOn: Binding<Bool>, key: String) -> some View {
+        proTool(text, icon: icon, isOn: isOn.wrappedValue, key: key) { isOn.wrappedValue.toggle() }
     }
 
     // Station 1: the mould.
@@ -424,6 +475,9 @@ struct WorkshopView: View {
         return VStack(spacing: 10) {
             HStack {
                 title("Shape")
+                if model.config.workshopDraw {
+                    proTool("Draw", icon: "scribble.variable", isOn: design.mould == "draw-it", key: "ws-draw-shape") { drawingShape = true }
+                }
                 proSwitch("Head on top", icon: "square.stack.fill", isOn: $onTop, key: "ws-on-top")
             }
             grid("Shape", key: "mould", tiles) { m in
@@ -435,6 +489,7 @@ struct WorkshopView: View {
                     design.mould2 = design.mould2 == m ? nil : m
                 } else {
                     design.mould = m
+                    design.drawnOutline = nil
                 }
                 unbake()
                 model.sounds.play("pop")
@@ -595,6 +650,12 @@ struct WorkshopView: View {
                     .buttonStyle(PressSquish())
                     .accessibilityLabel(Text(faceTitle(kind)))
                     .accessibilityIdentifier("ws-face-\(kind)")
+                }
+            }
+            if model.config.workshopDraw {
+                HStack {
+                    Spacer()
+                    proTool("Draw", icon: "scribble.variable", isOn: design.drawnFace != nil, key: "ws-draw-face") { drawingFace = true }
                 }
             }
             grid(faceTitle(faceKind), key: faceKind, faceTiles(faceKind)) { piece in
@@ -1247,6 +1308,22 @@ struct WorkshopView: View {
                 Text("My squishies").font(Theme.title(22)).foregroundStyle(Theme.plum)
                 Spacer()
                 Text(verbatim: "\(model.progress.made.count) / \(model.shelfPlaces)").font(Theme.body(15)).foregroundStyle(Theme.plum.opacity(0.6))
+                // The Mixer comes with Remove Ads: a child without it does not see it at all.
+                if model.config.workshopMixer && (access.pro || !gentle) {
+                    Button {
+                        shelf = false
+                        if access.pro {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { mixer = true }
+                        } else {
+                            note = .pro
+                        }
+                    } label: {
+                        Label("Mixer", systemImage: access.pro ? "tornado" : "lock.fill").font(Theme.body(14)).foregroundStyle(Theme.plum)
+                            .padding(.horizontal, 12).padding(.vertical, 8).background(Capsule().fill(.white))
+                    }
+                    .buttonStyle(PressSquish())
+                    .accessibilityIdentifier("ws-mixer")
+                }
                 IconButton(system: "xmark") { shelf = false }
             }
             ScrollView {

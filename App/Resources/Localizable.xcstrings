@@ -2389,6 +2389,28 @@
         }
       }
     },
+    "Draw": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "かく"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "그리기"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "畫畫"
+          }
+        }
+      }
+    },
     "Draw a circle round your Buddy": {
       "localizations": {
         "ja": {
@@ -4299,6 +4321,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "混色"
+          }
+        }
+      }
+    },
+    "Mixer": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ミキサー"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "믹서"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "混合機"
           }
         }
       }

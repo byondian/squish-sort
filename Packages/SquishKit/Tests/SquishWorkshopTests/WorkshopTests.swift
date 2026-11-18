@@ -252,4 +252,67 @@ final class WorkshopTests: XCTestCase {
         let old = try JSONDecoder().decode(GooLayer.self, from: Data(#"{"colour":255,"pattern":"plain","seed":4}"#.utf8))
         XCTAssertEqual(old, GooLayer(colour: 255, seed: 4))
     }
+
+    func testAnyScribbleBecomesAMouldAndNothingIsAnError() {
+        // Nothing drawn at all: a ball.
+        XCTAssertEqual(DrawnShape.outline(strokes: []).count, 64)
+        // A small ring drawn in a corner is scaled up to fill the pad, and its middle is filled in.
+        let ring = (0...40).map { i -> WorkshopPoint in
+            let a = Double(i) / 40 * 2 * Double.pi
+            return WorkshopPoint(x: 0.2 + 0.08 * cos(a), y: 0.2 + 0.08 * sin(a))
+        }
+        let big = DrawnShape.outline(strokes: [ring])
+        XCTAssertEqual(big.count, 64)
+        let xs = big.map(\.x), ys = big.map(\.y)
+        XCTAssertGreaterThan((xs.max() ?? 0) - (xs.min() ?? 0), 0.7)
+        XCTAssertGreaterThan((ys.max() ?? 0) - (ys.min() ?? 0), 0.7)
+        XCTAssertTrue(big.allSatisfy { $0.x >= 0 && $0.x <= 1 && $0.y >= 0 && $0.y <= 1 })
+        // The points go round the middle once: the angle from the centre keeps turning the same way.
+        var turned = 0.0
+        for i in big.indices {
+            let a = big[i], b = big[(i + 1) % big.count]
+            var step = atan2(b.y - 0.5, b.x - 0.5) - atan2(a.y - 0.5, a.x - 0.5)
+            if step > Double.pi { step -= 2 * Double.pi }
+            if step < -Double.pi { step += 2 * Double.pi }
+            turned += step
+        }
+        XCTAssertEqual(abs(turned), 2 * Double.pi, accuracy: 0.01)
+        // A single dot, a straight line and a wild scribble with a stray dot all give a shape.
+        let dot = DrawnShape.outline(strokes: [[WorkshopPoint(x: 0.5, y: 0.5)]])
+        XCTAssertEqual(dot.count, 64)
+        let line = DrawnShape.outline(strokes: [[WorkshopPoint(x: 0.1, y: 0.5), WorkshopPoint(x: 0.9, y: 0.5)]])
+        XCTAssertGreaterThan((line.map(\.y).max() ?? 0) - (line.map(\.y).min() ?? 0), 0.2, "a thin line is thickened")
+        var rng = SplitMix64(seed: 5)
+        let wild = (0..<60).map { _ in WorkshopPoint(x: Double(rng.next() % 1000) / 1000, y: Double(rng.next() % 1000) / 1000) }
+        XCTAssertEqual(DrawnShape.outline(strokes: [wild, [WorkshopPoint(x: 0.02, y: 0.02)]]).count, 64)
+        // A drawn face is cut to the save's limits.
+        let long = (0..<500).map { WorkshopPoint(x: Double($0) / 500, y: 0.5) }
+        let face = DrawnShape.face(strokes: Array(repeating: long, count: 20) + [[]])
+        XCTAssertEqual(face.count, WorkshopDesign.maxStrokes)
+        XCTAssertTrue(face.allSatisfy { $0.count == WorkshopDesign.maxStrokePoints })
+        XCTAssertEqual(face[0].last, long.last)
+    }
+
+    func testEveryRosterSquishyHasAMixerRecipeAndTheMixNeverGivesACollectible() throws {
+        let recipes = try MixerRecipes(json: Data(contentsOf: root.appendingPathComponent("Content/mixer-recipes.json")))
+        let roster = try Roster.decode(Data(contentsOf: root.appendingPathComponent("Content/roster.json")))
+        let catalog = try WorkshopCatalog(json: Data(contentsOf: root.appendingPathComponent("Content/workshop-parts.json")))
+        let ids = roster.collectibles.map(\.id) + roster.squishRoomToys.map(\.id)
+        XCTAssertFalse(ids.isEmpty)
+        for id in ids {
+            guard let lent = recipes.design(for: id) else { XCTFail("no mixer recipe for \(id)"); continue }
+            XCTAssertTrue(catalog.moulds.contains(lent.mould) && lent.mould != "draw-it", "\(id): \(lent.mould)")
+            XCTAssertTrue(lent.parts.isEmpty && lent.stickers.isEmpty, "a collectible lends no parts")
+            XCTAssertFalse(lent.layers.isEmpty)
+            // Mixed with a made squishy, either way round, the result is a design with a mould from the catalogue.
+            var mine = WorkshopDesign(mould: "bear")
+            mine.parts = [Placed(category: "ears", part: "cat")]
+            for mixed in [SquishyMixer.mix(.made(lent), .made(mine), seed: 1), SquishyMixer.mix(.made(mine), .made(lent), seed: 1)] {
+                XCTAssertTrue(catalog.moulds.contains(mixed.mould))
+                XCTAssertEqual(mixed.source, "game")
+                XCTAssertLessThanOrEqual(WorkshopStats(mixed).total, WorkshopStats.cap)
+            }
+        }
+        XCTAssertNil(recipes.design(for: "not-a-squishy"))
+    }
 }

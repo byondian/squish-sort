@@ -471,3 +471,159 @@ public enum DrawnShape {
         return out.map { WorkshopPoint(x: min(1, max(0, cx + ($0.x - cx) * kx)), y: min(1, max(0, cy + ($0.y - cy) * ky))) }
     }
 }
+
+extension DrawnShape {
+    /// Any drawing becomes a mould, and there is never an error: the strokes are drawn fat into a
+    /// small bitmap, everything that cannot be reached from outside is the shape, and its outer
+    /// edge is the mould. A small drawing is scaled up to fill the pad; nothing at all is a ball.
+    /// - Parameters:
+    ///   - strokes: finger strokes, 0...1 across the pad.
+    ///   - brush: how fat the strokes are drawn, as a share of the pad (24 pt on a 340 pt pad).
+    public static func outline(strokes: [[WorkshopPoint]], brush: Double = 0.07, grid n: Int = 96, points count: Int = 64) -> [WorkshopPoint] {
+        var ink = [Bool](repeating: false, count: n * n)
+        let r = max(1.0, brush * Double(n) / 2)
+        func stamp(_ x: Double, _ y: Double) {
+            let cx = x * Double(n), cy = y * Double(n)
+            let x0 = max(0, Int(cx - r)), x1 = min(n - 1, Int(cx + r))
+            let y0 = max(0, Int(cy - r)), y1 = min(n - 1, Int(cy + r))
+            guard x0 <= x1, y0 <= y1 else { return }
+            for yy in y0...y1 {
+                for xx in x0...x1 where (Double(xx) + 0.5 - cx) * (Double(xx) + 0.5 - cx) + (Double(yy) + 0.5 - cy) * (Double(yy) + 0.5 - cy) <= r * r {
+                    ink[yy * n + xx] = true
+                }
+            }
+        }
+        for stroke in strokes {
+            guard var last = stroke.first else { continue }
+            stamp(last.x, last.y)
+            for p in stroke.dropFirst() {
+                let steps = max(1, Int((abs(p.x - last.x) + abs(p.y - last.y)) * Double(n)))
+                for k in 1...steps {
+                    let t = Double(k) / Double(steps)
+                    stamp(last.x + (p.x - last.x) * t, last.y + (p.y - last.y) * t)
+                }
+                last = p
+            }
+        }
+        // Flood the outside from the edges, on a grid one cell bigger all round.
+        let m = n + 2
+        var outside = [Bool](repeating: false, count: m * m)
+        func isInk(_ x: Int, _ y: Int) -> Bool { x >= 1 && y >= 1 && x <= n && y <= n && ink[(y - 1) * n + (x - 1)] }
+        var stack = [0]
+        outside[0] = true
+        while let at = stack.popLast() {
+            let x = at % m, y = at / m
+            for (dx, dy) in [(1, 0), (-1, 0), (0, 1), (0, -1)] {
+                let nx = x + dx, ny = y + dy
+                guard nx >= 0, ny >= 0, nx < m, ny < m, !outside[ny * m + nx], !isInk(nx, ny) else { continue }
+                outside[ny * m + nx] = true
+                stack.append(ny * m + nx)
+            }
+        }
+        func solid(_ x: Int, _ y: Int) -> Bool { x >= 0 && y >= 0 && x < m && y < m && !outside[y * m + x] }
+        // The biggest piece is the squishy; stray dots are left out.
+        var label = [Int](repeating: 0, count: m * m)
+        var best = 0, bestSize = 0, next = 0
+        var bestStart = 0
+        for start in 0..<(m * m) where !outside[start] && label[start] == 0 {
+            next += 1
+            var size = 0
+            var todo = [start]
+            label[start] = next
+            while let at = todo.popLast() {
+                size += 1
+                let x = at % m, y = at / m
+                for dy in -1...1 {
+                    for dx in -1...1 where solid(x + dx, y + dy) && label[(y + dy) * m + x + dx] == 0 {
+                        label[(y + dy) * m + x + dx] = next
+                        todo.append((y + dy) * m + x + dx)
+                    }
+                }
+            }
+            if size > bestSize { bestSize = size; best = next; bestStart = start }
+        }
+        guard best > 0 else { return ball(count) }
+        func mine(_ x: Int, _ y: Int) -> Bool { x >= 0 && y >= 0 && x < m && y < m && label[y * m + x] == best }
+        // Walk round the outer edge, clockwise, starting from the top-left cell (its left side is outside).
+        let dirs = [(-1, 0), (-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1)]
+        let sx = bestStart % m, sy = bestStart / m
+        var cx = sx, cy = sy, back = 0
+        var edge: [WorkshopPoint] = []
+        var guardCount = 0
+        repeat {
+            edge.append(WorkshopPoint(x: (Double(cx) - 0.5) / Double(n), y: (Double(cy) - 0.5) / Double(n)))
+            var moved = false
+            for k in 1...8 {
+                let d = (back + k) % 8
+                let nx = cx + dirs[d].0, ny = cy + dirs[d].1
+                if mine(nx, ny) {
+                    let p = (back + k - 1) % 8
+                    let px = cx + dirs[p].0 - nx, py = cy + dirs[p].1 - ny
+                    back = dirs.firstIndex { $0.0 == px && $0.1 == py } ?? 0
+                    cx = nx
+                    cy = ny
+                    moved = true
+                    break
+                }
+            }
+            guardCount += 1
+            if !moved { break }
+        } while !(cx == sx && cy == sy) && guardCount < 4 * m * m
+        guard edge.count >= 8 else { return ball(count) }
+        // Fill the pad: the drawing's box is scaled to most of it, keeping its proportions.
+        let xs = edge.map(\.x), ys = edge.map(\.y)
+        let minX = xs.min() ?? 0, maxX = xs.max() ?? 1, minY = ys.min() ?? 0, maxY = ys.max() ?? 1
+        let span = max(maxX - minX, maxY - minY, 0.001)
+        let k = 0.9 / span
+        let mx = (minX + maxX) / 2, my = (minY + maxY) / 2
+        let fitted = edge.map { WorkshopPoint(x: 0.5 + ($0.x - mx) * k, y: 0.5 + ($0.y - my) * k) }
+        return mould(from: fitted, points: count) ?? ball(count)
+    }
+
+    static func ball(_ count: Int) -> [WorkshopPoint] {
+        (0..<max(8, count)).map { i in
+            let a = Double(i) / Double(max(8, count)) * 2 * Double.pi
+            return WorkshopPoint(x: 0.5 + 0.42 * cos(a), y: 0.5 + 0.42 * sin(a))
+        }
+    }
+
+    /// A finger-drawn face, kept inside the save's limits: at most twelve strokes of 64 points.
+    public static func face(strokes: [[WorkshopPoint]]) -> [[WorkshopPoint]] {
+        strokes.filter { !$0.isEmpty }.prefix(WorkshopDesign.maxStrokes).map { stroke in
+            guard stroke.count > WorkshopDesign.maxStrokePoints else { return stroke }
+            let step = Double(stroke.count - 1) / Double(WorkshopDesign.maxStrokePoints - 1)
+            return (0..<WorkshopDesign.maxStrokePoints).map { stroke[min(stroke.count - 1, Int((Double($0) * step).rounded()))] }
+        }
+    }
+}
+
+/// What each collectible lends to the Squishy Mixer (Content/mixer-recipes.json, made from the
+/// squishies' own pictures by scripts/make_mixer_recipes.py): a mould, two colours and a feel.
+/// Never parts, and never the collectible itself.
+public struct MixerRecipes: Sendable {
+    private struct Recipe: Decodable, Sendable {
+        var mould: String
+        var colours: [String]
+        var feel: String
+    }
+    private let recipes: [String: Recipe]
+
+    public init(json: Data) throws {
+        recipes = try JSONDecoder().decode([String: Recipe].self, from: json)
+    }
+
+    public var ids: Set<String> { Set(recipes.keys) }
+
+    /// The collectible's look as a made design, ready to go into the Mixer. Nil for an unknown id.
+    public func design(for id: String) -> WorkshopDesign? {
+        guard let r = recipes[id] else { return nil }
+        let colours = r.colours.compactMap { UInt32($0.replacingOccurrences(of: "#", with: ""), radix: 16) }
+        var d = WorkshopDesign(mould: r.mould, goo: Goo(rawValue: r.feel) ?? .jelly)
+        // The main colour fills most of the body; the second one is a band on top.
+        if let main = colours.first {
+            d.layers = [GooLayer(colour: main, amount: 0.7)]
+            if colours.count > 1, colours[1] != main { d.layers.append(GooLayer(colour: colours[1], amount: 0.3)) }
+        }
+        return d
+    }
+}
