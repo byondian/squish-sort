@@ -8,7 +8,7 @@ description: Squishy Workshop collects no data. No ads, no analytics, no account
 - Squishy Workshop **collects no data**. On the App Store it is labelled **Data Not Collected**.
 - **No ads, no analytics, no tracking and no third-party code** (no SDKs) of any kind.
 - **No accounts and no sign-in.** Children never type their name or anything else. Squishy names come from a spinning name wheel.
-- The squishies a child makes **stay on the device**. We never receive them.
+- The squishies a child makes **stay on the device**. We never receive them. A photo of a drawing is turned into a squishy on the device and the photo itself is never kept.
 - The app does not use the internet, except for Apple's own purchase system.
 - There is **one optional purchase**, "Unlock everything", a one-time purchase behind a grown-up check. Apple handles the payment; we never see who bought it.
 :::
@@ -26,7 +26,11 @@ This policy covers the Squishy Workshop app for iPhone and iPad. Squish Sort and
 
 ## What the app collects
 
-Nothing. The app has no ads, no analytics, no crash reporting service, no social features and no accounts. It contains no third-party code that collects data. It does not ask for contacts or location, and it does not use the device's advertising identifier.
+Nothing. The app has no ads, no analytics, no crash reporting service, no social features and no accounts. It contains no third-party code that collects data. It does not use the photo library, microphone, contacts or location, and it does not use the device's advertising identifier.
+
+## The camera: a photo of a drawing
+
+A child can turn a drawing on paper into a squishy by taking a photo of it. The camera is used only at that moment, and everything happens on the device. The photo itself is never stored or sent anywhere: only the cut-out drawing is kept, with the squishy that was made. If the photo shows a person's face, it is refused and nothing is saved.
 
 ## What stays on the device
 
@@ -42,7 +46,7 @@ Payments, Ask to Buy and refunds are handled by Apple under its own terms and pr
 
 ## Links
 
-The Grown-ups corner links to this page. It sits behind the same grown-up check and opens in the browser, outside the app. There are no ads in the app.
+The Grown-ups corner links to this page and to our support page. Both sit behind the same grown-up check and open in the browser, outside the app. There are no ads in the app.
 
 ## Children's privacy
 
