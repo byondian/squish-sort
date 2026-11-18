@@ -161,7 +161,7 @@ final class AppModel: ObservableObject {
         bios = words.bios
         riddles = words.riddles
         stats = words.stats
-        config = RemoteConfig.cached()
+        config = AppModel.forThisBuild(RemoteConfig.cached())
         buddyScript = AppModel.loadBuddyScript()
         purchases = PurchaseService(cachedOwnership: loaded.ownsRemoveAds)
         haptics.enabled = loaded.hapticsOn
@@ -200,7 +200,7 @@ final class AppModel: ObservableObject {
             }
         }
         Task {
-            if let fresh = await RemoteConfig.fetch() { config = fresh }
+            if let fresh = await RemoteConfig.fetch() { config = AppModel.forThisBuild(fresh) }
         }
     }
 
@@ -355,6 +355,18 @@ final class AppModel: ObservableObject {
         if isSideLevel(index) { return levels[index].file.index }
         // Keep Squishing counts on through every lap.
         return index + 1 + (index >= storyLevelCount ? progress.endlessLaps * endlessCount : 0)
+    }
+
+    /// The creator build (TestFlight workflow, "creator" on) is for partners who film the game before
+    /// launch: it has no tester tools and shows no ads at all, so no test ad ends up in a video.
+    static func forThisBuild(_ config: GameConfig) -> GameConfig {
+        #if CREATOR
+        var quiet = config
+        quiet.adsEnabled = false
+        return quiet
+        #else
+        return config
+        #endif
     }
 
     // MARK: - Tester tools (tester and debug builds only)
