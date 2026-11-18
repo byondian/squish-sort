@@ -42,11 +42,11 @@ Deleting the app deletes all of this. We hold no copy, so there is nothing for u
 
 The app is free to try. "Unlock everything" is a one-time purchase that opens every part of the app. It sits behind a grown-up check, so a young child cannot reach it by tapping around. Family Sharing is on, so one purchase works for the whole family.
 
-Payments, Ask to Buy and refunds are handled by Apple under its own terms and privacy policy. We never see your name, card or Apple Account. Apple gives us only sales totals that do not identify anyone. To restore the purchase on a new device, open the Grown-ups corner and tap Restore purchases.
+Payments, Ask to Buy and refunds are handled by Apple under its own terms and privacy policy. We never see your name, card or Apple Account. Apple gives us only sales totals that do not identify anyone. To restore the purchase on a new device, open "For grown-ups" and tap Restore purchases.
 
 ## Links
 
-The Grown-ups corner links to this page and to our support page. Both sit behind the same grown-up check and open in the browser, outside the app. There are no ads in the app.
+The "For grown-ups" area links to this page and to our support page. Both sit behind the same grown-up check and open in the browser, outside the app. There are no ads in the app.
 
 ## Children's privacy
 
