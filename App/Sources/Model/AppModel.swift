@@ -733,10 +733,24 @@ final class AppModel: ObservableObject {
     }
 
     var mysteryBag: MysteryBag? {
-        MysteryBag.daily(day: mysteryDay, playerSeed: progress.installID, roster: roster, worlds: openWorlds,
+        MysteryBag.daily(day: mysteryDay + testerBagSuffix, playerSeed: progress.installID, roster: roster, worlds: openWorlds,
                          shapes: AppModel.shapes,
                          seen: Set(roster.collectibles.filter { progress.collection.owns($0.id) }.map(\.id)),
                          easy: progress.mystery.isLearning(today: mysteryDay))
+    }
+
+    /// Tester builds only: each "new bag now" asks for a different bag on the same day.
+    private var testerBagSuffix: String {
+        guard AppModel.isTesterBuild, !AppModel.isUITesting else { return "" }
+        let extra = UserDefaults.standard.integer(forKey: "tester.mysteryExtra")
+        return extra > 0 ? "#\(extra)" : ""
+    }
+
+    /// Tester builds only: a fresh bag straight away, so the bag can be tried more than once a day.
+    func testerNewMysteryBag() {
+        guard AppModel.isTesterBuild else { return }
+        UserDefaults.standard.set(UserDefaults.standard.integer(forKey: "tester.mysteryExtra") + 1, forKey: "tester.mysteryExtra")
+        update { $0.mystery.lastPlayedDay = nil }
     }
 
     /// Body shape groups, so the Mystery Bag's choices can look alike.
