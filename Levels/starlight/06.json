@@ -12,6 +12,7 @@
     ["nova", "pip", "pip", "zuzu"],
     ["nova", "zuzu", "lumi", "lumi"],
     [],
+    [],
     []
   ],
   "mechanics": {"hidden": [], "sticky": [[0, 2], [3, 0]], "frozen": []},
