@@ -823,7 +823,13 @@ final class AppModel: ObservableObject {
 
     /// What this player has open in the Workshop. Remove Ads includes Workshop Pro.
     var workshopAccess: WorkshopAccess {
-        WorkshopAccess(pro: ownsRemoveAds, worlds: worldsCompleted, owned: progress.workshopParts)
+        #if KIDS
+        // No worlds to finish here. Free play has four moulds and a small set of faces, colours and ears;
+        // "Unlock everything" opens the lot, the crown and the unicorn horn included.
+        return WorkshopAccess(pro: ownsRemoveAds, worlds: ownsRemoveAds ? 99 : 2, owned: [])
+        #else
+        return WorkshopAccess(pro: ownsRemoveAds, worlds: worldsCompleted, owned: progress.workshopParts)
+        #endif
     }
 
     /// Places on the Workshop shelf: three free, more for coins up to eight, fifty with Pro.
