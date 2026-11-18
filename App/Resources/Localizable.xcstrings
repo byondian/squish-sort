@@ -3599,6 +3599,28 @@
         }
       }
     },
+    "Lucky hint!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ラッキーヒント！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "럭키 힌트!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "幸運提示！"
+          }
+        }
+      }
+    },
     "Lucky!": {
       "localizations": {
         "ja": {
@@ -3643,6 +3665,28 @@
         }
       }
     },
+    "Magic move!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "まほうの一手！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마법의 한 수!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "魔法步數！"
+          }
+        }
+      }
+    },
     "Magic moves +%lld": {
       "localizations": {
         "ja": {
@@ -3661,6 +3705,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "魔法步數 +%lld"
+          }
+        }
+      }
+    },
+    "Magic shuffle!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "まほうのシャッフル！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마법 섞기!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "魔法洗牌！"
           }
         }
       }

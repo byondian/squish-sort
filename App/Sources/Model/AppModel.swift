@@ -1708,6 +1708,12 @@ final class AppModel: ObservableObject {
         return progress.hintDay != today || progress.hintsUsedToday < 3
     }
 
+    /// A lucky bonus hands over one magic move, when there is room for it.
+    func grantMagicMove() {
+        guard progress.magicMoves < Coins.maxMagicMoves else { return }
+        update { $0.magicMoves += 1 }
+    }
+
     /// One magic move is used up. False when there is none.
     @discardableResult
     func useMagicMove() -> Bool {

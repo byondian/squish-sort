@@ -554,6 +554,27 @@ final class CoinTests: XCTestCase {
         XCTAssertEqual(Set(Coins.Item.allCases), [.hint, .theme, .treat, .gift, .shuffle])
         // Magic moves: one at a first-try streak of 3, two at 6, three at 9 and every third win after.
         XCTAssertEqual((0...13).map { Coins.magicMovesEarned(streak: $0) }, [0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 3, 0])
+        // Lucky bonuses: never on the first five levels, never twice in a try, about one jar in six,
+        // and only a hint when three magic moves are already held.
+        var rng = SplitMix64(seed: 7)
+        var got: [Coins.LuckyBonus] = []
+        for _ in 0..<6000 {
+            XCTAssertNil(Coins.luckyBonus(levelNumber: 5, alreadyThisTry: false, magicHeld: 0, rng: &rng))
+            XCTAssertNil(Coins.luckyBonus(levelNumber: 20, alreadyThisTry: true, magicHeld: 0, rng: &rng))
+            if let bonus = Coins.luckyBonus(levelNumber: 20, alreadyThisTry: false, magicHeld: 0, rng: &rng) { got.append(bonus) }
+            if let full = Coins.luckyBonus(levelNumber: 20, alreadyThisTry: false, magicHeld: Coins.maxMagicMoves, rng: &rng) {
+                XCTAssertEqual(full, .hint)
+            }
+        }
+        XCTAssertTrue((800...1200).contains(got.count), "\(got.count) bonuses in 6000 jars")
+        XCTAssertTrue(got.contains(.magicMove) && got.contains(.hint))
+        var rescues = 0
+        for _ in 0..<3000 {
+            XCTAssertFalse(Coins.magicShuffle(levelNumber: 3, alreadyThisTry: false, rng: &rng))
+            XCTAssertFalse(Coins.magicShuffle(levelNumber: 20, alreadyThisTry: true, rng: &rng))
+            if Coins.magicShuffle(levelNumber: 20, alreadyThisTry: false, rng: &rng) { rescues += 1 }
+        }
+        XCTAssertTrue((850...1150).contains(rescues), "\(rescues) rescues in 3000 stuck boards")
     }
 
     func testALevelPaysOnceSoReplaysCannotBeFarmed() {

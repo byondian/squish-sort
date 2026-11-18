@@ -425,13 +425,15 @@ final class BoardScene: SKScene {
     }
 
     /// A magic move: the scene lifts and lands `move` by itself, just as two taps would.
-    func playForPlayer(_ move: Move) {
-        guard !busy, board.isLegal(move) else { return }
+    /// False when the board is busy and nothing was started.
+    @discardableResult
+    func playForPlayer(_ move: Move) -> Bool {
+        guard !busy, board.isLegal(move) else { return false }
         endTutorial()
         clearHint()
         if lifted == move.from {
             tap(move.to)
-            return
+            return true
         }
         if let up = lifted { putBack(up) }
         lift(move.from)
@@ -440,6 +442,7 @@ final class BoardScene: SKScene {
             guard let self, !self.busy, self.lifted == move.from else { return }
             self.tap(move.to)
         }]))
+        return true
     }
 
     /// Same as a finger tap on jar `j` (used by UI tests and accessibility).

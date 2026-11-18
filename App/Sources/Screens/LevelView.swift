@@ -54,6 +54,9 @@ final class LevelController: ObservableObject {
     @Published var noWayThrough = false
     /// The magic move on its way to the board, and whether coins pay for it.
     private var magicPending: (move: Move, paid: Bool)?
+    /// Lucky bonuses: one from a finished jar and one magic shuffle at most in a try.
+    private var luckyUsed = false
+    private var rescueUsed = false
     /// The hint search ran out of room without an answer. Nothing is charged for that either.
     @Published var hintGaveUp = false
     /// A hint found for the current board, waiting to be paid for or shown.
@@ -224,12 +227,44 @@ final class LevelController: ObservableObject {
         }
     }
 
+    /// Now and then a finished jar brings a free surprise: a magic move or a hint. Never sold, never
+    /// after an ad, the same for every player; not on the jar that wins the level.
+    private func luckyBonus(atJar jar: Int) {
+        guard let model, !AppModel.isUITesting, !model.playingDaily, !session.board.isWon else { return }
+        var rng = SystemRandomNumberGenerator()
+        guard let bonus = Coins.luckyBonus(levelNumber: index + 1, alreadyThisTry: luckyUsed,
+                                           magicHeld: model.progress.magicMoves, rng: &rng) else { return }
+        luckyUsed = true
+        model.sounds.play("lucky")
+        model.haptics.star()
+        switch bonus {
+        case .magicMove:
+            model.grantMagicMove()
+            scene.popLabel(String(localized: "Magic move!"), atJar: jar)
+        case .hint:
+            scene.popLabel(String(localized: "Lucky hint!"), atJar: jar)
+            // Once the jar has settled, the next good move lights up. Nothing is charged.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in self?.luckyHint() }
+        }
+    }
+
+    private func luckyHint() {
+        guard !thinking, !shaking, outcome == nil else { return }
+        let board = session.board
+        Task {
+            let found = await Task.detached(priority: .userInitiated) { Solver.hint(board) }.value
+            guard board == session.board, outcome == nil, case .move(let move) = found else { return }
+            scene.showHint(move)
+        }
+    }
+
     /// Commons join the book the first time a jar of them is completed.
     private func jarCompleted(_ jar: Int) {
         guard let model, let piece = session.board.jars[jar].first, level.kinds.indices.contains(Int(piece.kind)) else { return }
         model.jarSorted(kind: level.kinds[Int(piece.kind)])
         jarsDone += 1
         model.sounds.jarComplete(number: jarsDone)
+        luckyBonus(atJar: jar)
         if level.file.beat == .boss {
             bossMood = 1
             let oneLeft = session.board.jars.indices.filter { session.board.isComplete($0) }.count == level.kinds.count - 1
@@ -332,9 +367,10 @@ final class LevelController: ObservableObject {
     }
 
     /// Everything trembles, then the pieces in unfinished jars fly to new spots.
-    private func shake(word: String, keepsStarLimit: Bool, then: @escaping (Bool) -> Void) {
+    private func shake(word: String, keepsStarLimit: Bool, kindest: Bool = false, then: @escaping (Bool) -> Void) {
         guard let model else { return }
         shaking = true
+        magicPending = nil
         chain.end()
         feverLeft = 0
         feverBefore = []
@@ -352,16 +388,19 @@ final class LevelController: ObservableObject {
                 var rng = SystemRandomNumberGenerator()
                 // Never hold the board for long: stop looking after about a second and a half.
                 let deadline = Date().addingTimeInterval(1.5)
+                var best: (board: Board, best: Int)?
                 for _ in 0..<14 {
                     if Date() > deadline { break }
                     let next = board.shakenUp(using: &rng)
                     if next == board || next.isWon || next.isStuck { continue }
                     if next.jars.indices.contains(where: { next.isComplete($0) && !board.isComplete($0) }) { continue }
                     if let result = Solver.solve(next, maxStates: 60_000), result.moves.count >= 2 {
-                        return (next, result.moves.count)
+                        // A magic shuffle keeps looking for the layout with the fewest moves left.
+                        if !kindest { return (next, result.moves.count) }
+                        if best == nil || result.moves.count < best!.best { best = (next, result.moves.count) }
                     }
                 }
-                return nil
+                return best
             }.value
             try? await Task.sleep(nanoseconds: 1_100_000_000)
             shaking = false
@@ -405,6 +444,21 @@ final class LevelController: ObservableObject {
             model.won(index: index, moves: session.moveCount, stars: stars, attempts: attempts, playSeconds: seconds,
                       pot: pot.coins)
         case .stuck:
+            // Now and then a free magic shuffle steps in: the pieces land in the kindest layout found,
+            // and the try carries on. It is not counted as a fail.
+            var rng = SystemRandomNumberGenerator()
+            if !AppModel.isUITesting, !model.playingDaily,
+               Coins.magicShuffle(levelNumber: index + 1, alreadyThisTry: rescueUsed, rng: &rng) {
+                rescueUsed = true
+                model.sounds.play("lucky")
+                shake(word: String(localized: "Magic shuffle!"), keepsStarLimit: true, kindest: true) { [weak self] done in
+                    guard let self, !done, self.outcome == nil, self.session.status == .stuck else { return }
+                    self.outcome = .stuck
+                    self.scene.sigh()
+                    model.failed(playSeconds: seconds)
+                }
+                break
+            }
             scene.sigh()
             model.failed(playSeconds: seconds)
             // The board stays in plain view for a moment first, so the player can see for
@@ -428,6 +482,7 @@ final class LevelController: ObservableObject {
             scene.setFever(before > 0)
         }
         noWayThrough = false; hintGaveUp = false
+        magicPending = nil
         outcome = nil
         scene.reload(session.board)
     }
@@ -493,7 +548,7 @@ final class LevelController: ObservableObject {
                 return
             }
             magicPending = (move, paid)
-            scene.playForPlayer(move)
+            if !scene.playForPlayer(move) { magicPending = nil }
         }
     }
 
@@ -519,6 +574,9 @@ final class LevelController: ObservableObject {
         videoShuffleUsed = false
         bossMood = 0
         shufflesUsed = 0
+        luckyUsed = false
+        rescueUsed = false
+        magicPending = nil
         noWayThrough = false; hintGaveUp = false
         outcome = nil
         scene.reload(session.board)
