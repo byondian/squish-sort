@@ -643,7 +643,7 @@ final class AppModel: ObservableObject {
         // The room and the Workshop are the whole app: both are open from the first second.
         if extra == .maker || extra == .squishRoom { return true }
         #endif
-        Extras.isUnlocked(extra, capsulesOpened: progress.collection.totalCapsules, levelsWon: levelsWon,
+        return Extras.isUnlocked(extra, capsulesOpened: progress.collection.totalCapsules, levelsWon: levelsWon,
                           firstWorldComplete: isWorldComplete(LevelCatalog.worlds[0]), ownsRemoveAds: ownsRemoveAds, config: config)
     }
 
