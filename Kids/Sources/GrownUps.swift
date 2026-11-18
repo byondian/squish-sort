@@ -53,13 +53,13 @@ struct GrownUpsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var busy = false
 
-    static let supportURL = URL(string: "https://squishsort.app/support")!
-
-    /// The policy in the app's language: /ja, /ko and /zh-hant have their own pages.
-    private var privacyURL: URL {
+    /// The site has its own pages for /ja, /ko and /zh-hant.
+    private func page(_ path: String) -> URL {
         let prefix = ["ja": "/ja", "ko": "/ko", "zh-Hant": "/zh-hant"][model.language] ?? ""
-        return URL(string: "https://squishsort.app\(prefix)/workshop/privacy")!
+        return URL(string: "https://squishsort.app\(prefix)\(path)")!
     }
+    private var privacyURL: URL { page("/workshop/privacy") }
+    private var supportURL: URL { page("/support") }
 
     var body: some View {
         ScrollView {
@@ -128,7 +128,7 @@ struct GrownUpsView: View {
                         Text("Privacy policy").font(Theme.body(15)).underline()
                     }
                     .accessibilityIdentifier("kids-privacy")
-                    Link(destination: Self.supportURL) {
+                    Link(destination: supportURL) {
                         Text("Support").font(Theme.body(15)).underline()
                     }
                     .accessibilityIdentifier("kids-support")
