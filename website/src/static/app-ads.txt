@@ -1,0 +1,3 @@
+# Squish Sort (com.ianatkinson.squishsort) authorised ad sellers.
+# The Google AdMob line is added once the AdMob account is verified:
+# google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
