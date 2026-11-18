@@ -475,6 +475,37 @@ final class AppModel: ObservableObject {
         return !ids.isEmpty && ids.allSatisfy { progress.stars[$0] != nil }
     }
 
+    /// Stars a story world needs before the next one opens: half of what it has to give
+    /// (23 of 45 in Toy Shop, 30 of 60, 38 of 75, 45 of 90).
+    static let starGateShare = 0.5
+    func starGate(_ world: String) -> Int {
+        Int((Double(stars(inWorld: world).possible) * AppModel.starGateShare).rounded(.up))
+    }
+
+    /// The next story world is waiting for stars: the world that needs them, the world that opens,
+    /// and how many more. Nil when nothing is waiting.
+    var starGateWaiting: (from: String, next: String, more: Int)? {
+        let top = progress.highestUnlocked
+        guard levels.indices.contains(top), levels.indices.contains(top + 1), !isSideLevel(top),
+              progress.stars[levels[top].id] != nil else { return nil }
+        let world = levels[top].file.world, next = levels[top + 1].file.world
+        guard next != world, LevelCatalog.worlds.contains(next) else { return nil }
+        let more = starGate(world) - stars(inWorld: world).earned
+        return more > 0 ? (world, next, more) : nil
+    }
+
+    /// The stars are in: the waiting world opens.
+    private func openStarGateIfEarned() {
+        let top = progress.highestUnlocked
+        guard levels.indices.contains(top), levels.indices.contains(top + 1), !isSideLevel(top),
+              progress.stars[levels[top].id] != nil else { return }
+        let world = levels[top].file.world, next = levels[top + 1].file.world
+        guard next != world, LevelCatalog.worlds.contains(next), stars(inWorld: world).earned >= starGate(world) else { return }
+        update { $0.highestUnlocked = top + 1 }
+        sounds.play("unlock_new")
+        toast = String(localized: "A new world is open!")
+    }
+
     /// Stars earned in a world, and how many it has to give.
     func stars(inWorld world: String) -> (earned: Int, possible: Int) {
         let ids = levels.filter { $0.file.world == world }.map(\.id)
@@ -1147,6 +1178,13 @@ final class AppModel: ObservableObject {
             summary.buddyName = progress.buddy.name
         }
         let side = isSideLevel(index)
+        // The next story world waits for this world's stars (Ian, 18 Nov). A player already past
+        // the gate is never locked out again.
+        let bestNow = max(previousBest ?? 0, stars)
+        let opensWorld = !side && levels.indices.contains(index + 1) && levels[index + 1].file.world != level.file.world
+            && LevelCatalog.worlds.contains(levels[index + 1].file.world) && index + 1 > progress.highestUnlocked
+        let held = opensWorld
+            && self.stars(inWorld: level.file.world).earned - (previousBest ?? 0) + bestNow < starGate(level.file.world)
         var barFull = false
         update { p in
             p.stampCard = card
@@ -1162,12 +1200,14 @@ final class AppModel: ObservableObject {
             p.stars[level.id] = max(previousBest ?? 0, stars)
             if side {
                 p.christmasUnlocked = max(p.christmasUnlocked, min(level.file.index, LevelCatalog.levelCount(in: level.file.world) - 1))
-            } else {
+            } else if !held {
                 p.highestUnlocked = max(p.highestUnlocked, min(index + 1, max(0, mainLevelCount - 1)))
             }
             AdCadence.recordPlayTime(playSeconds, &p.cadence)
             AdCadence.recordWin(&p.cadence)
         }
+        // A replay may have earned the stars a waiting world needs.
+        if !side, !held { openStarGateIfEarned() }
         lastWin = summary
         levelCheer = buddyLine(stars >= 3 ? "win_3star" : "win")
         let unlockedExtra = Extra.allCases.filter { isExtraUnlocked($0) } != extrasBefore
@@ -1190,7 +1230,8 @@ final class AppModel: ObservableObject {
             }
         } else if !worldWasComplete, isWorldComplete(level.file.world) {
             let order = LevelCatalog.worlds
-            let next = order.firstIndex(of: level.file.world).flatMap { $0 + 1 < order.count ? order[$0 + 1] : nil }
+            // While the next world waits for stars, the card does not raise the curtain on it.
+            let next = held ? nil : order.firstIndex(of: level.file.world).flatMap { $0 + 1 < order.count ? order[$0 + 1] : nil }
             news.append(.worldComplete(world: level.file.world, next: next))
             update { $0.wallet.earn(config.coins.worldComplete) }
             // The world's big show follows its WORLD COMPLETE card.

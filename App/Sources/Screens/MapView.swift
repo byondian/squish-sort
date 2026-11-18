@@ -51,6 +51,14 @@ struct MapView: View {
                                         .padding(.horizontal, 8).padding(.vertical, 3)
                                         .background(Capsule().fill(Theme.butter))
                                 }
+                                if let gate = model.starGateWaiting, gate.from == world.id {
+                                    // Replaying levels here for more stars opens the next world.
+                                    Text("\(gate.more) more stars open \(Text(AppModel.worldName(gate.next)))")
+                                        .font(Theme.body(12)).foregroundStyle(Theme.plum).lineLimit(2).minimumScaleFactor(0.7)
+                                        .padding(.horizontal, 8).padding(.vertical, 3)
+                                        .background(Capsule().fill(Theme.butter))
+                                        .accessibilityIdentifier("star-gate")
+                                }
                                 Spacer()
                                 if world.id != LevelCatalog.endless { starJar(world.id) }
                             }

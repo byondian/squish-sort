@@ -312,6 +312,50 @@
         }
       }
     },
+    "%lld more stars": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スターあと%lldこ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "별 %lld개 더"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "還差 %lld 顆星星"
+          }
+        }
+      }
+    },
+    "%lld more stars open %@": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スターあと%1$lldこで%2$@がひらくよ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "별 %1$lld개 더 모으면 %2$@이(가) 열려요"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再拿 %1$lld 顆星星就能開啟%2$@"
+          }
+        }
+      }
+    },
     "%lld more swaps for a new one": {
       "localizations": {
         "ja": {
@@ -779,6 +823,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "送你一個放在捏捏房間的紀念品！"
+          }
+        }
+      }
+    },
+    "A new world is open!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新しいワールドがひらいたよ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "새로운 월드가 열렸어요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新世界開放了！"
           }
         }
       }
@@ -8303,6 +8369,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "新！"
+          }
+        }
+      }
+    },
+    "to open %@": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@がひらくよ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 열기"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "就能開啟%@"
           }
         }
       }

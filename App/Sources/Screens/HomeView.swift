@@ -171,16 +171,26 @@ struct HomeView: View {
     /// The main button: straight into the level to play next, with how close the next capsule is.
     private func playButton(height: CGFloat) -> some View {
         let index = model.progress.highestUnlocked
-        return Button { model.screen = .level(index) } label: {
+        // The next world is waiting for stars: the button says how many and leads to the map.
+        let gate = model.starGateWaiting
+        return Button { model.screen = gate == nil ? .level(index) : .map } label: {
             HStack(spacing: 14) {
                 Image(systemName: "play.fill").font(.system(size: height * 0.28, weight: .heavy))
                     .foregroundStyle(Color(hex: 0xEE4689))
                     .frame(width: height * 0.6, height: height * 0.6)
                     .background(Circle().fill(.white))
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Level \(model.levelNumber(index))").font(Theme.title(height * 0.32)).foregroundStyle(.white)
+                    Group {
+                        if let gate { Text("\(gate.more) more stars") } else { Text("Level \(model.levelNumber(index))") }
+                    }
+                    .font(Theme.title(height * 0.32)).foregroundStyle(.white)
                         .lineLimit(1).minimumScaleFactor(0.6)
-                    if model.levels.indices.contains(index) {
+                    if let gate {
+                        Text("to open \(Text(AppModel.worldName(gate.next)))").font(Theme.body(13))
+                            .foregroundStyle(Color(hex: 0xEE4689))
+                            .padding(.horizontal, 10).padding(.vertical, 2)
+                            .background(Capsule().fill(.white))
+                    } else if model.levels.indices.contains(index) {
                         Text(AppModel.worldName(model.levels[index].file.world)).font(Theme.body(13))
                             .foregroundStyle(Color(hex: 0xEE4689))
                             .padding(.horizontal, 10).padding(.vertical, 2)
@@ -188,7 +198,7 @@ struct HomeView: View {
                     }
                 }
                 Spacer(minLength: 0)
-                if let before = model.levelsToNextCapsule(after: index - 1) {
+                if gate == nil, let before = model.levelsToNextCapsule(after: index - 1) {
                     // A capsule over three pips: one fills with each level won.
                     let toGo = before + 1
                     VStack(spacing: 6) {
