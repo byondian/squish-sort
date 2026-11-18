@@ -2,12 +2,16 @@
 """Turns the raw pictures from StoreShotTests into App Store screenshots (6.9 inch, 1320 x 2868):
 a caption on the game's own pink, with the screen underneath in a rounded frame.
 
-Usage: python3 scripts/store_shots.py <xcresult attachments dir> <output dir>
+With "ipad" as a third word it makes the 13 inch iPad size instead (2064 x 2752).
+
+Usage: python3 scripts/store_shots.py <xcresult attachments dir> <output dir> [ipad]
 """
 import json, os, sys
 from PIL import Image, ImageDraw, ImageFont
 
 W, H = 1320, 2868
+# Caption size to start from, the height of the caption band, and how wide the screen is drawn.
+CAPTION, BAND, SCREEN = 118, 520, 1120
 PLUM = (59, 42, 74)
 TOP, BOTTOM = (255, 225, 238), (255, 246, 234)
 
@@ -55,7 +59,7 @@ def compose(shot, language, number):
         t = y / (H - 1)
         draw.line([(0, y), (W, y)], fill=tuple(round(TOP[i] + (BOTTOM[i] - TOP[i]) * t) for i in range(3)))
     text = CAPTIONS[language][number - 1]
-    size = 118
+    size = CAPTION
     while True:
         f, used = font(language, size)
         box = draw.multiline_textbbox((0, 0), text, font=f, spacing=22, align="center")
@@ -63,12 +67,12 @@ def compose(shot, language, number):
             break
         size -= 6
     text_h = box[3] - box[1]
-    band = 520
+    band = BAND
     draw.multiline_text(((W - (box[2] - box[0])) / 2 - box[0], 110 + (band - 110 - text_h) / 2 - box[1]), text, font=f,
                         fill=PLUM, spacing=22, align="center")
     # The screen, in a rounded frame, running off the bottom edge.
     screen = Image.open(shot).convert("RGB")
-    width = 1120
+    width = SCREEN
     height = round(screen.height * width / screen.width)
     screen = screen.resize((width, height), Image.LANCZOS)
     radius, edge = 84, 14
@@ -81,7 +85,10 @@ def compose(shot, language, number):
 
 
 def main():
+    global W, H, CAPTION, BAND, SCREEN
     src, out = sys.argv[1], sys.argv[2]
+    if len(sys.argv) > 3 and sys.argv[3] == "ipad":
+        W, H, CAPTION, BAND, SCREEN = 2064, 2752, 150, 600, 1640
     manifest = json.load(open(os.path.join(src, "manifest.json")))
     made = 0
     for test in manifest:

@@ -584,6 +584,7 @@ struct WorldShowView: View {
         .background(RoundedRectangle(cornerRadius: 30).fill(Theme.marshmallow))
         .overlay(RoundedRectangle(cornerRadius: 30).stroke(Theme.butter, lineWidth: 4))
         .padding(30)
+        .frame(maxWidth: 560)
         .transition(.scale(scale: 0.8).combined(with: .opacity))
     }
 }

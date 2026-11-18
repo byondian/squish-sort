@@ -104,6 +104,19 @@ jobs:
             -only-testing:SquishSortUITests/GoldenPathTests/testLaunchShowsLevelOne \
             -only-testing:SquishSortUITests/GoldenPathTests/testHomeTopBarLinesUp CODE_SIGNING_ALLOWED=NO | tee smoke.log | grep -E "Test Case|error:|TEST" || true
           grep -q "TEST SUCCEEDED" smoke.log
+      - name: Launch on an iPad
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c "
+          import json, sys
+          d = json.load(sys.stdin)['devices']
+          pads = [x for k, v in sorted(d.items(), reverse=True) if 'iOS' in k for x in v if x['name'].startswith('iPad')]
+          print(next((x['udid'] for n in ['13-inch', '12.9-inch'] for x in pads if n in x['name']), pads[0]['udid'] if pads else ''))")
+          if [ -z "$UDID" ]; then echo "::error::No iPad simulator on this runner."; exit 1; fi
+          echo "Simulator $UDID"
+          xcodebuild test -project SquishSort.xcodeproj -scheme SquishSort -destination "id=$UDID" \
+            -only-testing:SquishSortUITests/GoldenPathTests/testLaunchShowsLevelOne \
+            -only-testing:SquishSortUITests/GoldenPathTests/testFirstSquishIsQuick CODE_SIGNING_ALLOWED=NO | tee ipad.log | grep -E "Test Case|error:|TEST" || true
+          grep -q "TEST SUCCEEDED" ipad.log
       - name: Home top bar on the smallest and the largest iPhone
         run: |
           # The main run covers one phone; these two cover the ends of the range, so the bar cannot slip on either.

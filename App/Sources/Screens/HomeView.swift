@@ -18,19 +18,21 @@ struct HomeView: View {
         GeometryReader { screen in
             // Small phones get a smaller logo and shorter buttons, so the Buddy keeps its room.
             let compact = screen.size.height < 720
+            // An iPad: everything in the middle is bigger, and the buttons keep a comfortable width.
+            let big = screen.size.width >= 700
             VStack(spacing: 0) {
                 VStack(spacing: compact ? 6 : 10) {
                     topBar.dimmed(teaching)
-                    JellyLogo(scale: compact ? 0.32 : 0.42).dimmed(teaching)
+                    JellyLogo(scale: big ? 0.64 : compact ? 0.32 : 0.42).dimmed(teaching)
                         .padding(.top, compact ? 9 : 14)
                         .accessibilityElement().accessibilityIdentifier("home-logo")
                     if model.adventDoors > 0 { AdventShelf().dimmed(teaching) }
                     Spacer(minLength: 0)
                     if model.isExtraUnlocked(.buddy) {
-                        BuddyHomeView(side: compact ? 160 : 200)
+                        BuddyHomeView(side: big ? 340 : compact ? 160 : 200)
                     } else {
                         SquishyView(id: model.progress.favouriteSquishy ?? "peach-bun", rarity: .rare)
-                            .frame(width: 170, height: 170)
+                            .frame(width: big ? 300 : 170, height: big ? 300 : 170)
                     }
                     Spacer(minLength: 0)
                     if let banner = model.eventBanner {
@@ -41,12 +43,13 @@ struct HomeView: View {
                             .background(Capsule().fill(Theme.butter))
                             .dimmed(teaching)
                     }
-                    if model.dailyJarOpen { dailyJarButton.dimmed(teaching) }
-                    playButton(height: compact ? 84 : 104).dimmed(teaching)
+                    if model.dailyJarOpen { dailyJarButton.frame(maxWidth: 620).dimmed(teaching) }
+                    playButton(height: big ? 124 : compact ? 84 : 104).frame(maxWidth: 620).dimmed(teaching)
                     HStack(spacing: 12) {
-                        collectionButton(height: compact ? 76 : 88)
-                        mysteryButton(height: compact ? 76 : 88)
+                        collectionButton(height: big ? 104 : compact ? 76 : 88)
+                        mysteryButton(height: big ? 104 : compact ? 76 : 88)
                     }
+                    .frame(maxWidth: 620)
                     .dimmed(teaching)
                 }
                 // The bar sits just under the status bar, with the same 16 points either side.

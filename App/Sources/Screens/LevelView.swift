@@ -663,10 +663,11 @@ struct LevelView: View {
         ZStack {
             VStack(spacing: 8) {
                 header
+                // The board has the whole width, on an iPad too; the bars keep a comfortable one.
                 SpriteView(scene: controller.scene, options: [.allowsTransparency])
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .overlay(alignment: .top) { if AppModel.isUITesting { testTaps } }
-                helpers
+                helpers.frame(maxWidth: 620)
             }
             .padding(.horizontal, 12)
             if isFinale {
@@ -693,6 +694,7 @@ struct LevelView: View {
                 .padding(24)
                 .background(RoundedRectangle(cornerRadius: 28).fill(Theme.marshmallow))
                 .padding(30)
+                .frame(maxWidth: 520)
             }
             if let item = controller.choosing {
                 // The hint's payment bubble.
@@ -852,6 +854,7 @@ struct LevelView: View {
         .padding(22)
         .background(RoundedRectangle(cornerRadius: 28).fill(Theme.marshmallow))
         .padding(30)
+        .frame(maxWidth: 520)
         .transition(.scale(scale: 0.8).combined(with: .opacity))
     }
 
@@ -1429,5 +1432,6 @@ struct StuckCard: View {
         .padding(28)
         .background(RoundedRectangle(cornerRadius: 32).fill(Theme.marshmallow))
         .padding(30)
+        .frame(maxWidth: 560)
     }
 }

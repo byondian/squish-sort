@@ -167,12 +167,13 @@ final class BoardScene: SKScene {
         let rows = BoardLayout.rows(jarCount: board.jarCount)
         let perRow = CGFloat(max(rows.map(\.count).max() ?? 1, 3))
         let margin: CGFloat = 14
-        let gap: CGFloat = 10
+        let gap: CGFloat = size.width >= 700 ? 22 : 10
         let cap = CGFloat(board.capacity)
         let maxJarWidth = (size.width - 2 * margin - gap * (perRow - 1)) / perRow
         let rowUnits = cap + 1.7 // jar plus room to lift above it
         let byHeight = (size.height - 2 * margin) / (CGFloat(rows.count) * rowUnits)
-        let piece = max(16, min(maxJarWidth / 1.25, byHeight, 70))
+        // An iPad has room for bigger squishies and wider gaps.
+        let piece = max(16, min(maxJarWidth / 1.25, byHeight, size.width >= 700 ? 104 : 70))
         let jarSize = CGSize(width: piece * 1.25, height: piece * (cap + 0.4))
         let rowHeight = piece * rowUnits
         var centers = Array(repeating: CGPoint.zero, count: board.jarCount)

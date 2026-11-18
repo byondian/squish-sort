@@ -27,20 +27,21 @@ struct RootView: View {
                 Text("Levels missing from the bundle").font(Theme.body())
             case .home:
                 HomeView()
+            // On an iPad these keep a comfortable reading width in the middle of the screen.
             case .map:
-                MapView()
+                MapView().frame(maxWidth: 760)
             case .mystery:
-                MysteryBagView()
+                MysteryBagView().frame(maxWidth: 760)
             case .maker:
-                MakerView()
+                MakerView().frame(maxWidth: 760)
             case .book:
-                BookView()
+                BookView().frame(maxWidth: 900)
             case .room:
                 SquishRoomView()
             case .settings:
-                SettingsView()
+                SettingsView().frame(maxWidth: 760)
             case .shop:
-                ShopView()
+                ShopView().frame(maxWidth: 760)
             }
         }
         .overlay {

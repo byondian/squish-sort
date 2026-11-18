@@ -1685,24 +1685,24 @@
         }
       }
     },
-    "Coins are saved on this iPhone only.": {
+    "Coins are saved on this device only.": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "コインはこのiPhoneにだけ保存されます。"
+            "value": "コインはこのデバイスにだけ保存されます。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "코인은 이 iPhone에만 저장돼요."
+            "value": "코인은 이 기기에만 저장돼요."
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "金幣只會儲存在這支 iPhone 上。"
+            "value": "金幣只會儲存在這部裝置上。"
           }
         }
       }
