@@ -23,6 +23,9 @@ struct SoftSquishy<Art: View>: View {
     var wiggles = 0
     /// Slides back to the middle after being thrown (the Buddy on Home).
     var comesHome = false
+    /// Other squishies out in the room with this one (Squish Room only). They can be squeezed and thrown
+    /// too, and they bump into each other. The signature moves and the callbacks belong to `toy`.
+    var mates: [String] = []
     var onTouch: (() -> Void)?
     var onLetGo: ((Double) -> Void)?
     var onDoubleTap: (() -> Void)?
@@ -34,6 +37,8 @@ struct SoftSquishy<Art: View>: View {
         let scene = SoftSquishyScene()
         let pulse = MovePulse()
         var sim: MoveSim?
+        /// The toys last handed to the scene, so only a new arrival drops in.
+        var shown: Set<String> = []
     }
 
     /// The squishy's own signature moves. A morphed look has none.
@@ -70,6 +75,7 @@ struct SoftSquishy<Art: View>: View {
             .onAppear { show(drop: true) }
             .onDisappear { holder.scene.goQuiet() }
             .onChange(of: toy) { _, _ in show(drop: true) }
+            .onChange(of: mates) { _, _ in show(drop: true) }
             .onChange(of: look) { _, _ in
                 if let image = picture() { holder.scene.redraw(image: image) }
             }
@@ -114,9 +120,27 @@ struct SoftSquishy<Art: View>: View {
         return renderer.uiImage
     }
 
+    private func matePicture(_ ref: String) -> UIImage? {
+        let renderer = ImageRenderer(content: SquishRefView(ref: ref).environmentObject(model).frame(width: 300, height: 300))
+        renderer.scale = min(max(displayScale, 1), 3)
+        renderer.isOpaque = false
+        return renderer.uiImage
+    }
+
     private func show(drop: Bool) {
         connect()
         guard let image = picture() else { return }
-        holder.scene.show(image: image, feel: feel, drop: drop)
+        guard mode == .room else {
+            holder.scene.show(image: image, feel: feel, drop: drop)
+            return
+        }
+        var toys = [SoftSquishyScene.Toy(id: toy, image: image, feel: feel)]
+        // A long squishy is a rope with a view of its own, so it is never one of several.
+        for mate in mates where mate != toy && !SignatureMoves.shared.isRope(mate) && !toys.contains(where: { $0.id == mate }) {
+            if let art = matePicture(mate) { toys.append(SoftSquishyScene.Toy(id: mate, image: art, feel: model.feel(for: mate))) }
+        }
+        let ids = Set(toys.map(\.id))
+        holder.scene.show(toys: toys, fresh: ids.subtracting(holder.shown), drop: drop)
+        holder.shown = ids
     }
 }

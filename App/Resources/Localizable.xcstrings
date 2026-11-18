@@ -6745,6 +6745,28 @@
         }
       }
     },
+    "Tap another squishy to bring it in too": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "もうひとつタップして、いっしょに入れよう"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다른 스퀴시를 탭해서 함께 넣어 보세요"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再點一個軟軟，讓它也進來"
+          }
+        }
+      }
+    },
     "Tap the trick under your Buddy at home to see it again.": {
       "localizations": {
         "ja": {
