@@ -123,7 +123,7 @@ struct WorkshopView: View {
 
     var body: some View {
         GeometryReader { geo in
-            let side = max(120, min(geo.size.width - 32, geo.size.height * 0.36, 340))
+            let side = max(120, min(geo.size.width - 32, geo.size.height * 0.36, AppModel.isKidsApp ? 460 : 340))
             VStack(spacing: 8) {
                 bar
                 stage(side: side)

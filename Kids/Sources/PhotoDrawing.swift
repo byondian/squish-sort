@@ -107,7 +107,7 @@ enum PhotoDrawing {
         paper = paper.map { cells > 0 ? max(0.3, $0 / cells) : 1 }
         // The drawing's square of the photo, stretched to the whole picture the same way its outline was.
         let fit = box.fitted
-        var out = [UInt8](repeating: 255, count: side * side * 4)
+        var out = [UInt8](repeating: 0, count: side * side * 4)
         for v in 0..<side {
             let sy = Int((fit.y + (Double(v) + 0.5) / Double(side) * fit.side) * Double(side))
             guard sy >= 0, sy < side else { continue }
@@ -115,16 +115,17 @@ enum PhotoDrawing {
                 let sx = Int((fit.x + (Double(u) + 0.5) / Double(side) * fit.side) * Double(side))
                 guard sx >= 0, sx < side else { continue }
                 let from = (sy * side + sx) * 4, to = (v * side + u) * 4
-                for c in 0..<3 {
-                    // Nearly-white paper becomes white, so only the drawing colours the goo.
-                    let light = Double(bytes[from + c]) / 255 / paper[c] / 0.9
-                    out[to + c] = UInt8(max(0, min(255, light * 255)))
-                }
+                // Nearly-white paper becomes clear, so the goo shows through it; pen and felt-tip stay as drawn.
+                var rgb = [0.0, 0.0, 0.0]
+                for c in 0..<3 { rgb[c] = max(0, min(1, Double(bytes[from + c]) / 255 / paper[c] / 0.9)) }
+                let alpha = max(0, min(1, (1 - (rgb.min() ?? 1)) * 3))
+                for c in 0..<3 { out[to + c] = UInt8(rgb[c] * alpha * 255) }
+                out[to + 3] = UInt8(alpha * 255)
             }
         }
         guard let provider = CGDataProvider(data: Data(out) as CFData),
               let picture = CGImage(width: side, height: side, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: side * 4,
-                                    space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.noneSkipLast.rawValue),
+                                    space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
                                     provider: provider, decode: nil, shouldInterpolate: true, intent: .defaultIntent) else { return .nothing }
         return .drawing(LiftedDrawing(outline: traced.outline, picture: UIImage(cgImage: picture)))
     }
