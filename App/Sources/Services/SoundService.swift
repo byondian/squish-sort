@@ -77,6 +77,38 @@ final class SoundService {
         }
     }
 
+    // MARK: - Made squishies' voices
+
+    private var voiceEngine: AVAudioEngine?
+    private let voiceNode = AVAudioPlayerNode()
+    private let voiceSpeed = AVAudioUnitVarispeed()
+
+    /// A made squishy's own voice (voice_<id>.wav), higher or lower by its pitch (0.8 to 1.25).
+    func voice(_ id: String, pitch: Double) {
+        let name = "voice_" + id.replacingOccurrences(of: "-", with: "_")
+        guard enabled, level > 0, let url = Bundle.main.url(forResource: name, withExtension: "wav") else { return }
+        // The plain player cannot change pitch, so the voices have a small engine of their own.
+        guard !AppModel.isUITesting, let file = try? AVAudioFile(forReading: url) else { play(name); return }
+        let engine: AVAudioEngine
+        if let made = voiceEngine {
+            engine = made
+        } else {
+            engine = AVAudioEngine()
+            engine.attach(voiceNode)
+            engine.attach(voiceSpeed)
+            engine.connect(voiceNode, to: voiceSpeed, format: file.processingFormat)
+            engine.connect(voiceSpeed, to: engine.mainMixerNode, format: file.processingFormat)
+            voiceEngine = engine
+        }
+        if !engine.isRunning { try? engine.start() }
+        guard engine.isRunning else { play(name); return }
+        voiceSpeed.rate = Float(min(1.25, max(0.8, pitch)))
+        voiceNode.stop()
+        voiceNode.volume = level
+        voiceNode.scheduleFile(file, at: nil, completionHandler: nil)
+        voiceNode.play()
+    }
+
     /// Plays `name`, or `fallback` while `name` has not been recorded yet.
     func play(_ name: String, or fallback: String) {
         play(Bundle.main.url(forResource: name, withExtension: "wav") != nil ? name : fallback)

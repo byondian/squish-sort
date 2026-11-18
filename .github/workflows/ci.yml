@@ -5,9 +5,18 @@ name: CI
 on:
   pull_request:
   workflow_dispatch:
+    inputs:
+      quick:
+        description: "Fast check while building a feature: build the app and run only the Workshop tests"
+        type: boolean
+        default: false
+      kids:
+        description: "Build and test Squishy Workshop (the kids app) instead of Squish Sort"
+        type: boolean
+        default: false
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.ref }}-${{ inputs.kids && 'kids' || 'app' }}
   cancel-in-progress: true
 
 jobs:
@@ -33,8 +42,8 @@ jobs:
     name: App build and golden path UI test (gate 3)
     # The only Mac job: it builds the app and runs it, so a separate build job would pay twice.
     runs-on: macos-15
-    needs: rules-and-levels
-    if: github.event_name == 'workflow_dispatch'
+    # It does not wait for the Linux gates: free Macs can take a long time to arrive, so it queues at once.
+    if: github.event_name == 'workflow_dispatch' && !inputs.kids
     timeout-minutes: 80
     steps:
       - uses: actions/checkout@v5
@@ -45,13 +54,19 @@ jobs:
           brew install xcodegen
           xcodegen generate
       - name: Run UI tests
+        env:
+          QUICK: ${{ inputs.quick }}
         run: |
           set -o pipefail
           UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; print(next(x['udid'] for k,v in sorted(d.items(), reverse=True) if 'iOS' in k for x in v if x['name'].startswith('iPhone')))")
           echo "Simulator $UDID"
+          PICK="-skip-testing:SquishSortUITests/StoreShotTests"
+          if [ "$QUICK" = "true" ]; then
+            PICK="-only-testing:SquishSortUITests/GoldenPathTests/testWorkshopMakesASquishy -only-testing:SquishSortUITests/GoldenPathTests/testWorkshopShowsAChildNoPricesAndNoShop"
+          fi
           xcodebuild test -project SquishSort.xcodeproj -scheme SquishSort -resultBundlePath ui.xcresult \
-            -destination "id=$UDID" -skip-testing:SquishSortUITests/StoreShotTests CODE_SIGNING_ALLOWED=NO \
-            | tee test.log | grep -E "Test Case|error:|TEST|FIRST-SQUISH" || true
+            -destination "id=$UDID" $PICK CODE_SIGNING_ALLOWED=NO \
+            | tee test.log | grep -E "Test Case|error:|TEST|FIRST-SQUISH|GOLDEN-PATH workshop" || true
           # Pictures the tests kept (the soft squishy at rest and just squeezed), for a look without a phone.
           xcrun xcresulttool export attachments --path ui.xcresult --output-path shots || true
           if ! grep -q "TEST SUCCEEDED" test.log; then
@@ -93,6 +108,7 @@ jobs:
                   print("PICTURE-END")
           PY
       - name: Launch smoke test on an older iOS (17 or 18)
+        if: ${{ !inputs.quick }}
         run: |
           UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; print(next((x['udid'] for k,v in sorted(d.items()) if 'iOS-17' in k or 'iOS-18' in k for x in v if x['name'].startswith('iPhone')), ''))")
           if [ -z "$UDID" ]; then
@@ -105,6 +121,7 @@ jobs:
             -only-testing:SquishSortUITests/GoldenPathTests/testHomeTopBarLinesUp CODE_SIGNING_ALLOWED=NO | tee smoke.log | grep -E "Test Case|error:|TEST" || true
           grep -q "TEST SUCCEEDED" smoke.log
       - name: Launch on an iPad
+        if: ${{ !inputs.quick }}
         run: |
           UDID=$(xcrun simctl list devices available -j | python3 -c "
           import json, sys
@@ -115,9 +132,11 @@ jobs:
           echo "Simulator $UDID"
           xcodebuild test -project SquishSort.xcodeproj -scheme SquishSort -destination "id=$UDID" \
             -only-testing:SquishSortUITests/GoldenPathTests/testLaunchShowsLevelOne \
-            -only-testing:SquishSortUITests/GoldenPathTests/testFirstSquishIsQuick CODE_SIGNING_ALLOWED=NO | tee ipad.log | grep -E "Test Case|error:|TEST" || true
+            -only-testing:SquishSortUITests/GoldenPathTests/testFirstSquishIsQuick \
+            -only-testing:SquishSortUITests/GoldenPathTests/testWorkshopMakesASquishy CODE_SIGNING_ALLOWED=NO | tee ipad.log | grep -E "Test Case|error:|TEST" || true
           grep -q "TEST SUCCEEDED" ipad.log
       - name: Home top bar on the smallest and the largest iPhone
+        if: ${{ !inputs.quick }}
         run: |
           # The main run covers one phone; these two cover the ends of the range, so the bar cannot slip on either.
           for PICK in small large; do
@@ -133,3 +152,70 @@ jobs:
               -only-testing:SquishSortUITests/GoldenPathTests/testHomeTopBarLinesUp CODE_SIGNING_ALLOWED=NO | tee bar-$PICK.log | grep -E "Test Case|error:|TEST" || true
             grep -q "TEST SUCCEEDED" bar-$PICK.log
           done
+
+  # Squishy Workshop, the Kids category app built from the same code (flag KIDS).
+  kids-app:
+    name: Squishy Workshop build and UI tests
+    runs-on: macos-15
+    if: github.event_name == 'workflow_dispatch' && inputs.kids
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - name: Select the newest Xcode
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
+      - name: Generate the Xcode project
+        run: |
+          brew install xcodegen
+          xcodegen generate
+      - name: Run the UI tests on an iPad
+        run: |
+          set -o pipefail
+          UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; print(next(x['udid'] for k,v in sorted(d.items(), reverse=True) if 'iOS' in k for x in v if x['name'].startswith('iPad')))")
+          echo "Simulator $UDID"
+          xcodebuild test -project SquishSort.xcodeproj -scheme SquishyWorkshop -resultBundlePath kids.xcresult \
+            -derivedDataPath dd -destination "id=$UDID" CODE_SIGNING_ALLOWED=NO \
+            | tee test.log | grep -E "Test Case|error:|TEST|KIDS-APP" || true
+          xcrun xcresulttool export attachments --path kids.xcresult --output-path shots || true
+          if ! grep -q "TEST SUCCEEDED" test.log; then
+            echo "::group::UI test diagnostics"
+            grep -E "error:|failed" test.log | head -60 || true
+            grep -A 140 "KIDS-APP" test.log | head -400 || true
+            echo "::endgroup::"
+            exit 1
+          fi
+      - name: The app holds no ad or tracking code
+        run: |
+          APP=$(find dd/Build/Products -name "SquishyWorkshop.app" -maxdepth 3 | head -1)
+          echo "$APP"
+          test -n "$APP"
+          # Nothing from Google, no tracking framework and no advertising identifier may be in the Kids app.
+          if otool -L "$APP/SquishyWorkshop" | grep -iE "GoogleMobileAds|UserMessagingPlatform|AppTrackingTransparency|AdSupport"; then exit 1; fi
+          if find "$APP" -iname "*Google*" -o -iname "*UserMessaging*" | grep .; then exit 1; fi
+          # Swift packages link statically, so the app's own symbols are checked as well.
+          if nm -gU "$APP/SquishyWorkshop" | grep -E "GADMobileAds|GADRequest|UMPConsent|ASIdentifierManager|ATTrackingManager"; then exit 1; fi
+          if nm -u "$APP/SquishyWorkshop" | grep -E "ASIdentifierManager|ATTrackingManager"; then exit 1; fi
+          if strings "$APP/SquishyWorkshop" | grep -E "GADMobileAds|ca-app-pub|ATTrackingManager|advertisingIdentifier"; then exit 1; fi
+          if /usr/libexec/PlistBuddy -c "Print" "$APP/Info.plist" | grep -E "GADApplicationIdentifier|NSUserTrackingUsageDescription|SKAdNetworkItems"; then exit 1; fi
+          echo "clean"
+      - name: Print small copies of the pictures in the log
+        if: always()
+        continue-on-error: true
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess, base64
+          try:
+              manifest = json.load(open("shots/manifest.json"))
+          except Exception as e:
+              print("no pictures", e); raise SystemExit(0)
+          for test in manifest:
+              for a in test.get("attachments", []):
+                  name = a.get("suggestedHumanReadableName", "")
+                  if not name.startswith("squishy-"): continue
+                  src = os.path.join("shots", a["exportedFileName"])
+                  out = "/tmp/small.jpg"
+                  subprocess.run(["sips", "-Z", "900", "-s", "format", "jpeg", "-s", "formatOptions", "70", src, "--out", out], check=False, capture_output=True)
+                  data = base64.b64encode(open(out, "rb").read()).decode()
+                  print("PICTURE-BEGIN " + name.split("_")[0])
+                  for i in range(0, len(data), 4000): print("PICTURE " + data[i:i + 4000])
+                  print("PICTURE-END")
+          PY

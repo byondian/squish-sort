@@ -5,7 +5,12 @@ import SquishPolicy
 /// Refunds turn ads back on through Transaction.updates.
 @MainActor
 final class PurchaseService: ObservableObject {
+    #if KIDS
+    /// Squishy Workshop sells one thing, once: "Unlock everything". It sits behind the grown-up gate.
+    static let removeAdsID = "com.ianatkinson.squishyworkshop.unlock"
+    #else
     static let removeAdsID = "com.ianatkinson.squishsort.removeads"
+    #endif
 
     @Published private(set) var product: Product?
     @Published private(set) var coinProducts: [Product] = []
@@ -32,7 +37,11 @@ final class PurchaseService: ObservableObject {
     deinit { updates?.cancel() }
 
     func start() async {
+        #if KIDS
+        let ids = [Self.removeAdsID]
+        #else
         let ids = [Self.removeAdsID, StarterPack.productID, PiggyBank.productID] + Coins.packs.map(\.productID)
+        #endif
         let all = (try? await Product.products(for: ids)) ?? []
         product = all.first { $0.id == Self.removeAdsID }
         coinProducts = Coins.packs.compactMap { pack in all.first { $0.id == pack.productID } }

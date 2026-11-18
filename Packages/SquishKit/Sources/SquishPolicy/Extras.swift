@@ -1,4 +1,5 @@
 import Foundation
+import SquishWorkshop
 
 /// The extras around the sort game (design doc, "Extras and unlock order").
 /// Each one appears as a quiet home button when it unlocks and never pops up.
@@ -13,12 +14,15 @@ public enum Extras {
     ///   - capsulesOpened: capsules opened so far, any world.
     ///   - levelsWon: how many levels of the play order are finished.
     ///   - firstWorldComplete: every level of the first world is finished.
+    ///   - ownsRemoveAds: Remove Ads includes Workshop Pro, so its owner has the Workshop at once.
     public static func isUnlocked(_ extra: Extra, capsulesOpened: Int, levelsWon: Int,
-                                  firstWorldComplete: Bool, config: GameConfig = GameConfig()) -> Bool {
+                                  firstWorldComplete: Bool, ownsRemoveAds: Bool = false,
+                                  config: GameConfig = GameConfig()) -> Bool {
         switch extra {
         case .squishRoom: return config.squishRoomEnabled && capsulesOpened >= 1
         case .mysteryBag: return config.mysteryBagEnabled && levelsWon >= mysteryBagAfterLevel
-        case .maker: return config.makerEnabled && firstWorldComplete
+        // The Squishy Workshop arrives with the first capsule, next to the Squish Room.
+        case .maker: return config.makerEnabled && (capsulesOpened >= 1 || ownsRemoveAds)
         case .buddy: return config.buddyEnabled && capsulesOpened >= 1
         }
     }
@@ -262,9 +266,16 @@ public struct MadeSquishy: Codable, Equatable, Identifiable, Sendable {
     public var mouth: Mouth
     public var ears: Ears
     public var accessory: Accessory
+    /// Made in the Squishy Workshop: its full design. Nil for a squishy from the old Maker, which
+    /// keeps today's look. Not part of the progress save: each design is a file of its own
+    /// (`MadeStore`), because the progress file is rewritten on every change.
+    public var design: WorkshopDesign?
+
+    private enum CodingKeys: String, CodingKey { case id, name, shape, color, eyes, mouth, ears, accessory }
 
     public init(id: String, name: String = "", shape: Shape = .bun, color: Int = 0, eyes: Eyes = .dots,
-                mouth: Mouth = .smile, ears: Ears = .none, accessory: Accessory = .none) {
+                mouth: Mouth = .smile, ears: Ears = .none, accessory: Accessory = .none, design: WorkshopDesign? = nil) {
+        self.design = design
         self.id = id
         self.name = name
         self.shape = shape
@@ -273,6 +284,43 @@ public struct MadeSquishy: Codable, Equatable, Identifiable, Sendable {
         self.mouth = mouth
         self.ears = ears
         self.accessory = accessory
+    }
+
+    /// The Workshop design this squishy has, or the one its old Maker parts turn into, so every
+    /// made squishy can be opened in the Workshop.
+    public var workshopDesign: WorkshopDesign {
+        if let design { return design }
+        var d = WorkshopDesign(mould: shape.rawValue)
+        let palette = MakerParts.palette
+        d.layers = [GooLayer(colour: palette[min(max(0, color), palette.count - 1)])]
+        switch eyes {
+        case .dots: d.face.eyes = "dots"
+        case .sparkle: d.face.eyes = "sparkle"
+        case .sleepy: d.face.eyes = "sleepy"
+        case .wink: d.face.eyes = "wink"
+        }
+        switch mouth {
+        case .smile: d.face.mouth = "smile"
+        case .open: d.face.mouth = "open-o"
+        case .cat: d.face.mouth = "cat-w"
+        case .tongue: d.face.mouth = "tongue"
+        }
+        switch ears {
+        case .none: break
+        case .cat, .bear, .bunny: d.parts.append(Placed(id: "ears", category: "ears", part: ears.rawValue, x: 0.5, y: 0.24))
+        case .horns: d.parts.append(Placed(id: "ears", category: "horns-and-antlers", part: "little-horns", x: 0.5, y: 0.24))
+        }
+        switch accessory {
+        case .none: break
+        case .bow: d.parts.append(Placed(id: "extra", category: "hats-and-headwear", part: "bow-headband", x: 0.5, y: 0.22))
+        case .crown: d.parts.append(Placed(id: "extra", category: "hats-and-headwear", part: "crown", x: 0.5, y: 0.2))
+        case .headphones: d.parts.append(Placed(id: "extra", category: "hats-and-headwear", part: "headphones", x: 0.5, y: 0.3))
+        // An old save with horns and a unicorn horn keeps the unicorn horn: one from each tray.
+        case .unicornHorn: d.parts.append(Placed(id: "extra", category: "horns-and-antlers", part: "unicorn", x: 0.5, y: 0.2))
+        case .leaf: d.parts.append(Placed(id: "extra", category: "antennae-and-hair", part: "sprout", x: 0.5, y: 0.2))
+        }
+        d.tidy()
+        return d
     }
 
     /// How a made squishy is referred to wherever a collectible id could also go.

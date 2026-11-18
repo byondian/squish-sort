@@ -11,17 +11,20 @@ let package = Package(
         .library(name: "SquishLevels", targets: ["SquishLevels"]),
         .library(name: "SquishPolicy", targets: ["SquishPolicy"]),
         .library(name: "SquishSoft", targets: ["SquishSoft"]),
+        .library(name: "SquishWorkshop", targets: ["SquishWorkshop"]),
         .executable(name: "squish-levels", targets: ["squish-levels"]),
     ],
     targets: [
         .target(name: "SquishCore"),
         .target(name: "SquishLevels", dependencies: ["SquishCore"]),
-        .target(name: "SquishPolicy"),
+        .target(name: "SquishWorkshop"),
+        .target(name: "SquishPolicy", dependencies: ["SquishWorkshop"]),
         .target(name: "SquishSoft"),
         .executableTarget(name: "squish-levels", dependencies: ["SquishLevels"]),
         .testTarget(name: "SquishCoreTests", dependencies: ["SquishCore"]),
         .testTarget(name: "SquishLevelsTests", dependencies: ["SquishLevels", "SquishPolicy"]),
         .testTarget(name: "SquishPolicyTests", dependencies: ["SquishPolicy"]),
         .testTarget(name: "SquishSoftTests", dependencies: ["SquishSoft"]),
+        .testTarget(name: "SquishWorkshopTests", dependencies: ["SquishWorkshop", "SquishPolicy"]),
     ]
 )
