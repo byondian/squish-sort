@@ -6525,6 +6525,28 @@
         }
       }
     },
+    "Stop it: %lld coins": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "止める：%lldコイン"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "막기: %lld코인"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "阻止它：%lld 金幣"
+          }
+        }
+      }
+    },
     "Stretch": {
       "localizations": {
         "ja": {

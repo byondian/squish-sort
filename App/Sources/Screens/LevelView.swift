@@ -267,12 +267,7 @@ final class LevelController: ObservableObject {
         model.sounds.jarComplete(number: jarsDone)
         luckyBonus(atJar: jar)
         // A jar filled before the countdown runs out calls the shake-up off for this try.
-        if shakeAt != nil, !session.board.isWon {
-            shakeAt = nil
-            scene.popWord(String(localized: "Shake-up stopped!"), size: 0.8)
-            model.sounds.play("star_2")
-            model.haptics.star()
-        }
+        if shakeAt != nil, !session.board.isWon { shakeStopped() }
         if level.file.beat == .boss {
             bossMood = 1
             let oneLeft = session.board.jars.indices.filter { session.board.isComplete($0) }.count == level.kinds.count - 1
@@ -332,6 +327,32 @@ final class LevelController: ObservableObject {
         guard let at = shakeAt, session.moveCount >= at, session.status == .playing, !shaking else { return }
         shakeAt = nil
         shake(word: String(localized: "Shake-up!"), keepsStarLimit: false) { _ in }
+    }
+
+    private func shakeStopped() {
+        shakeAt = nil
+        scene.popWord(String(localized: "Shake-up stopped!"), size: 0.8)
+        model?.sounds.play("star_2")
+        model?.haptics.star()
+    }
+
+    /// Coins call the shake-up off too, for the price of a hint. Never offered in gentle mode:
+    /// paying to dodge a setback is a pressure mechanic, and filling a jar stops it for free.
+    var canPayToStopShake: Bool {
+        guard let model, shakeAt != nil, outcome == nil, !shaking else { return false }
+        return !model.isGentleMode && session.status == .playing
+    }
+
+    func payToStopShake() {
+        guard let model, canPayToStopShake else { return }
+        guard model.spend(.hint) else {
+            // No shop offer from the board: just say what is in the purse.
+            shuffleShort = true
+            model.haptics.reject()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) { [weak self] in self?.shuffleShort = false }
+            return
+        }
+        shakeStopped()
     }
 
     /// The Shuffle button: the first shuffle on a level is free, later ones cost coins. The moves so far
@@ -857,6 +878,7 @@ struct LevelView: View {
                 }
             }
             VStack(spacing: 2) {
+                Group {
                 // A pink jelly pill with the level, and the world's name under it.
                 HStack(spacing: 6) {
                     if isBoss {
@@ -900,7 +922,10 @@ struct LevelView: View {
                         .padding(.horizontal, 10).padding(.vertical, 3)
                         .background(Capsule().fill(LinearGradient(colors: [Color(hex: 0xFFB13D), Color(hex: 0xFF7EB6)], startPoint: .leading, endPoint: .trailing)))
                         .transition(.scale.combined(with: .opacity))
-                } else if let left = controller.shakeIn {
+                }
+                }
+                .allowsHitTesting(false)
+                if controller.feverLeft == 0, let left = controller.shakeIn {
                     // The countdown, and under it the way to call the shake-up off.
                     VStack(spacing: 0) {
                         Label { Text("Shake-up in \(left)") } icon: { Image(systemName: "tornado") }
@@ -911,7 +936,20 @@ struct LevelView: View {
                     .padding(.horizontal, 12).padding(.vertical, 3)
                     .background(Capsule().fill(left <= 3 ? Theme.butter : Color.white.opacity(0.7)))
                     .accessibilityElement(children: .combine)
+                    .allowsHitTesting(false)
+                    // Or coins stop it, for the price of a hint. Not in gentle mode.
+                    if controller.canPayToStopShake {
+                        Button { controller.payToStopShake() } label: {
+                            Label { Text("Stop it: \(Coins.Item.hint.price) coins") } icon: { CoinIcon() }
+                                .font(Theme.body(12)).foregroundStyle(Theme.plum).lineLimit(1).minimumScaleFactor(0.7)
+                                .padding(.horizontal, 12).padding(.vertical, 4)
+                                .background(Capsule().fill(Theme.butter))
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("stop-shake")
+                    }
                 }
+                Group {
                 // The level pot: coins thrown by finished jars, banked on the win.
                 if controller.pot.paysCoins {
                     // Says what it is until the first jar pays, then just the number.
@@ -923,10 +961,11 @@ struct LevelView: View {
                         .animation(.spring(response: 0.3, dampingFraction: 0.6), value: controller.pot.coins)
                         .accessibilityIdentifier("level-pot")
                 }
+                }
+                .allowsHitTesting(false)
             }
             .foregroundStyle(Theme.plum)
             .frame(maxWidth: .infinity)
-            .allowsHitTesting(false)
         }
         .padding(.top, 8)
     }
