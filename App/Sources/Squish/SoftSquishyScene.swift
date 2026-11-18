@@ -477,12 +477,12 @@ final class SoftSquishyScene: SKScene {
     private func lift(_ touches: Set<UITouch>) {
         for touch in touches {
             let id = ObjectIdentifier(touch).hashValue
-            var trick = false
+            var didTrick = false
             if let path = paths.removeValue(forKey: id), let onGesture, let main = body {
                 let c = main.centre()
                 if let gesture = TrickGesture.classify(points: path.points, seconds: touch.timestamp - path.began,
                                                        centre: (x: c.x, y: c.y), size: main.size) {
-                    trick = onGesture(gesture)
+                    didTrick = onGesture(gesture)
                 }
             }
             let owner = touchOwner.removeValue(forKey: id)
@@ -495,7 +495,7 @@ final class SoftSquishyScene: SKScene {
             body.release(id)
             guard !body.isHeld else { continue }
             // Reduce Motion: let go without a throw.
-            if reduceMotion || trick { body.stop() }
+            if reduceMotion || didTrick { body.stop() }
             owner.waitsForPop = tuning.feel(owner.feel).hapticDentPop && dent > 0.2
             if let volume = owner.mixer.pop(depth: depth, feel: owner.feel) {
                 sounds?.pop(volume: volume, pan: pan, enabled: soundOn())
