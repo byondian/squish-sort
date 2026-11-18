@@ -26,6 +26,9 @@ struct SoftSquishy<Art: View>: View {
     /// Other squishies out in the room with this one (Squish Room only). They can be squeezed and thrown
     /// too, and they bump into each other. The signature moves and the callbacks belong to `toy`.
     var mates: [String] = []
+    /// The room's air and bounce (Squishy Workshop's rooms). See `SoftSquishyScene`.
+    var gravityScale = 1.0
+    var bounce: Double?
     var onTouch: (() -> Void)?
     var onLetGo: ((Double) -> Void)?
     var onDoubleTap: (() -> Void)?
@@ -130,6 +133,8 @@ struct SoftSquishy<Art: View>: View {
         let model = self.model
         scene.mode = mode
         scene.comesHome = comesHome
+        scene.gravityScale = gravityScale
+        scene.bounce = bounce
         scene.reduceMotion = reduceMotion
         scene.sounds = model.sounds.squish
         scene.haptics = model.haptics.squish

@@ -112,12 +112,14 @@ struct KidsRoomView: View {
         ZStack(alignment: .bottomTrailing) {
             if let id = current {
                 SoftSquishy(toy: id, look: morphedInto ?? id, feel: model.feel(for: id), mode: .room, wiggles: wiggles,
-                            mates: Array(shown.dropLast()),
+                            mates: Array(shown.dropLast()), gravityScale: scene.gravityScale, bounce: scene.bounce,
                             onLetGo: { depth in morph(depth: depth) },
                             onDoubleTap: { model.haptics.reject(); wiggles += 1 }) {
                     SquishRefView(ref: morphedInto ?? id)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                // A new room is a new place: the squishies drop in again with that room's weight and bounce.
+                .id(scene)
                 .accessibilityElement()
                 .accessibilityLabel(Text(verbatim: model.displayName(for: id)))
                 .accessibilityIdentifier("room-squishy")

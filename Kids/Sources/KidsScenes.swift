@@ -40,6 +40,18 @@ enum KidsScene: String, CaseIterable, Identifiable {
     }
 
     var isDark: Bool { self == .bedtime }
+
+    /// How heavy a squishy is in this room: it bobs in the bath and drifts down on a snow day.
+    var gravityScale: Double {
+        switch self {
+        case .bathTime: return 0.3
+        case .snowDay: return 0.6
+        default: return 1
+        }
+    }
+
+    /// The Bounce House sends a thrown squishy off the walls again and again.
+    var bounce: Double? { self == .bounceHouse ? 0.85 : nil }
 }
 
 /// What is behind the squishies in each room. Nothing here can be touched.
