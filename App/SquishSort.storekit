@@ -1,0 +1,77 @@
+{
+  "identifier": "5B6F1C2A",
+  "nonRenewingSubscriptions": [],
+  "products": [
+    {
+      "displayPrice": "3.99",
+      "familyShareable": true,
+      "internalID": "6835495967",
+      "localizations": [
+        {
+          "description": "No more forced ads. Squishies are never for sale.",
+          "displayName": "Remove Ads",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.ianatkinson.squishsort.removeads",
+      "referenceName": "Remove Ads",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "9000100",
+      "localizations": [
+        {
+          "description": "1,000 coins for hints, extra jars, board themes and Buddy treats.",
+          "displayName": "1,000 Coins",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.ianatkinson.squishsort.coins1000",
+      "referenceName": "1,000 Coins",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "2.99",
+      "familyShareable": false,
+      "internalID": "9000350",
+      "localizations": [
+        {
+          "description": "3,500 coins for hints, extra jars, board themes and Buddy treats.",
+          "displayName": "3,500 Coins",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.ianatkinson.squishsort.coins3500",
+      "referenceName": "3,500 Coins",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "4.99",
+      "familyShareable": false,
+      "internalID": "9000750",
+      "localizations": [
+        {
+          "description": "7,500 coins for hints, extra jars, board themes and Buddy treats.",
+          "displayName": "7,500 Coins",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.ianatkinson.squishsort.coins7500",
+      "referenceName": "7,500 Coins",
+      "type": "Consumable"
+    }
+  ],
+  "settings": {
+    "_applicationInternalID": "6835495515",
+    "_developerTeamID": "WVLPAK48UN",
+    "_locale": "en_US",
+    "_storefront": "GBR"
+  },
+  "subscriptionGroups": [],
+  "version": {
+    "major": 4,
+    "minor": 0
+  }
+}

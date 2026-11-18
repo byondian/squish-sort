@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "id": "starlight-02",
+  "world": "starlight",
+  "index": 2,
+  "beat": "easy",
+  "capacity": 4,
+  "jars": [
+    ["riff", "lumi", "riff", "lumi"],
+    ["lumi", "riff", "lumi", "riff"],
+    []
+  ],
+  "mechanics": {"hidden": [], "sticky": [[0, 2], [1, 2]], "frozen": []},
+  "par": 8,
+  "solution": [[0, 2], [1, 0], [2, 1], [0, 2], [1, 0], [1, 2], [0, 1], [0, 2]],
+  "capsule": false,
+  "softenAfterFails": null
+}

@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "id": "endless-39",
+  "world": "endless",
+  "index": 39,
+  "beat": "calm",
+  "capacity": 4,
+  "jars": [
+    ["pip", "lumi", "pip", "lumi"],
+    ["riff", "riff", "coco", "nova"],
+    ["pip", "coco", "nova", "nova"],
+    ["pip", "lumi", "nova", "strawbie"],
+    ["zuzu", "strawbie", "zuzu", "strawbie"],
+    ["zuzu", "zuzu", "lumi", "coco"],
+    ["riff", "riff", "coco", "strawbie"],
+    [],
+    []
+  ],
+  "mechanics": {"hidden": [[0, 2], [2, 2], [6, 0]], "sticky": [], "frozen": [], "curtains": [4, 5]},
+  "par": 22,
+  "solution": [[3, 7], [1, 3], [6, 7], [3, 8], [0, 3], [2, 8], [2, 8], [2, 1], [0, 2], [3, 0], [3, 2], [1, 3], [6, 3], [1, 6], [5, 3], [4, 7], [0, 1], [0, 2], [5, 1], [4, 5], [4, 7], [4, 5]],
+  "capsule": false,
+  "softenAfterFails": null
+}

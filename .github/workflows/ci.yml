@@ -1,0 +1,122 @@
+name: CI
+
+# Mac minutes cost ten times Linux ones, so the Mac job runs only when started by hand (once per
+# batch of changes, just before a merge). Pull requests run the Linux gates only; pushes to main run nothing.
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rules-and-levels:
+    name: Rules and levels (gates 1 and 2)
+    # Plain Swift with no Apple frameworks, so it runs on Linux, where a minute costs a tenth of a Mac one.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Toolchain
+        run: swift --version
+      - name: Gate 1 — unit tests (rules, policy, levels)
+        run: swift test --package-path Packages/SquishKit
+      - name: Gate 2 — re-solve every level and check par
+        run: swift run -c release --package-path Packages/SquishKit squish-levels check Levels
+      - name: Squishy pictures sit evenly in a jar
+        run: |
+          python3 -m pip install --quiet --user --break-system-packages pillow==10.4.0
+          python3 scripts/check_seating.py
+
+  golden-path:
+    name: App build and golden path UI test (gate 3)
+    # The only Mac job: it builds the app and runs it, so a separate build job would pay twice.
+    runs-on: macos-15
+    needs: rules-and-levels
+    if: github.event_name == 'workflow_dispatch'
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - name: Select the newest Xcode
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
+      - name: Generate the Xcode project
+        run: |
+          brew install xcodegen
+          xcodegen generate
+      - name: Run UI tests
+        run: |
+          set -o pipefail
+          UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; print(next(x['udid'] for k,v in sorted(d.items(), reverse=True) if 'iOS' in k for x in v if x['name'].startswith('iPhone')))")
+          echo "Simulator $UDID"
+          xcodebuild test -project SquishSort.xcodeproj -scheme SquishSort -resultBundlePath ui.xcresult \
+            -destination "id=$UDID" -skip-testing:SquishSortUITests/StoreShotTests CODE_SIGNING_ALLOWED=NO \
+            | tee test.log | grep -E "Test Case|error:|TEST|FIRST-SQUISH" || true
+          # Pictures the tests kept (the soft squishy at rest and just squeezed), for a look without a phone.
+          xcrun xcresulttool export attachments --path ui.xcresult --output-path shots || true
+          if ! grep -q "TEST SUCCEEDED" test.log; then
+            echo "::group::UI test diagnostics"
+            grep -E "error:|failed" test.log | head -40 || true
+            grep -A 140 "GOLDEN-PATH" test.log | head -600 || true
+            echo "::endgroup::"
+            exit 1
+          fi
+      - name: Keep the pictures from the UI tests
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-test-pictures
+          path: shots
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Print small copies of the squishy pictures in the log
+        if: always()
+        continue-on-error: true
+        run: |
+          # The log is the one place every reader of this run can reach, so the pictures go there too, small.
+          python3 - <<'PY'
+          import json, os, subprocess, base64
+          try:
+              manifest = json.load(open("shots/manifest.json"))
+          except Exception as e:
+              print("no pictures", e); raise SystemExit(0)
+          for test in manifest:
+              for a in test.get("attachments", []):
+                  name = a.get("suggestedHumanReadableName", "")
+                  if not name.startswith("squishy-"): continue
+                  src = os.path.join("shots", a["exportedFileName"])
+                  out = "/tmp/small.jpg"
+                  subprocess.run(["sips", "-Z", "900", "-s", "format", "jpeg", "-s", "formatOptions", "70", src, "--out", out], check=False, capture_output=True)
+                  data = base64.b64encode(open(out, "rb").read()).decode()
+                  print("PICTURE-BEGIN " + name.split("_")[0])
+                  for i in range(0, len(data), 4000): print("PICTURE " + data[i:i + 4000])
+                  print("PICTURE-END")
+          PY
+      - name: Launch smoke test on an older iOS (17 or 18)
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; print(next((x['udid'] for k,v in sorted(d.items()) if 'iOS-17' in k or 'iOS-18' in k for x in v if x['name'].startswith('iPhone')), ''))")
+          if [ -z "$UDID" ]; then
+            echo "::notice::No iOS 17 or 18 simulator on this runner, so the older-iOS launch test was skipped."
+            exit 0
+          fi
+          echo "Simulator $UDID"
+          xcodebuild test -project SquishSort.xcodeproj -scheme SquishSort -destination "id=$UDID" \
+            -only-testing:SquishSortUITests/GoldenPathTests/testLaunchShowsLevelOne \
+            -only-testing:SquishSortUITests/GoldenPathTests/testHomeTopBarLinesUp CODE_SIGNING_ALLOWED=NO | tee smoke.log | grep -E "Test Case|error:|TEST" || true
+          grep -q "TEST SUCCEEDED" smoke.log
+      - name: Home top bar on the smallest and the largest iPhone
+        run: |
+          # The main run covers one phone; these two cover the ends of the range, so the bar cannot slip on either.
+          for PICK in small large; do
+            UDID=$(xcrun simctl list devices available -j | PICK=$PICK python3 -c "
+          import json, os, sys
+          d = json.load(sys.stdin)['devices']
+          newest = next(v for k, v in sorted(d.items(), reverse=True) if 'iOS' in k and any(x['name'].startswith('iPhone') for x in v))
+          names = ['SE', '16e', 'mini'] if os.environ['PICK'] == 'small' else ['Pro Max', 'Plus']
+          print(next((x['udid'] for n in names for x in newest if x['name'].startswith('iPhone') and n in x['name']), ''))")
+            if [ -z "$UDID" ]; then echo "::notice::No $PICK iPhone simulator on this runner."; continue; fi
+            echo "Simulator $PICK $UDID"
+            xcodebuild test -project SquishSort.xcodeproj -scheme SquishSort -destination "id=$UDID" \
+              -only-testing:SquishSortUITests/GoldenPathTests/testHomeTopBarLinesUp CODE_SIGNING_ALLOWED=NO | tee bar-$PICK.log | grep -E "Test Case|error:|TEST" || true
+            grep -q "TEST SUCCEEDED" bar-$PICK.log
+          done

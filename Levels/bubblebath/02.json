@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "id": "bubblebath-02",
+  "world": "bubblebath",
+  "index": 2,
+  "beat": "easy",
+  "capacity": 4,
+  "jars": [
+    ["soapy", "soapy", "quacky", "quacky"],
+    ["quacky", "quacky", "soapy", "soapy"],
+    []
+  ],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": [[0, 1], [1, 0]]},
+  "par": 3,
+  "solution": [[0, 2], [1, 0], [1, 2]],
+  "capsule": false,
+  "softenAfterFails": null
+}

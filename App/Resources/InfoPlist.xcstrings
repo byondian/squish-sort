@@ -1,0 +1,50 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "NSPhotoLibraryAddUsageDescription": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「シェア」のあとで「ビデオを保存」を選んだときだけ、クリップを写真に保存します。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "공유를 누른 뒤 '비디오 저장'을 선택할 때만 클립을 사진에 저장해요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只有在點了「分享」後選擇「儲存影片」時，才會把短片存到照片。"
+          }
+        }
+      }
+    },
+    "NSUserTrackingUsageDescription": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あなたに合った広告を表示するために使います。許可しなくても、すべて遊べます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "더 잘 맞는 광고를 보여 주기 위해 사용해요. 허용하지 않아도 모두 플레이할 수 있어요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用來顯示更適合你的廣告。不允許也能玩所有內容。"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

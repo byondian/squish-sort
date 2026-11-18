@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "id": "starlight-24",
+  "world": "starlight",
+  "index": 24,
+  "beat": "medium",
+  "capacity": 4,
+  "jars": [
+    ["riff", "riff", "riff", "coco"],
+    ["pip", "nova", "zuzu", "pip"],
+    ["strawbie", "lumi", "strawbie", "zuzu"],
+    ["nova", "strawbie", "nova", "coco"],
+    ["riff", "coco", "pip", "nova"],
+    ["lumi", "zuzu", "coco", "zuzu"],
+    ["pip", "strawbie", "lumi", "lumi"],
+    [],
+    []
+  ],
+  "mechanics": {"hidden": [[1, 0], [2, 2], [3, 1], [4, 0], [4, 1], [5, 0]], "sticky": [], "frozen": [], "curtains": [0, 6]},
+  "par": 20,
+  "solution": [[2, 7], [5, 7], [3, 5], [4, 3], [1, 4], [1, 7], [3, 1], [3, 2], [1, 3], [4, 1], [5, 4], [5, 7], [6, 5], [2, 6], [2, 5], [6, 2], [6, 1], [0, 6], [4, 6], [0, 4]],
+  "capsule": true,
+  "softenAfterFails": null
+}

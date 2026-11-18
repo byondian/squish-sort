@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "id": "junglejam-01",
+  "world": "junglejam",
+  "index": 1,
+  "beat": "intro",
+  "capacity": 4,
+  "jars": [
+    ["tuki", "pina", "pina", "bongo"],
+    ["bongo", "bongo", "bongo", "tuki"],
+    ["pina", "pina", "tuki", "tuki"],
+    [],
+    []
+  ],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": [], "vines": [[1, 1]]},
+  "par": 6,
+  "solution": [[0, 3], [0, 4], [2, 0], [2, 4], [1, 0], [1, 3]],
+  "capsule": false,
+  "softenAfterFails": null
+}

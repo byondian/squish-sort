@@ -1,0 +1,24 @@
+name: TestFlight feedback
+
+# Run by hand. Prints the notes and pictures testers sent through TestFlight into this run's log.
+# Tester names and emails are never printed. Repo secrets: ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  feedback:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Read the feedback
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          pip install --quiet pyjwt==2.9.0 cryptography==43.0.3 pillow==10.4.0
+          python3 scripts/testflight_feedback.py

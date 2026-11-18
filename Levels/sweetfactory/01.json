@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "id": "sweetfactory-01",
+  "world": "sweetfactory",
+  "index": 1,
+  "beat": "intro",
+  "capacity": 4,
+  "jars": [
+    ["macaron", "macaron", "donut", "donut"],
+    ["macaron", "macaron", "donut", "donut"],
+    []
+  ],
+  "mechanics": {"hidden": [[0, 1]], "sticky": [], "frozen": []},
+  "par": 3,
+  "solution": [[0, 2], [1, 2], [0, 1]],
+  "capsule": false,
+  "softenAfterFails": null
+}

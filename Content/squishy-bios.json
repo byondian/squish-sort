@@ -1,0 +1,1222 @@
+{
+ "note": "One-line bios for the Collection card and new-find reveal. Keys are roster ids. en, ja, ko, zh-Hant. Written 17 Nov 2026 by the design thread; Bubble Bath and Jungle Jam bios were added with those worlds (17 Nov). Secrets: each world's secret squishy is the prize for finding every other squishy in that world (riddles say so).",
+ "bios": {
+  "strawbie": {
+   "en": "Smells like summer and blushes when you say hello.",
+   "ja": "夏のにおいがして、あいさつされると赤くなっちゃう。",
+   "ko": "여름 냄새가 나고, 인사하면 얼굴이 빨개져요.",
+   "zh-Hant": "聞起來像夏天，有人打招呼就會臉紅。"
+  },
+  "tango": {
+   "en": "Can't hear music without wiggling a little.",
+   "ja": "音楽がきこえると、ついくねくねしちゃう。",
+   "ko": "음악만 들리면 꼭 살랑살랑 움직여요.",
+   "zh-Hant": "一聽到音樂就忍不住扭一扭。"
+  },
+  "sunny": {
+   "en": "Wakes up first and says good morning to everyone.",
+   "ja": "いちばんに起きて、みんなにおはようを言うよ。",
+   "ko": "제일 먼저 일어나 모두에게 아침 인사를 해요.",
+   "zh-Hant": "總是第一個起床，跟大家說早安。"
+  },
+  "minty": {
+   "en": "Always cool, even on the hottest day.",
+   "ja": "どんなに暑い日でも、いつもクール。",
+   "ko": "아무리 더운 날에도 늘 시원해요.",
+   "zh-Hant": "再熱的天氣也總是涼涼的。"
+  },
+  "blu": {
+   "en": "Thinks every puddle is a tiny ocean.",
+   "ja": "水たまりはぜんぶ小さな海だと思ってる。",
+   "ko": "웅덩이는 전부 작은 바다라고 생각해요.",
+   "zh-Hant": "覺得每個水窪都是小小的海。"
+  },
+  "grapey": {
+   "en": "Comes in a bunch, but likes a quiet moment too.",
+   "ja": "いつもはみんなと一緒、でもひとりの時間も好き。",
+   "ko": "늘 무리 지어 다니지만 조용한 시간도 좋아해요.",
+   "zh-Hant": "總是一串一起出現，但也喜歡安靜的時光。"
+  },
+  "peach-bun": {
+   "en": "Fresh from the steamer and still a little bit warm.",
+   "ja": "せいろから出たばかりで、まだほんのりあったかい。",
+   "ko": "찜기에서 막 나와 아직 따끈따끈해요.",
+   "zh-Hant": "剛從蒸籠出來，還有一點溫溫的。"
+  },
+  "dino-rex": {
+   "en": "Roars in a tiny whisper so he never scares anyone.",
+   "ja": "だれもこわがらせないように、ささやき声でガオー。",
+   "ko": "아무도 무섭지 않게 속삭이듯 어흥 해요.",
+   "zh-Hant": "為了不嚇到別人，總是小小聲地吼。"
+  },
+  "capy": {
+   "en": "The calmest squishy in the shop. Nothing ruffles Capy.",
+   "ja": "お店でいちばんのんびり屋。何があっても動じない。",
+   "ko": "가게에서 제일 느긋해요. 무슨 일에도 끄떡없어요.",
+   "zh-Hant": "店裡最淡定的軟軟，什麼事都不慌。"
+  },
+  "axo": {
+   "en": "Smiles all the time, even when asleep.",
+   "ja": "ねているときも、ずっとにこにこ。",
+   "ko": "잠잘 때도 늘 웃고 있어요.",
+   "zh-Hant": "連睡覺的時候都在微笑。"
+  },
+  "spike": {
+   "en": "Looks prickly, gives the softest hugs.",
+   "ja": "見た目はトゲトゲ、でもハグはいちばんふわふわ。",
+   "ko": "뾰족해 보여도 포옹은 제일 폭신해요.",
+   "zh-Hant": "看起來刺刺的，抱起來卻最軟。"
+  },
+  "snooze": {
+   "en": "Has napped in every jar in the shop.",
+   "ja": "お店のびんで、ぜんぶお昼寝したことがある。",
+   "ko": "가게의 모든 병에서 낮잠을 자 봤어요.",
+   "zh-Hant": "店裡每個罐子都睡過午覺。"
+  },
+  "buzzy": {
+   "en": "Hums a happy tune and never, ever stings.",
+   "ja": "ごきげんな歌をハミング。ぜったいにささないよ。",
+   "ko": "신나는 노래를 흥얼거리고 절대 쏘지 않아요.",
+   "zh-Hant": "哼著快樂的歌，從來不會螫人。"
+  },
+  "sparkle-unicorn": {
+   "en": "Leaves a trail of glitter everywhere, and says sorry every time.",
+   "ja": "どこにでもキラキラを落として、そのたびにごめんねって言う。",
+   "ko": "어디든 반짝이를 흘리고, 그때마다 미안하다고 해요.",
+   "zh-Hant": "走到哪裡都掉亮粉，每次都說對不起。"
+  },
+  "blaze-dragon": {
+   "en": "Breathes warm air, perfect for cold toes.",
+   "ja": "あったかい息をふいて、つめたいつま先をぽかぽかに。",
+   "ko": "따뜻한 숨으로 시린 발가락을 녹여 줘요.",
+   "zh-Hant": "呼出暖暖的氣，最適合冰冷的腳趾。"
+  },
+  "morphy": {
+   "en": "Never the same twice. Today it might be you.",
+   "ja": "二度と同じ形にならない。今日はきみの形かも。",
+   "ko": "똑같은 모습은 두 번 없어요. 오늘은 너일지도.",
+   "zh-Hant": "從不重複同一個樣子，今天也許會變成你。"
+  },
+  "golden-shop-cat": {
+   "en": "Owns the shop. Lets the humans think they do.",
+   "ja": "お店の本当の主。人間には内緒にしてあげてる。",
+   "ko": "사실 가게 주인이에요. 사람들에겐 비밀이에요.",
+   "zh-Hant": "其實是店主，只是讓人類以為自己才是。"
+  },
+  "macaron": {
+   "en": "Fancy on the outside, gooey in the middle.",
+   "ja": "外はおしゃれ、中はとろとろ。",
+   "ko": "겉은 우아하고 속은 말랑말랑해요.",
+   "zh-Hant": "外表很優雅，裡面軟綿綿。"
+  },
+  "donut": {
+   "en": "Has a hole in the middle, and a whole lot of heart.",
+   "ja": "まんなかに穴、でも心はいっぱい。",
+   "ko": "가운데는 비어도 마음은 가득해요.",
+   "zh-Hant": "中間有個洞，心裡卻滿滿的。"
+  },
+  "jelly": {
+   "en": "Wobbles with excitement at the smallest thing.",
+   "ja": "ちょっとしたことで、うれしくてぷるぷる。",
+   "ko": "작은 일에도 신나서 탱글탱글 흔들려요.",
+   "zh-Hant": "一點小事就開心得抖抖抖。"
+  },
+  "cupcake": {
+   "en": "Celebrates everything, even Tuesdays.",
+   "ja": "なんでもお祝いしちゃう。火曜日だって。",
+   "ko": "뭐든 축하해요. 화요일도요.",
+   "zh-Hant": "什麼都要慶祝，連星期二也是。"
+  },
+  "gummy-bear": {
+   "en": "Stretchy, bouncy, and always up for a game.",
+   "ja": "のびのび、ぽよんぽよん、いつでも遊ぶ気まんまん。",
+   "ko": "쭉쭉 늘어나고 통통 튀고, 늘 놀 준비 완료.",
+   "zh-Hant": "Q彈又有彈性，隨時都想玩。"
+  },
+  "lolly": {
+   "en": "Gets a little dizzy from all that swirling.",
+   "ja": "ぐるぐるしすぎて、ちょっぴり目が回ってる。",
+   "ko": "빙글빙글 돌다가 살짝 어지러워요.",
+   "zh-Hant": "轉來轉去，有點頭暈。"
+  },
+  "mochi-ice": {
+   "en": "Cool on the outside, sweet all the way through.",
+   "ja": "外はひんやり、中まであまあま。",
+   "ko": "겉은 시원하고 속까지 달콤해요.",
+   "zh-Hant": "外面冰冰的，裡面甜到底。"
+  },
+  "panda-dumpling": {
+   "en": "Rolls instead of walks. Much faster.",
+   "ja": "歩くよりころがるほうが速い。",
+   "ko": "걷지 않고 굴러다녀요. 훨씬 빨라요.",
+   "zh-Hant": "不走路，用滾的，快多了。"
+  },
+  "butter-bar": {
+   "en": "Melts a little when you squeeze too long.",
+   "ja": "長くにぎると、ちょっととろけちゃう。",
+   "ko": "너무 오래 꾹 누르면 살짝 녹아요.",
+   "zh-Hant": "捏太久會有點融化。"
+  },
+  "strawberry-cow": {
+   "en": "Gives pink milk. Nobody knows how.",
+   "ja": "ピンクのミルクが出る。どうしてかはナゾ。",
+   "ko": "분홍 우유가 나와요. 이유는 아무도 몰라요.",
+   "zh-Hant": "會產粉紅色的牛奶，沒人知道為什麼。"
+  },
+  "cream-puff": {
+   "en": "So light it floats off when nobody is looking.",
+   "ja": "軽すぎて、だれも見てないとふわっと浮く。",
+   "ko": "너무 가벼워서 아무도 안 볼 때 둥실 떠요.",
+   "zh-Hant": "輕到沒人看的時候就飄起來。"
+  },
+  "taffy-snake": {
+   "en": "Ties itself in knots, then giggles about it.",
+   "ja": "自分で結び目を作って、くすくす笑う。",
+   "ko": "스스로 꼬여 매듭을 만들고 키득키득 웃어요.",
+   "zh-Hant": "把自己打成結，然後咯咯笑。"
+  },
+  "choco-bat": {
+   "en": "Stays up late, but only for midnight snacks.",
+   "ja": "夜ふかしするのは、真夜中のおやつのためだけ。",
+   "ko": "밤늦게까지 깨 있는 건 야식 때문이에요.",
+   "zh-Hant": "熬夜只是為了吃宵夜。"
+  },
+  "birthday-cake": {
+   "en": "Every day is somebody's birthday somewhere.",
+   "ja": "毎日どこかで、だれかの誕生日。",
+   "ko": "매일 어딘가에서 누군가의 생일이에요.",
+   "zh-Hant": "每天都是某個人的生日。"
+  },
+  "rainbow-toast": {
+   "en": "Pops out of the toaster in seven colours.",
+   "ja": "トースターから七色でポンッ。",
+   "ko": "토스터에서 일곱 빛깔로 팡 튀어나와요.",
+   "zh-Hant": "從烤麵包機跳出來時是七種顏色。"
+  },
+  "swirl": {
+   "en": "Never stops spinning. Says it helps it think.",
+   "ja": "ずっとくるくる。考えごとにいいんだって。",
+   "ko": "멈추지 않고 빙글빙글. 생각할 때 좋대요.",
+   "zh-Hant": "一直轉個不停，說這樣比較好思考。"
+  },
+  "golden-gummy": {
+   "en": "The factory's best kept secret. Shiny and squishy.",
+   "ja": "工場いちばんのヒミツ。ピカピカでぷにぷに。",
+   "ko": "공장의 최고 비밀. 반짝반짝 말랑말랑.",
+   "zh-Hant": "工廠最大的秘密，閃亮又軟Q。"
+  },
+  "lumi": {
+   "en": "Glows a little brighter when the crowd cheers.",
+   "ja": "声援がきこえると、ちょっと明るく光る。",
+   "ko": "응원 소리가 들리면 조금 더 환하게 빛나요.",
+   "zh-Hant": "聽到歡呼聲就會更亮一點。"
+  },
+  "riff": {
+   "en": "Plays air guitar between every song.",
+   "ja": "曲と曲のあいだは、いつもエアギター。",
+   "ko": "노래 사이사이 늘 에어 기타를 쳐요.",
+   "zh-Hant": "每首歌之間都在彈空氣吉他。"
+  },
+  "zuzu": {
+   "en": "Knows every dance move and makes up new ones.",
+   "ja": "ダンスはぜんぶおぼえてて、新しいのも作っちゃう。",
+   "ko": "모든 춤을 알고, 새로운 춤도 만들어요.",
+   "zh-Hant": "每個舞步都會，還會自己編新的。"
+  },
+  "pip": {
+   "en": "Small voice, big dreams of the main stage.",
+   "ja": "声は小さいけど、夢はメインステージ。",
+   "ko": "목소리는 작아도 꿈은 메인 무대예요.",
+   "zh-Hant": "聲音小小的，夢想是站上主舞台。"
+  },
+  "nova": {
+   "en": "Was a tiny star once. Still sparkles on stage.",
+   "ja": "むかしは小さな星だった。今もステージでキラキラ。",
+   "ko": "예전엔 작은 별이었어요. 지금도 무대에서 반짝여요.",
+   "zh-Hant": "以前是一顆小星星，在舞台上依然閃亮。"
+  },
+  "coco": {
+   "en": "Brings snacks for the whole band.",
+   "ja": "バンドのみんなにおやつを持ってくる。",
+   "ko": "밴드 모두를 위해 간식을 챙겨 와요.",
+   "zh-Hant": "總是幫整個樂團帶點心。"
+  },
+  "lightstick-lamb": {
+   "en": "Waves its light for everyone, not just the stars.",
+   "ja": "スターだけじゃなく、みんなのためにライトをふる。",
+   "ko": "스타만이 아니라 모두를 위해 응원봉을 흔들어요.",
+   "zh-Hant": "不只為明星，也為每個人揮動應援棒。"
+  },
+  "photocard-panda": {
+   "en": "Has a picture of every friend it ever made.",
+   "ja": "できた友だちみんなの写真を持ってる。",
+   "ko": "사귄 친구 모두의 사진을 가지고 있어요.",
+   "zh-Hant": "收藏了每個交過的朋友的照片。"
+  },
+  "encore-otter": {
+   "en": "Claps so hard the show always goes on.",
+   "ja": "拍手が大きすぎて、ショーがいつも終わらない。",
+   "ko": "박수를 너무 세게 쳐서 공연이 끝나지 않아요.",
+   "zh-Hant": "拍手拍到表演永遠不會結束。"
+  },
+  "fan-sign-hamster": {
+   "en": "Signs autographs in tiny paw prints.",
+   "ja": "小さな足あとでサインしてくれる。",
+   "ko": "작은 발도장으로 사인해 줘요.",
+   "zh-Hant": "用小小的腳印幫大家簽名。"
+  },
+  "chomp": {
+   "en": "Sings with its mouth full. Every single time.",
+   "ja": "いつも口いっぱいで歌っちゃう。",
+   "ko": "늘 입에 한가득 문 채로 노래해요.",
+   "zh-Hant": "每次都是嘴巴塞滿東西在唱歌。"
+  },
+  "mushie": {
+   "en": "Pops up backstage when you least expect it.",
+   "ja": "思いがけないときに、ステージ裏からひょっこり。",
+   "ko": "생각지도 못할 때 무대 뒤에서 쏙 나타나요.",
+   "zh-Hant": "總在意想不到的時候從後台冒出來。"
+  },
+  "sleepy-moon": {
+   "en": "Hums the lullaby at the end of every show.",
+   "ja": "ショーの最後に、いつも子守歌をハミング。",
+   "ko": "공연이 끝날 때마다 자장가를 흥얼거려요.",
+   "zh-Hant": "每場表演的最後都會哼搖籃曲。"
+  },
+  "centre-star": {
+   "en": "Always in the middle, always sharing the light.",
+   "ja": "いつもまんなかで、光をみんなに分けてる。",
+   "ko": "늘 한가운데서 빛을 모두와 나눠요.",
+   "zh-Hant": "總是站在中間，把光分給大家。"
+  },
+  "star-narwhal": {
+   "en": "Swims through the stage lights like the sea.",
+   "ja": "ステージのライトの中を、海みたいに泳ぐ。",
+   "ko": "무대 조명 속을 바다처럼 헤엄쳐요.",
+   "zh-Hant": "在舞台燈光裡像在海裡一樣游泳。"
+  },
+  "glimmer": {
+   "en": "Turns any room into a disco. Instantly.",
+   "ja": "どんな部屋も、一瞬でディスコに。",
+   "ko": "어떤 방이든 순식간에 디스코장으로 만들어요.",
+   "zh-Hant": "瞬間把任何房間變成迪斯可舞廳。"
+  },
+  "golden-mic": {
+   "en": "Only sings for those who sort every jar.",
+   "ja": "びんをぜんぶそろえた人のためだけに歌う。",
+   "ko": "모든 병을 정리한 사람에게만 노래해요.",
+   "zh-Hant": "只為整理好每個罐子的人唱歌。"
+  },
+  "santa": {
+   "en": "Checks the list twice, squishes it once.",
+   "ja": "リストを二回たしかめて、一回むぎゅっ。",
+   "ko": "명단을 두 번 확인하고 한 번 꾹.",
+   "zh-Hant": "名單檢查兩次，捏一次。"
+  },
+  "elfie": {
+   "en": "Wraps presents faster than you can blink.",
+   "ja": "まばたきより速くプレゼントを包んじゃう。",
+   "ko": "눈 깜짝할 새보다 빨리 선물을 포장해요.",
+   "zh-Hant": "包禮物比眨眼還快。"
+  },
+  "reindeer": {
+   "en": "Practises flying by bouncing on the bed.",
+   "ja": "ベッドでぽよんぽよんして、空を飛ぶ練習中。",
+   "ko": "침대에서 통통 뛰며 나는 연습을 해요.",
+   "zh-Hant": "在床上跳來跳去練習飛行。"
+  },
+  "snowbo": {
+   "en": "Never melts, because everyone keeps it cosy.",
+   "ja": "みんながあたたかくしてくれるから、とけないよ。",
+   "ko": "모두가 따뜻하게 해 줘서 녹지 않아요.",
+   "zh-Hant": "大家都對它很好，所以從不融化。"
+  },
+  "ginger": {
+   "en": "Smells like cookies and gives the best high fives.",
+   "ja": "クッキーのにおいで、ハイタッチがいちばん上手。",
+   "ko": "쿠키 냄새가 나고 하이파이브를 제일 잘해요.",
+   "zh-Hant": "聞起來像餅乾，擊掌最厲害。"
+  },
+  "waddles": {
+   "en": "Slides everywhere on its tummy. Wheee!",
+   "ja": "どこでもおなかでスーッとすべる。わーい！",
+   "ko": "어디든 배로 쭉 미끄러져요. 야호!",
+   "zh-Hant": "到哪裡都用肚子滑行。耶！"
+  },
+  "candy-cane-cat": {
+   "en": "Curls up in a perfect hook shape to sleep.",
+   "ja": "ねるときは、きれいなステッキの形にまるくなる。",
+   "ko": "잘 때는 완벽한 지팡이 모양으로 몸을 말아요.",
+   "zh-Hant": "睡覺時捲成完美的拐杖形狀。"
+  },
+  "hot-cocoa-bear": {
+   "en": "Always has room for one more marshmallow.",
+   "ja": "マシュマロはいつでもあとひとつ入る。",
+   "ko": "마시멜로 하나 더 들어갈 자리는 늘 있어요.",
+   "zh-Hant": "永遠還能再多放一顆棉花糖。"
+  },
+  "polar-bear": {
+   "en": "Gives hugs that feel like fresh snow.",
+   "ja": "ハグすると、新しい雪みたいにふわふわ。",
+   "ko": "갓 내린 눈처럼 포근한 포옹을 해 줘요.",
+   "zh-Hant": "抱起來像剛下的雪一樣鬆軟。"
+  },
+  "nutcracker-mouse": {
+   "en": "Guards the cookie tin with a very serious face.",
+   "ja": "とってもまじめな顔でクッキー缶を守ってる。",
+   "ko": "아주 진지한 얼굴로 쿠키 통을 지켜요.",
+   "zh-Hant": "用非常認真的表情守護餅乾盒。"
+  },
+  "starry-tree": {
+   "en": "Lights up one star for every friend who visits.",
+   "ja": "友だちが来るたびに、星をひとつ光らせる。",
+   "ko": "친구가 올 때마다 별 하나를 밝혀요.",
+   "zh-Hant": "每有一個朋友來訪，就點亮一顆星。"
+  },
+  "flurry": {
+   "en": "Dances so fast it makes its own snowstorm.",
+   "ja": "速く踊りすぎて、自分で吹雪をおこしちゃう。",
+   "ko": "너무 빨리 춤춰서 스스로 눈보라를 일으켜요.",
+   "zh-Hant": "跳舞跳得太快，自己颳起了暴風雪。"
+  },
+  "golden-bell": {
+   "en": "Rings only once a year, on the merriest night.",
+   "ja": "一年にいちど、いちばん楽しい夜だけ鳴る。",
+   "ko": "일 년에 한 번, 가장 즐거운 밤에만 울려요.",
+   "zh-Hant": "一年只響一次，在最快樂的那個夜晚。"
+  },
+  "quacky": {
+   "en": "Too cool for the pool. Never takes the shades off.",
+   "ja": "プールよりクール。サングラスはぜったいはずさない。",
+   "ko": "수영장보다 쿨해요. 선글라스는 절대 안 벗어요.",
+   "zh-Hant": "比泳池還酷，墨鏡從來不摘。"
+  },
+  "soapy": {
+   "en": "Smells like roses and leaves everything squeaky clean.",
+   "ja": "バラのかおりで、なんでもピカピカにしちゃう。",
+   "ko": "장미 향이 나고, 뭐든 뽀득뽀득 깨끗하게 해요.",
+   "zh-Hant": "有玫瑰香，把什麼都洗得亮晶晶。"
+  },
+  "bubbly": {
+   "en": "A little cloud of foam that giggles when it pops.",
+   "ja": "ふわふわのあわ。はじけるとクスクス笑うよ。",
+   "ko": "작은 거품 구름. 터질 때 키득키득 웃어요.",
+   "zh-Hant": "一小朵泡泡雲，破掉時會咯咯笑。"
+  },
+  "starla": {
+   "en": "Waves with all five arms at once.",
+   "ja": "5本のうでで、いっぺんに手をふるよ。",
+   "ko": "다섯 팔로 한꺼번에 손을 흔들어요.",
+   "zh-Hant": "五隻手一起跟你揮揮。"
+  },
+  "shelly": {
+   "en": "Keeps a tiny secret inside. Won't say what.",
+   "ja": "中に小さなヒミツがあるよ。なにかは内緒。",
+   "ko": "안에 작은 비밀이 있어요. 뭔지는 안 알려 줘요.",
+   "zh-Hant": "裡面藏著小秘密，就是不說。"
+  },
+  "fizzy": {
+   "en": "Drops in, fizzes like mad, turns the water rainbow.",
+   "ja": "ポチャンと入って、シュワシュワ。お湯がにじ色に。",
+   "ko": "퐁당 들어가 보글보글, 물을 무지개색으로 바꿔요.",
+   "zh-Hant": "撲通跳進去，嘶嘶冒泡，把水變成彩虹色。"
+  },
+  "floaty-otter": {
+   "en": "Has floated in the same ring all day. No plans to stop.",
+   "ja": "一日じゅう同じうきわでぷかぷか。やめる気はないよ。",
+   "ko": "하루 종일 같은 튜브에서 둥둥. 그만둘 생각 없어요.",
+   "zh-Hant": "整天漂在同一個泳圈上，沒有要停的意思。"
+  },
+  "shower-cap-cat": {
+   "en": "Hates getting wet. Loves the hat.",
+   "ja": "ぬれるのは大きらい。でもキャップは大すき。",
+   "ko": "물은 싫지만 샤워캡은 정말 좋아해요.",
+   "zh-Hant": "討厭弄濕，但超愛這頂浴帽。"
+  },
+  "towel-bear": {
+   "en": "Warm, fluffy and always fresh from the dryer.",
+   "ja": "ぽかぽかふわふわ。いつもかんそうきから出たて。",
+   "ko": "따끈하고 폭신해요. 늘 건조기에서 막 나왔어요.",
+   "zh-Hant": "暖暖蓬蓬的，永遠像剛從烘衣機出來。"
+  },
+  "bath-turtle": {
+   "en": "Slow in the race, fast in the bath.",
+   "ja": "かけっこはおそいけど、おふろでは速いよ。",
+   "ko": "달리기는 느려도 욕조에서는 빨라요.",
+   "zh-Hant": "賽跑很慢，洗澡很快。"
+  },
+  "bubble-seal": {
+   "en": "Can balance a bubble on its nose for a whole minute.",
+   "ja": "鼻の上にあわを1分間のせていられるよ。",
+   "ko": "코 위에 비눗방울을 1분이나 올려둘 수 있어요.",
+   "zh-Hant": "能把泡泡頂在鼻子上整整一分鐘。"
+  },
+  "tub-hippo": {
+   "en": "Takes up the whole tub. Shares the bubbles.",
+   "ja": "おふろをひとりじめ。でも、あわは分けてくれる。",
+   "ko": "욕조를 다 차지하지만 거품은 나눠 줘요.",
+   "zh-Hant": "一個人佔滿浴缸，但泡泡會分給你。"
+  },
+  "scrubby-crab": {
+   "en": "Scrubs sideways. Gets every corner.",
+   "ja": "横歩きでゴシゴシ。すみっこまでピカピカ。",
+   "ko": "옆으로 걸으며 쓱싹쓱싹. 구석구석 다 닦아요.",
+   "zh-Hant": "橫著刷刷刷，每個角落都不放過。"
+  },
+  "mer-kitty": {
+   "en": "Half kitten, half mermaid, all splash.",
+   "ja": "半分こねこ、半分にんぎょ。ぜんぶバシャバシャ。",
+   "ko": "반은 고양이, 반은 인어. 온통 첨벙첨벙.",
+   "zh-Hant": "一半小貓，一半美人魚，全身都是水花。"
+  },
+  "prisma": {
+   "en": "The biggest bubble in the bath. Please don't pop.",
+   "ja": "おふろでいちばん大きなあわ。われないでね。",
+   "ko": "욕조에서 제일 큰 비눗방울. 터지면 안 돼요.",
+   "zh-Hant": "浴室裡最大的泡泡，拜託不要破。"
+  },
+  "splash": {
+   "en": "Never the same shape twice. Always a bit damp.",
+   "ja": "同じ形は二度とないよ。いつもちょっとしっとり。",
+   "ko": "같은 모양은 두 번 없어요. 늘 조금 촉촉해요.",
+   "zh-Hant": "從來不會變同一個形狀，永遠有點濕濕的。"
+  },
+  "golden-ducky": {
+   "en": "The star of the tub. Even the bubbles ask for a photo.",
+   "ja": "おふろのスター。あわたちも写真をほしがるよ。",
+   "ko": "욕조의 스타. 거품들도 사진을 찍고 싶어 해요.",
+   "zh-Hant": "浴缸裡的大明星，連泡泡都想合照。"
+  },
+  "bongo": {
+   "en": "Drums on everything. Tables, tummies, coconuts.",
+   "ja": "なんでもたたいちゃう。つくえも、おなかも、ココナッツも。",
+   "ko": "뭐든 두드려요. 책상도, 배도, 코코넛도.",
+   "zh-Hant": "什麼都拿來敲：桌子、肚子、椰子。"
+  },
+  "tuki": {
+   "en": "That beak is for fruit and for telling secrets.",
+   "ja": "このくちばしは、フルーツとないしょ話のため。",
+   "ko": "이 부리는 과일 먹고 비밀 얘기할 때 써요.",
+   "zh-Hant": "這張大嘴用來吃水果，也用來說悄悄話。"
+  },
+  "pina": {
+   "en": "Spiky on top, sweet all the way through.",
+   "ja": "頭はツンツン、中身はずっとあまいよ。",
+   "ko": "머리는 뾰족뾰족, 속은 끝까지 달콤해요.",
+   "zh-Hant": "頭上刺刺的，裡面從頭甜到尾。"
+  },
+  "leafy": {
+   "en": "Catches the first raindrop every morning.",
+   "ja": "毎朝、いちばん最初の雨つぶをキャッチするよ。",
+   "ko": "매일 아침 첫 빗방울을 받아요.",
+   "zh-Hant": "每天早上接住第一滴雨。"
+  },
+  "dotty": {
+   "en": "Counts her spots every night. Still seven.",
+   "ja": "毎ばん、水玉をかぞえるよ。やっぱり7つ。",
+   "ko": "매일 밤 점을 세어요. 여전히 일곱 개.",
+   "zh-Hant": "每晚數自己的點點，還是七個。"
+  },
+  "nana": {
+   "en": "Always smiling. It's just the shape.",
+   "ja": "いつもにっこり。そういう形なんだ。",
+   "ko": "늘 웃고 있어요. 원래 그런 모양이에요.",
+   "zh-Hant": "永遠在微笑，因為形狀就是這樣。"
+  },
+  "snoozy-sloth": {
+   "en": "Fell asleep mid-yawn. Still hanging on.",
+   "ja": "あくびのとちゅうでねちゃった。まだぶらさがってる。",
+   "ko": "하품하다 잠들었어요. 아직도 매달려 있어요.",
+   "zh-Hant": "打哈欠打到一半睡著了，還掛在樹上。"
+  },
+  "kami": {
+   "en": "Changes colour when it's shy. So, all the time.",
+   "ja": "はずかしいと色がかわるよ。つまり、いつも。",
+   "ko": "부끄러우면 색이 바뀌어요. 그러니까 늘 그래요.",
+   "zh-Hant": "害羞就會變色，所以一直在變。"
+  },
+  "tiger-cub": {
+   "en": "Practising a roar. So far it's a squeak.",
+   "ja": "ガオーのれんしゅう中。今のところ、キュッ。",
+   "ko": "어흥 연습 중이에요. 아직은 삑 소리만 나요.",
+   "zh-Hant": "正在練習吼叫，目前只會吱一聲。"
+  },
+  "polly": {
+   "en": "Repeats everything you say, but cuter.",
+   "ja": "きみの言葉をまねするよ。もっとかわいくね。",
+   "ko": "네가 한 말을 따라 해요. 더 귀엽게요.",
+   "zh-Hant": "會學你說話，而且更可愛。"
+  },
+  "red-panda": {
+   "en": "Naps in trees and wakes up for snacks.",
+   "ja": "木の上でおひるね。おやつの時間だけ起きるよ。",
+   "ko": "나무에서 낮잠 자다가 간식 시간에만 일어나요.",
+   "zh-Hant": "在樹上午睡，只為點心醒來。"
+  },
+  "hummy": {
+   "en": "Wings so fast you only hear the hum.",
+   "ja": "はねが速すぎて、ブーンとしか聞こえないよ。",
+   "ko": "날개가 너무 빨라서 윙 소리만 들려요.",
+   "zh-Hant": "翅膀快到只聽得見嗡嗡聲。"
+  },
+  "pango": {
+   "en": "Rolls into a ball when surprised. Rolls back for hugs.",
+   "ja": "びっくりするとまるくなる。ハグのときは元どおり。",
+   "ko": "놀라면 공처럼 말려요. 안아 주면 다시 펴져요.",
+   "zh-Hant": "嚇到就捲成一顆球，要抱抱才會打開。"
+  },
+  "blossom-ellie": {
+   "en": "Never forgets a friend, or where the flowers grow.",
+   "ja": "友だちも、花がさく場所も、ぜったいわすれない。",
+   "ko": "친구도, 꽃 피는 곳도 절대 잊지 않아요.",
+   "zh-Hant": "永遠記得朋友，也記得花開在哪裡。"
+  },
+  "glowbug": {
+   "en": "The jungle's night light. Glows brighter when happy.",
+   "ja": "ジャングルのナイトライト。うれしいともっと光るよ。",
+   "ko": "정글의 무드등. 기쁘면 더 밝게 빛나요.",
+   "zh-Hant": "叢林的小夜燈，開心時會更亮。"
+  },
+  "vinny": {
+   "en": "Never the same shape twice. Grows a new leaf each time.",
+   "ja": "同じ形は二度とないよ。そのたびに新しい葉っぱが出る。",
+   "ko": "같은 모양은 두 번 없어요. 변할 때마다 새 잎이 나요.",
+   "zh-Hant": "從來不會變同一個形狀，每次都長一片新葉子。"
+  },
+  "golden-nana": {
+   "en": "The ripest banana in the jungle. Shines like the sun.",
+   "ja": "ジャングルでいちばん熟したバナナ。おひさまみたいに光るよ。",
+   "ko": "정글에서 가장 잘 익은 바나나. 해처럼 빛나요.",
+   "zh-Hant": "叢林裡最熟的香蕉，像太陽一樣閃亮。"
+  }
+ },
+ "riddles": {
+  "golden-shop-cat": {
+   "en": "Find every other Toy Shop squishy and I'll come out of hiding.",
+   "ja": "トイショップのほかの子をぜんぶ見つけたら、出てきてあげる。",
+   "ko": "토이숍의 다른 친구들을 모두 찾으면 나타날게요.",
+   "zh-Hant": "找到玩具店其他所有軟軟，我就會現身。"
+  },
+  "golden-gummy": {
+   "en": "Find every other Sweet Factory squishy and I'll roll off the line.",
+   "ja": "スイート工場のほかの子をぜんぶ見つけたら、ラインから出てくるよ。",
+   "ko": "스위트 공장의 다른 친구들을 모두 찾으면 나타날게요.",
+   "zh-Hant": "找到糖果工廠其他所有軟軟，我就會從生產線滾出來。"
+  },
+  "golden-mic": {
+   "en": "Find every other Starlight Stage squishy and I'll take the spotlight.",
+   "ja": "スターライトステージのほかの子をぜんぶ見つけたら、スポットライトの下へ。",
+   "ko": "스타라이트 스테이지의 다른 친구들을 모두 찾으면 무대에 설게요.",
+   "zh-Hant": "找到星光舞台其他所有軟軟，我就會站上聚光燈下。"
+  },
+  "golden-bell": {
+   "en": "Find every other Grotto squishy and I'll ring for you.",
+   "ja": "グロットのほかの子をぜんぶ見つけたら、きみのために鳴るよ。",
+   "ko": "그로토의 다른 친구들을 모두 찾으면 당신을 위해 울릴게요.",
+   "zh-Hant": "找到聖誕小屋其他所有軟軟，我就會為你響起。"
+  },
+  "golden-ducky": {
+   "en": "Find every other Bubble Bath squishy and I'll float on over.",
+   "ja": "バブルバスのほかの子をぜんぶ見つけたら、ぷかぷか行くよ。",
+   "ko": "보글보글 욕실의 다른 친구들을 모두 찾으면 둥둥 떠서 갈게요.",
+   "zh-Hant": "找到泡泡浴室其他所有軟軟，我就會漂過來。"
+  },
+  "golden-nana": {
+   "en": "Find every other Jungle Jam squishy and I'll drop from the tree.",
+   "ja": "ジャングルジャムのほかの子をぜんぶ見つけたら、木からおりてくるよ。",
+   "ko": "정글 잼의 다른 친구들을 모두 찾으면 나무에서 내려올게요.",
+   "zh-Hant": "找到叢林果醬其他所有軟軟，我就會從樹上掉下來。"
+  }
+ },
+ "stats": {
+  "strawbie": {
+   "squish": 47,
+   "bounce": 47,
+   "stretch": 59,
+   "charm": 61
+  },
+  "tango": {
+   "squish": 50,
+   "bounce": 70,
+   "stretch": 53,
+   "charm": 56
+  },
+  "sunny": {
+   "squish": 57,
+   "bounce": 47,
+   "stretch": 62,
+   "charm": 39
+  },
+  "minty": {
+   "squish": 46,
+   "bounce": 79,
+   "stretch": 52,
+   "charm": 49
+  },
+  "blu": {
+   "squish": 57,
+   "bounce": 67,
+   "stretch": 61,
+   "charm": 43
+  },
+  "grapey": {
+   "squish": 51,
+   "bounce": 47,
+   "stretch": 73,
+   "charm": 42
+  },
+  "peach-bun": {
+   "squish": 86,
+   "bounce": 82,
+   "stretch": 54,
+   "charm": 52
+  },
+  "dino-rex": {
+   "squish": 77,
+   "bounce": 61,
+   "stretch": 53,
+   "charm": 61
+  },
+  "capy": {
+   "squish": 78,
+   "bounce": 69,
+   "stretch": 75,
+   "charm": 72
+  },
+  "axo": {
+   "squish": 58,
+   "bounce": 81,
+   "stretch": 65,
+   "charm": 66
+  },
+  "spike": {
+   "squish": 71,
+   "bounce": 66,
+   "stretch": 73,
+   "charm": 61
+  },
+  "snooze": {
+   "squish": 74,
+   "bounce": 63,
+   "stretch": 67,
+   "charm": 62
+  },
+  "buzzy": {
+   "squish": 68,
+   "bounce": 64,
+   "stretch": 80,
+   "charm": 71
+  },
+  "sparkle-unicorn": {
+   "squish": 70,
+   "bounce": 80,
+   "stretch": 82,
+   "charm": 82
+  },
+  "blaze-dragon": {
+   "squish": 82,
+   "bounce": 90,
+   "stretch": 67,
+   "charm": 72
+  },
+  "morphy": {
+   "squish": 88,
+   "bounce": 78,
+   "stretch": 67,
+   "charm": 76
+  },
+  "golden-shop-cat": {
+   "squish": 99,
+   "bounce": 87,
+   "stretch": 91,
+   "charm": 85
+  },
+  "macaron": {
+   "squish": 69,
+   "bounce": 42,
+   "stretch": 44,
+   "charm": 72
+  },
+  "donut": {
+   "squish": 70,
+   "bounce": 56,
+   "stretch": 57,
+   "charm": 40
+  },
+  "jelly": {
+   "squish": 61,
+   "bounce": 62,
+   "stretch": 51,
+   "charm": 52
+  },
+  "cupcake": {
+   "squish": 49,
+   "bounce": 41,
+   "stretch": 47,
+   "charm": 53
+  },
+  "gummy-bear": {
+   "squish": 48,
+   "bounce": 84,
+   "stretch": 54,
+   "charm": 43
+  },
+  "lolly": {
+   "squish": 55,
+   "bounce": 62,
+   "stretch": 47,
+   "charm": 41
+  },
+  "mochi-ice": {
+   "squish": 74,
+   "bounce": 62,
+   "stretch": 61,
+   "charm": 67
+  },
+  "panda-dumpling": {
+   "squish": 64,
+   "bounce": 70,
+   "stretch": 67,
+   "charm": 68
+  },
+  "butter-bar": {
+   "squish": 77,
+   "bounce": 63,
+   "stretch": 58,
+   "charm": 87
+  },
+  "strawberry-cow": {
+   "squish": 50,
+   "bounce": 73,
+   "stretch": 53,
+   "charm": 63
+  },
+  "cream-puff": {
+   "squish": 94,
+   "bounce": 54,
+   "stretch": 71,
+   "charm": 52
+  },
+  "taffy-snake": {
+   "squish": 70,
+   "bounce": 73,
+   "stretch": 79,
+   "charm": 55
+  },
+  "choco-bat": {
+   "squish": 64,
+   "bounce": 64,
+   "stretch": 72,
+   "charm": 62
+  },
+  "birthday-cake": {
+   "squish": 88,
+   "bounce": 76,
+   "stretch": 64,
+   "charm": 76
+  },
+  "rainbow-toast": {
+   "squish": 93,
+   "bounce": 64,
+   "stretch": 71,
+   "charm": 99
+  },
+  "swirl": {
+   "squish": 62,
+   "bounce": 84,
+   "stretch": 71,
+   "charm": 92
+  },
+  "golden-gummy": {
+   "squish": 91,
+   "bounce": 99,
+   "stretch": 95,
+   "charm": 98
+  },
+  "lumi": {
+   "squish": 39,
+   "bounce": 49,
+   "stretch": 41,
+   "charm": 64
+  },
+  "riff": {
+   "squish": 60,
+   "bounce": 55,
+   "stretch": 50,
+   "charm": 52
+  },
+  "zuzu": {
+   "squish": 60,
+   "bounce": 47,
+   "stretch": 71,
+   "charm": 56
+  },
+  "pip": {
+   "squish": 42,
+   "bounce": 59,
+   "stretch": 57,
+   "charm": 52
+  },
+  "nova": {
+   "squish": 38,
+   "bounce": 70,
+   "stretch": 72,
+   "charm": 59
+  },
+  "coco": {
+   "squish": 42,
+   "bounce": 64,
+   "stretch": 58,
+   "charm": 51
+  },
+  "lightstick-lamb": {
+   "squish": 63,
+   "bounce": 74,
+   "stretch": 66,
+   "charm": 52
+  },
+  "photocard-panda": {
+   "squish": 69,
+   "bounce": 74,
+   "stretch": 56,
+   "charm": 53
+  },
+  "encore-otter": {
+   "squish": 62,
+   "bounce": 59,
+   "stretch": 55,
+   "charm": 80
+  },
+  "fan-sign-hamster": {
+   "squish": 69,
+   "bounce": 63,
+   "stretch": 61,
+   "charm": 68
+  },
+  "chomp": {
+   "squish": 72,
+   "bounce": 92,
+   "stretch": 68,
+   "charm": 51
+  },
+  "mushie": {
+   "squish": 72,
+   "bounce": 83,
+   "stretch": 69,
+   "charm": 69
+  },
+  "sleepy-moon": {
+   "squish": 54,
+   "bounce": 93,
+   "stretch": 71,
+   "charm": 73
+  },
+  "centre-star": {
+   "squish": 85,
+   "bounce": 94,
+   "stretch": 72,
+   "charm": 76
+  },
+  "star-narwhal": {
+   "squish": 70,
+   "bounce": 81,
+   "stretch": 69,
+   "charm": 92
+  },
+  "glimmer": {
+   "squish": 79,
+   "bounce": 80,
+   "stretch": 92,
+   "charm": 65
+  },
+  "golden-mic": {
+   "squish": 86,
+   "bounce": 85,
+   "stretch": 93,
+   "charm": 83
+  },
+  "santa": {
+   "squish": 45,
+   "bounce": 66,
+   "stretch": 73,
+   "charm": 44
+  },
+  "elfie": {
+   "squish": 59,
+   "bounce": 69,
+   "stretch": 73,
+   "charm": 52
+  },
+  "reindeer": {
+   "squish": 48,
+   "bounce": 53,
+   "stretch": 46,
+   "charm": 70
+  },
+  "snowbo": {
+   "squish": 60,
+   "bounce": 56,
+   "stretch": 47,
+   "charm": 38
+  },
+  "ginger": {
+   "squish": 56,
+   "bounce": 53,
+   "stretch": 57,
+   "charm": 41
+  },
+  "waddles": {
+   "squish": 59,
+   "bounce": 56,
+   "stretch": 68,
+   "charm": 61
+  },
+  "candy-cane-cat": {
+   "squish": 70,
+   "bounce": 63,
+   "stretch": 65,
+   "charm": 82
+  },
+  "hot-cocoa-bear": {
+   "squish": 63,
+   "bounce": 74,
+   "stretch": 81,
+   "charm": 52
+  },
+  "polar-bear": {
+   "squish": 60,
+   "bounce": 79,
+   "stretch": 67,
+   "charm": 67
+  },
+  "nutcracker-mouse": {
+   "squish": 71,
+   "bounce": 61,
+   "stretch": 82,
+   "charm": 62
+  },
+  "starry-tree": {
+   "squish": 71,
+   "bounce": 85,
+   "stretch": 86,
+   "charm": 81
+  },
+  "flurry": {
+   "squish": 69,
+   "bounce": 99,
+   "stretch": 83,
+   "charm": 72
+  },
+  "golden-bell": {
+   "squish": 77,
+   "bounce": 89,
+   "stretch": 99,
+   "charm": 73
+  },
+  "quacky": {
+   "squish": 78,
+   "bounce": 44,
+   "stretch": 47,
+   "charm": 44
+  },
+  "soapy": {
+   "squish": 60,
+   "bounce": 55,
+   "stretch": 64,
+   "charm": 37
+  },
+  "bubbly": {
+   "squish": 48,
+   "bounce": 58,
+   "stretch": 53,
+   "charm": 58
+  },
+  "starla": {
+   "squish": 47,
+   "bounce": 74,
+   "stretch": 60,
+   "charm": 33
+  },
+  "shelly": {
+   "squish": 41,
+   "bounce": 60,
+   "stretch": 56,
+   "charm": 53
+  },
+  "fizzy": {
+   "squish": 39,
+   "bounce": 73,
+   "stretch": 53,
+   "charm": 44
+  },
+  "floaty-otter": {
+   "squish": 68,
+   "bounce": 72,
+   "stretch": 85,
+   "charm": 48
+  },
+  "shower-cap-cat": {
+   "squish": 73,
+   "bounce": 99,
+   "stretch": 47,
+   "charm": 51
+  },
+  "towel-bear": {
+   "squish": 65,
+   "bounce": 48,
+   "stretch": 94,
+   "charm": 69
+  },
+  "bath-turtle": {
+   "squish": 63,
+   "bounce": 61,
+   "stretch": 94,
+   "charm": 52
+  },
+  "bubble-seal": {
+   "squish": 52,
+   "bounce": 60,
+   "stretch": 89,
+   "charm": 70
+  },
+  "tub-hippo": {
+   "squish": 56,
+   "bounce": 61,
+   "stretch": 98,
+   "charm": 59
+  },
+  "scrubby-crab": {
+   "squish": 55,
+   "bounce": 78,
+   "stretch": 93,
+   "charm": 45
+  },
+  "mer-kitty": {
+   "squish": 69,
+   "bounce": 99,
+   "stretch": 75,
+   "charm": 68
+  },
+  "prisma": {
+   "squish": 90,
+   "bounce": 55,
+   "stretch": 74,
+   "charm": 97
+  },
+  "splash": {
+   "squish": 91,
+   "bounce": 56,
+   "stretch": 88,
+   "charm": 81
+  },
+  "golden-ducky": {
+   "squish": 99,
+   "bounce": 67,
+   "stretch": 99,
+   "charm": 69
+  },
+  "bongo": {
+   "squish": 42,
+   "bounce": 60,
+   "stretch": 58,
+   "charm": 61
+  },
+  "tuki": {
+   "squish": 40,
+   "bounce": 44,
+   "stretch": 79,
+   "charm": 49
+  },
+  "pina": {
+   "squish": 63,
+   "bounce": 44,
+   "stretch": 73,
+   "charm": 40
+  },
+  "leafy": {
+   "squish": 41,
+   "bounce": 70,
+   "stretch": 69,
+   "charm": 41
+  },
+  "dotty": {
+   "squish": 43,
+   "bounce": 42,
+   "stretch": 65,
+   "charm": 59
+  },
+  "nana": {
+   "squish": 40,
+   "bounce": 81,
+   "stretch": 44,
+   "charm": 54
+  },
+  "snoozy-sloth": {
+   "squish": 61,
+   "bounce": 88,
+   "stretch": 65,
+   "charm": 64
+  },
+  "kami": {
+   "squish": 66,
+   "bounce": 65,
+   "stretch": 58,
+   "charm": 85
+  },
+  "tiger-cub": {
+   "squish": 74,
+   "bounce": 52,
+   "stretch": 99,
+   "charm": 45
+  },
+  "polly": {
+   "squish": 94,
+   "bounce": 81,
+   "stretch": 43,
+   "charm": 52
+  },
+  "red-panda": {
+   "squish": 75,
+   "bounce": 78,
+   "stretch": 60,
+   "charm": 63
+  },
+  "hummy": {
+   "squish": 66,
+   "bounce": 99,
+   "stretch": 47,
+   "charm": 49
+  },
+  "pango": {
+   "squish": 94,
+   "bounce": 72,
+   "stretch": 42,
+   "charm": 59
+  },
+  "blossom-ellie": {
+   "squish": 44,
+   "bounce": 83,
+   "stretch": 80,
+   "charm": 99
+  },
+  "glowbug": {
+   "squish": 78,
+   "bounce": 82,
+   "stretch": 99,
+   "charm": 49
+  },
+  "vinny": {
+   "squish": 91,
+   "bounce": 95,
+   "stretch": 63,
+   "charm": 62
+  },
+  "golden-nana": {
+   "squish": 64,
+   "bounce": 98,
+   "stretch": 73,
+   "charm": 99
+  }
+ },
+ "statsNote": "Squish card stats, 1 to 99: Squish (how soft), Bounce, Stretch, Charm. Rarer squishies have higher totals, each has one standout stat, feel nudges them (foam squishier, jelly bouncier, gel and mochi stretchier). Shown on the squishy card in 1.0; used for the friend face-offs (Squish Slam) in January. Generated deterministically from the id; edit by hand freely."
+}

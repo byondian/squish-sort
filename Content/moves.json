@@ -1,0 +1,2217 @@
+{
+ "version": 1,
+ "note": "Signature moves (signature-moves-spec.md). Coordinates in art units of each squishy's 120-unit box, as written in art-with-new-worlds.js (before its seat offset). part.match: an element of the rendered art belongs to the part when its markup contains any of these strings (invert: the part is everything else). Layer PNGs for parts are in art/moves/. Limbs are drawn by the game as round strokes along a squish-rope chain: outline width = width, fill width = width - 6, taper = tip width / root width. dy: each squishy's seat offset in art units, added to every y here when drawn.",
+ "limbMaterials": {
+  "tail": {
+   "k": 700,
+   "heldK": 0.05,
+   "curl": 0.1,
+   "smax": 1.8,
+   "grav": 4,
+   "damp": 2.0
+  },
+  "trunk": {
+   "k": 900,
+   "heldK": 0.05,
+   "curl": 0.12,
+   "smax": 2.4,
+   "grav": 4,
+   "damp": 2.2
+  },
+  "ear": {
+   "k": 500,
+   "heldK": 0.06,
+   "curl": 0.08,
+   "smax": 1.5,
+   "grav": 6,
+   "damp": 1.6
+  },
+  "antenna": {
+   "k": 1400,
+   "heldK": 0.08,
+   "curl": 0.2,
+   "smax": 1.4,
+   "grav": 2,
+   "damp": 1.2
+  },
+  "frill": {
+   "k": 1000,
+   "heldK": 0.06,
+   "curl": 0.12,
+   "smax": 1.6,
+   "grav": 2,
+   "damp": 1.8
+  },
+  "arm": {
+   "k": 600,
+   "heldK": 0.05,
+   "curl": 0.1,
+   "smax": 1.7,
+   "grav": 6,
+   "damp": 2.0
+  }
+ },
+ "dy": {
+  "strawbie": 1.3,
+  "tango": 3.5,
+  "sunny": 1.3,
+  "minty": 3.5,
+  "blu": 3.5,
+  "grapey": 7.5,
+  "peach-bun": 3.5,
+  "dino-rex": 1.3,
+  "capy": 3.5,
+  "axo": 3.5,
+  "spike": 1.3,
+  "snooze": 3.5,
+  "buzzy": 1.1,
+  "sparkle-unicorn": 3.5,
+  "blaze-dragon": 0.3,
+  "morphy": -2.1,
+  "golden-shop-cat": 3.5,
+  "macaron": 5.3,
+  "donut": 1.3,
+  "jelly": 1.3,
+  "cupcake": 1.3,
+  "gummy-bear": -4.5,
+  "lolly": -6.7,
+  "mochi-ice": 3.5,
+  "panda-dumpling": 3.5,
+  "butter-bar": -0.5,
+  "strawberry-cow": 3.5,
+  "cream-puff": 3.5,
+  "taffy-snake": -8.8,
+  "choco-bat": 3.5,
+  "birthday-cake": -0.5,
+  "rainbow-toast": 1.3,
+  "swirl": -2.1,
+  "golden-gummy": -4.5,
+  "lumi": 3,
+  "riff": 3.5,
+  "zuzu": 1.5,
+  "pip": 3.5,
+  "nova": 2,
+  "coco": 3.4,
+  "lightstick-lamb": 9.5,
+  "photocard-panda": -1.6,
+  "encore-otter": 3.5,
+  "fan-sign-hamster": 3.5,
+  "chomp": 3.5,
+  "mushie": -0.5,
+  "sleepy-moon": 1.5,
+  "centre-star": 11.5,
+  "star-narwhal": 3.5,
+  "glimmer": -2.1,
+  "golden-mic": -2.7,
+  "santa": 3.5,
+  "elfie": 3.5,
+  "reindeer": 3.5,
+  "snowbo": 1.3,
+  "ginger": 1.1,
+  "waddles": 1.3,
+  "candy-cane-cat": 3.5,
+  "hot-cocoa-bear": -0.5,
+  "polar-bear": 3.5,
+  "nutcracker-mouse": 3.5,
+  "starry-tree": 3.5,
+  "flurry": -2.1,
+  "golden-bell": -5.1,
+  "gloop": 1.3,
+  "tapey": 3.5
+ },
+ "moves": {
+  "strawbie": [
+   {
+    "effect": "BURST",
+    "particle": "seeds",
+    "at": [
+     60,
+     40
+    ],
+    "colors": [
+     "#FFE9A0",
+     "#FFFFFF"
+    ],
+    "count": 10
+   }
+  ],
+  "tango": [
+   {
+    "effect": "LIMB",
+    "limbs": [
+     {
+      "spine": [
+       [
+        94,
+        94
+       ],
+       [
+        108,
+        88
+       ],
+       [
+        114,
+        70
+       ],
+       [
+        106,
+        56
+       ]
+      ],
+      "width": 16,
+      "fill": "#FFA25C",
+      "outline": "#3B2A4A",
+      "behind": true,
+      "taper": 0.55,
+      "material": "tail",
+      "tip": {
+       "fill": "#FFF4E8",
+       "length": 0.25
+      }
+     }
+    ],
+    "strip": []
+   }
+  ],
+  "sunny": [
+   {
+    "effect": "BURST",
+    "particle": "feathers",
+    "at": [
+     60,
+     40
+    ],
+    "colors": [
+     "#FFE9A0",
+     "#FFD86B"
+    ],
+    "count": 10
+   },
+   {
+    "effect": "TRICK",
+    "trick": "flap"
+   }
+  ],
+  "minty": [
+   {
+    "effect": "TRICK",
+    "trick": "tongue-hop"
+   }
+  ],
+  "blu": [
+   {
+    "effect": "BURST",
+    "particle": "water",
+    "at": [
+     60,
+     30
+    ],
+    "colors": [
+     "#9AD9F5",
+     "#FFFFFF"
+    ],
+    "count": 12
+   }
+  ],
+  "grapey": [
+   {
+    "effect": "LIMB",
+    "limbs": [
+     {
+      "spine": [
+       [
+        38,
+        92
+       ],
+       [
+        32,
+        104
+       ],
+       [
+        36,
+        114
+       ]
+      ],
+      "width": 9,
+      "fill": "#B48CFF",
+      "outline": "#3B2A4A",
+      "behind": true,
+      "taper": 1.0,
+      "material": "tail"
+     },
+     {
+      "spine": [
+       [
+        52,
+        96
+       ],
+       [
+        50,
+        108
+       ],
+       [
+        54,
+        116
+       ]
+      ],
+      "width": 9,
+      "fill": "#B48CFF",
+      "outline": "#3B2A4A",
+      "behind": true,
+      "taper": 1.0,
+      "material": "tail"
+     },
+     {
+      "spine": [
+       [
+        68,
+        96
+       ],
+       [
+        70,
+        108
+       ],
+       [
+        66,
+        116
+       ]
+      ],
+      "width": 9,
+      "fill": "#B48CFF",
+      "outline": "#3B2A4A",
+      "behind": true,
+      "taper": 1.0,
+      "material": "tail"
+     },
+     {
+      "spine": [
+       [
+        82,
+        92
+       ],
+       [
+        88,
+        104
+       ],
+       [
+        84,
+        114
+       ]
+      ],
+      "width": 9,
+      "fill": "#B48CFF",
+      "outline": "#3B2A4A",
+      "behind": true,
+      "taper": 1.0,
+      "material": "tail"
+     }
+    ],
+    "strip": []
+   }
+  ],
+  "peach-bun": [
+   {
+    "effect": "PUFF",
+    "scale": 1.25,
+    "wobble": 1.0
+   }
+  ],
+  "dino-rex": [
+   {
+    "effect": "TRICK",
+    "trick": "roar"
+   },
+   {
+    "effect": "SOUND",
+    "sound": "roar_tiny"
+   }
+  ],
+  "capy": [
+   {
+    "effect": "LIFT",
+    "part": {
+     "match": [
+      "cx=\"60\" cy=\"26\" r=\"12\"",
+      "M60 14 q6 -8",
+      "cx=\"56\" cy=\"22\" r=\"2\""
+     ],
+     "invert": false
+    },
+    "anchor": [
+     60,
+     38
+    ],
+    "lift": 22,
+    "spin": true
+   }
+  ],
+  "axo": [
+   {
+    "effect": "LIMB",
+    "limbs": [
+     {
+      "spine": [
+       [
+        22,
+        50
+       ],
+       [
+        12,
+        46
+       ],
+       [
+        2,
+        52
+       ]
+      ],
+      "width": 10,
+      "fill": "#FF6FA8",
+      "outline": "#3B2A4A",
+      "behind": true,
+      "taper": 1.0,
+      "material": "frill"
+     },
+     {
+      "spine": [
+       [
+        20,
+        64
+       ],
+       [
+        10,
+        60
+       ],
+       [
+        0,
+        66
+       ]
+      ],
+      "width": 10,
+      "fill": "#FF6FA8",
+      "outline": "#3B2A4A",
+      "behind": true,
+      "taper": 1.0,
+      "material": "frill"
+     },
+     {
+      "spine": [
+       [
+        24,
+        78
+       ],
+       [
+        14,
+        74
+       ],
+       [
+        4,
+        80
+       ]
+      ],
+      "width": 10,
+      "fill": "#FF6FA8",
+      "outline": "#3B2A4A",
+      "behind": true,
+      "taper": 1.0,
+      "material": "frill"
+     },
+     {
+      "spine": [
+       [
+        98,
+        50
+       ],
+       [
+        108,
+        46
+       ],
+       [
+        118,
+        52
+       ]
+      ],
+      "width": 10,
+      "fill": "#FF6FA8",
+      "outline": "#3B2A4A",
+      "behind": true,
+      "taper": 1.0,
+      "material": "frill"
+     },
+     {
+      "spine": [
+       [
+        100,
+        64
+       ],
+       [
+        110,
+        60
+       ],
+       [
+        120,
+        66
+       ]
+      ],
+      "width": 10,
+      "fill": "#FF6FA8",
+      "outline": "#3B2A4A",
+      "behind": true,
+      "taper": 1.0,
+      "material": "frill"
+     },
+     {
+      "spine": [
+       [
+        96,
+        78
+       ],
+       [
+        106,
+        74
+       ],
+       [
+        116,
+        80
+       ]
+      ],
+      "width": 10,
+      "fill": "#FF6FA8",
+      "outline": "#3B2A4A",
+      "behind": true,
+      "taper": 1.0,
+      "material": "frill"
+     }
+    ],
+    "strip": [
+     "M22 50 q-14",
+     "M20 64 q-14",
+     "M24 78 q-14",
+     "M98 50 q14",
+     "M100 64 q14",
+     "M96 78 q14"
+    ]
+   }
+  ],
+  "spike": [
+   {
+    "effect": "PUFF",
+    "scale": 1.3,
+    "wobble": 1.0
+   }
+  ],
+  "snooze": [
+   {
+    "effect": "MELT",
+    "puddle": "#E8D7C2",
+    "drips": [
+     30,
+     60,
+     86
+    ],
+    "edgeY": 60,
+    "form": {
+     "sx": 1.38,
+     "sy": 0.55,
+     "k": 0.8
+    }
+   },
+   {
+    "effect": "SOUND",
+    "sound": "snore"
+   }
+  ],
+  "buzzy": [
+   {
+    "effect": "LIMB",
+    "limbs": [
+     {
+      "spine": [
+       [
+        50,
+        32
+       ],
+       [
+        44,
+        22
+       ],
+       [
+        36,
+        18
+       ]
+      ],
+      "width": 3.5,
+      "fill": "#3B2A4A",
+      "outline": null,
+      "behind": false,
+      "taper": 1.0,
+      "material": "antenna",
+      "tip": {
+       "r": 4,
+       "fill": "#3B2A4A"
+      }
+     },
+     {
+      "spine": [
+       [
+        70,
+        32
+       ],
+       [
+        76,
+        22
+       ],
+       [
+        84,
+        18
+       ]
+      ],
+      "width": 3.5,
+      "fill": "#3B2A4A",
+      "outline": null,
+      "behind": false,
+      "taper": 1.0,
+      "material": "antenna",
+      "tip": {
+       "r": 4,
+       "fill": "#3B2A4A"
+      }
+     }
+    ],
+    "strip": [
+     "M50 32 q-6 -14",
+     "cx=\"36\" cy=\"18\"",
+     "cx=\"84\" cy=\"18\""
+    ]
+   },
+   {
+    "effect": "BURST",
+    "particle": "hearts",
+    "at": [
+     60,
+     30
+    ],
+    "colors": [
+     "#FF7EB6"
+    ],
+    "count": 10
+   }
+  ],
+  "sparkle-unicorn": [
+   {
+    "effect": "BURST",
+    "particle": "glitter",
+    "at": [
+     60,
+     10
+    ],
+    "colors": [
+     "#FF9CC8",
+     "#FFD86B",
+     "#7FE0C4",
+     "#B48CFF"
+    ],
+    "count": 14
+   },
+   {
+    "effect": "GLOW",
+    "at": [
+     60,
+     20
+    ],
+    "color": "#FFE9A0",
+    "radius": 18,
+    "cycleColours": false
+   }
+  ],
+  "blaze-dragon": [
+   {
+    "effect": "BURST",
+    "particle": "smoke-rings",
+    "at": [
+     60,
+     60
+    ],
+    "colors": [
+     "#FFFFFF"
+    ],
+    "count": 10
+   }
+  ],
+  "morphy": [
+   {
+    "effect": "SHIFT"
+   }
+  ],
+  "golden-shop-cat": [
+   {
+    "effect": "LIMB",
+    "limbs": [
+     {
+      "spine": [
+       [
+        96,
+        96
+       ],
+       [
+        112,
+        88
+       ],
+       [
+        116,
+        70
+       ],
+       [
+        108,
+        58
+       ]
+      ],
+      "width": 12,
+      "fill": "#F5C542",
+      "outline": "#3B2A4A",
+      "behind": true,
+      "taper": 0.6,
+      "material": "tail"
+     }
+    ],
+    "strip": []
+   },
+   {
+    "effect": "GLOW",
+    "at": [
+     60,
+     70
+    ],
+    "color": "#FFE08A",
+    "radius": 60,
+    "cycleColours": false
+   }
+  ],
+  "macaron": [
+   {
+    "effect": "SPLIT",
+    "part": {
+     "match": [
+      "M14 62 C14 40",
+      "M18 62 q6 -4"
+     ],
+     "invert": false
+    },
+    "hinge": [
+     16,
+     62
+    ],
+    "open": 35,
+    "inside": "cream"
+   }
+  ],
+  "donut": [
+   {
+    "effect": "BURST",
+    "particle": "sprinkles",
+    "at": [
+     60,
+     40
+    ],
+    "colors": [
+     "#FF7EB6",
+     "#7FE0C4",
+     "#FFD86B",
+     "#7CC8FF"
+    ],
+    "count": 14
+   }
+  ],
+  "jelly": [
+   {
+    "effect": "PUFF",
+    "scale": 1.2,
+    "wobble": 1.6
+   }
+  ],
+  "cupcake": [
+   {
+    "effect": "LIFT",
+    "part": {
+     "match": [
+      "M26 74 L94 74",
+      "M42 76 l3 30"
+     ],
+     "invert": true
+    },
+    "anchor": [
+     60,
+     74
+    ],
+    "lift": 18,
+    "spin": true
+   }
+  ],
+  "gummy-bear": [
+   {
+    "effect": "PUFF",
+    "scale": 1.18,
+    "wobble": 1.8
+   }
+  ],
+  "lolly": [
+   {
+    "effect": "VORTEX",
+    "centre": [
+     60,
+     46
+    ],
+    "particle": "sparkles"
+   }
+  ],
+  "mochi-ice": [
+   {
+    "effect": "MELT",
+    "puddle": "#FFC9DE",
+    "drips": [
+     34,
+     60,
+     84
+    ],
+    "edgeY": 50,
+    "form": {
+     "sx": 1.38,
+     "sy": 0.55,
+     "k": 0.8
+    }
+   }
+  ],
+  "panda-dumpling": [
+   {
+    "effect": "PUFF",
+    "scale": 1.2,
+    "wobble": 1.0
+   },
+   {
+    "effect": "BURST",
+    "particle": "steam",
+    "at": [
+     60,
+     30
+    ],
+    "colors": [
+     "#FFFFFF"
+    ],
+    "count": 10
+   }
+  ],
+  "butter-bar": [
+   {
+    "effect": "MELT",
+    "puddle": "#FFE69A",
+    "drips": [
+     19,
+     40,
+     58
+    ],
+    "edgeY": 56,
+    "form": {
+     "sx": 1.38,
+     "sy": 0.55,
+     "k": 0.8
+    }
+   }
+  ],
+  "strawberry-cow": [
+   {
+    "effect": "BURST",
+    "particle": "milk",
+    "at": [
+     60,
+     40
+    ],
+    "colors": [
+     "#FFFFFF",
+     "#FFC9DE"
+    ],
+    "count": 10
+   }
+  ],
+  "cream-puff": [
+   {
+    "effect": "SPLIT",
+    "variant": "cream",
+    "part": {
+     "match": [
+      "M16 70 C10 54",
+      "<circle cx=\"40\" cy=\"52\""
+     ],
+     "invert": false
+    },
+    "anchor": [
+     60,
+     70
+    ],
+    "maxPull": 0.22,
+    "inside": "cream"
+   }
+  ],
+  "taffy-snake": [
+   {
+    "effect": "ROPE",
+    "body": "taffy"
+   }
+  ],
+  "choco-bat": [
+   {
+    "effect": "TRICK",
+    "trick": "flap"
+   }
+  ],
+  "birthday-cake": [
+   {
+    "effect": "GLOW",
+    "at": [
+     60,
+     14
+    ],
+    "color": "#FFD86B",
+    "radius": 14,
+    "cycleColours": false
+   },
+   {
+    "effect": "BURST",
+    "particle": "confetti",
+    "at": [
+     60,
+     20
+    ],
+    "colors": [
+     "#FF7EB6",
+     "#7FE0C4",
+     "#FFD86B",
+     "#7CC8FF"
+    ],
+    "count": 16
+   }
+  ],
+  "rainbow-toast": [
+   {
+    "effect": "TRICK",
+    "trick": "hop"
+   },
+   {
+    "effect": "BURST",
+    "particle": "rainbow",
+    "at": [
+     60,
+     40
+    ],
+    "colors": [
+     "#FF7EB6",
+     "#FFD86B",
+     "#7FE0C4"
+    ],
+    "count": 10
+   }
+  ],
+  "swirl": [
+   {
+    "effect": "SHIFT"
+   },
+   {
+    "effect": "VORTEX",
+    "centre": [
+     60,
+     60
+    ],
+    "particle": "sparkles"
+   }
+  ],
+  "golden-gummy": [
+   {
+    "effect": "GLOW",
+    "at": [
+     60,
+     64
+    ],
+    "color": "#FFE08A",
+    "radius": 60,
+    "cycleColours": false
+   }
+  ],
+  "lumi": [
+   {
+    "effect": "BURST",
+    "particle": "notes",
+    "at": [
+     60,
+     30
+    ],
+    "colors": [
+     "#FF7EB6",
+     "#B48CFF"
+    ],
+    "count": 10
+   }
+  ],
+  "riff": [
+   {
+    "effect": "SOUND",
+    "sound": "beat_drop"
+   },
+   {
+    "effect": "TRICK",
+    "trick": "bounce"
+   }
+  ],
+  "zuzu": [
+   {
+    "effect": "TRICK",
+    "trick": "spin"
+   }
+  ],
+  "pip": [
+   {
+    "effect": "LIMB",
+    "limbs": [
+     {
+      "spine": [
+       [
+        24,
+        58
+       ],
+       [
+        12,
+        72
+       ],
+       [
+        16,
+        90
+       ]
+      ],
+      "width": 14,
+      "fill": "#F0B43E",
+      "outline": "#3B2A4A",
+      "behind": false,
+      "taper": 1.0,
+      "material": "ear"
+     }
+    ],
+    "strip": [
+     "M22 56 C8 58"
+    ]
+   },
+   {
+    "effect": "GLOW",
+    "at": [
+     104,
+     46
+    ],
+    "color": "#FF9CC8",
+    "note": "the fan lightstick glows with the squeeze"
+   }
+  ],
+  "nova": [
+   {
+    "effect": "LIFT",
+    "part": {
+     "match": [
+      "M30 78 L44 74"
+     ],
+     "invert": false
+    },
+    "anchor": [
+     60,
+     80
+    ],
+    "lift": 8,
+    "spin": false,
+    "pivot": "flip-up",
+    "note": "pops the sequin jacket lapels"
+   }
+  ],
+  "coco": [
+   {
+    "effect": "SOUND",
+    "sound": "keys"
+   },
+   {
+    "effect": "BURST",
+    "particle": "notes",
+    "at": [
+     60,
+     30
+    ],
+    "colors": [
+     "#7FE0C4"
+    ],
+    "count": 10
+   }
+  ],
+  "lightstick-lamb": [
+   {
+    "effect": "GLOW",
+    "at": [
+     92,
+     30
+    ],
+    "color": "#FF7EB6",
+    "radius": 26,
+    "cycleColours": true
+   }
+  ],
+  "photocard-panda": [
+   {
+    "effect": "LIFT",
+    "part": {
+     "match": [
+      "rotate(-10 60 94)"
+     ],
+     "invert": false
+    },
+    "anchor": [
+     60,
+     95
+    ],
+    "lift": 30,
+    "spin": true,
+    "flip": true
+   }
+  ],
+  "encore-otter": [
+   {
+    "effect": "BURST",
+    "particle": "hearts",
+    "at": [
+     60,
+     30
+    ],
+    "colors": [
+     "#FF7EB6",
+     "#FF9CC8"
+    ],
+    "count": 10
+   }
+  ],
+  "fan-sign-hamster": [
+   {
+    "effect": "LIFT",
+    "part": {
+     "match": [
+      "x=\"88\" y=\"34\"",
+      "x=\"74\" y=\"18\"",
+      "M91 38 C82"
+     ],
+     "invert": false
+    },
+    "anchor": [
+     90,
+     74
+    ],
+    "lift": 22,
+    "spin": false
+   }
+  ],
+  "chomp": [
+   {
+    "effect": "TRICK",
+    "trick": "chomp"
+   }
+  ],
+  "mushie": [
+   {
+    "effect": "LIFT",
+    "part": {
+     "match": [
+      "M10 66 C10 34",
+      "<circle cx=\"40\" cy=\"38\" r=\"7\"",
+      "r=\"2.4\" fill=\"#FFF7B0\"",
+      "M60 4 l2 4 4 2"
+     ],
+     "invert": false
+    },
+    "anchor": [
+     60,
+     68
+    ],
+    "lift": 24,
+    "spin": true
+   },
+   {
+    "effect": "BURST",
+    "particle": "spores",
+    "at": [
+     60,
+     40
+    ],
+    "colors": [
+     "#FFFFFF",
+     "#FFC9DE"
+    ],
+    "count": 10
+   }
+  ],
+  "sleepy-moon": [
+   {
+    "effect": "GLOW",
+    "at": [
+     60,
+     64
+    ],
+    "color": "#FFE9A0",
+    "radius": 64,
+    "cycleColours": false
+   }
+  ],
+  "centre-star": [
+   {
+    "effect": "GLOW",
+    "at": [
+     60,
+     60
+    ],
+    "color": "#FFFFFF",
+    "radius": 60,
+    "cycleColours": false
+   },
+   {
+    "effect": "BURST",
+    "particle": "stars",
+    "at": [
+     60,
+     30
+    ],
+    "colors": [
+     "#FFD86B",
+     "#FFFFFF"
+    ],
+    "count": 10
+   }
+  ],
+  "star-narwhal": [
+   {
+    "effect": "LIMB",
+    "limbs": [
+     {
+      "spine": [
+       [
+        96,
+        74
+       ],
+       [
+        108,
+        64
+       ],
+       [
+        112,
+        48
+       ]
+      ],
+      "width": 12,
+      "fill": "#B9D8FF",
+      "outline": "#3B2A4A",
+      "behind": true,
+      "taper": 0.5,
+      "material": "tail",
+      "tip": {
+       "fin": true
+      }
+     }
+    ],
+    "strip": [
+     "M100 74 q16 -12"
+    ]
+   },
+   {
+    "effect": "GLOW",
+    "at": [
+     70,
+     20
+    ],
+    "color": "#FFE9A0",
+    "radius": 20,
+    "cycleColours": false
+   }
+  ],
+  "glimmer": [
+   {
+    "effect": "SHIFT"
+   }
+  ],
+  "golden-mic": [
+   {
+    "effect": "SOUND",
+    "sound": "mic_echo"
+   },
+   {
+    "effect": "GLOW",
+    "at": [
+     60,
+     50
+    ],
+    "color": "#FFE08A",
+    "radius": 56,
+    "cycleColours": false
+   }
+  ],
+  "santa": [
+   {
+    "effect": "LIFT",
+    "part": {
+     "match": [
+      "M28 46 C34 18",
+      "cx=\"98\" cy=\"46\" r=\"8\"",
+      "M22 52 C40 40"
+     ],
+     "invert": false
+    },
+    "anchor": [
+     60,
+     54
+    ],
+    "lift": 24,
+    "spin": true
+   }
+  ],
+  "elfie": [
+   {
+    "effect": "LIFT",
+    "part": {
+     "match": [
+      "M22 54 C26 30",
+      "cx=\"88\" cy=\"6\" r=\"6\"",
+      "M20 56 C40 46"
+     ],
+     "invert": false
+    },
+    "anchor": [
+     60,
+     60
+    ],
+    "lift": 20,
+    "spin": true
+   }
+  ],
+  "reindeer": [
+   {
+    "effect": "GLOW",
+    "at": [
+     60,
+     80
+    ],
+    "color": "#FF5D6C",
+    "radius": 16,
+    "cycleColours": false
+   }
+  ],
+  "snowbo": [
+   {
+    "effect": "MELT",
+    "puddle": "#EAF3FF",
+    "drips": [
+     36,
+     60,
+     84
+    ],
+    "edgeY": 60,
+    "form": {
+     "sx": 1.38,
+     "sy": 0.55,
+     "k": 0.8
+    }
+   }
+  ],
+  "ginger": [
+   {
+    "effect": "TRICK",
+    "trick": "wink"
+   }
+  ],
+  "waddles": [
+   {
+    "effect": "TRICK",
+    "trick": "belly-slide"
+   }
+  ],
+  "candy-cane-cat": [
+   {
+    "effect": "LIMB",
+    "limbs": [
+     {
+      "spine": [
+       [
+        98,
+        100
+       ],
+       [
+        110,
+        96
+       ],
+       [
+        112,
+        72
+       ],
+       [
+        104,
+        62
+       ],
+       [
+        94,
+        68
+       ]
+      ],
+      "width": 12,
+      "fill": "#FFFFFF",
+      "outline": "#3B2A4A",
+      "behind": true,
+      "taper": 1.0,
+      "material": "tail",
+      "dash": {
+       "color": "#FF5D6C",
+       "on": 5,
+       "off": 6
+      }
+     }
+    ],
+    "strip": [
+     "M98 100 C112 100"
+    ]
+   }
+  ],
+  "hot-cocoa-bear": [
+   {
+    "effect": "BURST",
+    "particle": "steam",
+    "at": [
+     60,
+     24
+    ],
+    "colors": [
+     "#FFFFFF"
+    ],
+    "count": 10
+   },
+   {
+    "effect": "BURST",
+    "particle": "marshmallows",
+    "at": [
+     60,
+     30
+    ],
+    "colors": [
+     "#FFFFFF",
+     "#FFC9DE"
+    ],
+    "count": 5
+   }
+  ],
+  "polar-bear": [
+   {
+    "effect": "LIFT",
+    "part": {
+     "match": [
+      "M22 60 C22 30 98 30",
+      "cx=\"22\" cy=\"62\" r=\"11\"",
+      "cx=\"98\" cy=\"62\" r=\"11\""
+     ],
+     "invert": false
+    },
+    "anchor": [
+     60,
+     62
+    ],
+    "lift": 20,
+    "spin": true
+   }
+  ],
+  "nutcracker-mouse": [
+   {
+    "effect": "LIFT",
+    "part": {
+     "match": [
+      "M34 50 L36 10",
+      "x=\"30\" y=\"44\"",
+      "cx=\"60\" cy=\"26\" r=\"5\""
+     ],
+     "invert": false
+    },
+    "anchor": [
+     60,
+     54
+    ],
+    "lift": 22,
+    "spin": true
+   }
+  ],
+  "starry-tree": [
+   {
+    "effect": "GLOW",
+    "at": [
+     60,
+     60
+    ],
+    "color": "#FFD86B",
+    "radius": 56,
+    "cycleColours": true
+   }
+  ],
+  "flurry": [
+   {
+    "effect": "SHIFT"
+   }
+  ],
+  "golden-bell": [
+   {
+    "effect": "SOUND",
+    "sound": "bell_ring"
+   },
+   {
+    "effect": "GLOW",
+    "at": [
+     60,
+     60
+    ],
+    "color": "#FFE08A",
+    "radius": 56,
+    "cycleColours": false
+   }
+  ],
+  "gloop": [
+   {
+    "effect": "PUFF",
+    "scale": 1.3,
+    "wobble": 1.4
+   }
+  ],
+  "tapey": [
+   {
+    "effect": "ROPE",
+    "body": "ribbon",
+    "anchor": [
+     95,
+     41
+    ],
+    "part": {
+     "match": [
+      "M88 40 l10 -6"
+     ],
+     "invert": false
+    },
+    "ribbon": {
+     "fill": "#F3E6D3",
+     "edge": "#E2CFB4",
+     "tab": "#FF9CC8",
+     "width": 9
+    }
+   }
+  ],
+  "quacky": [
+   {
+    "effect": "LIFT",
+    "part": {
+     "match": [
+      "M24 33 L82 33",
+      "M30 32 H50",
+      "M34 35 l5 0"
+     ],
+     "invert": false
+    },
+    "anchor": [
+     53,
+     46
+    ],
+    "lift": 26,
+    "spin": true
+   }
+  ],
+  "soapy": [
+   {
+    "effect": "BURST",
+    "particle": "bubbles",
+    "at": [
+     60,
+     40
+    ],
+    "colors": [
+     "#FFFFFF",
+     "#BFEFFF"
+    ],
+    "count": 12
+   }
+  ],
+  "bubbly": [
+   {
+    "effect": "PUFF",
+    "scale": 1.3,
+    "wobble": 1.0
+   }
+  ],
+  "starla": [
+   {
+    "effect": "TRICK",
+    "trick": "spin"
+   },
+   {
+    "effect": "BURST",
+    "particle": "bubbles",
+    "at": [
+     60,
+     30
+    ],
+    "colors": [
+     "#FFFFFF"
+    ],
+    "count": 10
+   }
+  ],
+  "shelly": [
+   {
+    "effect": "BURST",
+    "particle": "pearls",
+    "at": [
+     60,
+     40
+    ],
+    "colors": [
+     "#FFFFFF",
+     "#FFE4F0"
+    ],
+    "count": 6
+   }
+  ],
+  "fizzy": [
+   {
+    "effect": "BURST",
+    "particle": "fizz",
+    "at": [
+     60,
+     40
+    ],
+    "colors": [
+     "#7FE0C4",
+     "#FFFFFF"
+    ],
+    "count": 16
+   }
+  ],
+  "floaty-otter": [
+   {
+    "effect": "LIFT",
+    "part": {
+     "match": [
+      "M14 90 C14 78 34 74",
+      "M28 78 L22 104",
+      "cx=\"46\" cy=\"80\" rx=\"7\"",
+      "cx=\"74\" cy=\"80\" rx=\"7\""
+     ],
+     "invert": false
+    },
+    "anchor": [
+     60,
+     92
+    ],
+    "lift": 12,
+    "spin": false,
+    "bob": true
+   }
+  ],
+  "shower-cap-cat": [
+   {
+    "effect": "LIFT",
+    "part": {
+     "match": [
+      "M16 62 C8 34",
+      "<circle cx=\"40\" cy=\"34\" r=\"4\"",
+      "M16 62 q6 -6"
+     ],
+     "invert": false
+    },
+    "anchor": [
+     60,
+     60
+    ],
+    "lift": 24,
+    "spin": true
+   }
+  ],
+  "towel-bear": [
+   {
+    "effect": "LIFT",
+    "part": {
+     "match": [
+      "M26 56 C18 26",
+      "M56 16 C46 2",
+      "M32 40 C46 30"
+     ],
+     "invert": false
+    },
+    "anchor": [
+     60,
+     54
+    ],
+    "lift": 24,
+    "spin": true
+   }
+  ],
+  "bath-turtle": [
+   {
+    "effect": "BURST",
+    "particle": "suds",
+    "at": [
+     60,
+     40
+    ],
+    "colors": [
+     "#FFFFFF"
+    ],
+    "count": 10
+   }
+  ],
+  "bubble-seal": [
+   {
+    "effect": "LIFT",
+    "part": {
+     "match": [
+      "cx=\"60\" cy=\"22\" r=\"15\"",
+      "M51 16 q4"
+     ],
+     "invert": false
+    },
+    "anchor": [
+     60,
+     37
+    ],
+    "lift": 30,
+    "spin": false,
+    "popAtTop": true
+   }
+  ],
+  "tub-hippo": [
+   {
+    "effect": "BURST",
+    "particle": "splash",
+    "at": [
+     60,
+     40
+    ],
+    "colors": [
+     "#9AD9F5",
+     "#FFFFFF"
+    ],
+    "count": 14
+   }
+  ],
+  "scrubby-crab": [
+   {
+    "effect": "LIFT",
+    "part": {
+     "match": [
+      "M26 60 c-12 -4",
+      "M94 60 c12 -4"
+     ],
+     "invert": false
+    },
+    "anchor": [
+     60,
+     60
+    ],
+    "lift": 14,
+    "spin": false,
+    "wave": true
+   }
+  ],
+  "mer-kitty": [
+   {
+    "effect": "LIMB",
+    "limbs": [
+     {
+      "spine": [
+       [
+        64,
+        90
+       ],
+       [
+        90,
+        98
+       ],
+       [
+        106,
+        78
+       ],
+       [
+        112,
+        58
+       ]
+      ],
+      "width": 16,
+      "fill": "#7FE0C4",
+      "outline": "#3B2A4A",
+      "behind": true,
+      "taper": 0.45,
+      "material": "tail",
+      "tip": {
+       "fin": true
+      }
+     }
+    ],
+    "strip": [
+     "M58 96 C84 112",
+     "M78 92 q4 -6"
+    ]
+   }
+  ],
+  "prisma": [
+   {
+    "effect": "PUFF",
+    "scale": 1.25,
+    "wobble": 1.0
+   },
+   {
+    "effect": "GLOW",
+    "at": [
+     60,
+     60
+    ],
+    "color": "#FFFFFF",
+    "radius": 60,
+    "cycleColours": true
+   }
+  ],
+  "splash": [
+   {
+    "effect": "SHIFT"
+   }
+  ],
+  "golden-ducky": [
+   {
+    "effect": "LIFT",
+    "part": {
+     "match": [
+      "M26 34 L80 34",
+      "M40 26 l4 8",
+      "M66 26 l4 8",
+      "M36 32 l4 -2"
+     ],
+     "invert": false
+    },
+    "anchor": [
+     53,
+     48
+    ],
+    "lift": 26,
+    "spin": true
+   },
+   {
+    "effect": "GLOW",
+    "at": [
+     53,
+     60
+    ],
+    "color": "#FFE08A",
+    "radius": 50,
+    "cycleColours": false
+   }
+  ],
+  "bongo": [
+   {
+    "effect": "LIMB",
+    "limbs": [
+     {
+      "spine": [
+       [
+        96,
+        98
+       ],
+       [
+        112,
+        92
+       ],
+       [
+        116,
+        72
+       ],
+       [
+        106,
+        64
+       ]
+      ],
+      "width": 8,
+      "fill": "#B8835A",
+      "outline": "#3B2A4A",
+      "behind": true,
+      "taper": 0.8,
+      "material": "tail"
+     }
+    ],
+    "strip": []
+   },
+   {
+    "effect": "SOUND",
+    "sound": "bongos"
+   }
+  ],
+  "tuki": [
+   {
+    "effect": "TRICK",
+    "trick": "beak-clack"
+   }
+  ],
+  "pina": [
+   {
+    "effect": "LIFT",
+    "part": {
+     "match": [
+      "M60 44 C52 30"
+     ],
+     "invert": false
+    },
+    "anchor": [
+     60,
+     44
+    ],
+    "lift": 20,
+    "spin": true
+   }
+  ],
+  "leafy": [
+   {
+    "effect": "TRICK",
+    "trick": "sway"
+   },
+   {
+    "effect": "BURST",
+    "particle": "leaves",
+    "at": [
+     60,
+     30
+    ],
+    "colors": [
+     "#6FCF8E",
+     "#A6E8B8"
+    ],
+    "count": 10
+   }
+  ],
+  "dotty": [
+   {
+    "effect": "LIMB",
+    "limbs": [
+     {
+      "spine": [
+       [
+        44,
+        30
+       ],
+       [
+        38,
+        20
+       ],
+       [
+        30,
+        18
+       ]
+      ],
+      "width": 3.5,
+      "fill": "#3B2A4A",
+      "outline": null,
+      "behind": false,
+      "taper": 1.0,
+      "material": "antenna",
+      "tip": {
+       "r": 4,
+       "fill": "#3B2A4A"
+      }
+     },
+     {
+      "spine": [
+       [
+        76,
+        30
+       ],
+       [
+        82,
+        20
+       ],
+       [
+        90,
+        18
+       ]
+      ],
+      "width": 3.5,
+      "fill": "#3B2A4A",
+      "outline": null,
+      "behind": false,
+      "taper": 1.0,
+      "material": "antenna",
+      "tip": {
+       "r": 4,
+       "fill": "#3B2A4A"
+      }
+     }
+    ],
+    "strip": [
+     "M44 30 q-6 -12",
+     "cx=\"30\" cy=\"18\"",
+     "cx=\"90\" cy=\"18\""
+    ]
+   }
+  ],
+  "nana": [
+   {
+    "effect": "TRICK",
+    "trick": "spin"
+   }
+  ],
+  "snoozy-sloth": [
+   {
+    "effect": "LIMB",
+    "limbs": [
+     {
+      "spine": [
+       [
+        26,
+        56
+       ],
+       [
+        22,
+        44
+       ],
+       [
+        26,
+        34
+       ],
+       [
+        34,
+        30
+       ]
+      ],
+      "width": 15,
+      "fill": "#C2A58A",
+      "outline": "#3B2A4A",
+      "behind": true,
+      "taper": 1.0,
+      "material": "arm"
+     },
+     {
+      "spine": [
+       [
+        94,
+        56
+       ],
+       [
+        98,
+        44
+       ],
+       [
+        94,
+        34
+       ],
+       [
+        86,
+        30
+       ]
+      ],
+      "width": 15,
+      "fill": "#C2A58A",
+      "outline": "#3B2A4A",
+      "behind": true,
+      "taper": 1.0,
+      "material": "arm"
+     }
+    ],
+    "strip": [
+     "M26 56 C22 44"
+    ]
+   }
+  ],
+  "kami": [
+   {
+    "effect": "GLOW",
+    "at": [
+     60,
+     70
+    ],
+    "color": "#7FE0C4",
+    "radius": 60,
+    "cycleColours": true
+   }
+  ],
+  "tiger-cub": [
+   {
+    "effect": "LIMB",
+    "limbs": [
+     {
+      "spine": [
+       [
+        96,
+        96
+       ],
+       [
+        112,
+        88
+       ],
+       [
+        114,
+        68
+       ]
+      ],
+      "width": 10,
+      "fill": "#FFA25C",
+      "outline": "#3B2A4A",
+      "behind": true,
+      "taper": 0.7,
+      "material": "tail",
+      "dash": {
+       "color": "#3B2A4A",
+       "on": 4,
+       "off": 6
+      }
+     }
+    ],
+    "strip": []
+   }
+  ],
+  "polly": [
+   {
+    "effect": "TRICK",
+    "trick": "flap"
+   }
+  ],
+  "red-panda": [
+   {
+    "effect": "LIMB",
+    "limbs": [
+     {
+      "spine": [
+       [
+        96,
+        96
+       ],
+       [
+        112,
+        90
+       ],
+       [
+        116,
+        70
+       ],
+       [
+        108,
+        58
+       ]
+      ],
+      "width": 16,
+      "fill": "#E07A4A",
+      "outline": "#3B2A4A",
+      "behind": true,
+      "taper": 0.65,
+      "material": "tail",
+      "dash": {
+       "color": "#B85A30",
+       "on": 6,
+       "off": 6
+      }
+     }
+    ],
+    "strip": []
+   }
+  ],
+  "hummy": [
+   {
+    "effect": "TRICK",
+    "trick": "hover"
+   }
+  ],
+  "pango": [
+   {
+    "effect": "ROPE",
+    "body": "pango"
+   }
+  ],
+  "blossom-ellie": [
+   {
+    "effect": "LIMB",
+    "limbs": [
+     {
+      "spine": [
+       [
+        60,
+        80
+       ],
+       [
+        60,
+        96
+       ],
+       [
+        64,
+        104
+       ],
+       [
+        74,
+        102
+       ],
+       [
+        80,
+        98
+       ],
+       [
+        76,
+        92
+       ]
+      ],
+      "width": 13,
+      "fill": "#B9C6E6",
+      "outline": "#3B2A4A",
+      "behind": false,
+      "taper": 1.0,
+      "material": "trunk"
+     }
+    ],
+    "strip": [
+     "M60 80 C60 96 64 104 74 102"
+    ]
+   },
+   {
+    "effect": "BURST",
+    "particle": "petals",
+    "at": [
+     78,
+     30
+    ],
+    "colors": [
+     "#FF7EB6",
+     "#FFC9DE"
+    ],
+    "count": 10
+   }
+  ],
+  "glowbug": [
+   {
+    "effect": "GLOW",
+    "at": [
+     60,
+     90
+    ],
+    "color": "#FFE08A",
+    "radius": 40,
+    "cycleColours": false
+   }
+  ],
+  "vinny": [
+   {
+    "effect": "SHIFT"
+   }
+  ],
+  "golden-nana": [
+   {
+    "effect": "TRICK",
+    "trick": "spin"
+   },
+   {
+    "effect": "GLOW",
+    "at": [
+     60,
+     70
+    ],
+    "color": "#FFE08A",
+    "radius": 56,
+    "cycleColours": false
+   }
+  ]
+ }
+}

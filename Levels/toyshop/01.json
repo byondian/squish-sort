@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "id": "toyshop-01",
+  "world": "toyshop",
+  "index": 1,
+  "beat": "intro",
+  "capacity": 4,
+  "jars": [
+    ["strawbie", "strawbie", "strawbie"],
+    ["tango", "tango", "tango", "strawbie"],
+    ["tango"]
+  ],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": []},
+  "par": 2,
+  "solution": [[1, 0], [1, 2]],
+  "capsule": false,
+  "softenAfterFails": null
+}

@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "id": "junglejam-35",
+  "world": "junglejam",
+  "index": 35,
+  "beat": "boss",
+  "capacity": 4,
+  "jars": [
+    ["nana", "tuki", "blu", "leafy"],
+    ["bongo", "tuki", "nana", "tuki"],
+    ["leafy", "bongo", "dotty", "dotty"],
+    ["dotty", "pina", "leafy", "nana"],
+    ["blu", "leafy", "blu", "bongo"],
+    ["bongo", "tuki", "nana", "pina"],
+    ["dotty", "pina", "pina", "blu"],
+    [],
+    []
+  ],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": [[2, 0], [3, 0]], "vines": [[0, 2], [1, 2]]},
+  "par": 22,
+  "solution": [[6, 7], [5, 6], [3, 5], [6, 8], [2, 6], [4, 2], [4, 7], [3, 4], [3, 8], [3, 6], [0, 4], [0, 7], [1, 0], [0, 3], [1, 0], [1, 3], [1, 2], [5, 0], [5, 3], [2, 5], [4, 2], [4, 7]],
+  "capsule": true,
+  "softenAfterFails": 2
+}

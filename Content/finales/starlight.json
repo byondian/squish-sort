@@ -1,0 +1,66 @@
+{
+ "style": "stage",
+ "music": "starlight_concert",
+ "teaserMusic": "starlight_rehearsal_",
+ "teaserLevels": [
+  4,
+  8,
+  12,
+  16,
+  20,
+  24
+ ],
+ "keepsake": "poster",
+ "steps": [
+  {
+   "at": 0,
+   "act": "dark"
+  },
+  {
+   "at": 3,
+   "act": "open"
+  },
+  {
+   "at": 5,
+   "act": "solo",
+   "who": 0
+  },
+  {
+   "at": 7,
+   "act": "solo",
+   "who": 1
+  },
+  {
+   "at": 9,
+   "act": "solo",
+   "who": 2
+  },
+  {
+   "at": 11,
+   "act": "solo",
+   "who": 3
+  },
+  {
+   "at": 13,
+   "act": "solo",
+   "who": 4
+  },
+  {
+   "at": 15,
+   "act": "solo",
+   "who": 5
+  },
+  {
+   "at": 17,
+   "act": "backing"
+  },
+  {
+   "at": 21,
+   "act": "finish"
+  },
+  {
+   "at": 25,
+   "act": "end"
+  }
+ ]
+}

@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "id": "sweetfactory-15",
+  "world": "sweetfactory",
+  "index": 15,
+  "beat": "showpiece",
+  "capacity": 4,
+  "jars": [
+    ["tango"],
+    ["cupcake", "macaron", "macaron", "macaron"],
+    ["donut", "cupcake", "cupcake", "cupcake"],
+    ["strawbie", "tango", "tango", "tango"],
+    ["lolly", "donut", "donut", "donut"],
+    ["gummy-bear", "lolly", "lolly", "lolly"],
+    [],
+    ["gummy-bear", "gummy-bear", "gummy-bear"],
+    ["macaron", "jelly", "jelly", "jelly"],
+    ["jelly", "strawbie", "strawbie", "strawbie"]
+  ],
+  "mechanics": {"hidden": [[1, 0], [2, 0]], "sticky": [], "frozen": []},
+  "par": 8,
+  "solution": [[3, 0], [9, 3], [8, 9], [1, 8], [2, 1], [4, 2], [5, 4], [5, 7]],
+  "capsule": true,
+  "softenAfterFails": null
+}
