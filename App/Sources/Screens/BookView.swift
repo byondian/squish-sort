@@ -55,15 +55,16 @@ struct BookView: View {
             }
         }
         .overlay(alignment: .bottom) {
-            if let r = riddle, let line = model.riddle(for: r.id) {
+            // A secret's riddle, or for any other squishy not found yet, where it comes from.
+            if let r = riddle, let line = r.rarity == .secret ? model.riddle(for: r.id) : model.howToFind(r) {
                 HStack(spacing: 10) {
-                    Text(verbatim: "🤫").font(.system(size: 26))
+                    Text(verbatim: r.rarity == .secret ? "🤫" : "🔎").font(.system(size: 26))
                     Text(verbatim: line).font(Theme.body(15)).foregroundStyle(Theme.plum)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 .padding(16)
                 .background(RoundedRectangle(cornerRadius: 22).fill(.white))
-                .overlay(RoundedRectangle(cornerRadius: 22).stroke(RarityLook.gold, lineWidth: 3))
+                .overlay(RoundedRectangle(cornerRadius: 22).stroke(r.rarity == .secret ? RarityLook.gold : RarityLook.color(r.rarity), lineWidth: 3))
                 .padding(16)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
                 .onTapGesture { riddle = nil }
@@ -234,7 +235,9 @@ struct BookView: View {
             if has {
                 model.haptics.land()
                 card = c
-            } else if c.rarity == .secret {
+            } else {
+                // Not found yet: a secret tells its riddle, any other says where it comes from.
+                model.haptics.land()
                 riddle = riddle == c ? nil : c
             }
         } label: {

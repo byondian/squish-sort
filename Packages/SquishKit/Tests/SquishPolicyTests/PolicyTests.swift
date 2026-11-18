@@ -552,6 +552,8 @@ final class CoinTests: XCTestCase {
 
     func testNothingInTheShopIsASquishy() {
         XCTAssertEqual(Set(Coins.Item.allCases), [.hint, .theme, .treat, .gift, .shuffle])
+        // Magic moves: one at a first-try streak of 3, two at 6, three at 9 and every third win after.
+        XCTAssertEqual((0...13).map { Coins.magicMovesEarned(streak: $0) }, [0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 3, 0])
     }
 
     func testALevelPaysOnceSoReplaysCannotBeFarmed() {

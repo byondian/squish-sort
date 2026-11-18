@@ -671,19 +671,43 @@ final class AppModel: ObservableObject {
         }
     }
 
+    /// Where a squishy the player has not found yet comes from, in one line, naming the very next
+    /// chance: commons hide in the jars; rares and ultras come in capsules.
+    func howToFind(_ c: Collectible) -> String {
+        if c.rarity == .common {
+            return String(localized: "It hides in this world's jars. Play its levels to find it.")
+        }
+        // A capsule level of this world still to win.
+        if let next = levels.firstIndex(where: { $0.file.world == c.world && $0.file.capsule && progress.stars[$0.id] == nil }),
+           !isSideLevel(next) {
+            return String(localized: "It comes in a capsule. Win level \(next + 1) to open the next one.")
+        }
+        // The star jar's capsule, then its golden capsule.
+        let goals = starJarGoals(c.world)
+        let given = starJarPrizes(c.world)
+        let earned = stars(inWorld: c.world).earned
+        if given < goals.count, goals.count == 3 {
+            let goal = goals[max(1, given)]
+            if goal > earned {
+                return String(localized: "It comes in a capsule. \(goal - earned) more stars in this world win one.")
+            }
+        }
+        return String(localized: "It comes in a capsule. Guess the Mystery Bag or fill your stamp card to win one.")
+    }
+
     private func isBookComplete(_ world: String) -> Bool {
         roster.collectibles.filter { $0.world == world && $0.rarity != .secret }
             .allSatisfy { progress.collection.owns($0.id) }
     }
 
-    /// The Mystery Bag capsule opens for the world the player is in, or for
-    /// another open world when that book is already complete. Never a locked world.
+    /// A capsule from the Mystery Bag or the stamp card opens for the earliest open world whose book
+    /// still has a gap, so an old world can always be finished (a world's own capsules are fewer than
+    /// its rares and ultras). With every open book full it is the world the player is in. Never a locked world.
     private var mysteryCapsuleWorld: String {
         let open = openWorlds
+        if let gap = open.first(where: { !isBookComplete($0) }) { return gap }
         let current = levels.indices.contains(progress.highestUnlocked) ? levels[progress.highestUnlocked].file.world : ""
-        let here = open.contains(current) ? current : (open.first ?? LevelCatalog.worlds[0])
-        if isBookComplete(here), let other = open.first(where: { !isBookComplete($0) }) { return other }
-        return here
+        return open.contains(current) ? current : (open.first ?? LevelCatalog.worlds[0])
     }
 
     // MARK: - Squishy Maker
@@ -1061,6 +1085,8 @@ final class AppModel: ObservableObject {
         var offersRemoveAds = false
         /// The Buddy's free treat for this win: true = one more in the jar, false = the jar was full, nil = no Buddy yet.
         var treat: Bool?
+        /// Magic moves this win earned (a first-try streak, or a boss beaten).
+        var magicEarned = 0
         var buddyName = ""
         /// This was today's Daily Jar.
         var dailyJar = false
@@ -1093,6 +1119,12 @@ final class AppModel: ObservableObject {
             summary.streak = streak
             summary.streakBonus = Coins.streakBonus(streak: streak, rules: rules)
         }
+        if firstClear {
+            // Magic moves: from a first-try streak (never in gentle mode, where no streak is kept in view)
+            // and one for every boss. Never more than three are held.
+            let earned = (isGentleMode ? 0 : Coins.magicMovesEarned(streak: streak)) + (level.file.beat == .boss ? 1 : 0)
+            summary.magicEarned = max(0, min(earned, Coins.maxMagicMoves - progress.magicMoves))
+        }
         summary.dailyBonus = progress.lastWinDay == today ? 0 : rules.firstWinOfDay
         summary.offersRemoveAds = RemoveAdsOffer.shouldShow(interstitialsShown: progress.cadence.interstitialsShown, group: ageGroup,
                                                             alreadyShown: progress.removeAdsOfferShown, ownsRemoveAds: ownsRemoveAds)
@@ -1122,6 +1154,7 @@ final class AppModel: ObservableObject {
             // The piggy bank gets a bonus on top; the win's own coins are untouched.
             if offersAllowed, p.piggy.add(forWin: summary.total) > 0 || p.piggy.isFull { summary.piggyFill = p.piggy.fill }
             p.winStreak = streak
+            p.magicMoves += summary.magicEarned
             p.lastWinDay = today
             if summary.offersRemoveAds { p.removeAdsOfferShown = true }
             p.buddy.earnTreatForWin()
@@ -1673,6 +1706,14 @@ final class AppModel: ObservableObject {
         if !progress.freeHintUsed || progress.hintTokens > 0 { return true }
         guard ownsRemoveAds else { return false }
         return progress.hintDay != today || progress.hintsUsedToday < 3
+    }
+
+    /// One magic move is used up. False when there is none.
+    @discardableResult
+    func useMagicMove() -> Bool {
+        guard progress.magicMoves > 0 else { return false }
+        update { $0.magicMoves -= 1 }
+        return true
     }
 
     func useHint() {

@@ -88,6 +88,13 @@ public enum Coins {
         streak >= 2 ? min(rules.streakCap, (streak - 1) * rules.streakStep) : 0
     }
 
+    /// Magic moves: the game plays the best next move for the player. Never more than this many are held.
+    public static let maxMagicMoves = 3
+    /// A first-try streak earns them on every third win: 1 at a streak of 3, 2 at 6, 3 at 9 and after.
+    public static func magicMovesEarned(streak: Int) -> Int {
+        streak > 0 && streak % 3 == 0 ? min(3, streak / 3) : 0
+    }
+
     /// The lucky squishy's kind for this level, or nil when the level has none.
     /// A stable hash of the install seed and level id, so a restart never re-rolls it.
     public static func luckyKind(levelNumber: Int, levelID: String, installSeed: String, kinds: Int,
