@@ -41,6 +41,20 @@ struct MysteryBagView: View {
                     }
                 }
                 .padding(16)
+                if AppModel.isTesterBuild, guessedRight != nil || !model.progress.mystery.canPlay(today: model.mysteryDay) {
+                    // Tester builds only: players get one bag a day (the day turns at 4 am).
+                    Button {
+                        model.testerNewMysteryBag()
+                        bag = model.mysteryBag
+                        guessedRight = nil
+                        ruledOut = nil
+                        poked = []
+                    } label: {
+                        Text(verbatim: "Tester: new bag now")
+                    }
+                    .buttonStyle(SquishButtonStyle(fill: .white, text: Theme.plum))
+                    .padding(.bottom, 16)
+                }
             }
         }
         .background(Theme.marshmallow.ignoresSafeArea())

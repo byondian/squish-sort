@@ -395,14 +395,16 @@ final class AppModel: ObservableObject {
 
     // MARK: - Tester tools (tester and debug builds only)
 
-    /// True in debug builds, and in TestFlight builds made with the tester tools (the TESTER flag
-    /// and a sandbox receipt). The build that goes to App Review is made without the flag, so the
-    /// tools are not in it at all. They stay hidden until the version line in Settings is tapped seven times.
+    /// True in debug builds, and in TestFlight builds made with the tester tools (the TESTER flag).
+    /// The build that goes to App Review is made without the flag, so the tools are not in it at all.
+    /// As a second lock they are off for an App Store install (its receipt is named "receipt"); a
+    /// missing receipt does not switch them off, because a TestFlight install may have none yet.
+    /// They stay hidden until the version line in Settings is tapped seven times.
     static var isTesterBuild: Bool {
         #if DEBUG
         return true
         #elseif TESTER
-        return Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
+        return Bundle.main.appStoreReceiptURL?.lastPathComponent != "receipt"
         #else
         return false
         #endif
@@ -731,10 +733,24 @@ final class AppModel: ObservableObject {
     }
 
     var mysteryBag: MysteryBag? {
-        MysteryBag.daily(day: mysteryDay, playerSeed: progress.installID, roster: roster, worlds: openWorlds,
+        MysteryBag.daily(day: mysteryDay + testerBagSuffix, playerSeed: progress.installID, roster: roster, worlds: openWorlds,
                          shapes: AppModel.shapes,
                          seen: Set(roster.collectibles.filter { progress.collection.owns($0.id) }.map(\.id)),
                          easy: progress.mystery.isLearning(today: mysteryDay))
+    }
+
+    /// Tester builds only: each "new bag now" asks for a different bag on the same day.
+    private var testerBagSuffix: String {
+        guard AppModel.isTesterBuild, !AppModel.isUITesting else { return "" }
+        let extra = UserDefaults.standard.integer(forKey: "tester.mysteryExtra")
+        return extra > 0 ? "#\(extra)" : ""
+    }
+
+    /// Tester builds only: a fresh bag straight away, so the bag can be tried more than once a day.
+    func testerNewMysteryBag() {
+        guard AppModel.isTesterBuild else { return }
+        UserDefaults.standard.set(UserDefaults.standard.integer(forKey: "tester.mysteryExtra") + 1, forKey: "tester.mysteryExtra")
+        update { $0.mystery.lastPlayedDay = nil }
     }
 
     /// Body shape groups, so the Mystery Bag's choices can look alike.

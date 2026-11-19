@@ -36,9 +36,7 @@ final class KidsAppTests: XCTestCase {
         XCTAssertTrue(question.waitForExistence(timeout: 5), "the sum follows the hold")
         let numbers = question.label.split(whereSeparator: { !$0.isNumber }).compactMap { Int($0) }
         XCTAssertEqual(numbers.count, 2, question.label)
-        let field = app.textFields["gate-answer"]
-        field.tap()
-        field.typeText(String(numbers[0] * numbers[1]))
+        for digit in String(numbers[0] * numbers[1]) { app.buttons["gate-key-\(digit)"].tap() }
         app.buttons["gate-ok"].tap()
     }
 
