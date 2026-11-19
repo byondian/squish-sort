@@ -84,6 +84,8 @@ struct ParentalGate: View {
     }
 
     private func submit() {
+        // A press during the pause keeps what was typed: the line above says how long is left.
+        guard !gate.isLocked(now: Date().timeIntervalSince1970) else { return }
         var rng = SystemRandomNumberGenerator()
         if gate.submit(answer, now: Date().timeIntervalSince1970, using: &rng) {
             onPass()
