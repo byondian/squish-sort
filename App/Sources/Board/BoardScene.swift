@@ -519,8 +519,17 @@ final class BoardScene: SKScene {
 
     private var taps = 0
     /// One line for UI test failure logs.
+    /// Same as a finger tap on the golden bubble of jar `j` (used by UI tests and accessibility).
+    func tapBubble(_ j: Int) {
+        taps += 1
+        guard lifted == nil, riding == nil, !busy, board.rideJars.contains(j), j < pieces.count else { return }
+        clearHint()
+        endTutorial()
+        liftRide(j)
+    }
+
     var debugState: String {
-        "taps=\(taps) lifted=\(lifted.map(String.init) ?? "-") busy=\(busy) paused=\(isPaused) view=\(view != nil)"
+        "taps=\(taps) lifted=\(lifted.map(String.init) ?? "-") riding=\(riding.map(String.init) ?? "-") busy=\(busy) paused=\(isPaused) view=\(view != nil)"
     }
 
     // MARK: - Motion

@@ -1108,6 +1108,17 @@ struct LevelView: View {
                         .accessibilityIdentifier("jar-\(j)")
                 }
             }
+            if controller.scene.board.floats {
+                HStack(spacing: 2) {
+                    ForEach(0..<controller.scene.board.jarCount, id: \.self) { j in
+                        Button("bubble-\(j)") { controller.scene.tapBubble(j) }
+                            .font(.system(size: 6))
+                            .frame(width: 28, height: 14)
+                            .background(Color.white)
+                            .accessibilityIdentifier("bubble-\(j)")
+                    }
+                }
+            }
             // What the scene thinks is going on, for failing UI tests.
             TimelineView(.periodic(from: .now, by: 0.25)) { _ in
                 Text(controller.scene.debugState + " status=\(String(describing: controller.session.status))")

@@ -273,7 +273,13 @@ final class AppModel: ObservableObject {
             screen = .maker
         default:
             // "room:<id>" opens the Squish Room on one squishy, for the pictures the checks keep.
-            if shot.hasPrefix("room:") {
+            if shot.hasPrefix("bubbles:") {
+                // "bubbles:<n>" opens Bubble Bath level n, for the pictures the checks keep.
+                let id = String(format: "bubblebath-%02d", Int(shot.dropFirst(8)) ?? 1)
+                let at = levels.firstIndex { $0.id == id } ?? 0
+                update { p in p.highestUnlocked = max(p.highestUnlocked, at) }
+                screen = .level(at)
+            } else if shot.hasPrefix("room:") {
                 let id = String(shot.dropFirst(5))
                 update { p in p.collection.owned[id] = 1 }
                 roomStart = id
