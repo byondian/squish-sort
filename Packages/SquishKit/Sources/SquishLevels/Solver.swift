@@ -5,6 +5,7 @@ import SquishCore
 /// Heuristic: total same-kind runs across all jars minus the number of runs a
 /// solved board has. A move can remove at most one run, so the heuristic never
 /// overestimates and the first solution found is optimal.
+/// (Bubble Bath boards need a little more care: see `heuristic`.)
 ///
 /// Without frozen pieces jar order doesn't matter to solvability, so states are
 /// compared with jars sorted, which shrinks the search a lot. While a curtain is closed, which
@@ -103,18 +104,28 @@ public enum Solver {
         }
     }
 
+    /// Runs still to remove. On a Bubble Bath board one move can remove two runs (a squishy taken from
+    /// between a floater and its twin), so there it is the larger of: the runs without the floaters
+    /// (a move removes at most one of those), and half of all the runs. Both never overestimate.
     static func heuristic(_ b: Board, _ solvedRuns: Int) -> Int {
         var runs = 0
+        var solid = 0
         for jar in b.jars {
             var previous: UInt8?
-            // A floater is no run yet. Counted, one move could remove two runs (a squishy taken from
-            // between a floater and its twin), and the first solution found would not be the shortest.
-            for p in jar where p.kind != previous && !(b.floats && p.isFrozen) {
-                runs += 1
-                previous = p.kind
+            var under: UInt8?
+            for p in jar {
+                if p.kind != previous {
+                    runs += 1
+                    previous = p.kind
+                }
+                if !(b.floats && p.isFrozen) && p.kind != under {
+                    solid += 1
+                    under = p.kind
+                }
             }
         }
-        return runs - solvedRuns
+        guard b.floats else { return runs - solvedRuns }
+        return max(solid - solvedRuns, (runs - solvedRuns + 1) / 2)
     }
 
     static func key(_ b: Board, canonical: Bool) -> [UInt8] {

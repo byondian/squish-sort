@@ -208,16 +208,24 @@ def splits(jar, k):
 
 
 def heuristic(b, kind_jars):
+    """Runs still to remove. On a Bubble Bath board a move can remove two runs when it takes the
+    squishy from between a floater and its twin, so there it is the larger of: the runs without the
+    floaters (a move removes at most one), and half of all the runs."""
     runs = 0
+    solid = 0
     for jar in b.jars:
         prev = None
+        under = None
         for p in jar:
-            if b.floats and p[2] > 0:
-                continue  # a floater is no run yet: taking a squishy from under it can join two runs in one move
             if p[0] != prev:
                 runs += 1
                 prev = p[0]
-    return runs - kind_jars
+            if not (b.floats and p[2] > 0) and p[0] != under:
+                solid += 1
+                under = p[0]
+    if not b.floats:
+        return runs - kind_jars
+    return max(solid - kind_jars, (runs - kind_jars + 1) // 2)
 
 
 def key(b, canonical):
