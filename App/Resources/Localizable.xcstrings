@@ -1333,6 +1333,28 @@
         }
       }
     },
+    "Big": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "おおきい"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "큼"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大"
+          }
+        }
+      }
+    },
     "Big show after the last level!": {
       "localizations": {
         "ja": {
@@ -3357,6 +3379,28 @@
         }
       }
     },
+    "Giant": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ジャンボ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "자이언트"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "巨大"
+          }
+        }
+      }
+    },
     "Gift": {
       "localizations": {
         "ja": {
@@ -3749,6 +3793,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "玩法說明"
+          }
+        }
+      }
+    },
+    "Huge": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "とてもおおきい"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "아주 큼"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "超大"
           }
         }
       }
@@ -6877,6 +6943,28 @@
         }
       }
     },
+    "Small": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ちいさい"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "작음"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "小"
+          }
+        }
+      }
+    },
     "Sneak peek %lld of %lld": {
       "localizations": {
         "ja": {
@@ -8083,6 +8171,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "猜對三次就能集滿，免費獲得一顆扭蛋。"
+          }
+        }
+      }
+    },
+    "Tiny": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ちび"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "꼬마"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "迷你"
           }
         }
       }

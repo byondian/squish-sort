@@ -1144,8 +1144,8 @@ final class AppModel: ObservableObject {
             sounds.play("trick", or: "unlock_new")
             buddySays = String(localized: "I grew!")
             if showingNews == nil { showingNews = .trick(BuddyState.tricksKnown(hearts: now)) }
-        } else if now / 5 > before / 5, Double(before) * BuddyState.growthPerHeart < BuddyState.maxGrowth {
-            // Every fifth heart the Buddy says so; the growing itself shows on every treat.
+        } else if BuddyState.size(hearts: now) != BuddyState.size(hearts: before) {
+            // A new size: the Buddy says so. The growing itself shows on every treat, and on the size meter.
             sounds.play("grow", or: "heart")
             buddySays = String(localized: "I grew!")
         } else {

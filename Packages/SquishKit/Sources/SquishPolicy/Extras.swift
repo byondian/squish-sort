@@ -503,11 +503,41 @@ public struct BuddyState: Codable, Equatable, Sendable {
         heartsToNextTrick == nil ? 1 : Double(hearts % BuddyState.heartsPerTrick) / Double(BuddyState.heartsPerTrick)
     }
 
-    /// Every heart makes the Buddy a little bigger for good: 2% a heart, up to 40% at 20 hearts.
-    /// It never shrinks.
-    public static let growthPerHeart = 0.02
-    public static let maxGrowth = 0.40
-    public var growth: Double { min(BuddyState.maxGrowth, Double(max(0, hearts)) * BuddyState.growthPerHeart) }
+    /// The Buddy grows for good through five sizes, and every heart on the way makes it a little
+    /// bigger: Small at 5 hearts, Big at 20, Huge at 40 and Giant at 60. It never shrinks.
+    /// (Up to 20 hearts this is the 2% a heart of earlier builds, so no saved Buddy gets smaller.)
+    public enum Size: Int, CaseIterable, Sendable {
+        case tiny, small, big, huge, giant
+
+        /// Hearts that reach this size.
+        public var hearts: Int { [0, 5, 20, 40, 60][rawValue] }
+        /// How much bigger than a new Buddy this size is.
+        public var growth: Double { [0, 0.10, 0.40, 0.50, 0.60][rawValue] }
+        public var next: Size? { Size(rawValue: rawValue + 1) }
+    }
+
+    public static let maxGrowth = Size.giant.growth
+
+    public static func size(hearts: Int) -> Size {
+        Size.allCases.last { hearts >= $0.hearts } ?? .tiny
+    }
+
+    /// 0 to 1 of the way from this size to the next. 1 once Giant.
+    public static func sizeProgress(hearts: Int) -> Double {
+        let size = size(hearts: hearts)
+        guard let next = size.next else { return 1 }
+        return Double(max(0, hearts) - size.hearts) / Double(next.hearts - size.hearts)
+    }
+
+    public static func growth(hearts: Int) -> Double {
+        let size = size(hearts: hearts)
+        guard let next = size.next else { return maxGrowth }
+        return size.growth + (next.growth - size.growth) * sizeProgress(hearts: hearts)
+    }
+
+    public var size: Size { BuddyState.size(hearts: hearts) }
+    public var sizeProgress: Double { BuddyState.sizeProgress(hearts: hearts) }
+    public var growth: Double { BuddyState.growth(hearts: hearts) }
 
     /// A treat also puffs the Buddy up by 15% on top, easing back over a day to the size it has
     /// earned for good. Nothing earned is ever lost, and nothing is shown when the puff is gone.

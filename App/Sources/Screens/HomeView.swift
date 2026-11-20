@@ -630,6 +630,8 @@ struct BuddyHomeView: View {
                 .accessibilityIdentifier("buddy-name")
                 .opacity(model.trickTeaching == nil ? 1 : 0.25)
                 .allowsHitTesting(model.trickTeaching == nil)
+                sizeMeter
+                    .opacity(model.trickTeaching == nil ? 1 : 0.25)
                 if model.dailyGiftReady {
                     // The Buddy's daily gift: coins by opt-in ad, or free in gentle mode.
                     Button { model.takeDailyGift(); squish() } label: {
@@ -698,7 +700,8 @@ struct BuddyHomeView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                 withAnimation(.spring(response: 0.45, dampingFraction: 0.35)) { gulp = false }
             }
-            // Every treat and gift makes the Buddy bigger, fully grown or not, and says so.
+            // "Bigger!" only when it is: a Giant Buddy just enjoys the treat.
+            guard BuddyState.growth(hearts: new) > BuddyState.growth(hearts: old) else { return }
             withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { biggerPop = true }
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.3) { withAnimation { biggerPop = false } }
         }
@@ -844,7 +847,45 @@ struct BuddyHomeView: View {
 
     /// Growth earned for good, plus the puff from a recent treat.
     private var buddySize: Double {
-        model.progress.buddy.growth + model.progress.buddy.puff(at: Date().timeIntervalSince1970, lasting: model.puffSeconds)
+        min(BuddyHomeView.biggest, model.progress.buddy.growth
+            + model.progress.buddy.puff(at: Date().timeIntervalSince1970, lasting: model.puffSeconds))
+    }
+
+    /// The most a Buddy is ever drawn bigger, growth and puff together, so it always fits on Home.
+    private static let biggest = 0.72
+
+    static func sizeName(_ size: BuddyState.Size) -> String {
+        switch size {
+        case .tiny: return String(localized: "Tiny")
+        case .small: return String(localized: "Small")
+        case .big: return String(localized: "Big")
+        case .huge: return String(localized: "Huge")
+        case .giant: return String(localized: "Giant")
+        }
+    }
+
+    /// The size meter: which size the Buddy is, and how far it is to the next. Every treat moves it.
+    private var sizeMeter: some View {
+        let buddy = model.progress.buddy
+        return HStack(spacing: 8) {
+            Text(verbatim: BuddyHomeView.sizeName(buddy.size)).font(Theme.body(13)).foregroundStyle(Theme.plum)
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Theme.plum.opacity(0.12))
+                    Capsule().fill(Theme.mint)
+                        .frame(width: max(8, geo.size.width * buddy.sizeProgress))
+                }
+            }
+            .frame(width: 90, height: 8)
+            if let next = buddy.size.next {
+                Text(verbatim: BuddyHomeView.sizeName(next)).font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.5))
+            } else {
+                Image(systemName: "star.fill").font(.system(size: 12)).foregroundStyle(Theme.butter)
+            }
+        }
+        .animation(.spring(response: 0.4, dampingFraction: 0.6), value: buddy.hearts)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("buddy-size")
     }
 
     /// The treat flies in, the Buddy chomps twice, then a heart floats up.
