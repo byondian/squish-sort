@@ -57,12 +57,12 @@ public struct PiggyBank: Codable, Equatable, Sendable {
     }
 }
 
-/// Squishy Maker shelf: the first place is free, each further one is bought with coins.
+/// Squishy Workshop shelf: three places are free, each further one is bought with coins.
 public enum MakerSlots {
-    public static let free = 1
+    public static let free = 3
     public static let price = 2500
 
-    /// Places a save starts with: one, or as many as it had already made before places had a price.
+    /// Places a save starts with: three, or as many as it had already made before places had a price.
     public static func starting(alreadyMade: Int) -> Int { min(MakerParts.maxMade, max(free, alreadyMade)) }
 }
 

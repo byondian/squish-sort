@@ -1,4 +1,6 @@
+#if !KIDS
 import AppTrackingTransparency
+#endif
 import Foundation
 import StoreKit
 import SwiftUI
@@ -7,6 +9,7 @@ import SquishCore
 import SquishLevels
 import SquishPolicy
 import SquishSoft
+import SquishWorkshop
 
 /// App state: levels, progress, collection, age, purchases.
 @MainActor
@@ -146,19 +149,26 @@ final class AppModel: ObservableObject {
 
     init() {
         var loaded = AppModel.isUITesting ? PlayerProgress() : store.load()
+        // Each made squishy's Workshop design is a file of its own; one from the old Maker has none.
+        for i in loaded.made.indices { loaded.made[i].design = MadeFiles.shared.load(id: loaded.made[i].id) }
         levels = AppModel.loadLevels()
         if loaded.version < 3 {
             loaded.migrate(path: levels.filter { LevelCatalog.worlds.contains($0.file.world) }.map(\.id))
             loaded.migrateNewWorlds(path: levels.filter { LevelCatalog.worlds.contains($0.file.world) }.map(\.id))
             store.save(loaded)
         }
+        #if KIDS
+        // Every player of Squishy Workshop is treated as a small child: no age question, no prices,
+        // no typing, no offers. Grown-up things sit behind the gate in the Grown-ups corner.
+        loaded.age = AgeProfile(group: .child, source: .parentSetGentleMode, storefront: "")
+        #endif
         progress = loaded
         roster = AppModel.loadRoster()
         let words = AppModel.loadBios()
         bios = words.bios
         riddles = words.riddles
         stats = words.stats
-        config = RemoteConfig.cached()
+        config = AppModel.forThisBuild(RemoteConfig.cached())
         buddyScript = AppModel.loadBuddyScript()
         purchases = PurchaseService(cachedOwnership: loaded.ownsRemoveAds)
         haptics.enabled = loaded.hapticsOn
@@ -168,7 +178,11 @@ final class AppModel: ObservableObject {
         sounds.buddyVoice = loaded.buddyVoiceOn
         sounds.musicLevel = loaded.musicOn ? Float(loaded.musicLevel) : 0
         // New players land straight on Level 1; the home screen arrives with the first capsule.
+        #if KIDS
+        screen = .home
+        #else
         screen = loaded.highestUnlocked >= 3 ? .home : .level(min(loaded.highestUnlocked, max(0, levels.count - 1)))
+        #endif
         // A save that already holds every other squishy of a world is owed that world's secret.
         for world in LevelCatalog.worlds + [ChristmasWorld.id] { queueSecretIfWon(world: world) }
         repairBuddyName()
@@ -196,9 +210,11 @@ final class AppModel: ObservableObject {
                 ads.update(policy: currentAdPolicy)
             }
         }
+        #if !KIDS
         Task {
-            if let fresh = await RemoteConfig.fetch() { config = fresh }
+            if let fresh = await RemoteConfig.fetch() { config = AppModel.forThisBuild(fresh) }
         }
+        #endif
     }
 
     #if DEBUG
@@ -248,6 +264,13 @@ final class AppModel: ObservableObject {
             screen = .map
         case "book":
             screen = .book
+        case "workshop", "workshop-child":
+            // The Workshop for a player of 13 or over, and as a child sees it (no prices, no shop).
+            update { p in
+                p.collection.totalCapsules = max(1, p.collection.totalCapsules)
+                if shot == "workshop-child" { p.age = AgeProfile(group: .child, source: .birthYear, storefront: "GBR") }
+            }
+            screen = .maker
         default:
             // "room:<id>" opens the Squish Room on one squishy, for the pictures the checks keep.
             if shot.hasPrefix("room:") {
@@ -347,16 +370,41 @@ final class AppModel: ObservableObject {
         return index + 1 + (index >= storyLevelCount ? progress.endlessLaps * endlessCount : 0)
     }
 
+    /// The creator build (TestFlight workflow, "creator" on) is for partners who film the game before
+    /// launch: it has no tester tools and shows no ads at all, so no test ad ends up in a video.
+    static func forThisBuild(_ config: GameConfig) -> GameConfig {
+        #if KIDS
+        // Squishy Workshop: no ads, no counting, no offers, no shop and no link out, whatever a config says.
+        var kids = GameConfig()
+        kids.adsEnabled = false
+        kids.telemetryEnabled = false
+        kids.offersEnabled = false
+        kids.squishyShopEnabled = false
+        kids.dailyJarEnabled = false
+        kids.mysteryBagEnabled = false
+        kids.event = nil
+        return kids
+        #elseif CREATOR
+        var quiet = config
+        quiet.adsEnabled = false
+        return quiet
+        #else
+        return config
+        #endif
+    }
+
     // MARK: - Tester tools (tester and debug builds only)
 
-    /// True in debug builds, and in TestFlight builds made with the tester tools (the TESTER flag
-    /// and a sandbox receipt). The build that goes to App Review is made without the flag, so the
-    /// tools are not in it at all. They stay hidden until the version line in Settings is tapped seven times.
+    /// True in debug builds, and in TestFlight builds made with the tester tools (the TESTER flag).
+    /// The build that goes to App Review is made without the flag, so the tools are not in it at all.
+    /// As a second lock they are off for an App Store install (its receipt is named "receipt"); a
+    /// missing receipt does not switch them off, because a TestFlight install may have none yet.
+    /// They stay hidden until the version line in Settings is tapped seven times.
     static var isTesterBuild: Bool {
         #if DEBUG
         return true
         #elseif TESTER
-        return Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
+        return Bundle.main.appStoreReceiptURL?.lastPathComponent != "receipt"
         #else
         return false
         #endif
@@ -464,7 +512,11 @@ final class AppModel: ObservableObject {
     var showsCornerButtons: Bool { progress.highestUnlocked >= 3 }
 
     /// Where "back" and "home" lead: the home screen once it exists, else the current level.
+    #if KIDS
+    var homeScreen: Screen { .home }
+    #else
     var homeScreen: Screen { showsCornerButtons ? .home : .level(progress.highestUnlocked) }
+    #endif
 
     // MARK: - Extras
 
@@ -589,8 +641,12 @@ final class AppModel: ObservableObject {
     var worldsCompleted: Int { LevelCatalog.allWorlds.filter { isWorldComplete($0) }.count }
 
     func isExtraUnlocked(_ extra: Extra) -> Bool {
-        Extras.isUnlocked(extra, capsulesOpened: progress.collection.totalCapsules, levelsWon: levelsWon,
-                          firstWorldComplete: isWorldComplete(LevelCatalog.worlds[0]), config: config)
+        #if KIDS
+        // The room and the Workshop are the whole app: both are open from the first second.
+        if extra == .maker || extra == .squishRoom { return true }
+        #endif
+        return Extras.isUnlocked(extra, capsulesOpened: progress.collection.totalCapsules, levelsWon: levelsWon,
+                          firstWorldComplete: isWorldComplete(LevelCatalog.worlds[0]), ownsRemoveAds: ownsRemoveAds, config: config)
     }
 
     func isNew(_ extra: Extra) -> Bool { isExtraUnlocked(extra) && !progress.seenExtras.contains(extra.rawValue) }
@@ -608,6 +664,28 @@ final class AppModel: ObservableObject {
 
     /// Everything that can be squeezed or be a Buddy: starter toys, owned squishies, made ones.
     var squeezables: [String] {
+        #if KIDS
+        return kidsShelf.flatMap { $0.squishies } + progress.made.map(\.ref)
+        #else
+        return gameSqueezables
+        #endif
+    }
+
+    #if KIDS
+    /// The first world's squishies are free to play with; "Unlock everything" opens every world.
+    static let kidsFreeWorld = LevelCatalog.worlds[0]
+
+    /// The toy shelf in Squishy Workshop, one group per world. Nothing is won or collected here:
+    /// every squishy of an open world is simply there.
+    var kidsShelf: [(world: String, open: Bool, squishies: [String])] {
+        LevelCatalog.allWorlds.map { world in
+            let open = ownsRemoveAds || world == AppModel.kidsFreeWorld
+            return (world, open, open ? roster.collectibles.filter { $0.world == world }.map(\.id) : [])
+        }
+    }
+    #endif
+
+    private var gameSqueezables: [String] {
         roster.squishRoomToys.map(\.id)
             + roster.collectibles.filter { progress.collection.owns($0.id) }.map(\.id)
             + (isExtraUnlocked(.maker) ? progress.made.map(\.ref) : [])
@@ -621,6 +699,8 @@ final class AppModel: ObservableObject {
 
     /// How a squeezable thing squishes. Made squishies, like anything with no feel of its own, are jelly.
     func feel(for ref: String) -> SquishFeel {
+        // A made squishy feels like the goo it was poured from.
+        if let made = progress.made.first(where: { $0.ref == ref }) { return SquishFeel(named: made.design?.goo.rawValue) }
         if let c = roster.collectible(ref) { return SquishFeel(named: c.feel) }
         return SquishFeel(named: roster.squishRoomToys.first { $0.id == ref }?.feel)
     }
@@ -653,10 +733,24 @@ final class AppModel: ObservableObject {
     }
 
     var mysteryBag: MysteryBag? {
-        MysteryBag.daily(day: mysteryDay, playerSeed: progress.installID, roster: roster, worlds: openWorlds,
+        MysteryBag.daily(day: mysteryDay + testerBagSuffix, playerSeed: progress.installID, roster: roster, worlds: openWorlds,
                          shapes: AppModel.shapes,
                          seen: Set(roster.collectibles.filter { progress.collection.owns($0.id) }.map(\.id)),
                          easy: progress.mystery.isLearning(today: mysteryDay))
+    }
+
+    /// Tester builds only: each "new bag now" asks for a different bag on the same day.
+    private var testerBagSuffix: String {
+        guard AppModel.isTesterBuild, !AppModel.isUITesting else { return "" }
+        let extra = UserDefaults.standard.integer(forKey: "tester.mysteryExtra")
+        return extra > 0 ? "#\(extra)" : ""
+    }
+
+    /// Tester builds only: a fresh bag straight away, so the bag can be tried more than once a day.
+    func testerNewMysteryBag() {
+        guard AppModel.isTesterBuild else { return }
+        UserDefaults.standard.set(UserDefaults.standard.integer(forKey: "tester.mysteryExtra") + 1, forKey: "tester.mysteryExtra")
+        update { $0.mystery.lastPlayedDay = nil }
     }
 
     /// Body shape groups, so the Mystery Bag's choices can look alike.
@@ -741,31 +835,69 @@ final class AppModel: ObservableObject {
         return open.contains(current) ? current : (open.first ?? LevelCatalog.worlds[0])
     }
 
-    // MARK: - Squishy Maker
+    // MARK: - Squishy Workshop
+
+    /// What this player has open in the Workshop. Remove Ads includes Workshop Pro.
+    var workshopAccess: WorkshopAccess {
+        #if KIDS
+        // No worlds to finish here. Free play has four moulds and a small set of faces, colours and ears;
+        // "Unlock everything" opens the lot, the crown and the unicorn horn included.
+        return WorkshopAccess(pro: ownsRemoveAds, worlds: ownsRemoveAds ? 99 : 2, owned: [])
+        #else
+        return WorkshopAccess(pro: ownsRemoveAds, worlds: worldsCompleted, owned: progress.workshopParts)
+        #endif
+    }
+
+    /// Places on the Workshop shelf: three free, more for coins up to eight, fifty with Pro.
+    var shelfPlaces: Int { WorkshopGate.slots(bought: progress.makerSlots, workshopAccess) }
 
     /// False when the name is empty or rude, a part is still locked, or the shelf is full.
     func saveMade(_ draft: MadeSquishy) -> Bool {
-        guard isExtraUnlocked(.maker), let name = NameFilter.clean(draft.name),
-              MakerParts.isAllowed(draft, worldsCompleted: worldsCompleted) else { return false }
+        guard isExtraUnlocked(.maker), let name = NameFilter.clean(draft.name) else { return false }
         var made = draft
         made.name = name
+        let saved = progress.made.first { $0.id == made.id }
+        if var design = made.design {
+            design.tidy()
+            // A look made with Pro stays after Pro is lost, but only as it was: a changed design has to be allowed.
+            let palette = WorkshopArt.catalog?.colours ?? MakerParts.palette
+            guard saved?.design == design || WorkshopGate.allowed(design, palette: palette, workshopAccess) else { return false }
+            if design.born == 0 { design.born = saved?.design?.born ?? Date().timeIntervalSince1970 }
+            made.design = design
+        } else {
+            guard MakerParts.isAllowed(made, worldsCompleted: worldsCompleted) else { return false }
+        }
         if let i = progress.made.firstIndex(where: { $0.id == made.id }) {
             update { $0.made[i] = made }
         } else {
-            guard progress.made.count < min(progress.makerSlots, MakerParts.maxMade) else { return false }
+            guard progress.made.count < shelfPlaces else { return false }
             update { $0.made.append(made) }
         }
+        if let design = made.design { MadeFiles.shared.save(design, id: made.id) }
         return true
     }
 
-    /// One more place on the Maker shelf, for coins. The first place is free.
-    var canBuyMakerSlot: Bool { progress.makerSlots < MakerParts.maxMade }
+    /// One more place on the Workshop shelf, for coins. Workshop Pro has fifty and never pays.
+    /// Squishy Workshop has no coins and no levels, so a full shelf there never shows a price.
+    var canBuyMakerSlot: Bool { !AppModel.isKidsApp && !ownsRemoveAds && shelfPlaces < WorkshopGate.coinSlots }
 
     @discardableResult
     func buyMakerSlot() -> Bool {
         guard canBuyMakerSlot, progress.wallet.balance >= MakerSlots.price else { return false }
         update { p in
-            if p.wallet.spend(MakerSlots.price) { p.makerSlots += 1 }
+            if p.wallet.spend(MakerSlots.price) { p.makerSlots = max(MakerSlots.free, p.makerSlots) + 1 }
+        }
+        sounds.play("unlock_new")
+        return true
+    }
+
+    /// One wearable for coins, for a player of 13 or over without Workshop Pro. Kept for good.
+    @discardableResult
+    func buyWorkshopPart(category: String, part: String) -> Bool {
+        guard !isGentleMode, let price = WorkshopGate.coinPrice(category: category, part: part, workshopAccess),
+              progress.wallet.balance >= price else { return false }
+        update { p in
+            if p.wallet.spend(price) { p.workshopParts.insert(category + "/" + part) }
         }
         sounds.play("unlock_new")
         return true
@@ -875,6 +1007,7 @@ final class AppModel: ObservableObject {
             if let made = p.made.first(where: { $0.id == id }), p.buddy.squishy == made.ref { p.buddy.squishy = nil }
             p.made.removeAll { $0.id == id }
         }
+        MadeFiles.shared.delete(id: id)
     }
 
     // MARK: - Squishy Buddy
@@ -909,6 +1042,11 @@ final class AppModel: ObservableObject {
 
     /// The squishy the Squish Room should open with (set by "Squeeze me" buttons, used once).
     var roomStart: String?
+
+    /// Squishy Workshop: something closed was tapped, so the grown-up gate should come up.
+    @Published var grownUpAsk = false
+    /// What a grown-up asked to open once they are through the gate. Nil opens the Grown-ups corner.
+    var afterGate: (() -> Void)?
 
     /// Opens the Squish Room with this squishy in hand.
     func squeeze(_ ref: String) {
@@ -1086,11 +1224,36 @@ final class AppModel: ObservableObject {
     }
 
     /// Re-derived from the current storefront every time (unknown storefront = strictest).
+    #if KIDS
+    var ageGroup: AgeGroup { .child }
+    #else
     var ageGroup: AgeGroup { AgePolicy.group(of: progress.age, storefront: storefront) }
+    #endif
     var isGentleMode: Bool { ageGroup == .child }
     /// Sharing a clip of a big moment: 13 and over only (14 in Korea), never before the age step.
     var canShareClips: Bool { progress.age != nil && !isGentleMode && !AppModel.isUITesting && clips.available }
-    var ownsRemoveAds: Bool { purchases.ownsRemoveAds }
+    #if KIDS
+    static let isKidsApp = true
+    /// In Squishy Workshop this is the one purchase, "Unlock everything". UI tests can start unlocked.
+    var ownsRemoveAds: Bool {
+        purchases.ownsRemoveAds || testerOwnsEverything
+            || (AppModel.isUITesting && ProcessInfo.processInfo.arguments.contains("-kidsUnlocked"))
+    }
+    #else
+    static let isKidsApp = false
+    var ownsRemoveAds: Bool { purchases.ownsRemoveAds || testerOwnsEverything }
+    #endif
+
+    /// Tester builds only (never the build for App Review): the tester plays as an owner of the one
+    /// purchase, so there are no ads and everything paid is open. On until switched off in the tester tools.
+    var testerOwnsEverything: Bool {
+        AppModel.isTesterBuild && !AppModel.isUITesting && !UserDefaults.standard.bool(forKey: "tester.playAsFree")
+    }
+
+    func testerSetOwnsEverything(_ on: Bool) {
+        objectWillChange.send()
+        UserDefaults.standard.set(!on, forKey: "tester.playAsFree")
+    }
 
     func update(_ change: (inout PlayerProgress) -> Void) {
         change(&progress)
@@ -1260,7 +1423,7 @@ final class AppModel: ObservableObject {
         }
         awardStarJars()
         // The Buddy is met in the first capsule itself ("Is this your Buddy?"), so it has no card.
-        for extra in [Extra.mysteryBag, .maker] where isExtraUnlocked(extra) && !extrasBefore.contains(extra) {
+        for extra in [Extra.mysteryBag] where isExtraUnlocked(extra) && !extrasBefore.contains(extra) {
             news.append(.unlocked(extra))
         }
         // A full capsule bar opens its capsule after the level's own, never on top of it.
@@ -1588,7 +1751,11 @@ final class AppModel: ObservableObject {
 
     // MARK: - Ads
 
+    #if KIDS
+    private var trackingAllowed: Bool { false }
+    #else
     private var trackingAllowed: Bool { ATTrackingManager.trackingAuthorizationStatus == .authorized }
+    #endif
 
     var currentAdPolicy: AdRequestPolicy {
         AdPolicy.requestPolicy(profile: progress.age, storefront: storefront, consent: ads.consentStatus,
@@ -1619,10 +1786,12 @@ final class AppModel: ObservableObject {
         guard trackingExplainer else { return }
         trackingExplainer = false
         update { $0.trackingAsked = true }
+        #if !KIDS
         Task {
             _ = await ATTrackingManager.requestTrackingAuthorization()
             ads.update(policy: currentAdPolicy)
         }
+        #endif
     }
 
     // MARK: - Coins

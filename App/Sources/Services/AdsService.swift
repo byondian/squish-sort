@@ -1,3 +1,4 @@
+#if !KIDS
 import GoogleMobileAds
 import SwiftUI
 import UIKit
@@ -187,3 +188,26 @@ final class AdsService: NSObject, ObservableObject, FullScreenContentDelegate {
         return vc
     }
 }
+#else
+import SwiftUI
+import SquishPolicy
+
+/// Squishy Workshop (the Kids category app) has no ads and no ad SDK at all: nothing is linked,
+/// nothing is loaded, and every call here does nothing.
+@MainActor
+final class AdsService: ObservableObject {
+    @Published private(set) var rewardedReady = false
+    let started = false
+    var consentStatus: SquishPolicy.ConsentStatus { .notRequired }
+    var privacyOptionsRequired: Bool { false }
+    func update(policy: AdRequestPolicy) {}
+    func start(policy: AdRequestPolicy) async {}
+    func setMuted(_ muted: Bool) {}
+    func showPrivacyOptions() async {}
+    func showInterstitial(done: @escaping () -> Void) -> Bool {
+        done()
+        return false
+    }
+    func showRewarded(completion: @escaping (Bool) -> Void) { completion(false) }
+}
+#endif

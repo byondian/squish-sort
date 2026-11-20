@@ -190,6 +190,10 @@ final class SoftSquishyScene: SKScene {
     }
 
     var mode = Mode.pressOnly
+    /// The air of the room: 1 is normal weight, less floats (a bath, falling snow). Read when a toy comes in.
+    var gravityScale = 1.0
+    /// How hard a thrown toy bounces off the floor and walls, 0 to 1. Nil keeps the toy's own.
+    var bounce: Double?
     /// The Buddy on Home: once thrown and settled, it slides back to the middle.
     var comesHome = false
     var reduceMotion = false
@@ -355,7 +359,10 @@ final class SoftSquishyScene: SKScene {
             let falls = drop && fresh.contains(piece.id) && mode == .room && !reduceMotion
             let slot = w * (Double(i) + 0.5) / Double(pieces.count)
             let x = mode == .room ? min(max(before[piece.id] ?? slot, half), max(half, w - half)) : w / 2
-            let made = SquishBody(size: side, n: 12, material: tuning.material(piece.feel, reduceMotion: reduceMotion),
+            var material = tuning.material(piece.feel, reduceMotion: reduceMotion)
+            material.grav *= gravityScale
+            if let bounce, !reduceMotion { material.rest = bounce }
+            let made = SquishBody(size: side, n: 12, material: material,
                                   x: x,
                                   y: falls ? -side * 0.6 : world.floor - footV * side + side / 2,
                                   footV: footV, inside: { u, v in mask?.inside(u, v) ?? true })

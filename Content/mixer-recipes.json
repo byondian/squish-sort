@@ -1,0 +1,802 @@
+{
+ "axo": {
+  "colours": [
+   "#F8B8C8",
+   "#F8E8F8"
+  ],
+  "feel": "jelly",
+  "mould": "cat"
+ },
+ "bath-turtle": {
+  "colours": [
+   "#F8D868",
+   "#B8E8B8"
+  ],
+  "feel": "foam",
+  "mould": "bean"
+ },
+ "birthday-cake": {
+  "colours": [
+   "#F8C8D8",
+   "#C8E8E8"
+  ],
+  "feel": "foam",
+  "mould": "dino"
+ },
+ "blaze-dragon": {
+  "colours": [
+   "#98E8B8",
+   "#E8F8E8"
+  ],
+  "feel": "jelly",
+  "mould": "blob"
+ },
+ "blossom-ellie": {
+  "colours": [
+   "#A8C8E8",
+   "#D8D8C8"
+  ],
+  "feel": "jelly",
+  "mould": "egg"
+ },
+ "blu": {
+  "colours": [
+   "#78C8F8",
+   "#D8E8F8"
+  ],
+  "feel": "jelly",
+  "mould": "drop"
+ },
+ "bongo": {
+  "colours": [
+   "#B88858",
+   "#F8D8B8"
+  ],
+  "feel": "jelly",
+  "mould": "flower"
+ },
+ "bubble-seal": {
+  "colours": [
+   "#D8E8F8",
+   "#A8A8B8"
+  ],
+  "feel": "jelly",
+  "mould": "pear"
+ },
+ "bubbly": {
+  "colours": [
+   "#88D8F8",
+   "#586888"
+  ],
+  "feel": "gel",
+  "mould": "dome"
+ },
+ "butter-bar": {
+  "colours": [
+   "#98D8F8",
+   "#F8E898"
+  ],
+  "feel": "foam",
+  "mould": "square"
+ },
+ "buzzy": {
+  "colours": [
+   "#F8D868",
+   "#E8F8F8"
+  ],
+  "feel": "jelly",
+  "mould": "heart"
+ },
+ "candy-cane-cat": {
+  "colours": [
+   "#F8F8F8",
+   "#F85868"
+  ],
+  "feel": "jelly",
+  "mould": "long-cat"
+ },
+ "capy": {
+  "colours": [
+   "#C89868",
+   "#F8C838"
+  ],
+  "feel": "jelly",
+  "mould": "drop"
+ },
+ "centre-star": {
+  "colours": [
+   "#C8D898",
+   "#F878B8"
+  ],
+  "feel": "jelly",
+  "mould": "flower"
+ },
+ "choco-bat": {
+  "colours": [
+   "#986848",
+   "#C86878"
+  ],
+  "feel": "jelly",
+  "mould": "drop"
+ },
+ "chomp": {
+  "colours": [
+   "#88B8D8",
+   "#F85898"
+  ],
+  "feel": "jelly",
+  "mould": "pear"
+ },
+ "coco": {
+  "colours": [
+   "#78E8A8",
+   "#F878B8"
+  ],
+  "feel": "jelly",
+  "mould": "cloud"
+ },
+ "cream-puff": {
+  "colours": [
+   "#F8C878",
+   "#D8D8D8"
+  ],
+  "feel": "foam",
+  "mould": "blob"
+ },
+ "cupcake": {
+  "colours": [
+   "#C8A8F8",
+   "#F8F8E8"
+  ],
+  "feel": "foam",
+  "mould": "drop"
+ },
+ "dino-rex": {
+  "colours": [
+   "#78D8C8",
+   "#D8F8E8"
+  ],
+  "feel": "jelly",
+  "mould": "flower"
+ },
+ "donut": {
+  "colours": [
+   "#F8C888",
+   "#A86838"
+  ],
+  "feel": "foam",
+  "mould": "blob"
+ },
+ "dotty": {
+  "colours": [
+   "#F85868",
+   "#F88898"
+  ],
+  "feel": "jelly",
+  "mould": "drop"
+ },
+ "elfie": {
+  "colours": [
+   "#F8E8C8",
+   "#38B878"
+  ],
+  "feel": "jelly",
+  "mould": "drop"
+ },
+ "encore-otter": {
+  "colours": [
+   "#B88868",
+   "#F8D8C8"
+  ],
+  "feel": "jelly",
+  "mould": "drop"
+ },
+ "fan-sign-hamster": {
+  "colours": [
+   "#F8F8E8",
+   "#F8D8A8"
+  ],
+  "feel": "jelly",
+  "mould": "cat"
+ },
+ "fizzy": {
+  "colours": [
+   "#88E8C8",
+   "#B8C8F8"
+  ],
+  "feel": "foam",
+  "mould": "drop"
+ },
+ "floaty-otter": {
+  "colours": [
+   "#B88868",
+   "#F86878"
+  ],
+  "feel": "jelly",
+  "mould": "bun"
+ },
+ "flurry": {
+  "colours": [
+   "#A8D8F8",
+   "#D8E8D8"
+  ],
+  "feel": "jelly",
+  "mould": "drop"
+ },
+ "ginger": {
+  "colours": [
+   "#E8A878",
+   "#A87868"
+  ],
+  "feel": "foam",
+  "mould": "flower"
+ },
+ "glimmer": {
+  "colours": [
+   "#B8D8E8",
+   "#F898C8"
+  ],
+  "feel": "jelly",
+  "mould": "egg"
+ },
+ "gloop": {
+  "colours": [
+   "#F898C8",
+   "#F8E8F8"
+  ],
+  "feel": "gel",
+  "mould": "blob"
+ },
+ "glowbug": {
+  "colours": [
+   "#5868B8",
+   "#E8F8F8"
+  ],
+  "feel": "gel",
+  "mould": "flower"
+ },
+ "golden-bell": {
+  "colours": [
+   "#E8A828",
+   "#F8D888"
+  ],
+  "feel": "jelly",
+  "mould": "cloud"
+ },
+ "golden-ducky": {
+  "colours": [
+   "#E8A828",
+   "#F8C858"
+  ],
+  "feel": "jelly",
+  "mould": "egg"
+ },
+ "golden-gummy": {
+  "colours": [
+   "#E8B838",
+   "#F8D868"
+  ],
+  "feel": "jelly",
+  "mould": "blob"
+ },
+ "golden-mic": {
+  "colours": [
+   "#E8B838",
+   "#F8D878"
+  ],
+  "feel": "jelly",
+  "mould": "mushroom"
+ },
+ "golden-nana": {
+  "colours": [
+   "#E8A828",
+   "#F8D878"
+  ],
+  "feel": "jelly",
+  "mould": "moon"
+ },
+ "golden-shop-cat": {
+  "colours": [
+   "#E8B838",
+   "#F8D878"
+  ],
+  "feel": "jelly",
+  "mould": "bean"
+ },
+ "grapey": {
+  "colours": [
+   "#B888F8",
+   "#D8C8F8"
+  ],
+  "feel": "jelly",
+  "mould": "bun"
+ },
+ "gummy-bear": {
+  "colours": [
+   "#58D888",
+   "#A8E8C8"
+  ],
+  "feel": "jelly",
+  "mould": "bean"
+ },
+ "hot-cocoa-bear": {
+  "colours": [
+   "#F898C8",
+   "#F8F8E8"
+  ],
+  "feel": "jelly",
+  "mould": "bear"
+ },
+ "hummy": {
+  "colours": [
+   "#58D8B8",
+   "#C8F8E8"
+  ],
+  "feel": "jelly",
+  "mould": "heart"
+ },
+ "jelly": {
+  "colours": [
+   "#F86878",
+   "#F8B8B8"
+  ],
+  "feel": "jelly",
+  "mould": "square"
+ },
+ "kami": {
+  "colours": [
+   "#78E8A8",
+   "#F8B8C8"
+  ],
+  "feel": "jelly",
+  "mould": "drop"
+ },
+ "leafy": {
+  "colours": [
+   "#68C888",
+   "#A8E8B8"
+  ],
+  "feel": "jelly",
+  "mould": "heart"
+ },
+ "lightstick-lamb": {
+  "colours": [
+   "#E8D8F8",
+   "#F85898"
+  ],
+  "feel": "jelly",
+  "mould": "cat"
+ },
+ "lolly": {
+  "colours": [
+   "#78C8F8",
+   "#D8E8F8"
+  ],
+  "feel": "jelly",
+  "mould": "heart"
+ },
+ "lumi": {
+  "colours": [
+   "#F898C8",
+   "#C8A8F8"
+  ],
+  "feel": "jelly",
+  "mould": "long-cat"
+ },
+ "macaron": {
+  "colours": [
+   "#F898C8",
+   "#F8F8E8"
+  ],
+  "feel": "foam",
+  "mould": "blob"
+ },
+ "mer-kitty": {
+  "colours": [
+   "#F8E8F8",
+   "#78D8D8"
+  ],
+  "feel": "jelly",
+  "mould": "bean"
+ },
+ "minty": {
+  "colours": [
+   "#78E8A8",
+   "#68A888"
+  ],
+  "feel": "jelly",
+  "mould": "bun"
+ },
+ "mochi-ice": {
+  "colours": [
+   "#F8E8F8",
+   "#D8B8C8"
+  ],
+  "feel": "mochi",
+  "mould": "drop"
+ },
+ "morphy": {
+  "colours": [
+   "#A8C8E8",
+   "#E8E8E8"
+  ],
+  "feel": "jelly",
+  "mould": "egg"
+ },
+ "mushie": {
+  "colours": [
+   "#F86878",
+   "#F8F8E8"
+  ],
+  "feel": "jelly",
+  "mould": "flower"
+ },
+ "nana": {
+  "colours": [
+   "#F8E868",
+   "#C8A858"
+  ],
+  "feel": "jelly",
+  "mould": "moon"
+ },
+ "nova": {
+  "colours": [
+   "#C8D8E8",
+   "#F8A858"
+  ],
+  "feel": "jelly",
+  "mould": "egg"
+ },
+ "nutcracker-mouse": {
+  "colours": [
+   "#C8C8D8",
+   "#F85868"
+  ],
+  "feel": "jelly",
+  "mould": "blob"
+ },
+ "panda-dumpling": {
+  "colours": [
+   "#E8E8E8",
+   "#988898"
+  ],
+  "feel": "mochi",
+  "mould": "cat"
+ },
+ "pango": {
+  "colours": [
+   "#D8B888",
+   "#F8E8D8"
+  ],
+  "feel": "foam",
+  "mould": "drop"
+ },
+ "peach-bun": {
+  "colours": [
+   "#F8B898",
+   "#C88888"
+  ],
+  "feel": "jelly",
+  "mould": "egg"
+ },
+ "photocard-panda": {
+  "colours": [
+   "#F898C8",
+   "#F8E8F8"
+  ],
+  "feel": "jelly",
+  "mould": "flower"
+ },
+ "pina": {
+  "colours": [
+   "#F8C848",
+   "#B89848"
+  ],
+  "feel": "jelly",
+  "mould": "drop"
+ },
+ "pip": {
+  "colours": [
+   "#F8D868",
+   "#F878B8"
+  ],
+  "feel": "jelly",
+  "mould": "blob"
+ },
+ "polar-bear": {
+  "colours": [
+   "#78C8F8",
+   "#F8F8F8"
+  ],
+  "feel": "jelly",
+  "mould": "cat"
+ },
+ "polly": {
+  "colours": [
+   "#38C8E8",
+   "#F8D868"
+  ],
+  "feel": "jelly",
+  "mould": "drop"
+ },
+ "prisma": {
+  "colours": [
+   "#B8E8F8",
+   "#F8F8E8"
+  ],
+  "feel": "gel",
+  "mould": "blob"
+ },
+ "quacky": {
+  "colours": [
+   "#F8D868",
+   "#886858"
+  ],
+  "feel": "jelly",
+  "mould": "drop"
+ },
+ "rainbow-toast": {
+  "colours": [
+   "#C8E8D8",
+   "#F8D898"
+  ],
+  "feel": "foam",
+  "mould": "bun"
+ },
+ "red-panda": {
+  "colours": [
+   "#E87848",
+   "#F8F8F8"
+  ],
+  "feel": "jelly",
+  "mould": "egg"
+ },
+ "reindeer": {
+  "colours": [
+   "#E8C8A8",
+   "#986848"
+  ],
+  "feel": "jelly",
+  "mould": "cat"
+ },
+ "riff": {
+  "colours": [
+   "#78C8F8",
+   "#F85878"
+  ],
+  "feel": "jelly",
+  "mould": "blob"
+ },
+ "santa": {
+  "colours": [
+   "#F85868",
+   "#A84858"
+  ],
+  "feel": "jelly",
+  "mould": "bun"
+ },
+ "scrubby-crab": {
+  "colours": [
+   "#F88878",
+   "#985858"
+  ],
+  "feel": "jelly",
+  "mould": "blob"
+ },
+ "shelly": {
+  "colours": [
+   "#B898F8",
+   "#7868A8"
+  ],
+  "feel": "jelly",
+  "mould": "blob"
+ },
+ "shower-cap-cat": {
+  "colours": [
+   "#98E8E8",
+   "#F8F8F8"
+  ],
+  "feel": "jelly",
+  "mould": "blob"
+ },
+ "sleepy-moon": {
+  "colours": [
+   "#F8E888",
+   "#B888F8"
+  ],
+  "feel": "jelly",
+  "mould": "blob"
+ },
+ "snooze": {
+  "colours": [
+   "#F8E8D8",
+   "#B8A888"
+  ],
+  "feel": "jelly",
+  "mould": "cat"
+ },
+ "snoozy-sloth": {
+  "colours": [
+   "#C8A888",
+   "#F8E8D8"
+  ],
+  "feel": "mochi",
+  "mould": "bear"
+ },
+ "snowbo": {
+  "colours": [
+   "#78E8C8",
+   "#F878B8"
+  ],
+  "feel": "jelly",
+  "mould": "egg"
+ },
+ "soapy": {
+  "colours": [
+   "#F898C8",
+   "#F8E8E8"
+  ],
+  "feel": "jelly",
+  "mould": "dome"
+ },
+ "sparkle-unicorn": {
+  "colours": [
+   "#E8F8F8",
+   "#F898C8"
+  ],
+  "feel": "jelly",
+  "mould": "drop"
+ },
+ "spike": {
+  "colours": [
+   "#E8C8A8",
+   "#A89888"
+  ],
+  "feel": "jelly",
+  "mould": "flower"
+ },
+ "splash": {
+  "colours": [
+   "#88D8E8",
+   "#D8E8E8"
+  ],
+  "feel": "gel",
+  "mould": "drop"
+ },
+ "star-narwhal": {
+  "colours": [
+   "#A8D8E8",
+   "#E8F8F8"
+  ],
+  "feel": "jelly",
+  "mould": "pear"
+ },
+ "starla": {
+  "colours": [
+   "#F89878",
+   "#F8C8B8"
+  ],
+  "feel": "jelly",
+  "mould": "star"
+ },
+ "starry-tree": {
+  "colours": [
+   "#68C8A8",
+   "#F8D868"
+  ],
+  "feel": "jelly",
+  "mould": "dino"
+ },
+ "strawberry-cow": {
+  "colours": [
+   "#F8C8D8",
+   "#F86878"
+  ],
+  "feel": "jelly",
+  "mould": "egg"
+ },
+ "strawbie": {
+  "colours": [
+   "#F86878",
+   "#68C888"
+  ],
+  "feel": "jelly",
+  "mould": "flower"
+ },
+ "sunny": {
+  "colours": [
+   "#F8D868",
+   "#C8A868"
+  ],
+  "feel": "jelly",
+  "mould": "flower"
+ },
+ "swirl": {
+  "colours": [
+   "#C8C8D8",
+   "#F8E8E8"
+  ],
+  "feel": "jelly",
+  "mould": "drop"
+ },
+ "taffy-snake": {
+  "colours": [
+   "#F898C8",
+   "#F8F8F8"
+  ],
+  "feel": "mochi",
+  "mould": "bean"
+ },
+ "tango": {
+  "colours": [
+   "#F8A858",
+   "#F8F8E8"
+  ],
+  "feel": "jelly",
+  "mould": "long-cat"
+ },
+ "tapey": {
+  "colours": [
+   "#F8E8D8",
+   "#786878"
+  ],
+  "feel": "mochi",
+  "mould": "egg"
+ },
+ "tiger-cub": {
+  "colours": [
+   "#F8A858",
+   "#F8F8E8"
+  ],
+  "feel": "jelly",
+  "mould": "cat"
+ },
+ "towel-bear": {
+  "colours": [
+   "#D8A878",
+   "#F8D8C8"
+  ],
+  "feel": "foam",
+  "mould": "egg"
+ },
+ "tub-hippo": {
+  "colours": [
+   "#C8A8F8",
+   "#F8F8F8"
+  ],
+  "feel": "jelly",
+  "mould": "cloud"
+ },
+ "tuki": {
+  "colours": [
+   "#F8F8E8",
+   "#F8A858"
+  ],
+  "feel": "jelly",
+  "mould": "blob"
+ },
+ "vinny": {
+  "colours": [
+   "#88D8A8",
+   "#D8E8C8"
+  ],
+  "feel": "jelly",
+  "mould": "drop"
+ },
+ "waddles": {
+  "colours": [
+   "#586898",
+   "#F85868"
+  ],
+  "feel": "jelly",
+  "mould": "egg"
+ },
+ "zuzu": {
+  "colours": [
+   "#B888F8",
+   "#38C8B8"
+  ],
+  "feel": "jelly",
+  "mould": "blob"
+ }
+}

@@ -711,8 +711,10 @@ final class ExtrasTests: XCTestCase {
         XCTAssertTrue(open(.squishRoom, capsules: 1, won: 3))
         XCTAssertFalse(open(.mysteryBag, capsules: 3, won: 9))
         XCTAssertTrue(open(.mysteryBag, capsules: 3, won: 10))
-        XCTAssertFalse(open(.maker, capsules: 6, won: 19))
-        XCTAssertTrue(open(.maker, capsules: 6, won: 20, world: true))
+        XCTAssertTrue(open(.maker, capsules: 1, won: 3), "the Workshop arrives with the first capsule")
+        XCTAssertTrue(Extras.isUnlocked(.maker, capsulesOpened: 0, levelsWon: 0, firstWorldComplete: false, ownsRemoveAds: true),
+                      "Remove Ads includes Workshop Pro, so its owner has the Workshop at once")
+        XCTAssertFalse(Extras.isUnlocked(.squishRoom, capsulesOpened: 0, levelsWon: 0, firstWorldComplete: false, ownsRemoveAds: true))
         XCTAssertFalse(open(.buddy))
         XCTAssertTrue(open(.buddy, capsules: 1, won: 3), "the Buddy arrives with the first capsule")
     }
@@ -876,6 +878,9 @@ final class ExtrasTests: XCTestCase {
         XCTAssertFalse(gate.isLocked(now: 110))
         XCTAssertTrue(gate.submit(" \(gate.a * gate.b) ", now: 110, using: &rng))
         XCTAssertFalse(gate.submit("abc", now: 200, using: &rng))
+        // Only the digits count, whatever else a keyboard adds around them.
+        XCTAssertTrue(gate.submit("\(gate.a * gate.b).", now: 300, using: &rng))
+        XCTAssertFalse(gate.submit("", now: 300, using: &rng))
     }
 
     func testSquishyShopLinkIsNeverShownToChildrenOrUnknownAges() {
@@ -1147,7 +1152,7 @@ final class OffersTests: XCTestCase {
     }
 
     func testMakerPlacesStartWithWhatWasAlreadyMade() {
-        XCTAssertEqual(MakerSlots.starting(alreadyMade: 0), 1)
+        XCTAssertEqual(MakerSlots.starting(alreadyMade: 0), 3)
         XCTAssertEqual(MakerSlots.starting(alreadyMade: 3), 3)
         XCTAssertEqual(MakerSlots.starting(alreadyMade: 99), MakerParts.maxMade)
     }

@@ -54,6 +54,8 @@ targets:
         product: SquishPolicy
       - package: SquishKit
         product: SquishSoft
+      - package: SquishKit
+        product: SquishWorkshop
       - package: GoogleMobileAds
         product: GoogleMobileAds
       - package: GoogleUMP
@@ -144,6 +146,77 @@ targets:
       storeKitConfiguration: App/SquishSort.storekit
       testTargets:
         - SquishSortUITests
+  # Squishy Workshop: the Kids category app. Same code with the KIDS flag; no ad SDK is linked,
+  # nothing is collected, and it has its own privacy manifest and its own single purchase.
+  SquishyWorkshop:
+    type: application
+    platform: iOS
+    sources:
+      - path: App/Sources
+      - path: Kids/Sources
+      - path: App/Resources
+        excludes:
+          - PrivacyInfo.xcprivacy
+          - InfoPlist.xcstrings
+      - path: Kids/Resources
+      - path: Levels
+        type: folder
+        buildPhase: resources
+      - path: Content
+        type: folder
+        buildPhase: resources
+    dependencies:
+      - package: SquishKit
+        product: SquishCore
+      - package: SquishKit
+        product: SquishLevels
+      - package: SquishKit
+        product: SquishPolicy
+      - package: SquishKit
+        product: SquishSoft
+      - package: SquishKit
+        product: SquishWorkshop
+      - sdk: StoreKit.framework
+    info:
+      path: Kids/Info.plist
+      properties:
+        CFBundleDisplayName: Squishy Workshop
+        NSCameraUsageDescription: Take a photo of your drawing to turn it into a squishy
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleLocalizations: [en, ja, ko, zh-Hant]
+        ITSAppUsesNonExemptEncryption: false
+        LSRequiresIPhoneOS: true
+        UILaunchScreen:
+          UIColorName: Marshmallow
+        UIRequiresFullScreen: true
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIApplicationSupportsIndirectInputEvents: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ianatkinson.squishyworkshop
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIconWorkshop
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: Bubblegum
+        CODE_SIGN_STYLE: Automatic
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: $(inherited) KIDS $(TESTER_FLAG)
+    scheme:
+      storeKitConfiguration: Kids/SquishyWorkshop.storekit
+      testTargets:
+        - SquishyWorkshopUITests
+  SquishyWorkshopUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: Kids/UITests
+    dependencies:
+      - target: SquishyWorkshop
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ianatkinson.squishyworkshop.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TARGETED_DEVICE_FAMILY: "1,2"
+        CODE_SIGN_STYLE: Automatic
   SquishSortUITests:
     type: bundle.ui-testing
     platform: iOS
