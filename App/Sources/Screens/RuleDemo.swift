@@ -4,19 +4,21 @@ import SquishPolicy
 
 /// The twists a board can have. Each is shown once, on the first level that has it.
 enum BoardRule: String, CaseIterable {
-    case wrapped, duet, frozen, curtain, bubble, vine
+    case wrapped, duet, frozen, curtain, floater, ride, vine
     /// Not a twist of one world: a run only moves as far as there is room. Taught early in Toy Shop.
     case partial
 
     /// The rules on this board, in the order they are taught.
-    /// - Parameter look: the world the board is dressed as. In Bubble Bath the ice is a bubble.
+    /// - Parameter look: the world the board is dressed as.
+    /// On a Bubble Bath board the frozen pieces are floaters, and a golden one can ride.
     static func rules(on board: Board, look: String = "") -> [BoardRule] {
         var found: Set<BoardRule> = []
         for jar in board.jars {
             for piece in jar {
                 if piece.hidden { found.insert(.wrapped) }
                 if piece.bondedAbove { found.insert(.duet) }
-                if piece.frozen > 0 { found.insert(look == "bubblebath" ? .bubble : .frozen) }
+                if piece.frozen > 0 { found.insert(board.floats ? .floater : .frozen) }
+                if board.floats, piece.frozen == 2 { found.insert(.ride) }
             }
         }
         if !board.curtains.isEmpty { found.insert(.curtain) }
@@ -31,7 +33,8 @@ enum BoardRule: String, CaseIterable {
         case .frozen: return String(localized: "Frozen! Moves next to it melt the ice.")
         case .partial: return String(localized: "Only what fits moves!")
         case .curtain: return String(localized: "Finish the jar next door to raise the curtain!")
-        case .bubble: return String(localized: "Pop the bubble by moving next to it.")
+        case .floater: return String(localized: "A bubble seals its jar. Dig under it until it meets its twin or the bottom. Pop!")
+        case .ride: return String(localized: "A golden bubble can fly! Tap it, then tap any jar.")
         case .vine: return String(localized: "Each finished jar counts the tag down. At 0 the vine snaps!")
         }
     }
@@ -86,6 +89,7 @@ struct RuleDemo: View {
             for s in 0...5 {
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.65)) { step = s }
                 if s == 2 || s == 4 { model.sounds.play("land_soft", volume: 0.5) }
+                if s == 4, rule == .floater || rule == .ride { model.sounds.play("bubble_pop", volume: 0.6) }
                 try? await Task.sleep(nanoseconds: s == 5 ? 1_400_000_000 : 750_000_000)
                 if Task.isCancelled { return }
             }
@@ -108,7 +112,9 @@ struct RuleDemo: View {
         switch rule {
         case .wrapped: wrappedStage
         case .duet: duetStage
-        case .frozen, .bubble: frozenStage
+        case .frozen: frozenStage
+        case .floater: floaterStage
+        case .ride: rideStage
         case .vine: vineStage
         case .partial: partialStage
         case .curtain: curtainStage
@@ -230,14 +236,7 @@ struct RuleDemo: View {
         let inMiddle = step >= 2 && step < 4
         return ZStack {
             blob(actors[1], x: RuleDemo.xs[0], y: RuleDemo.ys[0])
-            if ice > 0, rule == .bubble {
-                Circle().fill(Color.white.opacity(0.55))
-                    .overlay(Circle().stroke(Color(hex: 0x8FD8F5), lineWidth: 2.5))
-                    .overlay(Text(verbatim: "\(ice)").font(Theme.title(16)).foregroundStyle(Theme.plum))
-                    .frame(width: 44, height: 44)
-                    .position(x: RuleDemo.xs[0], y: RuleDemo.ys[0])
-                    .transition(.scale(scale: 1.5).combined(with: .opacity))
-            } else if ice > 0 {
+            if ice > 0 {
                 RoundedRectangle(cornerRadius: 10).fill(Color(uiColor: .ice).opacity(0.85))
                     .overlay(Text(verbatim: "\(ice)").font(Theme.title(16)).foregroundStyle(Theme.plum))
                     .frame(width: 38, height: 36)
@@ -247,6 +246,50 @@ struct RuleDemo: View {
             blob(actors[0], x: RuleDemo.xs[1], y: RuleDemo.ys[0])
             blob(actors[0], x: RuleDemo.xs[2], y: RuleDemo.ys[0])
             blob(actors[0], x: inMiddle ? RuleDemo.xs[1] : RuleDemo.xs[2], y: RuleDemo.ys[1])
+        }
+    }
+
+    /// A soap bubble round a squishy in the demo: blue, or golden for one that can ride.
+    private func bubble(golden: Bool, x: CGFloat, y: CGFloat) -> some View {
+        let edge = Color(hex: golden ? 0xFFB300 : 0x3FB6F2)
+        return Circle().fill(Color(hex: golden ? 0xFFE27A : 0xBDEBFF).opacity(0.45))
+            .overlay(Circle().stroke(edge, lineWidth: 3))
+            .overlay(alignment: .topLeading) {
+                Capsule().fill(Color.white.opacity(0.95)).frame(width: 12, height: 5).rotationEffect(.degrees(-40)).offset(x: 7, y: 9)
+            }
+            .frame(width: 44, height: 44)
+            .position(x: x, y: y)
+            .transition(.scale(scale: 1.6).combined(with: .opacity))
+    }
+
+    // Floater: the one under the bubble hops away, the bubble sinks onto its twin and pops.
+    private var floaterStage: some View {
+        let lifted = step == 2
+        let moved = step >= 3
+        let popped = step >= 4
+        let floaterY = moved ? RuleDemo.ys[1] : RuleDemo.ys[2]
+        return ZStack {
+            blob(actors[0], x: RuleDemo.xs[0], y: RuleDemo.ys[0])
+            blob(actors[1], x: RuleDemo.xs[2], y: RuleDemo.ys[0])
+            blob(actors[1], x: moved ? RuleDemo.xs[2] : RuleDemo.xs[0],
+                 y: lifted ? RuleDemo.ys[3] : RuleDemo.ys[1])
+            blob(actors[0], x: RuleDemo.xs[0], y: floaterY)
+            if !popped { bubble(golden: false, x: RuleDemo.xs[0], y: floaterY) }
+        }
+    }
+
+    // Ride: a tap on the golden bubble, a tap on another jar, and it flies over and pops on its twin.
+    private var rideStage: some View {
+        let lifted = step == 2
+        let moved = step >= 3
+        let popped = step >= 4
+        let x = moved ? RuleDemo.xs[2] : RuleDemo.xs[0]
+        let y = lifted ? RuleDemo.ys[3] : RuleDemo.ys[1]
+        return ZStack {
+            blob(actors[1], x: RuleDemo.xs[0], y: RuleDemo.ys[0])
+            blob(actors[0], x: RuleDemo.xs[2], y: RuleDemo.ys[0])
+            blob(actors[0], x: x, y: y)
+            if !popped { bubble(golden: true, x: x, y: y) }
         }
     }
 
@@ -275,9 +318,11 @@ struct RuleDemo: View {
         case (.duet, 1): spot = CGPoint(x: RuleDemo.xs[0], y: RuleDemo.ys[1])
         case (.duet, 2): spot = CGPoint(x: RuleDemo.xs[1], y: RuleDemo.ys[1])
         case (.duet, 3), (.duet, 4): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])
-        case (.frozen, 1), (.bubble, 1): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])
-        case (.frozen, 2), (.frozen, 3), (.bubble, 2), (.bubble, 3): spot = CGPoint(x: RuleDemo.xs[1], y: RuleDemo.ys[1])
-        case (.frozen, 4), (.bubble, 4): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])
+        case (.frozen, 1): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])
+        case (.frozen, 2), (.frozen, 3): spot = CGPoint(x: RuleDemo.xs[1], y: RuleDemo.ys[1])
+        case (.frozen, 4): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])
+        case (.floater, 1), (.floater, 2), (.ride, 1), (.ride, 2): spot = CGPoint(x: RuleDemo.xs[0], y: RuleDemo.ys[1])
+        case (.floater, 3), (.ride, 3): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])
         case (.partial, 1), (.partial, 2): spot = CGPoint(x: RuleDemo.xs[0], y: RuleDemo.ys[2])
         case (.partial, 3): spot = CGPoint(x: RuleDemo.xs[1], y: RuleDemo.ys[2])
         case (.curtain, 1), (.curtain, 2), (.vine, 1), (.vine, 2): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])

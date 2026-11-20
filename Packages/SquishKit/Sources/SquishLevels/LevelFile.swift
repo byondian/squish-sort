@@ -20,7 +20,8 @@ public struct LevelFile: Codable, Equatable, Sendable {
         public var hidden: [[Int]]?
         /// [jar, position] of the lower piece of each duet (it and the one above move together).
         public var sticky: [[Int]]?
-        /// [jar, position] or [jar, position, movesToThaw] (default 2).
+        /// [jar, position] or [jar, position, movesToThaw] (default 2). In Bubble Bath these are bubbles:
+        /// [jar, position, 1] a floater, [jar, position, 2] a golden bubble that can ride.
         public var frozen: [[Int]]?
         /// Jars that start behind a closed curtain.
         public var curtains: [Int]?
@@ -103,9 +104,10 @@ public struct Level: Sendable {
         }
         let hidden = Set(try positions(m.hidden, "hidden").map { [$0[0], $0[1]] })
         let sticky = Set(try positions(m.sticky, "sticky").map { [$0[0], $0[1]] })
+        let floats = file.world == LevelCatalog.floatWorld
         var frozen: [[Int]: UInt8] = [:]
         for p in try positions(m.frozen, "frozen") {
-            frozen[[p[0], p[1]]] = UInt8(clamping: p.count > 2 ? p[2] : LevelFile.defaultThaw)
+            frozen[[p[0], p[1]]] = UInt8(clamping: p.count > 2 ? p[2] : (floats ? 1 : LevelFile.defaultThaw))
         }
 
         var jars: [[Piece]] = []
@@ -132,6 +134,6 @@ public struct Level: Sendable {
             }
             vines[v[0]] = v[1]
         }
-        self.board = Board(capacity: file.capacity, jars: jars, curtains: m.curtains ?? [], vines: vines)
+        self.board = Board(capacity: file.capacity, jars: jars, curtains: m.curtains ?? [], vines: vines, floats: floats)
     }
 }

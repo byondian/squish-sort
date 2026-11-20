@@ -4,6 +4,8 @@ import Foundation
 public enum LevelCatalog {
     /// The main path, in play order.
     public static let worlds = ["toyshop", "sweetfactory", "starlight", "bubblebath", "junglejam"]
+    /// The world whose bubbles are floaters (see `Board.floats`).
+    public static let floatWorld = "bubblebath"
     /// Side worlds have their own level numbers and are not on the map's main path.
     public static let sideWorlds = ["christmas"]
     public static var allWorlds: [String] { worlds + sideWorlds }

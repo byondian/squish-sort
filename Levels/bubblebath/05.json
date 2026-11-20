@@ -6,19 +6,19 @@
   "beat": "showpiece",
   "capacity": 4,
   "jars": [
-    ["bubbly", "minty", "minty", "minty"],
-    ["fizzy"],
-    [],
-    ["starla", "quacky", "quacky", "quacky"],
-    ["soapy", "shelly", "shelly", "shelly"],
-    ["starla", "starla", "starla"],
-    ["minty", "soapy", "soapy", "soapy"],
-    ["quacky", "bubbly", "bubbly", "bubbly"],
-    ["shelly", "fizzy", "fizzy", "fizzy"]
+    ["starla", "starla", "starla", "bubbly"],
+    ["fizzy", "fizzy", "fizzy", "shelly"],
+    ["minty", "minty", "minty", "fizzy"],
+    ["shelly", "shelly", "shelly", "soapy"],
+    ["bubbly", "bubbly", "bubbly", "minty"],
+    ["quacky", "quacky", "quacky"],
+    ["starla"],
+    ["soapy", "soapy", "soapy", "quacky"],
+    []
   ],
-  "mechanics": {"hidden": [], "sticky": [], "frozen": []},
+  "mechanics": {"hidden": [], "sticky": [], "frozen": [[0, 3, 2], [1, 3, 2], [2, 3, 2], [3, 3, 2], [4, 3, 2], [7, 3, 2]]},
   "par": 7,
-  "solution": [[8, 1], [4, 8], [6, 4], [0, 6], [7, 0], [3, 7], [3, 5]],
+  "solution": [[0, 6], [4, 0], [2, 4], [1, 2], [3, 1], [7, 3], [5, 7]],
   "capsule": false,
   "softenAfterFails": null
 }

@@ -260,6 +260,16 @@ final class AppModel: ObservableObject {
         case "room":
             roomStart = "taffy-snake"
             screen = .room
+        case "gifts":
+            // The Buddy with a hat, a scarf and a balloon, for the picture the checks keep.
+            update { p in
+                // The Buddy lives on Home from the first capsule.
+                p.collection.totalCapsules = max(1, p.collection.totalCapsules)
+                for id in ["hats-and-headwear/party-hat", "neck-and-body/scarf", "held-items/balloon"] {
+                    if let gift = BuddyGifts.gift(id) { p.buddy.receive(gift) }
+                }
+            }
+            screen = .home
         case "map":
             screen = .map
         case "book":
@@ -273,7 +283,13 @@ final class AppModel: ObservableObject {
             screen = .maker
         default:
             // "room:<id>" opens the Squish Room on one squishy, for the pictures the checks keep.
-            if shot.hasPrefix("room:") {
+            if shot.hasPrefix("bubbles:") {
+                // "bubbles:<n>" opens Bubble Bath level n, for the pictures the checks keep.
+                let id = String(format: "bubblebath-%02d", Int(shot.dropFirst(8)) ?? 1)
+                let at = levels.firstIndex { $0.id == id } ?? 0
+                update { p in p.highestUnlocked = max(p.highestUnlocked, at) }
+                screen = .level(at)
+            } else if shot.hasPrefix("room:") {
                 let id = String(shot.dropFirst(5))
                 update { p in p.collection.owned[id] = 1 }
                 roomStart = id
@@ -1138,8 +1154,8 @@ final class AppModel: ObservableObject {
             sounds.play("trick", or: "unlock_new")
             buddySays = String(localized: "I grew!")
             if showingNews == nil { showingNews = .trick(BuddyState.tricksKnown(hearts: now)) }
-        } else if now / 5 > before / 5, Double(before) * BuddyState.growthPerHeart < BuddyState.maxGrowth {
-            // Every fifth heart the Buddy says so; the growing itself shows on every treat.
+        } else if BuddyState.size(hearts: now) != BuddyState.size(hearts: before) {
+            // A new size: the Buddy says so. The growing itself shows on every treat, and on the size meter.
             sounds.play("grow", or: "heart")
             buddySays = String(localized: "I grew!")
         } else {
@@ -1161,6 +1177,30 @@ final class AppModel: ObservableObject {
         applyToBuddy(item)
         buddyDelivery = item
         screen = homeScreen
+    }
+
+    /// A gift the Buddy keeps and wears, chosen in the shop at its shown price. Paid for, kept and put on
+    /// in one go, so nothing can be lost; the home screen then plays the arrival.
+    func buyGift(_ gift: BuddyGift) {
+        guard buddyActive, buddyDelivery == nil, !progress.buddy.owns(gift), progress.wallet.balance >= gift.price else { return }
+        heartsBeforeDelivery = progress.buddy.hearts
+        let seconds = puffSeconds
+        update { p in
+            guard p.wallet.spend(gift.price) else { return }
+            p.buddy.receive(gift)
+            p.buddy.puffUp(.gift, at: Date().timeIntervalSince1970, lasting: seconds)
+        }
+        buddyDelivery = .gift
+        screen = homeScreen
+    }
+
+    /// Puts a gift it owns on the Buddy, or takes it off.
+    func toggleGift(_ gift: BuddyGift) {
+        guard progress.buddy.owns(gift) else { return }
+        haptics.land()
+        update { p in
+            if p.buddy.isWearing(gift) { p.buddy.takeOff(gift) } else { p.buddy.wear(gift) }
+        }
     }
 
     /// The home screen calls this when the bought treat or gift reaches the Buddy: only the celebration is left to do.
@@ -1213,7 +1253,13 @@ final class AppModel: ObservableObject {
         let grant: () -> Void = { [weak self] in
             guard let self else { return }
             withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) {
-                self.update { $0.dailyGiftDay = self.today; $0.wallet.earn(self.config.coins.dailyGift) }
+                // On some days there is also something small for the Buddy to wear.
+                let extra = BuddyGifts.inDailyGift(day: self.today, installSeed: self.progress.installID, owned: self.progress.buddy.gifts)
+                self.update { p in
+                    p.dailyGiftDay = self.today
+                    p.wallet.earn(self.config.coins.dailyGift)
+                    if let extra { p.buddy.receive(extra) }
+                }
                 self.giftsOpened += 1
             }
             self.sounds.play("gift_open", or: "coin_shower")

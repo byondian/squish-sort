@@ -3,7 +3,8 @@
 /// `kind` indexes the level's kind table (its art, colour and squeak).
 /// Mechanics travel with the piece when it moves:
 /// - `hidden`: wrapped, shown as "?" until it reaches the top of its jar.
-/// - `frozen`: moves left until it thaws; a frozen piece can't move.
+/// - `frozen`: moves left until it thaws; a frozen piece can't move. On a Bubble Bath board it is a
+///   bubble instead: 1 a floater, 2 a golden bubble that can still ride (see `Board`).
 /// - `bondedAbove`: this piece and the one directly above it are a duet and
 ///   always move together.
 public struct Piece: Hashable, Sendable {

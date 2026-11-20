@@ -22,6 +22,24 @@ func board(_ jars: [String], capacity: Int = 4) -> Board {
     return Board(capacity: capacity, jars: parsed)
 }
 
+/// A Bubble Bath board from letters, bottom to top: "*" after a letter is a floater,
+/// "^" after a letter is a golden bubble that can ride.
+func bath(_ jars: [String], capacity: Int = 4) -> Board {
+    var parsed: [[Piece]] = []
+    for jar in jars {
+        var pieces: [Piece] = []
+        for ch in jar {
+            switch ch {
+            case "*": pieces[pieces.count - 1].frozen = 1
+            case "^": pieces[pieces.count - 1].frozen = 2
+            default: pieces.append(Piece(kind: UInt8(ch.asciiValue! - Character("A").asciiValue!)))
+            }
+        }
+        parsed.append(pieces)
+    }
+    return Board(capacity: capacity, jars: parsed, floats: true)
+}
+
 final class BoardTests: XCTestCase {
     func testLevelOneHasOnlyTheTaughtMoves() {
         // [R R R] [B B B R] [B] from the game design doc
@@ -115,6 +133,85 @@ final class BoardTests: XCTestCase {
         var b = board(["A*B", "C", "", "B"])
         b.apply(Move(from: 3, to: 2)) // jars 2 and 3 aren't next to jar 0
         XCTAssertEqual(b.jars[0][0].frozen, 2)
+    }
+
+    func testAFloaterSealsItsJarAndCannotBePickedUp() {
+        let b = bath(["ABA*", "B", ""])
+        XCTAssertTrue(b.isSealed(0))
+        XCTAssertEqual(b.base(0), 2)
+        // Nothing goes in, not even its own kind or what matches the squishy under it.
+        XCTAssertFalse(b.isLegal(Move(from: 1, to: 0)))
+        // The squishy under it comes out; the floater itself never does.
+        XCTAssertEqual(b.runLength(at: 0), 1)
+        XCTAssertEqual(b.piecesToMove(Move(from: 0, to: 1)), 1)
+        XCTAssertEqual(Set(b.legalMoves), [Move(from: 0, to: 1), Move(from: 0, to: 2), Move(from: 1, to: 2)])
+    }
+
+    func testAFloaterPopsOnItsOwnKindOrOnTheBottom() {
+        // Dig out the B: the floater sinks onto its twin and pops.
+        var b = bath(["ABA*", "B", ""])
+        let onTwin = b.apply(Move(from: 0, to: 1))
+        XCTAssertEqual(onTwin?.poppedJars, [0])
+        XCTAssertEqual(b.jars[0].map(\.frozen), [0, 0])
+        XCTAssertFalse(b.isSealed(0))
+        XCTAssertEqual(b.runLength(at: 0), 2, "popped, it is an ordinary squishy and joins the run")
+        // Dig out everything: it reaches the bottom and pops.
+        var c = bath(["BA*", "B", ""])
+        XCTAssertEqual(c.apply(Move(from: 0, to: 1))?.poppedJars, [0])
+        XCTAssertEqual(c.jars[0], [Piece(kind: 0)])
+        // Moves next door do nothing to a floater: it is not ice.
+        var d = bath(["CBA*", "B", "", ""])
+        d.apply(Move(from: 1, to: 2))
+        d.apply(Move(from: 2, to: 1))
+        XCTAssertTrue(d.isSealed(0))
+        XCTAssertNil(d.apply(Move(from: 1, to: 0)))
+    }
+
+    func testABubbleThatWouldPopAtOnceIsNotABubbleAtTheStart() {
+        let b = bath(["BAA*", "A*"])
+        XCTAssertFalse(b.jars.joined().contains { $0.isFrozen })
+    }
+
+    func testAGoldenBubbleRidesOnceToAnyJarWithRoom() {
+        var b = bath(["CBA^", "AA", "CCB", "BBBC"])
+        XCTAssertEqual(b.rideJars, [0])
+        XCTAssertEqual(Set(b.legalMoves.filter(\.isRide)), [Move.ride(from: 0, to: 1), Move.ride(from: 0, to: 2)])
+        XCTAssertFalse(b.canRide(from: 0, to: 3), "no room")
+        XCTAssertFalse(b.canRide(from: 0, to: 0))
+        // Onto another kind: it lands on top, seals that jar, and cannot ride again.
+        var c = b
+        let landed = c.apply(Move.ride(from: 0, to: 2))
+        XCTAssertEqual(landed?.poppedJars, [])
+        XCTAssertEqual(c.jars[2].last, Piece(kind: 0, frozen: 1))
+        XCTAssertTrue(c.isSealed(2))
+        XCTAssertTrue(c.rideJars.isEmpty)
+        XCTAssertFalse(c.isSealed(0))
+        // Onto its own kind: it pops as it lands.
+        let home = b.apply(Move.ride(from: 0, to: 1))
+        XCTAssertEqual(home?.poppedJars, [1])
+        XCTAssertEqual(home?.move.destination, 1)
+        XCTAssertEqual(b.jars[1], [Piece(kind: 0), Piece(kind: 0), Piece(kind: 0)])
+        // Into an empty jar: nothing is under it, so it pops.
+        var e = bath(["BA^", ""])
+        XCTAssertEqual(e.apply(Move.ride(from: 0, to: 1))?.poppedJars, [1])
+        XCTAssertEqual(e.jars[1], [Piece(kind: 0)])
+    }
+
+    func testARideCanFinishAJar() {
+        var b = bath(["BA^", "AAA", "BBB"])
+        XCTAssertEqual(b.apply(Move.ride(from: 0, to: 1))?.completedJar, 1)
+        b.apply(Move(from: 0, to: 2))
+        XCTAssertTrue(b.isWon)
+    }
+
+    func testOrdinaryBoardsKnowNothingOfFloaters() {
+        // On an ice board the same marks are ice: a frozen piece on top blocks its jar and nothing rides.
+        let b = board(["ABA*", "B", ""])
+        XCTAssertFalse(b.isSealed(0))
+        XCTAssertEqual(b.runLength(at: 0), 0)
+        XCTAssertTrue(b.rideJars.isEmpty)
+        XCTAssertFalse(b.legalMoves.contains(where: \.isRide))
+        XCTAssertTrue(b.isLegal(Move(from: 1, to: 2)))
     }
 
     func testExtraJarHasNoNeighbours() {
