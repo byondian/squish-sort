@@ -6,19 +6,18 @@
   "beat": "calm",
   "capacity": 4,
   "jars": [
-    ["minty", "minty", "minty", "quacky"],
-    ["quacky", "starla", "starla", "shelly"],
-    ["bubbly", "bubbly", "fizzy", "fizzy"],
-    ["fizzy", "soapy", "shelly", "quacky"],
-    ["minty", "soapy", "soapy", "fizzy"],
-    ["starla", "bubbly", "bubbly", "shelly"],
-    ["soapy", "quacky", "starla", "shelly"],
+    ["bubbly", "starla", "bubbly", "starla"],
+    ["shelly", "soapy", "fizzy", "quacky"],
+    ["quacky", "shelly", "shelly", "quacky"],
+    ["soapy", "bubbly", "fizzy", "starla"],
+    ["starla", "fizzy", "soapy", "fizzy"],
+    ["shelly", "bubbly", "quacky", "soapy"],
     [],
     []
   ],
-  "mechanics": {"hidden": [[5, 1], [5, 2], [6, 2]], "sticky": [], "frozen": [[2, 0], [3, 1], [5, 1]]},
-  "par": 17,
-  "solution": [[1, 7], [5, 7], [6, 7], [6, 1], [0, 6], [3, 6], [3, 7], [2, 8], [4, 8], [3, 4], [3, 8], [5, 2], [5, 2], [1, 5], [6, 1], [4, 6], [0, 4]],
+  "mechanics": {"hidden": [[0, 0], [4, 0], [5, 0]], "sticky": [], "frozen": [[0, 3, 1], [5, 3, 1], [3, 3, 2]]},
+  "par": 19,
+  "solution": [[0, 6], [3, -1], [4, 3], [1, 7], [2, 7], [5, 7], [5, 6], [5, 2], [4, 5], [1, 4], [1, 5], [2, 1], [2, 7], [3, 2], [3, 6], [3, 5], [4, 2], [0, 4], [0, 6]],
   "capsule": false,
   "softenAfterFails": null
 }

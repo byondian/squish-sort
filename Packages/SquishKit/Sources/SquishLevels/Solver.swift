@@ -33,7 +33,8 @@ public enum Solver {
     /// heuristic: far fewer positions, a good solution, not always the shortest.
     /// `maxNodes` bounds how many positions are kept in memory.
     static func search(_ start: Board, maxStates: Int, maxNodes: Int, weight: Int) -> Outcome {
-        let canonical = !start.jars.contains { jar in jar.contains { $0.isFrozen } }
+        // Floaters do not care which jar stands next to which, so those boards are compared sorted too.
+        let canonical = start.floats || !start.jars.contains { jar in jar.contains { $0.isFrozen } }
         var counts: [UInt8: Int] = [:]
         for jar in start.jars { for p in jar { counts[p.kind, default: 0] += 1 } }
         let solvedRuns = counts.values.reduce(0) { $0 + ($1 + start.capacity - 1) / start.capacity }
@@ -62,7 +63,7 @@ public enum Solver {
             explored += 1
             if explored > maxStates || boards.count > maxNodes { return .gaveUp }
             for move in current.legalMoves {
-                if free && current.jars[move.to].isEmpty
+                if free && !move.isRide && current.jars[move.to].isEmpty
                     && current.runLength(at: move.from) == current.jars[move.from].count {
                     continue // pouring a whole jar into an empty one changes nothing
                 }

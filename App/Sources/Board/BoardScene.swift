@@ -27,6 +27,10 @@ final class BoardScene: SKScene {
     private var jarNodes: [JarNode] = []
     private var pieces: [[PieceNode]] = []
     private var lifted: Int?
+    /// Bubble Bath: the jar whose golden bubble is held up, waiting for a jar to ride to.
+    private var riding: Int?
+    /// A bubble popped on a move (Bubble Bath).
+    var onBubblePop: (() -> Void)?
     private var busy = false
     /// First-ever board: this move's squishy starts lifted with a hand on the target jar.
     var tutorialMove: Move?
@@ -78,6 +82,7 @@ final class BoardScene: SKScene {
         removeAllActions()
         self.board = board
         lifted = nil
+        riding = nil
         busy = false
         rebuild()
         guard dropIn else { return }
@@ -104,8 +109,15 @@ final class BoardScene: SKScene {
 
     /// Puts down anything held, without a move.
     func clearSelection() {
-        if let l = lifted { putBack(l) }
+        if let l = lifted ?? riding { putBack(l) }
         clearHint()
+    }
+
+    /// The squishies that leave jar `j` on a move: the top run under any floaters.
+    private func runNodes(_ j: Int) -> [PieceNode] {
+        let low = min(board.base(j), pieces[j].count)
+        let n = min(board.runLength(at: j), low)
+        return Array(pieces[j][(low - n)..<low])
     }
 
     /// Shake-up is coming: every jar trembles and the squishies shake their heads.
@@ -204,6 +216,7 @@ final class BoardScene: SKScene {
         removeAllChildren()
         // Everything is drawn at rest, so nothing is lifted any more.
         lifted = nil
+        riding = nil
         guard size.width > 0 else { return }
         geometry = computeGeometry()
         jarNodes = []
@@ -261,15 +274,16 @@ final class BoardScene: SKScene {
     }
 
     private func showTutorialIfNeeded() {
-        guard let move = tutorialMove, lifted == nil, board.isLegal(move),
-              move.from < board.jarCount, move.to < board.jarCount else { return }
-        lift(move.from)
+        guard let move = tutorialMove, lifted == nil, riding == nil, board.isLegal(move),
+              move.from < board.jarCount, move.destination < board.jarCount else { return }
+        if move.isRide { liftRide(move.from) } else { lift(move.from) }
+        let to = move.destination
         let hand = SKLabelNode(text: "👆")
         hand.name = "tutorial-hand"
         hand.fontSize = geometry.piece * 0.9
         hand.verticalAlignmentMode = .center
-        hand.position = CGPoint(x: geometry.centers[move.to].x + geometry.piece * 0.25,
-                                y: geometry.centers[move.to].y - geometry.jarSize.height * 0.1)
+        hand.position = CGPoint(x: geometry.centers[to].x + geometry.piece * 0.25,
+                                y: geometry.centers[to].y - geometry.jarSize.height * 0.1)
         hand.zPosition = 40
         addChild(hand)
         let pulse = SKAction.sequence([
@@ -383,11 +397,25 @@ final class BoardScene: SKScene {
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let point = touches.first?.location(in: self) else { return }
         clearHint()
-        if let j = jarIndex(at: point) {
+        if lifted == nil, riding == nil, !busy, let j = goldenBubble(at: point) {
+            // A tap on a golden bubble picks it up for its ride.
+            endTutorial()
+            liftRide(j)
+        } else if let j = jarIndex(at: point) {
             tap(j)
-        } else if let l = lifted {
+        } else if let l = lifted ?? riding {
             putBack(l)
         }
+    }
+
+    /// The jar whose golden bubble is under the finger, if it still has somewhere to go.
+    private func goldenBubble(at p: CGPoint) -> Int? {
+        for j in board.rideJars where j < pieces.count {
+            guard let node = pieces[j].last, node.hasGoldenBubble else { continue }
+            let c = node.middle
+            if hypot(p.x - c.x, p.y - c.y) <= node.diameter * 0.75 { return j }
+        }
+        return nil
     }
 
     private func jarIndex(at p: CGPoint) -> Int? {
@@ -402,7 +430,21 @@ final class BoardScene: SKScene {
     private func tap(_ j: Int) {
         guard !busy else { return }
         endTutorial()
-        if let from = lifted {
+        if let from = riding {
+            if from == j {
+                putBack(from)
+                return
+            }
+            let move = Move.ride(from: from, to: j)
+            if board.isLegal(move), let played = onPlay?(move) {
+                riding = nil
+                animate(played.0, newBoard: played.1)
+            } else {
+                shake(j)
+                putBack(from)
+                onReject?()
+            }
+        } else if let from = lifted {
             if from == j {
                 putBack(from)
                 return
@@ -419,10 +461,30 @@ final class BoardScene: SKScene {
             }
         } else if board.runLength(at: j) > 0 {
             lift(j)
+        } else if board.rideJars.contains(j) {
+            // Nothing under the golden bubble can move, so the tap can only mean the bubble.
+            liftRide(j)
         } else {
             shake(j)
             onReject?()
         }
+    }
+
+    /// The golden bubble on top of jar `j` drifts up and waits for a jar to ride to.
+    private func liftRide(_ j: Int) {
+        guard let node = pieces[j].last else { return }
+        riding = j
+        node.removeAction(forKey: "wobble")
+        node.removeAction(forKey: "travel")
+        node.zPosition = 10
+        let rise = SKAction.move(to: liftPoint(j, 0), duration: 0.25)
+        rise.timingMode = .easeOut
+        let drift = SKAction.repeatForever(.sequence([
+            .moveBy(x: 0, y: geometry.piece * 0.08, duration: 0.5), .moveBy(x: 0, y: -geometry.piece * 0.08, duration: 0.5),
+        ]))
+        node.run(.sequence([rise, drift]), withKey: "wobble")
+        node.wobbleBubble()
+        onLift?()
     }
 
     /// A magic move: the scene lifts and lands `move` by itself, just as two taps would.
@@ -432,16 +494,17 @@ final class BoardScene: SKScene {
         guard !busy, board.isLegal(move) else { return false }
         endTutorial()
         clearHint()
-        if lifted == move.from {
-            tap(move.to)
+        let to = move.destination
+        if (move.isRide ? riding : lifted) == move.from, (move.isRide ? lifted : riding) == nil {
+            tap(to)
             return true
         }
-        if let up = lifted { putBack(up) }
-        lift(move.from)
-        run(.sequence([.wait(forDuration: 0.3), .run { [weak self] in
+        if let up = lifted ?? riding { putBack(up) }
+        if move.isRide { liftRide(move.from) } else { lift(move.from) }
+        run(.sequence([.wait(forDuration: move.isRide ? 0.45 : 0.3), .run { [weak self] in
             // Only if nothing else happened in between.
-            guard let self, !self.busy, self.lifted == move.from else { return }
-            self.tap(move.to)
+            guard let self, !self.busy, (move.isRide ? self.riding : self.lifted) == move.from else { return }
+            self.tap(to)
         }]))
         return true
     }
@@ -514,8 +577,7 @@ final class BoardScene: SKScene {
     private func lift(_ j: Int) {
         lifted = j
         jarNodes[j].setHighlighted(true)
-        let n = board.runLength(at: j)
-        for (k, node) in pieces[j].suffix(n).enumerated() {
+        for (k, node) in runNodes(j).enumerated() {
             node.removeAction(forKey: "wobble")
             node.removeAction(forKey: "travel")
             // Picked up while still dropping in after a shuffle: it must not stay faded.
@@ -535,6 +597,7 @@ final class BoardScene: SKScene {
 
     private func putBack(_ j: Int) {
         lifted = nil
+        riding = nil
         jarNodes[j].setHighlighted(false)
         for (i, node) in pieces[j].enumerated() {
             node.removeAction(forKey: "wobble")
@@ -566,15 +629,20 @@ final class BoardScene: SKScene {
             .moveTo(x: x - 3, duration: 0.05), .moveTo(x: x, duration: 0.05),
         ]))
         // The squishies that can't go there shake their heads.
-        let unhappy = lifted.map { from in Array(pieces[from].suffix(board.runLength(at: from))) } ?? pieces[j]
+        let unhappy = riding.map { from in Array(pieces[from].suffix(1)) } ?? lifted.map { from in runNodes(from) } ?? pieces[j]
         for node in unhappy { node.shakeHead() }
+        // A sealed jar says why: its bubble wobbles.
+        for node in pieces[j] { node.wobbleBubble() }
     }
 
     private func animate(_ result: MoveResult, newBoard: Board) {
         busy = true
-        let from = result.move.from, to = result.move.to, k = result.count
-        let moving = Array(pieces[from].suffix(k))
-        pieces[from].removeLast(k)
+        let from = result.move.from, to = result.move.destination, k = result.count
+        let ride = result.move.isRide
+        // The squishies leave from under any floaters (the board here is still the one before the move).
+        let low = ride ? pieces[from].count : min(board.base(from), pieces[from].count)
+        let moving = Array(pieces[from][(low - k)..<low])
+        pieces[from].removeSubrange((low - k)..<low)
         let base = pieces[to].count
         // Pieces of a lifted run that couldn't fit drop back.
         for (i, node) in pieces[from].enumerated() {
@@ -583,7 +651,8 @@ final class BoardScene: SKScene {
             node.zPosition = 5
             node.run(.move(to: slot(from, i), duration: 0.12), withKey: "travel")
         }
-        let hop = 0.18, stagger = 0.04
+        // A golden bubble drifts across; a squishy hops.
+        let hop = ride ? 0.55 : 0.18, stagger = 0.04
         let spread = stagger * Double(max(0, k - 1))
         for (i, node) in moving.enumerated() {
             node.removeAction(forKey: "wobble")
@@ -617,7 +686,7 @@ final class BoardScene: SKScene {
             .wait(forDuration: hop + spread),
             .run { [weak self] in
                 self?.onLand?(result)
-                self?.showCombo(result.count, at: result.move.to)
+                self?.showCombo(result.count, at: result.move.destination)
             },
             .wait(forDuration: 0.25),
             .run { [weak self] in self?.finish(result, newBoard: newBoard) },
@@ -626,6 +695,7 @@ final class BoardScene: SKScene {
 
     private func finish(_ result: MoveResult, newBoard: Board) {
         board = newBoard
+        if !result.poppedJars.isEmpty { onBubblePop?() }
         for j in 0..<min(pieces.count, board.jarCount) {
             for (i, node) in pieces[j].enumerated() where i < board.jars[j].count {
                 node.apply(board.jars[j][i])
@@ -871,7 +941,7 @@ final class BoardScene: SKScene {
 
     func showHint(_ move: Move) {
         clearHint()
-        for (j, delay) in [(move.from, 0.0), (move.to, 0.35)] where j < geometry.centers.count {
+        for (j, delay) in [(move.from, 0.0), (move.destination, 0.35)] where j >= 0 && j < geometry.centers.count {
             let ring = SKShapeNode(rectOf: CGSize(width: geometry.jarSize.width + 10, height: geometry.jarSize.height + 10),
                                    cornerRadius: geometry.jarSize.width * 0.35)
             ring.strokeColor = UIColor(hex: 0xFFD86B)

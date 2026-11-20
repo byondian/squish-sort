@@ -20,7 +20,7 @@ WORLDS = [
     ("starlight", ["lumi", "riff", "zuzu", "pip", "nova", "coco"], "sticky"),
     ("christmas", ["santa", "elfie", "reindeer", "snowbo", "ginger", "waddles"], "frozen"),
     # Added after the others so the indexes above stay put. On the path they follow Starlight Stage.
-    ("bubblebath", ["quacky", "soapy", "bubbly", "starla", "shelly", "fizzy"], "frozen"),   # bubbles: the frozen rule
+    ("bubblebath", ["quacky", "soapy", "bubbly", "starla", "shelly", "fizzy"], None),       # floaters and golden ride bubbles
     ("junglejam", ["bongo", "tuki", "pina", "leafy", "dotty", "nana"], None),               # vine jars
 ]
 # Worlds grow as the game goes on. The last level of a world is always a boss.
@@ -104,8 +104,8 @@ def mechanic_count(mech, pos):
     return 0
 
 
-def random_board(rng, names, empties, mech, mcount, mix_hidden=0, mix_frozen=0, vines=None):
-    """Returns (jars, mechanics) or None."""
+def random_board(rng, names, empties, mech, mcount, mix_hidden=0, mix_frozen=0, vines=None, bubbles=None):
+    """Returns (jars, mechanics) or None. `bubbles` is (floaters, golden ride bubbles) for Bubble Bath."""
     units = []
     if mech == "sticky":
         # a duet is two different kinds placed as one 2-piece unit (bottom, top)
@@ -187,9 +187,86 @@ def random_board(rng, names, empties, mech, mcount, mix_hidden=0, mix_frozen=0, 
                 if len(picks) == mix_frozen:
                     break
             mechanics["frozen"] = sorted(picks)
+        if bubbles:
+            # A bubble goes on the top squishy of a jar, one a jar, never on a duet, never on a squishy
+            # that already sits on its own kind (it would pop at once). The squishy under it is not wrapped.
+            taken = {(j, i) for j, i in sticky} | {(j, i + 1) for j, i in sticky}
+            tops = [j for j in range(len(jars)) if jars[j][-1] != jars[j][-2] and (j, CAP - 1) not in taken and j not in closed]
+            if len(tops) < sum(bubbles):
+                continue
+            picked = rng.sample(tops, sum(bubbles))
+            mechanics["frozen"] = sorted([j, CAP - 1, 1] for j in picked[:bubbles[0]]) + sorted([j, CAP - 1, 2] for j in picked[bubbles[0]:])
+            if "hidden" in mechanics:
+                mechanics["hidden"] = [h for h in mechanics["hidden"] if not (h[0] in picked and h[1] >= CAP - 2)]
         jars = jars + [[] for _ in range(empties)]
         return jars, mechanics
     return None
+
+
+def playout_wins(b, rng, games=40, limit=160):
+    """How often a player who moves at random (never straight back, never a whole jar into an empty one)
+    wins the board. A rough but honest measure of how much a board punishes careless moves."""
+    wins = 0
+    for _ in range(games):
+        cur, last = b, None
+        for _ in range(limit):
+            if cur.won():
+                wins += 1
+                break
+            ms = [m for m in cur.moves() if not (last and m[1] >= 0 and (m[1], m[0]) == last)
+                  and not (m[1] >= 0 and len(cur.jars[m[1]]) == 0 and cur.run_length(m[0]) == len(cur.jars[m[0]]))]
+            if not ms:
+                break
+            last = rng.choice(ms)
+            cur = cur.apply(*last)
+    return wins / games
+
+
+# Bubble Bath: how often a careless player should win a level of each beat.
+BUBBLE_EASE = {"intro": 0.9, "easy": 0.8, "medium": 0.5, "showpiece": 1.0, "breather": 0.7, "bonus": 0.4,
+               "tension": 0.2, "calm": 0.6, "boss": 0.12}
+
+
+def bubble_plan(pos, beat):
+    """Bubble Bath: (kinds, floaters, golden ride bubbles) for a level. Two spare jars throughout:
+    the floaters are what make it tight. The first three levels teach the floater, level 4 the ride."""
+    if pos <= 4:
+        return [(2, 1, 0), (3, 1, 0), (3, 2, 0), (4, 2, 1)][pos - 1]
+    tier = (pos - 1) // 10
+    kinds = {"intro": 5, "easy": 5, "medium": 6, "showpiece": 6, "breather": 5, "bonus": 6, "tension": 7, "calm": 5, "boss": 7}[beat] + (1 if tier >= 1 and beat not in ("tension", "boss") else 0)
+    floaters = {"intro": 2, "easy": 3, "medium": 3, "showpiece": 3, "breather": 2, "bonus": 3, "tension": 4, "calm": 2, "boss": 3}[beat] + (1 if tier == 2 else 0)
+    rides = {"intro": 0, "easy": 0, "medium": 1, "showpiece": 1, "breather": 1, "bonus": 1, "tension": 0, "calm": 1, "boss": 1}[beat]
+    if pos == 30:
+        rides = 2
+    return min(kinds, 8), floaters, rides
+
+
+def choose_bubbles(rng, level, names, mech, mcount, mix_hidden, bubbles, ease):
+    """Bubble Bath: the solvable deal with no losing first move whose careless-win rate is nearest `ease`."""
+    best = None
+    for _ in range(int(os.environ.get("LEVELGEN_TRIES", "60"))):
+        cand = random_board(rng, names, 2, mech, mcount, mix_hidden, 0, None, bubbles)
+        if cand is None:
+            continue
+        jars_c, mech_c = cand
+        b, _ = board_from_level(dict(level, jars=jars_c, mechanics=mech_c))
+        if sum(1 for jar in b.jars for p in jar if p[2] > 0) != sum(bubbles):
+            continue
+        sol, _ = solve(b, 40_000)
+        if sol is None:
+            continue
+        if bubbles[1] and not any(m[1] < 0 for m in sol) and rng.random() < 0.7:
+            continue  # prefer deals where the best answer takes the ride
+        if killing_first_moves(b) > 0:
+            continue
+        rank = abs(playout_wins(b, rng) - ease)
+        if best is None or rank < best[0]:
+            best = (rank, jars_c, mech_c)
+        if rank <= 0.05:
+            break
+    if best is None:
+        raise SystemExit(f"{level['id']}: no solvable candidate")
+    return best[1], best[2]
 
 
 def staircase(rng, names):
@@ -259,10 +336,10 @@ def choose(rng, level, names, empties, mech, mcount, target, mix_hidden=0, mix_f
 def late_rules(world, pos):
     """Bubble Bath and Jungle Jam: (main rule, wrapped mixed in, bubbles mixed in, vine tags)."""
     if world == "bubblebath":
-        # bubbles alone at first; duets and wrapped squishies mix in from level 16
+        # floaters alone at first; duets and wrapped squishies mix in from level 16
         if pos < 16:
-            return "frozen", 0, 0, None
-        return ("sticky", 0, 2, None) if pos % 2 == 0 else ("frozen", 3, 0, None)
+            return None, 0, 0, None
+        return ("sticky", 0, 0, None) if pos % 2 == 0 else (None, 3, 0, None)
     # Jungle Jam: one vine with a 1 on its tag, then a 2, then two vines; everything earlier mixes in from 18
     tags = [1] if pos < 8 else [2] if pos < 14 else [1, 2] if pos < 26 else [2, 2]
     if pos < 18:
@@ -292,7 +369,11 @@ def make_level(world_idx, pos, salt=0):
         mech, late_hidden, late_frozen, vines = late_rules(world, pos)
     if showpiece or finale:
         k = base_k
-    hard = None if (showpiece or pos <= 3) else squeeze(world, pos, beat)
+    hard = None if (showpiece or pos <= 3 or world == "bubblebath") else squeeze(world, pos, beat)
+    bubbles = None
+    if world == "bubblebath" and not showpiece:
+        k, nf, nr = bubble_plan(pos, beat)
+        bubbles, empties = (nf, nr), 2
     if hard:
         k = max(4, min(8, k + hard[0]))
         empties = hard[1]
@@ -318,8 +399,22 @@ def make_level(world_idx, pos, salt=0):
         r, y, b = own[0], own[2], own[4]
         names = [r, y, b]
         jars = [[r, y, y, b], [y, b, b, r], [b, r, r, y], [], []]
+    elif bubbles:
+        # a level 25 that is not a staircase is an ordinary medium level
+        ease = 0.5 if beat == "showpiece" else BUBBLE_EASE[beat]
+        jars, mechanics = choose_bubbles(rng, level, names, mech, 2 if mech == "sticky" else 0, late_hidden, bubbles, ease)
     elif showpiece:
         jars = staircase(rng, names)
+        if world == "bubblebath":
+            # The showpiece is a chain of golden bubbles: each one rides onto three of its own kind and
+            # finishes a jar, which frees the next. The last squishy hops home the ordinary way.
+            order = names[:]
+            rng.shuffle(order)
+            jars = [[order[0]] * 3] + [[order[i]] * 3 + [order[i - 1]] for i in range(1, len(order))] + [[order[-1]]]
+            marks = list(range(len(jars)))
+            rng.shuffle(marks)
+            jars = [jars[m] for m in marks] + [[]]
+            mechanics = {"frozen": sorted([j, CAP - 1, 2] for j, jar in enumerate(jars) if len(jar) == CAP)}
         if mech:
             # a light touch of the world's mechanic on the showpiece
             if mech == "hidden":

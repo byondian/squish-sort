@@ -115,6 +115,10 @@ final class LevelController: ObservableObject {
             model?.sounds.play("star_2", volume: 0.7)
             model?.haptics.star()
         }
+        scene.onBubblePop = { [weak model] in
+            model?.sounds.play("bubble_pop")
+            model?.haptics.star()
+        }
         scene.onVineSnap = { [weak model] in
             model?.sounds.play("vine_snap")
             model?.haptics.star()
@@ -128,7 +132,7 @@ final class LevelController: ObservableObject {
             model?.sounds.move(run: result.count)
             self?.landed()
             if !result.thawedJars.isEmpty { model?.sounds.play(bubbles ? "bubble_pop" : "thaw") }
-            if result.duetLetGo { self?.duetLetGo(atJar: result.move.to) }
+            if result.duetLetGo { self?.duetLetGo(atJar: result.move.destination) }
             if let jar = result.completedJar {
                 model?.haptics.complete()
                 self?.jarCompleted(jar)
@@ -170,7 +174,7 @@ final class LevelController: ObservableObject {
     }
 
     private func play(_ move: Move) -> (MoveResult, Board)? {
-        let ontoMatch = session.board.jars.indices.contains(move.to) && !session.board.jars[move.to].isEmpty
+        let ontoMatch = session.board.jars.indices.contains(move.destination) && !session.board.jars[move.destination].isEmpty
         let free = feverLeft > 0
         let before = feverLeft
         // A magic move is only used up (or paid for) when it really lands.

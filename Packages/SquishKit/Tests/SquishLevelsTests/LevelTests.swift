@@ -50,7 +50,24 @@ final class LevelTests: XCTestCase {
             }
         }
         let bath = try all.filter { $0.world == "bubblebath" }.map { try Level(file: $0).board }
-        XCTAssertTrue(bath.contains { $0.jars.contains { $0.contains { $0.frozen > 0 } } }, "Bubble Bath has bubbles")
+        // Every Bubble Bath level has a floater or a golden bubble, each on top of its jar and never one
+        // that would pop before the first move. The first level has one floater; rides start at level 4.
+        for (n, board) in bath.enumerated() {
+            XCTAssertTrue(board.floats)
+            let bubbles = board.jars.joined().filter { $0.isFrozen }
+            XCTAssertFalse(bubbles.isEmpty, "bubblebath-\(n + 1) has a bubble")
+            for jar in board.jars {
+                XCTAssertLessThanOrEqual(jar.filter { $0.isFrozen }.count, 1)
+                if let i = jar.firstIndex(where: { $0.isFrozen }) {
+                    XCTAssertEqual(i, jar.count - 1)
+                    XCTAssertTrue(i > 0 && jar[i - 1].kind != jar[i].kind)
+                }
+            }
+            if n < 3 { XCTAssertFalse(bubbles.contains { $0.frozen == 2 }, "no ride before level 4") }
+        }
+        XCTAssertEqual(bath.first?.jars.joined().filter { $0.isFrozen }.count, 1)
+        XCTAssertTrue(bath.count > 3 && bath[3].jars.joined().contains { $0.frozen == 2 }, "level 4 teaches the ride")
+        XCTAssertTrue(try all.filter { $0.world != "bubblebath" }.allSatisfy { try !Level(file: $0).board.floats })
     }
 
     func testStructureBeatAndCapsules() throws {

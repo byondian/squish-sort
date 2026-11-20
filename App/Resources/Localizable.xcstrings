@@ -805,6 +805,50 @@
         }
       }
     },
+    "A bubble seals its jar. Dig under it until it meets its twin or the bottom. Pop!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あわはびんにふたをするよ。下のスクイーズをどかして、同じなかまか底まで下ろすと、ポン！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "비눗방울이 병을 막고 있어요. 아래 친구들을 꺼내서 같은 친구나 바닥에 닿으면 펑!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "泡泡會把罐子封住。把下面的移走，讓它碰到同伴或罐底，就會啵地破掉！"
+          }
+        }
+      }
+    },
+    "A golden bubble can fly! Tap it, then tap any jar.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "金色のあわはとべるよ！タップして、行きたいびんをタップしてね。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "황금 비눗방울은 날 수 있어요! 방울을 누르고, 보낼 병을 눌러요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "金色泡泡會飛！點一下泡泡，再點任何一個罐子。"
+          }
+        }
+      }
+    },
     "A keepsake for your Squish Room!": {
       "localizations": {
         "ja": {
@@ -5883,28 +5927,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "戳戳袋子，猜猜裡面是誰！"
-          }
-        }
-      }
-    },
-    "Pop the bubble by moving next to it.": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "となりで動かして、あわをわろう。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "옆에서 움직여서 비눗방울을 터뜨려요."
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在旁邊移動，就能戳破泡泡。"
           }
         }
       }
