@@ -107,7 +107,9 @@ public enum Solver {
         var runs = 0
         for jar in b.jars {
             var previous: UInt8?
-            for p in jar where p.kind != previous {
+            // A floater is no run yet. Counted, one move could remove two runs (a squishy taken from
+            // between a floater and its twin), and the first solution found would not be the shortest.
+            for p in jar where p.kind != previous && !(b.floats && p.isFrozen) {
                 runs += 1
                 previous = p.kind
             }

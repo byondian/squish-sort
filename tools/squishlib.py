@@ -212,6 +212,8 @@ def heuristic(b, kind_jars):
     for jar in b.jars:
         prev = None
         for p in jar:
+            if b.floats and p[2] > 0:
+                continue  # a floater is no run yet: taking a squishy from under it can join two runs in one move
             if p[0] != prev:
                 runs += 1
                 prev = p[0]
