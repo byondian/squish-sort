@@ -260,6 +260,14 @@ final class AppModel: ObservableObject {
         case "room":
             roomStart = "taffy-snake"
             screen = .room
+        case "gifts":
+            // The Buddy with a hat, a scarf and a balloon, for the picture the checks keep.
+            update { p in
+                for id in ["hats-and-headwear/party-hat", "neck-and-body/scarf", "held-items/balloon"] {
+                    if let gift = BuddyGifts.gift(id) { p.buddy.receive(gift) }
+                }
+            }
+            screen = .home
         case "map":
             screen = .map
         case "book":

@@ -103,6 +103,18 @@ final class GoldenPathTests: XCTestCase {
         app.terminate()
     }
 
+    /// The Buddy on Home with gifts on and its size meter: a picture, so where a hat sits is seen without a phone.
+    func testBuddyWearsItsGifts() {
+        app.terminate()
+        app.launchArguments = ["-uiTesting", "-storeShot", "gifts"]
+        app.launch()
+        XCTAssertTrue(app.buttons["home-play"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.descendants(matching: .any)["buddy-size"].waitForExistence(timeout: 5), "the size meter is on Home")
+        Thread.sleep(forTimeInterval: 2.5)
+        keep(app.screenshot(), as: "squishy-buddy-gifts")
+        app.terminate()
+    }
+
     /// Bubble Bath level 4, played to the end by its stored solution: floaters seal their jars and pop,
     /// and the golden bubble takes its ride. Pictures are kept of the start, the bubble lifted and after it lands.
     func testBubbleBathFloatersAndARide() {
