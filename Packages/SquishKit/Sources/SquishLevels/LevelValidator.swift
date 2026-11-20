@@ -55,6 +55,10 @@ public enum LevelValidator {
                 if i != file.jars[j].count - 1 { p.append("\(id): bubble \(b) is not on the top squishy of its jar") }
                 if i == 0 || file.jars[j][i - 1] == file.jars[j][i] { p.append("\(id): bubble \(b) would pop before the first move") }
                 if b.count > 2, !(1...2).contains(b[2]) { p.append("\(id): bubble \(b) must be 1 (floater) or 2 (golden)") }
+                // A wrapped squishy in a bubble would still be wrapped after it pops, on top of its jar for good.
+                if (file.mechanics?.hidden ?? []).contains(where: { $0.count >= 2 && $0[0] == j && $0[1] == i }) {
+                    p.append("\(id): bubble \(b) is on a wrapped squishy")
+                }
             }
         }
         // Curtain jars: at most two, each a full jar with nothing wrapped, frozen or paired inside,
