@@ -263,6 +263,8 @@ final class AppModel: ObservableObject {
         case "gifts":
             // The Buddy with a hat, a scarf and a balloon, for the picture the checks keep.
             update { p in
+                // The Buddy lives on Home from the first capsule.
+                p.collection.totalCapsules = max(1, p.collection.totalCapsules)
                 for id in ["hats-and-headwear/party-hat", "neck-and-body/scarf", "held-items/balloon"] {
                     if let gift = BuddyGifts.gift(id) { p.buddy.receive(gift) }
                 }
