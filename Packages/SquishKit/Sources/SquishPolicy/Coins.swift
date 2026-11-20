@@ -1,9 +1,11 @@
 import Foundation
 
 /// Coin amounts (rules approved 16 Nov 2026). Remote config can change the numbers.
+/// 20 Nov 2026 (Ian: 10,000 coins and nothing to want): a win, the daily gift and a finished world
+/// pay half of what they did, and the Buddy's gifts are things to save up for.
 public struct CoinRules: Codable, Equatable, Sendable {
-    public var winBase = 50
-    public var threeStarBonus = 50
+    public var winBase = 25
+    public var threeStarBonus = 25
     /// Two jars completed within `doublePopSeconds`.
     public var doublePop = 10
     public var doublePopSeconds: Double = 3
@@ -15,10 +17,10 @@ public struct CoinRules: Codable, Equatable, Sendable {
     public var mysteryGuess = 50
     public var streakStep = 10
     public var streakCap = 50
-    public var dailyGift = 200
+    public var dailyGift = 100
     public var adventCoins = 100
     /// Paid once when every level of a world is finished.
-    public var worldComplete = 500
+    public var worldComplete = 250
     /// Coins for stamps 1 to 6 of the stamp card (the 7th moves the capsule bar).
     public var stampCoins = [50, 50, 100, 100, 150, 150]
 

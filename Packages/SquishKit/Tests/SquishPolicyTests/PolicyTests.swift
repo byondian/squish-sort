@@ -478,7 +478,7 @@ final class ConfigTests: XCTestCase {
         XCTAssertEqual(c.christmasOpenFrom, "2026-12-05")
         XCTAssertEqual(c.christmasOpenUntil, "2027-01-06")
         XCTAssertEqual(c.coins.lucky, 150)
-        XCTAssertEqual(c.coins.winBase, 50, "numbers that aren't sent keep their defaults")
+        XCTAssertEqual(c.coins.winBase, 25, "numbers that aren't sent keep their defaults")
         XCTAssertEqual(c.optInAdsPerDay, 6)
         XCTAssertEqual(c.capsuleOdds, CapsuleOdds())
         let odds = GameConfig.decodeOrDefault(Data(#"{"capsuleOdds": {"rare": 1, "ultra": 99}}"#.utf8))
@@ -533,9 +533,9 @@ final class CoinTests: XCTestCase {
         var w = CoinWallet()
         w.earn(Coins.earned(forWinWithStars: 3))
         w.earn(Coins.earned(forWinWithStars: 1))
-        XCTAssertEqual(w.balance, 150)
+        XCTAssertEqual(w.balance, 75)
         XCTAssertFalse(w.spend(on: .hint), "can't go below zero")
-        w.earn(100)
+        w.earn(175)
         XCTAssertTrue(w.spend(on: .hint))
         XCTAssertEqual(w.balance, 0)
     }
@@ -578,12 +578,12 @@ final class CoinTests: XCTestCase {
     }
 
     func testALevelPaysOnceSoReplaysCannotBeFarmed() {
-        XCTAssertEqual(Coins.earned(forWinWithStars: 2, previousBest: nil), 50)
-        XCTAssertEqual(Coins.earned(forWinWithStars: 3, previousBest: nil), 100)
+        XCTAssertEqual(Coins.earned(forWinWithStars: 2, previousBest: nil), 25)
+        XCTAssertEqual(Coins.earned(forWinWithStars: 3, previousBest: nil), 50)
         XCTAssertEqual(Coins.earned(forWinWithStars: 3, previousBest: 3), 0, "a replay pays nothing")
         XCTAssertEqual(Coins.earned(forWinWithStars: 1, previousBest: 2), 0)
-        XCTAssertEqual(Coins.earned(forWinWithStars: 3, previousBest: 1), 50, "the three-star difference, once")
-        XCTAssertEqual(Coins.starBonus(stars: 3, previousBest: nil), 50)
+        XCTAssertEqual(Coins.earned(forWinWithStars: 3, previousBest: 1), 25, "the three-star difference, once")
+        XCTAssertEqual(Coins.starBonus(stars: 3, previousBest: nil), 25)
         XCTAssertEqual(Coins.starBonus(stars: 3, previousBest: 3), 0)
         XCTAssertEqual(Coins.starBonus(stars: 2, previousBest: nil), 0)
         XCTAssertEqual(Coins.earned(forWinWithStars: 2, previousBest: 3), 0)
@@ -591,24 +591,24 @@ final class CoinTests: XCTestCase {
 
     func testPricesAreTenTimesTheOldOnes() {
         XCTAssertEqual(Coins.Item.allCases.map(\.price), [250, 1500, 100, 600, 150])
-        XCTAssertEqual(CoinRules().dailyGift, 200)
+        XCTAssertEqual(CoinRules().dailyGift, 100)
     }
 
     func testJarsShareTheBaseCoinsAndTheLastJarTakesTheRemainder() {
-        XCTAssertEqual(Coins.jarShares(jars: 2), [25, 25])
-        XCTAssertEqual(Coins.jarShares(jars: 3), [16, 16, 18])
-        XCTAssertEqual(Coins.jarShares(jars: 8), [6, 6, 6, 6, 6, 6, 6, 8])
-        for jars in 1...10 { XCTAssertEqual(Coins.jarShares(jars: jars).reduce(0, +), 50) }
+        XCTAssertEqual(Coins.jarShares(jars: 2), [12, 13])
+        XCTAssertEqual(Coins.jarShares(jars: 3), [8, 8, 9])
+        XCTAssertEqual(Coins.jarShares(jars: 8), [3, 3, 3, 3, 3, 3, 3, 4])
+        for jars in 1...10 { XCTAssertEqual(Coins.jarShares(jars: jars).reduce(0, +), 25) }
         XCTAssertEqual(Coins.jarShares(jars: 0), [])
     }
 
     func testThePotPaysEachJarOnceWithDoublePopAndLucky() {
         var pot = LevelPot(firstClear: true, jars: 3, luckyKind: 2)
-        XCTAssertEqual(pot.jarCompleted(kind: 0, at: 10), .init(coins: 16, doublePop: false, lucky: false))
+        XCTAssertEqual(pot.jarCompleted(kind: 0, at: 10), .init(coins: 8, doublePop: false, lucky: false))
         XCTAssertEqual(pot.jarCompleted(kind: 0, at: 11), .init(), "undo and redo of the same jar adds nothing")
-        XCTAssertEqual(pot.jarCompleted(kind: 1, at: 12.5), .init(coins: 26, doublePop: true, lucky: false), "two jars within 3 s")
-        XCTAssertEqual(pot.jarCompleted(kind: 2, at: 30), .init(coins: 118, doublePop: false, lucky: true))
-        XCTAssertEqual(pot.coins, 160)
+        XCTAssertEqual(pot.jarCompleted(kind: 1, at: 12.5), .init(coins: 18, doublePop: true, lucky: false), "two jars within 3 s")
+        XCTAssertEqual(pot.jarCompleted(kind: 2, at: 30), .init(coins: 109, doublePop: false, lucky: true))
+        XCTAssertEqual(pot.coins, 135)
         var replay = LevelPot(firstClear: false, jars: 3, luckyKind: 2)
         XCTAssertEqual(replay.jarCompleted(kind: 2, at: 1), .init(), "replays throw sparkles, not coins")
         XCTAssertEqual(replay.coins, 0)
@@ -919,6 +919,44 @@ final class ExtrasTests: XCTestCase {
         XCTAssertEqual(b.tricksUnlocked, BuddyState.tricks)
         XCTAssertEqual(Coins.Item.treat.price, 100)
         XCTAssertEqual(Coins.Item.gift.price, 600)
+    }
+
+    func testGiftsAreKeptWornOneFromEachTrayAndNeverALuckyDip() throws {
+        XCTAssertEqual(Set(BuddyGifts.all.map(\.id)).count, BuddyGifts.all.count, "every gift is its own thing")
+        XCTAssertTrue(BuddyGifts.all.allSatisfy { (300...3000).contains($0.price) && BuddyGifts.categories.contains($0.category) })
+        let party = try XCTUnwrap(BuddyGifts.gift("hats-and-headwear/party-hat"))
+        let crown = try XCTUnwrap(BuddyGifts.gift("hats-and-headwear/crown"))
+        let scarf = try XCTUnwrap(BuddyGifts.gift("neck-and-body/scarf"))
+        var b = BuddyState()
+        b.wear(party)
+        XCTAssertTrue(b.worn.isEmpty, "only a gift it owns can be worn")
+        XCTAssertTrue(b.receive(party))
+        XCTAssertEqual(b.hearts, BuddyState.heartsPerKeptGift)
+        XCTAssertFalse(b.receive(party), "a gift is given once")
+        XCTAssertEqual(b.hearts, BuddyState.heartsPerKeptGift)
+        XCTAssertTrue(b.receive(scarf))
+        XCTAssertTrue(b.receive(crown))
+        XCTAssertEqual(b.worn, [scarf, crown], "a new hat takes the place of the old one")
+        XCTAssertTrue(b.owns(party), "and the old one is kept")
+        b.wear(party)
+        XCTAssertEqual(b.worn, [scarf, party])
+        b.takeOff(scarf)
+        XCTAssertEqual(b.worn, [party])
+        let saved = try JSONDecoder().decode(BuddyState.self, from: JSONEncoder().encode(b))
+        XCTAssertEqual(saved, b)
+        // The free daily gift: the same answer all day, only small gifts, never one it has.
+        var held = 0
+        for day in 1...300 {
+            let first = BuddyGifts.inDailyGift(day: "day-\(day)", installSeed: "seed", owned: [party.id])
+            XCTAssertEqual(first, BuddyGifts.inDailyGift(day: "day-\(day)", installSeed: "seed", owned: [party.id]))
+            if let first {
+                held += 1
+                XCTAssertLessThanOrEqual(first.price, BuddyGifts.freeUpTo)
+                XCTAssertNotEqual(first, party)
+            }
+        }
+        XCTAssertEqual(Double(held) / 300, 1.0 / 3, accuracy: 0.08)
+        XCTAssertNil(BuddyGifts.inDailyGift(day: "day-3", installSeed: "seed", owned: BuddyGifts.all.map(\.id)))
     }
 
     func testBuddyStateDecodesFromAnOlderSave() throws {

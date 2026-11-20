@@ -47,6 +47,7 @@ struct SquishRoomView: View {
             if let id = current {
                 // Soft all the way through: knead it, pull it, pinch it, pick it up and throw it.
                 SoftSquishy(toy: id, look: morphedInto ?? id, feel: model.feel(for: id), mode: .room, wiggles: wiggles, mates: Array(shown.dropLast()),
+                            wear: morphedInto == nil && id == model.progress.buddy.squishy ? model.progress.buddy.worn : [],
                             onLetGo: { depth in morph(depth: depth) }, onDoubleTap: { tickle() }) {
                     SquishRefView(ref: morphedInto ?? id)
                         .colorMultiply(morphedInto == nil ? .white : Color(red: 0.86, green: 0.82, blue: 1))

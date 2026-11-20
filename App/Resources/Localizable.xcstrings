@@ -3423,6 +3423,28 @@
         }
       }
     },
+    "Gifts to keep": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ずっともっていられるプレゼント"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "간직하는 선물"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可以留著的禮物"
+          }
+        }
+      }
+    },
     "Go for 3 stars": {
       "localizations": {
         "ja": {
@@ -8857,6 +8879,50 @@
         }
       }
     },
+    "Wear": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "つける"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "착용"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "戴上"
+          }
+        }
+      }
+    },
+    "Wearing": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "つけてるよ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "착용 중"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "穿戴中"
+          }
+        }
+      }
+    },
     "What is %lld × %lld?": {
       "localizations": {
         "ja": {
@@ -8989,24 +9055,24 @@
         }
       }
     },
-    "Win levels to earn coins too: 50 a win, 100 with three stars.": {
+    "Win levels to earn coins too: %lld a win, %lld with three stars.": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "レベルをクリアしてもコインがもらえます。1回50、星3つで100。"
+            "value": "レベルをクリアしてもコインがもらえます。1回%1$lld、星3つで%2$lld。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "레벨을 깨도 코인을 받아요. 한 번에 50, 별 3개면 100."
+            "value": "레벨을 깨도 코인을 받아요. 한 번에 %1$lld, 별 3개면 %2$lld."
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "過關也能得到金幣：每關 50，三星 100。"
+            "value": "過關也能得到金幣：每關 %1$lld，三星 %2$lld。"
           }
         }
       }
@@ -9579,6 +9645,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "你用星星贏得了一顆扭蛋。"
+          }
+        }
+      }
+    },
+    "Your Buddy keeps every gift and wears it. Tap one it has to put it on or take it off.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バディはもらったプレゼントをずっともっていて、身につけます。もっているものをタップすると、つけたりはずしたりできます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "버디는 받은 선물을 모두 간직하고 착용해요. 가진 선물을 누르면 입히거나 벗길 수 있어요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "夥伴會留著每一份禮物並穿戴起來。點一下已有的禮物，就能戴上或拿下。"
           }
         }
       }

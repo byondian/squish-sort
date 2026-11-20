@@ -426,6 +426,49 @@ public enum NameFilter {
 
 // MARK: - Squishy Buddy
 
+/// Something the Buddy keeps and wears: a hat, something round its neck or something to hold.
+/// Bought with coins, chosen by the player at a price that is shown: never a lucky dip.
+/// Just for fun: a gift changes how the Buddy looks and nothing else in the game.
+public struct BuddyGift: Equatable, Hashable, Identifiable, Sendable {
+    /// The Workshop tray its picture comes from; the Buddy wears one thing from each.
+    public let category: String
+    public let part: String
+    public let price: Int
+
+    public var id: String { category + "/" + part }
+}
+
+public enum BuddyGifts {
+    public static let hats = "hats-and-headwear"
+    public static let neck = "neck-and-body"
+    public static let held = "held-items"
+    public static let categories = [hats, neck, held]
+
+    public static let all: [BuddyGift] = [
+        (hats, "party-hat", 300), (hats, "beanie", 400), (hats, "cap", 400), (hats, "bow-headband", 500),
+        (hats, "beret", 600), (hats, "flower-crown", 700), (hats, "cowboy", 800), (hats, "chef", 800),
+        (hats, "pirate", 900), (hats, "headphones", 1000), (hats, "wizard-hat", 1200), (hats, "top-hat", 1500),
+        (hats, "tiara", 2000), (hats, "crown", 3000),
+        (neck, "bow-tie", 300), (neck, "scarf", 400), (neck, "bandana", 500), (neck, "bell-collar", 600),
+        (neck, "medal", 1000), (neck, "pearl-necklace", 1500), (neck, "cape", 2000),
+        (held, "lollipop", 300), (held, "flower", 400), (held, "balloon", 500), (held, "ice-cream", 600),
+        (held, "teddy", 900), (held, "wand", 1200), (held, "guitar", 1800),
+    ].map { BuddyGift(category: $0.0, part: $0.1, price: $0.2) }
+
+    public static func gift(_ id: String) -> BuddyGift? { all.first { $0.id == id } }
+
+    /// The free daily gift holds one of the small gifts on about one day in three, while there is one
+    /// the Buddy does not have yet. Stable for the day, so opening it again changes nothing.
+    public static let freeUpTo = 600
+    public static let freeOneDayIn = 3
+    public static func inDailyGift(day: String, installSeed: String, owned: [String]) -> BuddyGift? {
+        guard MysteryBag.stableHash(installSeed + "|gift-day|" + day) % UInt64(freeOneDayIn) == 0 else { return nil }
+        let open = all.filter { $0.price <= freeUpTo && !owned.contains($0.id) }
+        guard !open.isEmpty else { return nil }
+        return open[Int(MysteryBag.stableHash(installSeed + "|gift-pick|" + day) % UInt64(open.count))]
+    }
+}
+
 /// A gentle pet. It never gets hungry, sick or sad, and never sends notifications.
 public struct BuddyState: Codable, Equatable, Sendable {
     /// A collectible id, or a made squishy's `ref`. Nil until the player picks one.
@@ -443,11 +486,17 @@ public struct BuddyState: Codable, Equatable, Sendable {
     public var lastTreatAt: Double?
     /// How big the puff was just after the last treat or gift. Missing in older saves: one treat's worth.
     public var puffBase: Double?
+    /// Gifts the Buddy has been given (`BuddyGift.id`), oldest first. Kept for good.
+    public var gifts: [String] = []
+    /// The gifts it has on now: at most one from each tray.
+    public var wearing: [String] = []
 
     public static let maxStoredTreats = 3
     public static let heartsPerTreat = 1
     /// A gift is better value than six treats, and nearly a whole trick.
     public static let heartsPerGift = 8
+    /// A gift the Buddy keeps also makes it happy.
+    public static let heartsPerKeptGift = 3
 
     public init() {}
 
@@ -461,6 +510,35 @@ public struct BuddyState: Codable, Equatable, Sendable {
         hearts = try c.decodeIfPresent(Int.self, forKey: .hearts) ?? 0
         lastOpenedAt = try c.decodeIfPresent(Double.self, forKey: .lastOpenedAt)
         moodAskedDay = try c.decodeIfPresent(String.self, forKey: .moodAskedDay)
+        gifts = ((try? c.decodeIfPresent([String].self, forKey: .gifts)) ?? nil) ?? []
+        wearing = (((try? c.decodeIfPresent([String].self, forKey: .wearing)) ?? nil) ?? []).filter { gifts.contains($0) }
+    }
+
+    public func owns(_ gift: BuddyGift) -> Bool { gifts.contains(gift.id) }
+    public func isWearing(_ gift: BuddyGift) -> Bool { wearing.contains(gift.id) }
+
+    /// What the Buddy has on, in the order it is drawn.
+    public var worn: [BuddyGift] { wearing.compactMap(BuddyGifts.gift) }
+
+    /// A new gift: kept for good, put on at once, and a few hearts. False when it has it already.
+    @discardableResult
+    public mutating func receive(_ gift: BuddyGift) -> Bool {
+        guard !owns(gift) else { return false }
+        gifts.append(gift.id)
+        hearts += BuddyState.heartsPerKeptGift
+        wear(gift)
+        return true
+    }
+
+    /// Puts on a gift it owns, in place of whatever it had on from the same tray.
+    public mutating func wear(_ gift: BuddyGift) {
+        guard owns(gift) else { return }
+        wearing.removeAll { BuddyGifts.gift($0)?.category == gift.category || BuddyGifts.gift($0) == nil }
+        wearing.append(gift.id)
+    }
+
+    public mutating func takeOff(_ gift: BuddyGift) {
+        wearing.removeAll { $0 == gift.id }
     }
 
     /// Every level win gives one free treat, up to three stored.

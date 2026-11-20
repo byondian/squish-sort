@@ -1169,6 +1169,30 @@ final class AppModel: ObservableObject {
         screen = homeScreen
     }
 
+    /// A gift the Buddy keeps and wears, chosen in the shop at its shown price. Paid for, kept and put on
+    /// in one go, so nothing can be lost; the home screen then plays the arrival.
+    func buyGift(_ gift: BuddyGift) {
+        guard buddyActive, buddyDelivery == nil, !progress.buddy.owns(gift), progress.wallet.balance >= gift.price else { return }
+        heartsBeforeDelivery = progress.buddy.hearts
+        let seconds = puffSeconds
+        update { p in
+            guard p.wallet.spend(gift.price) else { return }
+            p.buddy.receive(gift)
+            p.buddy.puffUp(.gift, at: Date().timeIntervalSince1970, lasting: seconds)
+        }
+        buddyDelivery = .gift
+        screen = homeScreen
+    }
+
+    /// Puts a gift it owns on the Buddy, or takes it off.
+    func toggleGift(_ gift: BuddyGift) {
+        guard progress.buddy.owns(gift) else { return }
+        haptics.land()
+        update { p in
+            if p.buddy.isWearing(gift) { p.buddy.takeOff(gift) } else { p.buddy.wear(gift) }
+        }
+    }
+
     /// The home screen calls this when the bought treat or gift reaches the Buddy: only the celebration is left to do.
     func deliverToBuddy() {
         guard let item = buddyDelivery else { return }
@@ -1219,7 +1243,13 @@ final class AppModel: ObservableObject {
         let grant: () -> Void = { [weak self] in
             guard let self else { return }
             withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) {
-                self.update { $0.dailyGiftDay = self.today; $0.wallet.earn(self.config.coins.dailyGift) }
+                // On some days there is also something small for the Buddy to wear.
+                let extra = BuddyGifts.inDailyGift(day: self.today, installSeed: self.progress.installID, owned: self.progress.buddy.gifts)
+                self.update { p in
+                    p.dailyGiftDay = self.today
+                    p.wallet.earn(self.config.coins.dailyGift)
+                    if let extra { p.buddy.receive(extra) }
+                }
                 self.giftsOpened += 1
             }
             self.sounds.play("gift_open", or: "coin_shower")

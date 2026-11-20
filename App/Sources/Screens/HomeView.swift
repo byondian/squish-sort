@@ -676,6 +676,7 @@ struct BuddyHomeView: View {
     /// The Buddy itself: as soft as in the Squish Room. Knead, pull, pinch, pick up and throw.
     private func toy(_ ref: String) -> some View {
         SoftSquishy(toy: ref, look: ref, feel: model.feel(for: ref), mode: .room, pokes: pokes, comesHome: true,
+                    wear: model.progress.buddy.worn,
                     onTouch: { withAnimation { model.pokeBuddy() } },
                     onDoubleTap: { _ = ask(for: 3) },
                     onGesture: { gesture in ask(for: gesture == .circle ? 1 : 2) }) {

@@ -29,6 +29,8 @@ struct SoftSquishy<Art: View>: View {
     /// The room's air and bounce (Squishy Workshop's rooms). See `SoftSquishyScene`.
     var gravityScale = 1.0
     var bounce: Double?
+    /// Gifts this toy has on (the Buddy's hat, scarf and so on). They are part of its picture, so they squish with it.
+    var wear: [BuddyGift] = []
     var onTouch: (() -> Void)?
     var onLetGo: ((Double) -> Void)?
     var onDoubleTap: (() -> Void)?
@@ -123,6 +125,7 @@ struct SoftSquishy<Art: View>: View {
                 if let image = picture() { holder.scene.redraw(image: image) }
             }
             .onChange(of: reduceMotion) { _, _ in show(drop: false) }
+            .onChange(of: wear) { _, _ in show(drop: false) }
             .onChange(of: pokes) { _, _ in holder.scene.poke() }
             .onChange(of: wiggles) { _, _ in holder.scene.wiggle() }
     }
@@ -156,12 +159,13 @@ struct SoftSquishy<Art: View>: View {
         // Those pictures are drawn on a slightly wider frame than the squishy's own.
         if look == toy, let base = SignatureMoves.shared.baseArt(for: toy) {
             let bare = ImageRenderer(content: Image(base).resizable().frame(width: 320, height: 320)
-                .frame(width: 300, height: 300).clipped())
+                .frame(width: 300, height: 300).clipped().overlay(BuddyWearView(worn: wear)))
             bare.scale = min(max(displayScale, 1), 3)
             bare.isOpaque = false
             if let image = bare.uiImage { return image }
         }
-        let renderer = ImageRenderer(content: art().environmentObject(model).frame(width: 300, height: 300))
+        let renderer = ImageRenderer(content: art().environmentObject(model).frame(width: 300, height: 300)
+            .overlay(BuddyWearView(worn: wear)))
         renderer.scale = min(max(displayScale, 1), 3)
         renderer.isOpaque = false
         return renderer.uiImage
@@ -189,5 +193,37 @@ struct SoftSquishy<Art: View>: View {
         let ids = Set(toys.map(\.id))
         holder.scene.show(toys: toys, fresh: ids.subtracting(holder.shown), drop: drop)
         holder.shown = ids
+    }
+}
+
+/// What the Buddy has on, drawn over its picture: a hat on its head, something round its neck,
+/// something held at its side. The pictures are the Workshop's own parts.
+struct BuddyWearView: View {
+    let worn: [BuddyGift]
+
+    /// Where a gift from each tray sits on a squishy's picture and how big it is (shares of the picture's side).
+    static func spot(_ category: String) -> (x: CGFloat, y: CGFloat, size: CGFloat) {
+        switch category {
+        case BuddyGifts.hats: return (0.5, 0.13, 0.46)
+        case BuddyGifts.neck: return (0.5, 0.8, 0.42)
+        default: return (0.13, 0.62, 0.36)
+        }
+    }
+
+    var body: some View {
+        GeometryReader { geo in
+            let side = min(geo.size.width, geo.size.height)
+            ZStack {
+                ForEach(worn) { gift in
+                    if let image = WorkshopArt.part(gift.category, gift.part) {
+                        let spot = BuddyWearView.spot(gift.category)
+                        Image(uiImage: image).resizable().scaledToFit()
+                            .frame(width: side * spot.size, height: side * spot.size)
+                            .position(x: geo.size.width / 2 + side * (spot.x - 0.5), y: geo.size.height / 2 + side * (spot.y - 0.5))
+                    }
+                }
+            }
+        }
+        .allowsHitTesting(false)
     }
 }
