@@ -26,10 +26,10 @@ public enum LevelCatalog {
     ]
     /// The name id of each block of ten, from the rules it mixes (the app holds the words).
     public static let endlessBlocks = [
-        "toy-freeze", "sticky-sweets", "encore", "frosty-bubbles", "jungle-jam", "grand-mix",
-        "toy-freeze", "sticky-sweets", "encore", "star-splash", "jungle-jam", "grand-mix",
-        "toy-freeze", "sticky-sweets", "star-splash", "jungle-bubbles", "jungle-jam", "grand-mix",
-        "toy-freeze", "candy-jungle", "encore", "frosty-bubbles", "jungle-bubbles", "grand-mix",
+        "toy-freeze", "space-locks", "morph-mayhem", "mega-jars", "jungle-jam", "grand-mix",
+        "toy-freeze", "space-locks", "encore", "star-splash", "morph-mayhem", "grand-mix",
+        "toy-freeze", "sticky-sweets", "star-splash", "mega-jars", "space-locks", "grand-mix",
+        "toy-freeze", "morph-mayhem", "encore", "frosty-bubbles", "mega-jars", "grand-mix",
     ]
     public static func endlessBlock(index: Int) -> String {
         endlessBlocks[((max(1, index) - 1) / 10) % endlessBlocks.count]

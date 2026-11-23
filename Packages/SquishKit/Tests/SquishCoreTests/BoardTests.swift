@@ -296,6 +296,93 @@ final class BoardTests: XCTestCase {
         XCTAssertTrue(b.isLegal(Move(from: 0, to: 2)))
     }
 
+    func testKeyJarIsShutUntilAJarOfItsKindIsFinished() {
+        // Jar 1 has a padlock that shows A; jar 4 is spare room.
+        let jars = board(["A", "BC", "A", "CB", ""], capacity: 2).jars
+        var b = Board(capacity: 2, jars: jars, keys: [1: 0])
+        XCTAssertEqual(b.keyKind(1), 0)
+        XCTAssertNil(b.keyKind(0))
+        XCTAssertTrue(b.hasKeys)
+        XCTAssertTrue(b.isShut(1))
+        XCTAssertEqual(b.runLength(at: 1), 0)
+        XCTAssertFalse(b.isLegal(Move(from: 1, to: 4)), "nothing comes out")
+        XCTAssertFalse(b.isLegal(Move(from: 3, to: 1)), "nothing goes in")
+        // A move that finishes nothing leaves the padlock alone.
+        XCTAssertEqual(b.apply(Move(from: 3, to: 4))?.openedLocks, [])
+        XCTAssertTrue(b.isShut(1))
+        // The jar of A is finished: the padlock opens for good.
+        let result = b.apply(Move(from: 0, to: 2))
+        XCTAssertEqual(result?.completedJar, 2)
+        XCTAssertEqual(result?.openedLocks, [1])
+        XCTAssertNil(b.keyKind(1))
+        XCTAssertFalse(b.hasKeys)
+        XCTAssertTrue(b.isLegal(Move(from: 1, to: 3)))
+    }
+
+    func testKeyJarStaysShutWhenAnotherKindIsFinished() {
+        // The padlock on jar 1 shows C; finishing the jar of A does not open it.
+        let jars = board(["A", "BC", "A", "CB", ""], capacity: 2).jars
+        var b = Board(capacity: 2, jars: jars, keys: [1: 2])
+        let result = b.apply(Move(from: 0, to: 2))
+        XCTAssertEqual(result?.completedJar, 2)
+        XCTAssertEqual(result?.openedLocks, [])
+        XCTAssertTrue(b.isShut(1))
+        // A wrapped squishy on top of a locked jar is unwrapped when the board is made, like any top.
+        let wrapped = Board(capacity: 2, jars: [[Piece(kind: 1), Piece(kind: 2, hidden: true)], []], keys: [0: 0])
+        XCTAssertFalse(wrapped.jars[0][1].hidden)
+    }
+
+    func testShakeUpLeavesAKeyJarAloneAndKeepsItsPadlock() {
+        let jars = board(["AB", "BC", "CA", "", ""], capacity: 2).jars
+        let b = Board(capacity: 2, jars: jars, keys: [1: 0])
+        var rng = SystemRandomNumberGenerator()
+        let shaken = b.shakenUp(using: &rng)
+        XCTAssertEqual(shaken.jars[1], b.jars[1])
+        XCTAssertEqual(shaken.keyKind(1), 0)
+    }
+
+    func testMorphPieceFlipsEachTimeItIsPoured() {
+        // Jar 0: A, then a morph piece that shows B and turns into A. Jar 1: B.
+        var b = Board(capacity: 3, jars: [[Piece(kind: 0), Piece(kind: 1, morph: 1)], [Piece(kind: 1)], []])
+        XCTAssertTrue(b.hasMorphs)
+        XCTAssertEqual(b.jars[0][1].otherKind, 0)
+        XCTAssertEqual(b.runLength(at: 0), 1, "it counts as the kind it shows, so it is not part of the A under it")
+        // It goes onto B as a B, and lands as an A.
+        let first = b.apply(Move(from: 0, to: 1))
+        XCTAssertEqual(first?.flipped, [1])
+        XCTAssertEqual(b.jars[1].map(\.kind), [1, 0])
+        XCTAssertEqual(b.jars[1][1].otherKind, 1)
+        // Now it is an A: it goes back onto the A, and lands as a B again.
+        let back = b.apply(Move(from: 1, to: 0))
+        XCTAssertEqual(back?.flipped, [1])
+        XCTAssertEqual(b.jars[0].map(\.kind), [0, 1])
+        XCTAssertEqual(b.jars[0][1].otherKind, 0)
+    }
+
+    func testOnlyTheMorphPieceOfARunFlips() {
+        // Three that show B, the middle one a morph piece: all three move, one flips.
+        var b = Board(capacity: 4, jars: [[Piece(kind: 1), Piece(kind: 1, morph: 1), Piece(kind: 1)], []])
+        XCTAssertEqual(b.runLength(at: 0), 3)
+        let result = b.apply(Move(from: 0, to: 1))
+        XCTAssertEqual(result?.count, 3)
+        XCTAssertEqual(result?.flipped, [1])
+        XCTAssertEqual(b.jars[1].map(\.kind), [1, 0, 1])
+        XCTAssertFalse(b.isComplete(1))
+        // An ordinary move reports no flip.
+        var plain = board(["AB", "", ""], capacity: 2)
+        XCTAssertEqual(plain.apply(Move(from: 0, to: 1))?.flipped, [])
+    }
+
+    func testShakeUpKeepsAMorphPieceAMorphPiece() {
+        let b = Board(capacity: 2, jars: [[Piece(kind: 0), Piece(kind: 1, morph: 1)], [Piece(kind: 1), Piece(kind: 0)], []])
+        var rng = SystemRandomNumberGenerator()
+        let shaken = b.shakenUp(using: &rng)
+        let morphs = shaken.jars.flatMap { $0 }.filter(\.isMorph)
+        XCTAssertEqual(morphs.count, 1)
+        XCTAssertEqual(morphs.first?.kind, 1)
+        XCTAssertEqual(morphs.first?.otherKind, 0)
+    }
+
     func testShakeUpLeavesAClosedCurtainAlone() {
         let jars = board(["AB", "BC", "CA", "", ""], capacity: 2).jars
         let b = Board(capacity: 2, jars: jars, curtains: [1])

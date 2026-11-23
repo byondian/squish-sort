@@ -29,9 +29,35 @@ public struct LevelFile: Codable, Equatable, Sendable {
         public var vines: [[Int]]?
         /// True when the frozen entries are bubbles outside Bubble Bath (a Keep Squishing block that borrows them).
         public var floats: Bool?
+        /// Key jars (Keep Squishing): the jar is padlocked until a jar of `kind` is finished.
+        public var keys: [KeyJar]?
+        /// Morph pieces (Keep Squishing): the piece at `at` in `jar` flips to `kind` when it is poured, and back.
+        public var morph: [MorphPiece]?
+
+        public struct KeyJar: Codable, Equatable, Sendable {
+            public var jar: Int
+            public var kind: String
+            public init(jar: Int, kind: String) {
+                self.jar = jar
+                self.kind = kind
+            }
+        }
+
+        public struct MorphPiece: Codable, Equatable, Sendable {
+            public var jar: Int
+            public var at: Int
+            public var kind: String
+            public init(jar: Int, at: Int, kind: String) {
+                self.jar = jar
+                self.at = at
+                self.kind = kind
+            }
+        }
 
         public init(hidden: [[Int]]? = nil, sticky: [[Int]]? = nil, frozen: [[Int]]? = nil, curtains: [Int]? = nil,
-                    vines: [[Int]]? = nil, floats: Bool? = nil) {
+                    vines: [[Int]]? = nil, floats: Bool? = nil, keys: [KeyJar]? = nil, morph: [MorphPiece]? = nil) {
+            self.keys = keys
+            self.morph = morph
             self.hidden = hidden
             self.sticky = sticky
             self.frozen = frozen
@@ -125,6 +151,16 @@ public struct Level: Sendable {
             frozen[[p[0], p[1]]] = UInt8(clamping: p.count > 2 ? p[2] : (floats ? 1 : LevelFile.defaultThaw))
         }
 
+        var morphs: [[Int]: UInt8] = [:]
+        for piece in m.morph ?? [] {
+            let at = [piece.jar, piece.at]
+            guard file.jars.indices.contains(piece.jar), file.jars[piece.jar].indices.contains(piece.at),
+                  let other = kinds.firstIndex(of: piece.kind), morphs[at] == nil else {
+                throw LevelError.invalid("\(file.id): morph piece \(at) must be on the board, once, with a kind of this level")
+            }
+            morphs[at] = UInt8(other + 1)
+        }
+
         var jars: [[Piece]] = []
         for (j, jar) in file.jars.enumerated() {
             var pieces: [Piece] = []
@@ -133,7 +169,8 @@ public struct Level: Sendable {
                 pieces.append(Piece(kind: kind,
                                     hidden: hidden.contains([j, i]),
                                     frozen: frozen[[j, i]] ?? 0,
-                                    bondedAbove: sticky.contains([j, i])))
+                                    bondedAbove: sticky.contains([j, i]),
+                                    morph: morphs[[j, i]] ?? 0))
             }
             jars.append(pieces)
         }
@@ -149,6 +186,14 @@ public struct Level: Sendable {
             }
             vines[v[0]] = v[1]
         }
-        self.board = Board(capacity: file.capacity, jars: jars, curtains: m.curtains ?? [], vines: vines, floats: floats)
+        var keys: [Int: Int] = [:]
+        for key in m.keys ?? [] {
+            guard file.jars.indices.contains(key.jar), let kind = kinds.firstIndex(of: key.kind), keys[key.jar] == nil else {
+                throw LevelError.invalid("\(file.id): key jar \(key.jar) must be on the board, once, with a kind of this level")
+            }
+            keys[key.jar] = kind
+        }
+        self.board = Board(capacity: file.capacity, jars: jars, curtains: m.curtains ?? [], vines: vines, floats: floats,
+                           keys: keys)
     }
 }

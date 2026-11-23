@@ -332,6 +332,99 @@ final class PieceNode: SKNode {
         run(.sequence([.scale(to: 1.12, duration: 0.07), .scale(to: 1, duration: 0.12)]))
     }
 
+    private var morphLook: SKNode?
+
+    /// A morph piece is drawn split corner to corner: its own kind on top, the kind it turns into
+    /// below, with a small white swirl badge. `other` nil takes the split away.
+    func showMorph(other: String?) {
+        morphLook?.removeFromParent()
+        morphLook = nil
+        guard let other else { return }
+        let d = diameter
+        let look = SKNode()
+        look.zPosition = 2.5
+        let half = CGMutablePath()
+        half.move(to: CGPoint(x: -d * 0.62, y: -d * 0.62))
+        half.addLine(to: CGPoint(x: d * 0.62, y: -d * 0.62))
+        half.addLine(to: CGPoint(x: d * 0.62, y: d * 0.62))
+        half.closeSubpath()
+        let mask = SKShapeNode(path: half)
+        mask.fillColor = .white
+        mask.strokeColor = .clear
+        let crop = SKCropNode()
+        crop.maskNode = mask
+        let otherStyle = SquishyStyle.forID(other)
+        if UIImage(named: "squishy-\(other)") != nil {
+            let sprite = SKSpriteNode(texture: SKTexture(imageNamed: "squishy-\(other)"))
+            let box = SquishMask.opaqueBox(named: "squishy-\(other)")
+            let side = min(d * 1.6, d * 0.96 / max(box.width, box.height, 0.4))
+            sprite.size = CGSize(width: side, height: side)
+            sprite.position = CGPoint(x: (0.5 - box.midX) * side, y: -d * 0.48 - (0.5 - box.maxY) * side)
+            crop.addChild(sprite)
+        } else {
+            let blob = SKShapeNode(path: otherStyle.bodyPath(diameter: d))
+            blob.fillColor = otherStyle.color
+            blob.strokeColor = .plum
+            blob.lineWidth = max(1.5, d * 0.04)
+            crop.addChild(blob)
+        }
+        look.addChild(crop)
+        let seamPath = CGMutablePath()
+        seamPath.move(to: CGPoint(x: -d * 0.36, y: -d * 0.36))
+        seamPath.addLine(to: CGPoint(x: d * 0.36, y: d * 0.36))
+        let seam = SKShapeNode(path: seamPath)
+        seam.strokeColor = .white
+        seam.lineWidth = max(2, d * 0.05)
+        seam.lineCap = .round
+        look.addChild(seam)
+        // The swirl badge, bottom left.
+        let badge = SKShapeNode(circleOfRadius: d * 0.15)
+        badge.fillColor = .white
+        badge.strokeColor = .plum
+        badge.lineWidth = max(1.5, d * 0.03)
+        badge.position = CGPoint(x: -d * 0.3, y: -d * 0.3)
+        let spiral = CGMutablePath()
+        for n in 0...40 {
+            let t = CGFloat(n) / 40
+            let angle = t * 3.2 * .pi
+            let r = d * 0.105 * t
+            let point = CGPoint(x: cos(angle) * r, y: sin(angle) * r)
+            if n == 0 { spiral.move(to: point) } else { spiral.addLine(to: point) }
+        }
+        let swirl = SKShapeNode(path: spiral)
+        swirl.strokeColor = otherStyle.color
+        swirl.lineWidth = max(1.5, d * 0.035)
+        swirl.lineCap = .round
+        swirl.fillColor = .clear
+        badge.addChild(swirl)
+        if !UIAccessibility.isReduceMotionEnabled {
+            swirl.run(.repeatForever(.rotate(byAngle: -2 * CGFloat.pi, duration: 4)))
+        }
+        look.addChild(badge)
+        content.addChild(look)
+        morphLook = look
+    }
+
+    /// A morph piece flips: this node squashes flat and goes; `next`, the piece in its new kind, pops up in its place.
+    func morph(into next: PieceNode, calm: Bool) {
+        next.position = position
+        next.zPosition = zPosition
+        if calm {
+            next.alpha = 0
+            next.run(.fadeIn(withDuration: 0.25))
+            run(.sequence([.fadeOut(withDuration: 0.25), .removeFromParent()]))
+            return
+        }
+        next.setScale(0.2)
+        next.alpha = 0
+        next.run(.sequence([
+            .wait(forDuration: 0.1),
+            .group([.fadeIn(withDuration: 0.05), .scale(to: 1.18, duration: 0.12)]),
+            .scale(to: 1, duration: 0.1),
+        ]))
+        run(.sequence([.scaleX(to: 1.3, y: 0.25, duration: 0.1), .removeFromParent()]))
+    }
+
     func apply(_ piece: Piece) {
         let wasHidden = !question.isHidden
         question.isHidden = !piece.hidden
@@ -782,6 +875,91 @@ final class VineNode: SKNode {
         fall.timingMode = .easeIn
         tag.run(fall)
         run(.sequence([.wait(forDuration: 0.45), .removeFromParent()]))
+    }
+}
+
+/// The padlock on a key jar: a bar across the jar's mouth and a padlock whose body is the colour of
+/// the key squishy, with that squishy's picture on it. Drawn about the jar's centre.
+final class LockNode: SKNode {
+    private let shackle: SKShapeNode
+    private let padlock = SKNode()
+    private let bar: SKShapeNode
+
+    init(size: CGSize, keyID: String) {
+        let w = size.width, h = size.height
+        let side = min(w * 0.62, 46)
+        let arc = CGMutablePath()
+        arc.move(to: CGPoint(x: -side * 0.26, y: side * 0.3))
+        arc.addLine(to: CGPoint(x: -side * 0.26, y: side * 0.56))
+        arc.addArc(center: CGPoint(x: 0, y: side * 0.56), radius: side * 0.26, startAngle: .pi, endAngle: 0, clockwise: true)
+        arc.addLine(to: CGPoint(x: side * 0.26, y: side * 0.3))
+        shackle = SKShapeNode(path: arc)
+        bar = SKShapeNode(rect: CGRect(x: -w / 2 - 4, y: -4, width: w + 8, height: 8), cornerRadius: 4)
+        super.init()
+        let style = SquishyStyle.forID(keyID)
+        bar.fillColor = UIColor(hex: 0xC9B8E8)
+        bar.strokeColor = .plum
+        bar.lineWidth = 2
+        bar.position = CGPoint(x: 0, y: h / 2 - 2)
+        addChild(bar)
+        shackle.strokeColor = .plum
+        shackle.lineWidth = max(4, side * 0.13)
+        shackle.lineCap = .round
+        shackle.fillColor = .clear
+        padlock.addChild(shackle)
+        let body = SKShapeNode(rect: CGRect(x: -side / 2, y: -side * 0.42, width: side, height: side * 0.84), cornerRadius: side * 0.2)
+        body.fillColor = style.color
+        body.strokeColor = .plum
+        body.lineWidth = 2.5
+        padlock.addChild(body)
+        if UIImage(named: "squishy-\(keyID)") != nil {
+            let face = SKSpriteNode(texture: SKTexture(imageNamed: "squishy-\(keyID)"))
+            face.size = CGSize(width: side * 0.74, height: side * 0.74)
+            face.zPosition = 1
+            // A white disc behind it, so the squishy reads on a body of its own colour.
+            let disc = SKShapeNode(circleOfRadius: side * 0.36)
+            disc.fillColor = UIColor.white.withAlphaComponent(0.85)
+            disc.strokeColor = .clear
+            padlock.addChild(disc)
+            padlock.addChild(face)
+        } else {
+            let dot = SKShapeNode(path: style.bodyPath(diameter: side * 0.5))
+            dot.fillColor = .white
+            dot.strokeColor = .plum
+            dot.lineWidth = 1.5
+            padlock.addChild(dot)
+        }
+        padlock.position = CGPoint(x: 0, y: h / 2 - 2)
+        addChild(padlock)
+        isAccessibilityElement = false
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) is not used") }
+
+    /// A tap on a locked jar: the padlock rattles and holds.
+    func rattle() {
+        padlock.removeAction(forKey: "rattle")
+        padlock.zRotation = 0
+        padlock.run(.sequence([
+            .rotate(toAngle: 0.22, duration: 0.05), .rotate(toAngle: -0.22, duration: 0.08),
+            .rotate(toAngle: 0.1, duration: 0.06), .rotate(toAngle: 0, duration: 0.05),
+        ]), withKey: "rattle")
+    }
+
+    /// Open: the padlock squishes, the shackle pops up, and it all drops away. With Reduce Motion it fades.
+    func open(calm: Bool) {
+        if calm {
+            run(.sequence([.fadeOut(withDuration: 0.4), .removeFromParent()]))
+            return
+        }
+        shackle.run(.moveBy(x: 0, y: 9, duration: 0.12))
+        padlock.run(.sequence([
+            .scaleX(to: 1.25, y: 0.75, duration: 0.09), .scaleX(to: 0.92, y: 1.12, duration: 0.1), .scale(to: 1, duration: 0.08),
+            .wait(forDuration: 0.12),
+            .group([.moveBy(x: 0, y: -40, duration: 0.35), .rotate(byAngle: 0.8, duration: 0.35), .fadeOut(withDuration: 0.35)]),
+        ]))
+        bar.run(.sequence([.wait(forDuration: 0.3), .group([.scaleX(to: 0.1, duration: 0.2), .fadeOut(withDuration: 0.2)])]))
+        run(.sequence([.wait(forDuration: 0.8), .removeFromParent()]))
     }
 }
 

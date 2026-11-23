@@ -38,7 +38,9 @@ public enum Solver {
         let canonical = start.floats || !start.jars.contains { jar in jar.contains { $0.isFrozen } }
         var counts: [UInt8: Int] = [:]
         for jar in start.jars { for p in jar { counts[p.kind, default: 0] += 1 } }
-        let solvedRuns = counts.values.reduce(0) { $0 + ($1 + start.capacity - 1) / start.capacity }
+        var solvedRuns = counts.values.reduce(0) { $0 + ($1 + start.capacity - 1) / start.capacity }
+        // Morph pieces change how many there are of each kind; a won board is still this many full jars.
+        if start.hasMorphs { solvedRuns = counts.values.reduce(0, +) / start.capacity }
 
         var boards: [Board] = [start]
         var parents: [Int32] = [-1]
@@ -50,7 +52,7 @@ public enum Solver {
 
         while let entry = heap.pop() {
             let current = boards[entry.node]
-            let free = canonical && current.curtains.isEmpty && !current.hasVines
+            let free = canonical && current.curtains.isEmpty && !current.hasVines && !current.hasKeys
             if let known = best[key(current, canonical: canonical)], known < entry.g { continue }
             if current.isWon {
                 var path: [Move] = []
@@ -65,8 +67,9 @@ public enum Solver {
             if explored > maxStates || boards.count > maxNodes { return .gaveUp }
             for move in current.legalMoves {
                 if free && !move.isRide && current.jars[move.to].isEmpty
-                    && current.runLength(at: move.from) == current.jars[move.from].count {
-                    continue // pouring a whole jar into an empty one changes nothing
+                    && current.runLength(at: move.from) == current.jars[move.from].count
+                    && !current.jars[move.from].contains(where: \.isMorph) {
+                    continue // pouring a whole jar into an empty one changes nothing (unless a morph piece flips on the way)
                 }
                 var next = current
                 next.apply(move)
@@ -134,15 +137,22 @@ public enum Solver {
     }
 
     static func key(_ b: Board, canonical: Bool) -> [UInt8] {
-        var parts = b.jars.map { jar in jar.map(\.code) }
-        // While a curtain is closed or a vine is tied, which jar is which matters.
-        let tied = b.hasVines
+        // A morph piece is told apart by its other kind too.
+        let morphs = b.hasMorphs
+        var parts: [[UInt8]] = b.jars.map { jar in
+            morphs ? jar.flatMap { [$0.code, $0.morph] } : jar.map(\.code)
+        }
+        // While a curtain is closed, a vine is tied or a padlock is shut, which jar is which matters.
+        let tied = b.hasVines || b.hasKeys
         if canonical && b.curtains.isEmpty && !tied { parts.sort { $0.lexicographicallyPrecedes($1) } }
         var out: [UInt8] = []
         out.reserveCapacity(b.jars.count * (b.capacity + 1) + 3)
         out.append(UInt8(b.curtains.count))
         for j in b.curtains { out.append(UInt8(j)) }
-        if tied { out.append(contentsOf: b.vines) }
+        if tied {
+            out.append(contentsOf: b.vines)
+            out.append(contentsOf: b.keys)
+        }
         for p in parts {
             out.append(UInt8(p.count))
             out.append(contentsOf: p)

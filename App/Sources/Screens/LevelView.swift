@@ -127,6 +127,11 @@ final class LevelController: ObservableObject {
             model?.sounds.play("vine_snap")
             model?.haptics.star()
         }
+        scene.onLockOpen = { [weak model] in
+            model?.sounds.play("unlock_new", volume: 0.8)
+            model?.haptics.star()
+        }
+        scene.onMorph = { [weak model] in model?.sounds.play("squeeze_out", volume: 0.7) }
         let bubbles = level.look == "bubblebath"
         scene.onReject = { [weak model] in
             model?.haptics.reject()

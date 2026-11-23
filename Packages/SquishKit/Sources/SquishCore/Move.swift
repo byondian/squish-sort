@@ -39,4 +39,8 @@ public struct MoveResult: Equatable, Sendable {
     public var snappedVines: [Int] = []
     /// Jars where a bubble popped on this move (Bubble Bath).
     public var poppedJars: [Int] = []
+    /// Key jars whose padlock opened because a jar of their key kind was finished on this move.
+    public var openedLocks: [Int] = []
+    /// Places in the destination jar (0 is the bottom) of the morph pieces that flipped on this move.
+    public var flipped: [Int] = []
 }

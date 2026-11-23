@@ -104,6 +104,9 @@ final class AppModel: ObservableObject {
         case "frosty-bubbles": return "Frosty Bubbles"
         case "jungle-bubbles": return "Jungle Bubbles"
         case "jungle-jam": return "Jungle Jam"
+        case "space-locks": return "Space Locks"
+        case "morph-mayhem": return "Morph Mayhem"
+        case "mega-jars": return "Mega Jar Party"
         default: return "Grand Mix"
         }
     }

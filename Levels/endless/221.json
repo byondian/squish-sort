@@ -4,20 +4,19 @@
   "world": "endless",
   "index": 221,
   "beat": "intro",
-  "capacity": 4,
+  "capacity": 5,
   "jars": [
-    ["tuki", "tuki", "leafy", "nana"],
-    ["bongo", "leafy", "bongo", "pina"],
-    ["tuki", "bongo", "pina", "nana"],
-    ["pina", "nana", "leafy", "pina"],
-    ["tuki", "dotty", "nana", "bongo"],
-    ["dotty", "leafy", "dotty", "dotty"],
+    ["tuki", "leafy", "pina", "bongo", "pina"],
+    ["pina", "pina", "leafy", "leafy", "tuki"],
+    ["dotty", "leafy", "dotty", "tuki", "dotty"],
+    ["bongo", "bongo", "pina", "bongo", "dotty"],
+    ["tuki", "dotty", "leafy", "tuki", "bongo"],
     [],
     []
   ],
-  "mechanics": {"hidden": [], "sticky": [], "frozen": [], "vines": [[3, 2]]},
+  "mechanics": {"hidden": [], "sticky": [], "frozen": []},
   "par": 19,
-  "solution": [[0, 6], [2, 6], [1, 2], [4, 1], [4, 6], [5, 4], [5, 0], [4, 5], [2, 7], [1, 2], [0, 1], [0, 4], [1, 0], [2, 1], [2, 4], [3, 7], [3, 0], [3, 6], [3, 7]],
+  "solution": [[2, 5], [1, 2], [3, 5], [1, 6], [0, 1], [3, 0], [3, 1], [0, 3], [0, 1], [0, 6], [2, 0], [2, 5], [2, 6], [2, 5], [4, 3], [4, 0], [4, 6], [4, 5], [0, 4]],
   "capsule": false,
   "softenAfterFails": null
 }
