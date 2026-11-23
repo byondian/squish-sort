@@ -241,7 +241,7 @@ function partners() {
   const code = 'en', t = T.en, s = t.support;
   const P = {
     title: 'Partner with us', lede: 'Not a paid post. We build a new game every week. You bring the audience. We share the revenue.',
-    how: [['We build.', 'A new mobile game or app most weeks. Squish Sort went from a name to a 365-level game on testers’ phones in three days.'],
+    how: [['We build.', 'A new mobile game or app most weeks. Squish Sort went from no idea to a finished game in three days: 385 levels, 98 original squishies, several languages and iPad.'],
       ['You share it your way.', 'Early builds, ready-made clips and your own tracked link.'],
       ['We both earn.', 'A share of revenue from every game you help launch, for as long as the partnership runs.']],
     gets: ['Revenue share on every title you promote, not a one-off fee', 'Early TestFlight builds before anyone else', 'Your own original character in the game, designed with you', 'A say in what we make next, built around what your audience asks for'],
@@ -270,7 +270,7 @@ function partners() {
   <button class="btn" type="submit">${esc(f.send)}</button>
   <p class="status" role="status" aria-live="polite"></p>
 </form>
-<p class="fine-print">Made by Ian, an independent developer. ${owner}</p></main>` + footer(code) + end(`<script src="/assets/contact.js?v=${V}" defer></script>`);
+<p class="fine-print">Made by Ian, founder and product builder. ${owner}</p></main>` + footer(code) + end(`<script src="/assets/contact.js?v=${V}" defer></script>`);
 }
 function shop(code) {
   const t = T[code], s = t.shop;
