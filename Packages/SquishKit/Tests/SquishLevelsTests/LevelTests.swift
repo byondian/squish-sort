@@ -27,6 +27,11 @@ final class LevelTests: XCTestCase {
         XCTAssertEqual(LevelCatalog.look(world: LevelCatalog.endless, index: 11), "sweetfactory")
         XCTAssertEqual(LevelCatalog.look(world: LevelCatalog.endless, index: 31), "bubblebath")
         XCTAssertEqual(LevelCatalog.endlessLooks.count * 10, LevelCatalog.levelCount(in: LevelCatalog.endless))
+        XCTAssertEqual(LevelCatalog.endlessBlocks.count, LevelCatalog.endlessLooks.count)
+        XCTAssertEqual(LevelCatalog.endlessBlock(index: 60), "grand-mix")
+        XCTAssertEqual(LevelCatalog.endlessBlock(index: 91), "star-splash")
+        XCTAssertTrue(LevelCatalog.isExpert(world: LevelCatalog.endless, index: 5))
+        XCTAssertFalse(LevelCatalog.isExpert(world: "toyshop", index: 5))
         XCTAssertEqual(LevelCatalog.look(world: "toyshop", index: 11), "toyshop")
         XCTAssertEqual((1...20).filter { LevelCatalog.isCapsuleLevel(index: $0, world: LevelCatalog.endless) }, [5, 10, 15, 20])
         for world in LevelCatalog.fileWorlds {
@@ -41,7 +46,18 @@ final class LevelTests: XCTestCase {
         let all = try files()
         let jungle = all.filter { $0.world == "junglejam" }
         XCTAssertTrue(jungle.contains { !($0.mechanics?.vines ?? []).isEmpty }, "Jungle Jam has vine jars")
-        XCTAssertFalse(all.contains { $0.world != "junglejam" && !($0.mechanics?.vines ?? []).isEmpty }, "vines stay in Jungle Jam")
+        // Keep Squishing comes after Jungle Jam, so it may borrow vines; no earlier world does.
+        XCTAssertFalse(all.contains { !["junglejam", LevelCatalog.endless].contains($0.world) && !($0.mechanics?.vines ?? []).isEmpty },
+                       "vines stay in Jungle Jam and Keep Squishing")
+        // Keep Squishing mixes every world's rule, and wrapped squishies are no longer on every level.
+        let keep = all.filter { $0.world == LevelCatalog.endless }
+        XCTAssertTrue(keep.contains { !($0.mechanics?.vines ?? []).isEmpty })
+        XCTAssertTrue(keep.contains { $0.mechanics?.floats == true })
+        XCTAssertTrue(keep.contains { !($0.mechanics?.sticky ?? []).isEmpty })
+        XCTAssertTrue(keep.contains { !($0.mechanics?.curtains ?? []).isEmpty })
+        XCTAssertLessThan(keep.filter { !($0.mechanics?.hidden ?? []).isEmpty }.count, keep.count / 3)
+        XCTAssertGreaterThanOrEqual(keep.filter { $0.index % 5 == 0 && $0.jars.filter(\.isEmpty).count == 1 }.count, 20,
+                                    "Expert boards with one spare jar")
         for file in jungle {
             let board = try Level(file: file).board
             let tied = (0..<board.jarCount).filter { board.vineTag($0) > 0 }

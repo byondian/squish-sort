@@ -92,6 +92,28 @@ final class AppModel: ObservableObject {
         }
     }
 
+    /// The name of a Keep Squishing block of ten ("Jungle Bubbles"), from the rules it mixes.
+    /// The words are in the string catalogue under these English names.
+    nonisolated static func blockEnglish(_ id: String) -> String {
+        switch id {
+        case "toy-freeze": return "Toy Box Freeze"
+        case "sticky-sweets": return "Sticky Sweets"
+        case "candy-jungle": return "Candy Jungle"
+        case "encore": return "Encore Curtain"
+        case "star-splash": return "Starlight Splash"
+        case "frosty-bubbles": return "Frosty Bubbles"
+        case "jungle-bubbles": return "Jungle Bubbles"
+        case "jungle-jam": return "Jungle Jam"
+        default: return "Grand Mix"
+        }
+    }
+    nonisolated static func blockName(_ id: String) -> LocalizedStringKey { LocalizedStringKey(blockEnglish(id)) }
+
+    /// What the top of a level calls where you are: the world, or in Keep Squishing the block.
+    nonisolated static func placeName(world: String, index: Int) -> LocalizedStringKey {
+        world == LevelCatalog.endless ? blockName(LevelCatalog.endlessBlock(index: index)) : worldName(world)
+    }
+
     nonisolated static func worldName(_ id: String) -> LocalizedStringKey {
         switch id {
         case "toyshop": return "Toy Shop"
@@ -1340,7 +1362,7 @@ final class AppModel: ObservableObject {
     }
 
     /// `pot` is what the level's jars threw on this attempt (0 on a replay).
-    func won(index: Int, moves: Int, stars: Int, attempts: Int, playSeconds: Double, pot: Int) {
+    func won(index: Int, moves: Int, stars: Int, attempts: Int, playSeconds: Double, pot: Int, gold: Bool = false) {
         if playingDaily {
             wonDailyJar(playSeconds: playSeconds)
             return
@@ -1410,6 +1432,7 @@ final class AppModel: ObservableObject {
             if summary.offersRemoveAds { p.removeAdsOfferShown = true }
             p.buddy.earnTreatForWin()
             p.stars[level.id] = max(previousBest ?? 0, stars)
+            if gold { p.goldStars.insert(level.id) }
             if side {
                 p.christmasUnlocked = max(p.christmasUnlocked, min(level.file.index, LevelCatalog.levelCount(in: level.file.world) - 1))
             } else if !held {
@@ -1432,7 +1455,7 @@ final class AppModel: ObservableObject {
             if isWorldComplete(LevelCatalog.endless) {
                 let ids = levels.filter { $0.file.world == LevelCatalog.endless }.map(\.id)
                 update { p in
-                    for id in ids { p.stars[id] = nil }
+                    for id in ids { p.stars[id] = nil; p.goldStars.remove(id) }
                     p.endlessLaps += 1
                     p.highestUnlocked = storyLevelCount
                     p.wallet.earn(config.coins.worldComplete)

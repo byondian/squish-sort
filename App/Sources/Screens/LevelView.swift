@@ -145,6 +145,13 @@ final class LevelController: ObservableObject {
             self?.shakeUpIfDue()
         }
         shakeAt = model.shakeUpMove(index: index)
+        // The first board of a Keep Squishing block says which block this is.
+        if level.file.world == LevelCatalog.endless, level.file.index % 10 == 1, model.progress.stars[level.id] == nil {
+            let name = String(localized: String.LocalizationValue(AppModel.blockEnglish(LevelCatalog.endlessBlock(index: level.file.index))))
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak model] in
+                model?.toast = String(localized: "Next up: \(name)")
+            }
+        }
         // The very first board opens mid-move: one squishy already lifted and a
         // hand on the jar it belongs in, so the first tap finishes a jar.
         if index == 0, model.progress.stars.isEmpty, let first = level.solution.first {
@@ -480,7 +487,7 @@ final class LevelController: ObservableObject {
             model.haptics.win()
             model.sounds.play(level.file.beat == .boss ? "win_boss" : "win")
             model.won(index: index, moves: session.moveCount, stars: stars, attempts: attempts, playSeconds: seconds,
-                      pot: pot.coins)
+                      pot: pot.coins, gold: session.moveCount <= session.par && session.extraJarsAdded == 0)
         case .stuck:
             // Now and then a free magic shuffle steps in: the pieces land in the kindest layout found,
             // and the try carries on. It is not counted as a fail.
@@ -749,6 +756,7 @@ struct LevelView: View {
                             summary: model.lastWin,
                             moves: controller.session.moveCount,
                             perfect: controller.session.moveCount <= controller.session.par,
+                            gold: controller.session.moveCount <= controller.session.par && controller.session.extraJarsAdded == 0,
                             threeStarMoves: Stars.moveLimit(forStars: 3, par: controller.session.par, slack: controller.starSlack),
                             // Not while good news is waiting behind the win card: that is told first.
                             retry: controller.index < 2 || !model.news.isEmpty || model.lastWin.dailyJar ? nil : { controller.retry() },
@@ -918,9 +926,16 @@ struct LevelView: View {
                         }
                     }
                 Text(model.playingDaily ? LocalizedStringKey("One a day")
-                     : controller.level.file.world == "christmas" ? AppModel.christmasWorldName : AppModel.worldName(controller.level.file.world))
+                     : controller.level.file.world == "christmas" ? AppModel.christmasWorldName
+                     : AppModel.placeName(world: controller.level.file.world, index: controller.level.file.index))
                     .font(Theme.body(13)).foregroundStyle(darkRoom ? Color.white.opacity(0.9) : Theme.plum.opacity(0.75))
-                if controller.level.file.beat == .bonus {
+                if LevelCatalog.isExpert(world: controller.level.file.world, index: controller.level.file.index) {
+                    // Keep Squishing's fifth and tenth boards: the real test of a block.
+                    Text("EXPERT").font(Theme.body(13)).foregroundStyle(.white)
+                        .padding(.horizontal, 8).padding(.vertical, 1)
+                        .background(Capsule().fill(Theme.grape))
+                        .accessibilityIdentifier("level-expert")
+                } else if controller.level.file.beat == .bonus {
                     // Coin Rush: every finished jar throws double coins the first time through.
                     Text("BONUS x2").font(Theme.body(13)).foregroundStyle(Theme.plum)
                         .padding(.horizontal, 8).padding(.vertical, 1)
@@ -1221,6 +1236,8 @@ struct WinCard: View {
     var moves: Int?
     /// Won in the fewest moves possible.
     var perfect = false
+    /// Won in the fewest moves there are, with no extra jar: a gold fourth star.
+    var gold = false
     /// The most moves that still earn three stars, for the line under a win with fewer.
     var threeStarMoves: Int?
     /// "Go for 3 stars": play the level again. Nil where it isn't offered.
@@ -1252,7 +1269,14 @@ struct WinCard: View {
                         .rotationEffect(.degrees(i < shown ? 0 : -25))
                 }
             }
-            if perfect && shown >= 3 {
+            if gold && shown >= 3 {
+                Label { Text("Gold star! The fewest moves there are.") } icon: { Image(systemName: "star.circle.fill") }
+                    .font(Theme.title(17)).foregroundStyle(Theme.plum)
+                    .padding(.horizontal, 14).padding(.vertical, 5)
+                    .background(Capsule().fill(RarityLook.gold))
+                    .transition(.scale(scale: 2.2).combined(with: .opacity))
+                    .accessibilityIdentifier("win-gold")
+            } else if perfect && shown >= 3 {
                 Text("Perfect!").font(Theme.title(20)).foregroundStyle(.white)
                     .padding(.horizontal, 14).padding(.vertical, 4)
                     .background(Capsule().fill(Theme.bubblegum))

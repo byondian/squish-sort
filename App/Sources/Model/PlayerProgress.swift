@@ -82,6 +82,8 @@ struct PlayerProgress: Codable, Equatable {
     var keepsakes: Set<String> = []
     /// Times Keep Squishing has been played all the way through.
     var endlessLaps = 0
+    /// Levels won in the fewest moves there are, with no extra jar: a gold fourth star on the map.
+    var goldStars: Set<String> = []
     /// yyyy-MM-dd of the last Daily Jar won.
     var dailyJarDay: String?
     /// Places on the Workshop shelf: three are free, more are bought with coins.
@@ -195,6 +197,7 @@ struct PlayerProgress: Codable, Equatable {
         finalesSeen = v(.finalesSeen, d.finalesSeen)
         keepsakes = v(.keepsakes, d.keepsakes)
         endlessLaps = max(0, v(.endlessLaps, d.endlessLaps))
+        goldStars = v(.goldStars, d.goldStars)
         dailyJarDay = (try? c.decodeIfPresent(String.self, forKey: .dailyJarDay)) ?? nil
         // A save from before places had a price keeps a place for everything it already made.
         makerSlots = max(MakerSlots.free, v(.makerSlots, MakerSlots.starting(alreadyMade: made.count)))
