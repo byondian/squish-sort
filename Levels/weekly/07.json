@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "id": "weekly-07",
+  "world": "weekly",
+  "index": 7,
+  "beat": "easy",
+  "capacity": 4,
+  "jars": [
+    ["bongo", "tuki", "leafy", "pina"],
+    ["bongo", "leafy", "pina", "leafy"],
+    ["leafy", "nana", "nana", "tuki"],
+    ["tuki", "nana", "pina", "dotty"],
+    ["nana", "dotty", "dotty", "pina"],
+    ["bongo", "bongo", "tuki", "dotty"],
+    [],
+    []
+  ],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": [], "vines": [[5, 2]]},
+  "par": 17,
+  "solution": [[0, 6], [1, 0], [1, 6], [0, 1], [2, 0], [4, 6], [3, 4], [3, 6], [2, 3], [1, 2], [4, 7], [3, 4], [0, 3], [0, 1], [5, 7], [5, 3], [1, 5]],
+  "capsule": false,
+  "softenAfterFails": null
+}

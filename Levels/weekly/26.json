@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "id": "weekly-26",
+  "world": "weekly",
+  "index": 26,
+  "beat": "easy",
+  "capacity": 4,
+  "jars": [
+    ["bubbly", "soapy", "bubbly", "shelly"],
+    ["starla", "starla", "shelly", "shelly"],
+    ["starla", "quacky", "bubbly", "starla"],
+    ["soapy", "quacky", "bubbly", "shelly"],
+    ["soapy", "soapy", "quacky", "quacky"],
+    [],
+    []
+  ],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": [[2, 3, 1], [3, 3, 1]], "floats": true},
+  "par": 12,
+  "solution": [[2, 5], [3, 5], [2, 6], [3, 6], [4, 6], [3, 4], [0, 3], [0, 5], [0, 4], [0, 5], [1, 3], [1, 2]],
+  "capsule": false,
+  "softenAfterFails": null
+}

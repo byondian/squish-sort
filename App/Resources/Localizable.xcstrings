@@ -827,6 +827,28 @@
         }
       }
     },
+    "A bit of everything!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ぜんぶ ちょっとずつ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이것저것 다 나와요!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "什麼都來一點！"
+          }
+        }
+      }
+    },
     "A bubble seals its jar. Dig under it until it meets its twin or the bottom. Pop!": {
       "localizations": {
         "ja": {
@@ -1065,6 +1087,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "全部普通"
+          }
+        }
+      }
+    },
+    "All five done! A new twist is on its way.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5つぜんぶクリア！つぎのひねりが もうすぐ来るよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다섯 개 모두 완료! 새 트위스트가 곧 와요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "五關全部完成！新玩法快來了。"
           }
         }
       }
@@ -1703,6 +1747,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "泡泡芭蕾"
+          }
+        }
+      }
+    },
+    "Bubble Bash": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バブルパーティー"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "버블 파티"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "泡泡派對"
           }
         }
       }
@@ -2719,6 +2785,28 @@
         }
       }
     },
+    "Duet Disco": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "デュエットディスコ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "듀엣 디스코"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "二重唱迪斯可"
+          }
+        }
+      }
+    },
     "Duet! They move together. Land the bottom one on its own kind and they let go.": {
       "localizations": {
         "ja": {
@@ -2979,6 +3067,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "集滿這個世界的所有星星！你贏得了黃金扭蛋。"
+          }
+        }
+      }
+    },
+    "Every twist comes back soon. Boards you won stay won.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "どのひねりも またすぐ戻ってくるよ。クリアしたボードは そのまま。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모든 트위스트는 곧 다시 돌아와요. 깬 보드는 그대로 남아요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每種玩法很快都會回來。破過的關卡會一直保留。"
           }
         }
       }
@@ -4211,6 +4321,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "它躲在這個世界的罐子裡。玩這裡的關卡就能找到。"
+          }
+        }
+      }
+    },
+    "It is on your sticker card, and your Buddy is wearing its prize. You can only get it here.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "シールカードにはったよ。バディは ごほうびを身につけているよ。ここでしか もらえないよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스티커 카드에 붙였어요. 버디가 선물을 쓰고 있어요. 여기서만 받을 수 있어요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已經貼在貼紙卡上，夥伴也戴上獎品了。只有這裡才拿得到。"
+          }
+        }
+      }
+    },
+    "It is on your sticker card.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "シールカードにはったよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스티커 카드에 붙였어요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已經貼在貼紙卡上。"
           }
         }
       }
@@ -6349,6 +6503,28 @@
         }
       }
     },
+    "Play board %lld": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ボード%lldであそぶ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld번 보드 하기"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "玩第 %lld 關"
+          }
+        }
+      }
+    },
     "Poke the bag and guess who's inside. A new bag every day, on your shelf at home.": {
       "localizations": {
         "ja": {
@@ -8219,6 +8395,50 @@
         }
       }
     },
+    "Sticker card %lld/%lld": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "シールカード %1$lld/%2$lld"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스티커 카드 %1$lld/%2$lld"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "貼紙卡 %1$lld/%2$lld"
+          }
+        }
+      }
+    },
+    "Sticker won!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "シールゲット！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스티커 획득!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拿到貼紙了！"
+          }
+        }
+      }
+    },
     "Sticky Sweets": {
       "localizations": {
         "ja": {
@@ -9121,6 +9341,50 @@
         }
       }
     },
+    "Twist board done!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ひねりボード クリア！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "트위스트 보드 완료!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新玩法過關！"
+          }
+        }
+      }
+    },
+    "Twist of the week": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今週のひねり"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이번 주 트위스트"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本週新玩法"
+          }
+        }
+      }
+    },
     "Twist to open!": {
       "localizations": {
         "ja": {
@@ -9627,6 +9891,28 @@
         }
       }
     },
+    "Win all 5 boards for the sticker and a prize your Buddy can wear.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5つぜんぶクリアで シールと バディが身につけられるごほうび。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "보드 5개를 모두 깨면 스티커와 버디가 쓸 수 있는 선물을 받아요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "五關全破就能拿到貼紙，還有夥伴可以戴的獎品。"
+          }
+        }
+      }
+    },
     "Win every 10th level for a Buddy prize you can only get here.": {
       "localizations": {
         "ja": {
@@ -9975,6 +10261,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "你有夥伴了！"
+          }
+        }
+      }
+    },
+    "You have this sticker. All 5 boards this week give %lld more coins.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このシールは もう持っているよ。今週5つぜんぶクリアで さらに%lldコイン。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 스티커는 이미 있어요. 이번 주 보드 5개를 모두 깨면 %lld코인을 더 받아요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你已經有這張貼紙了。本週五關全破再送 %lld 金幣。"
           }
         }
       }

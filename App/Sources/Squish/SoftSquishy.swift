@@ -206,6 +206,8 @@ struct BuddyWearView: View {
         switch category {
         case BuddyGifts.hats: return (0.5, 0.13, 0.46)
         case BuddyGifts.neck: return (0.5, 0.8, 0.42)
+        // Glasses from Twist of the week sit across the eyes.
+        case BuddyGifts.face: return (0.5, 0.46, 0.5)
         default: return (0.13, 0.62, 0.36)
         }
     }

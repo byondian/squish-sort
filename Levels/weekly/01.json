@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "id": "weekly-01",
+  "world": "weekly",
+  "index": 1,
+  "beat": "easy",
+  "capacity": 4,
+  "jars": [
+    ["gummy-bear", "jelly", "gummy-bear", "gummy-bear"],
+    ["cupcake", "cupcake", "donut", "macaron"],
+    ["cupcake", "donut", "macaron", "macaron"],
+    ["jelly", "jelly", "donut", "donut"],
+    ["gummy-bear", "cupcake", "jelly", "macaron"],
+    [],
+    []
+  ],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": [], "keys": [{"jar": 4, "kind": "donut"}]},
+  "par": 12,
+  "solution": [[1, 5], [2, 5], [1, 2], [2, 6], [1, 2], [3, 6], [4, 5], [4, 3], [4, 2], [0, 4], [0, 3], [0, 4]],
+  "capsule": false,
+  "softenAfterFails": null
+}

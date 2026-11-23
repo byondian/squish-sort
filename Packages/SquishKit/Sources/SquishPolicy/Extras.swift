@@ -464,7 +464,16 @@ public enum BuddyGifts {
         (hats, "graduation"), (held, "foam-sword"), (neck, "tutu"), (hats, "witch"), (held, "heart-sign"), (hats, "space-helmet"),
     ].map { BuddyGift(category: $0.0, part: $0.1, price: 0) }
 
-    public static func gift(_ id: String) -> BuddyGift? { all.first { $0.id == id } ?? milestones.first { $0.id == id } }
+    /// Twist of the week: one pair of glasses for each theme's sticker, in the order of `WeeklyTwist.themes`.
+    /// Prizes for playing, like the milestone shelf: never in the shop, no price, no coins, no ad.
+    public static let face = "glasses-and-face-wear"
+    public static let weekly: [BuddyGift] = [
+        "monocle", "goggles", "3d", "heart", "big-nerdy", "swim-mask", "shades", "star",
+    ].map { BuddyGift(category: face, part: $0, price: 0) }
+
+    public static func gift(_ id: String) -> BuddyGift? {
+        all.first { $0.id == id } ?? milestones.first { $0.id == id } ?? weekly.first { $0.id == id }
+    }
 
     /// The free daily gift holds one of the small gifts on about one day in three, while there is one
     /// the Buddy does not have yet. Stable for the day, so opening it again changes nothing.

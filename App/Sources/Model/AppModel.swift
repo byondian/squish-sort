@@ -34,11 +34,14 @@ final class AppModel: ObservableObject {
     /// A duplicate just came out of a capsule or a swap: the spares it made, for "+1 spare".
     @Published private(set) var capsuleSpares: Int?
     @Published var screen: Screen = .level(0) {
-        // The Daily Jar ends when its board is left.
-        didSet { if case .level = screen {} else { playingDaily = false } }
+        // The Daily Jar or a Twist of the week board ends when its board is left.
+        didSet { if case .level = screen {} else { playingDaily = false; playingWeekly = nil } }
     }
-    /// The level on screen is today's Daily Jar, not a level of the path.
+    /// The level on screen is today's Daily Jar or a Twist of the week board, not a level of the path.
     private(set) var playingDaily = false
+    /// The Twist of the week board on screen (1 to 5). `playingDaily` is set with it, so the board is
+    /// kept off the path's stars, capsules and lucky bonuses the same way.
+    private(set) var playingWeekly: Int?
     @Published private(set) var progress: PlayerProgress
     @Published var capsule: Collectible?
     @Published var askAge = false
@@ -72,6 +75,8 @@ final class AppModel: ObservableObject {
         case bossBeaten(world: String)
         /// A tenth Keep Squishing level is won: a prize for the milestone shelf (a wearable, or coins once it is owned).
         case milestone(level: Int, gift: String?, coins: Int)
+        /// All five boards of a Twist of the week theme are won: its sticker and its wearable.
+        case sticker(theme: String, gift: String?)
 
         var isShow: Bool {
             switch self {
@@ -91,6 +96,7 @@ final class AppModel: ObservableObject {
             case .starterPack: return "starter-pack"
             case .bossBeaten(let world): return "boss-\(world)"
             case .milestone(let level, _, _): return "milestone-\(level)"
+            case .sticker(let theme, _): return "sticker-\(theme)"
             }
         }
     }
@@ -117,7 +123,8 @@ final class AppModel: ObservableObject {
 
     /// What the top of a level calls where you are: the world, or in Keep Squishing the block.
     nonisolated static func placeName(world: String, index: Int) -> LocalizedStringKey {
-        world == LevelCatalog.endless ? blockName(LevelCatalog.endlessBlock(index: index)) : worldName(world)
+        if world == LevelCatalog.weekly { return weeklyName(WeeklyTwist.theme(levelIndex: index) ?? "") }
+        return world == LevelCatalog.endless ? blockName(LevelCatalog.endlessBlock(index: index)) : worldName(world)
     }
 
     nonisolated static func worldName(_ id: String) -> LocalizedStringKey {
@@ -414,6 +421,10 @@ final class AppModel: ObservableObject {
 
     /// The number on the board: 1 upwards on the main path, 1 to 20 in a side world.
     func levelNumber(_ index: Int) -> Int {
+        if levels.indices.contains(index), levels[index].file.world == LevelCatalog.weekly {
+            // Twist of the week: board 1 to 5 of its theme.
+            return (levels[index].file.index - 1) % LevelCatalog.weeklyBoards + 1
+        }
         if isSideLevel(index) { return levels[index].file.index }
         // Keep Squishing counts on through every lap.
         return index + 1 + (index >= storyLevelCount ? progress.endlessLaps * endlessCount : 0)
@@ -430,6 +441,7 @@ final class AppModel: ObservableObject {
         kids.offersEnabled = false
         kids.squishyShopEnabled = false
         kids.dailyJarEnabled = false
+        kids.weeklyTwistEnabled = false
         kids.mysteryBagEnabled = false
         kids.event = nil
         return kids
@@ -490,6 +502,8 @@ final class AppModel: ObservableObject {
 
     func isUnlocked(_ index: Int) -> Bool {
         guard levels.indices.contains(index) else { return false }
+        // Twist of the week boards open from their Home card only, never by walking on from another level.
+        if levels[index].file.world == LevelCatalog.weekly { return false }
         if isSideLevel(index) {
             return progress.christmasEntered && levels[index].file.index - 1 <= progress.christmasUnlocked
         }
@@ -993,6 +1007,14 @@ final class AppModel: ObservableObject {
     /// shown (Keep Squishing borrows rules from worlds an early player has not reached).
     private var dailyJarIndex: Int? {
         guard let pick = DailyJar.board(day: today, count: endlessCount) else { return nil }
+        // Where it fits, the day's board carries the twist of the week.
+        if weeklyOpen, let rule = weeklyTheme.flatMap(AppModel.weeklyRule) {
+            for step in 0..<endlessCount {
+                let index = storyLevelCount + (pick + step) % endlessCount
+                if dailyJarFits(index, plainOnly: false),
+                   BoardRule.rules(on: levels[index].board, look: levels[index].look).contains(rule) { return index }
+            }
+        }
         for plainOnly in [false, true] {
             for step in 0..<endlessCount {
                 let index = storyLevelCount + (pick + step) % endlessCount
@@ -1029,6 +1051,112 @@ final class AppModel: ObservableObject {
         screen = .level(index)
         // Setting the screen is what clears the flag for other screens; a level keeps it.
         playingDaily = true
+    }
+
+    // MARK: - Twist of the week
+
+    /// Tester builds only: "next week's twist" moves the week on, so all eight themes can be tried.
+    private var testerWeekShift: Int {
+        guard AppModel.isTesterBuild, !AppModel.isUITesting else { return 0 }
+        return UserDefaults.standard.integer(forKey: "tester.weekShift")
+    }
+
+    func testerNextWeek() {
+        guard AppModel.isTesterBuild else { return }
+        UserDefaults.standard.set(testerWeekShift + 1, forKey: "tester.weekShift")
+        objectWillChange.send()
+    }
+
+    /// This week's number and theme, from the date on the device.
+    var weeklyWeek: Int? { WeeklyTwist.week(day: today).map { $0 + testerWeekShift } }
+    var weeklyTheme: String? { weeklyWeek.map(WeeklyTwist.theme(week:)) }
+
+    /// The rule a theme is about, for the Daily Jar. The Grand Mix has none of its own.
+    static func weeklyRule(_ theme: String) -> BoardRule? {
+        switch theme {
+        case "keys": return .key
+        case "vines": return .vine
+        case "morph": return .morph
+        case "duets": return .duet
+        case "big": return .bigJar
+        case "floaters": return .floater
+        case "frozen": return .frozen
+        default: return nil
+        }
+    }
+
+    /// The words are in the string catalogue under these English names.
+    nonisolated static func weeklyEnglish(_ theme: String) -> String {
+        switch theme {
+        case "keys": return "Space Locks"
+        case "vines": return "Jungle Jam"
+        case "morph": return "Morph Mayhem"
+        case "duets": return "Duet Disco"
+        case "big": return "Mega Jar Party"
+        case "floaters": return "Bubble Bash"
+        case "frozen": return "Toy Box Freeze"
+        default: return "Grand Mix"
+        }
+    }
+    nonisolated static func weeklyName(_ theme: String) -> LocalizedStringKey { LocalizedStringKey(weeklyEnglish(theme)) }
+
+    /// Twist of the week shows on Home once every story world is won and its boards are in the build.
+    var weeklyOpen: Bool {
+        config.weeklyTwistEnabled && storyLevelCount > 0 && progress.highestUnlocked >= storyLevelCount
+            && weeklyTheme != nil && levels.contains { $0.file.world == LevelCatalog.weekly }
+    }
+
+    /// Boards of this week's theme played this week (1 to 5).
+    var weeklyPlayed: [Int] { weeklyWeek.map { progress.weekly.playedThisWeek($0) } ?? [] }
+
+    /// The next board to play this week, or nil when all five are done.
+    var weeklyNext: Int? {
+        guard let week = weeklyWeek, let theme = weeklyTheme else { return nil }
+        return progress.weekly.next(theme: theme, week: week)
+    }
+
+    func playWeekly() {
+        guard weeklyOpen, let theme = weeklyTheme, let board = weeklyNext,
+              let number = WeeklyTwist.levelIndex(theme: theme, board: board),
+              let index = levels.firstIndex(where: { $0.file.world == LevelCatalog.weekly && $0.file.index == number }) else { return }
+        playingDaily = true
+        playingWeekly = board
+        screen = .level(index)
+        // Setting the screen is what clears the flags for other screens; a level keeps them.
+        playingDaily = true
+        playingWeekly = board
+    }
+
+    /// A Twist of the week board is won: coins once a week, a treat for the Buddy, and on a theme's
+    /// fifth board its sticker and its wearable. Nothing is timed and nothing is ever lost.
+    private func wonWeekly(board: Int, playSeconds: Double) {
+        var summary = WinSummary()
+        summary.dailyJar = true
+        summary.weeklyTwist = true
+        summary.firstClear = true
+        guard let week = weeklyWeek, let theme = weeklyTheme else {
+            lastWin = summary
+            return
+        }
+        var state = progress.weekly
+        let prize = state.win(theme: theme, board: board, week: week)
+        summary.pot = prize.coins + prize.bonus
+        if buddyActive {
+            summary.treat = progress.buddy.treats < BuddyState.maxStoredTreats
+            summary.buddyName = progress.buddy.name
+        }
+        var gift: BuddyGift?
+        update { p in
+            p.weekly = state
+            p.wallet.earn(summary.total)
+            p.buddy.earnTreatForWin()
+            if prize.sticker, let wear = WeeklyTwist.gift(theme: theme), p.buddy.receive(wear) { gift = wear }
+            AdCadence.recordPlayTime(playSeconds, &p.cadence)
+        }
+        lastWin = summary
+        lastWinHadReward = prize.coins > 0
+        levelCheer = buddyLine("win")
+        if prize.sticker { news.append(.sticker(theme: theme, gift: gift?.id)) }
     }
 
     /// Today's Daily Jar is won: coins, a treat for the Buddy and the day's stamp. No streak, nothing to lose.
@@ -1381,8 +1509,10 @@ final class AppModel: ObservableObject {
         /// Magic moves this win earned (a first-try streak, or a boss beaten).
         var magicEarned = 0
         var buddyName = ""
-        /// This was today's Daily Jar.
+        /// This was today's Daily Jar (or a Twist of the week board, which is off the path the same way).
         var dailyJar = false
+        /// This was a Twist of the week board.
+        var weeklyTwist = false
         /// How full the piggy bank is after this win, 0 to 1. Nil where it isn't shown.
         var piggyFill: Double?
         var total: Int { pot * (doubled ? 2 : 1) + starBonus + streakBonus + dailyBonus + stampCoins }
@@ -1390,6 +1520,10 @@ final class AppModel: ObservableObject {
 
     /// `pot` is what the level's jars threw on this attempt (0 on a replay).
     func won(index: Int, moves: Int, stars: Int, attempts: Int, playSeconds: Double, pot: Int, gold: Bool = false, unaided: Bool = true) {
+        if let board = playingWeekly {
+            wonWeekly(board: board, playSeconds: playSeconds)
+            return
+        }
         if playingDaily {
             wonDailyJar(playSeconds: playSeconds)
             return

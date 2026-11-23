@@ -942,7 +942,7 @@ struct LevelView: View {
                             Capsule().fill(Color.white.opacity(0.35)).frame(height: 8).padding(.horizontal, 10).padding(.top, 3)
                         }
                     }
-                Text(model.playingDaily ? LocalizedStringKey("One a day")
+                Text(model.playingDaily && model.playingWeekly == nil ? LocalizedStringKey("One a day")
                      : controller.level.file.world == "christmas" ? AppModel.christmasWorldName
                      : AppModel.placeName(world: controller.level.file.world, index: controller.level.file.index))
                     .font(Theme.body(13)).foregroundStyle(darkRoom ? Color.white.opacity(0.9) : Theme.plum.opacity(0.75))
@@ -1276,7 +1276,7 @@ struct WinCard: View {
 
     var body: some View {
         VStack(spacing: 14) {
-            Text(summary.dailyJar ? LocalizedStringKey("Daily Jar done!") : showpiece ? LocalizedStringKey("Genius!") : LocalizedStringKey("Sorted!")).font(Theme.title(34)).foregroundStyle(Theme.plum)
+            Text(summary.weeklyTwist ? LocalizedStringKey("Twist board done!") : summary.dailyJar ? LocalizedStringKey("Daily Jar done!") : showpiece ? LocalizedStringKey("Genius!") : LocalizedStringKey("Sorted!")).font(Theme.title(34)).foregroundStyle(Theme.plum)
             HStack(spacing: 10) {
                 ForEach(0..<3) { i in
                     Image(systemName: i < shown ? "star.fill" : "star")
