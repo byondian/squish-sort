@@ -290,8 +290,8 @@ def solve(b, max_states=3_000_000, weight=1, max_nodes=None):
         if explored > max_states or (max_nodes and len(nodes) > max_nodes):
             return None, explored
         for (f, t) in cur.moves():
-            if t >= 0 and canonical and not cur.curtains and not any(cur.vines) and not any(cur.keys) and len(cur.jars[t]) == 0 and cur.run_length(f) == len(cur.jars[f]):
-                continue  # pouring a whole jar into an empty one changes nothing
+            if t >= 0 and canonical and not cur.curtains and not any(cur.vines) and not any(cur.keys) and len(cur.jars[t]) == 0 and cur.run_length(f) == len(cur.jars[f]) and not any(p[4] for p in cur.jars[f]):
+                continue  # pouring a whole jar into an empty one changes nothing (unless a morph piece flips on the way)
             nb = cur.apply(f, t)
             k = key(nb, canonical)
             ng = g + 1

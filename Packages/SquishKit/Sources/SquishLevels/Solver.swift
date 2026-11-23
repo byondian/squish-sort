@@ -67,8 +67,9 @@ public enum Solver {
             if explored > maxStates || boards.count > maxNodes { return .gaveUp }
             for move in current.legalMoves {
                 if free && !move.isRide && current.jars[move.to].isEmpty
-                    && current.runLength(at: move.from) == current.jars[move.from].count {
-                    continue // pouring a whole jar into an empty one changes nothing
+                    && current.runLength(at: move.from) == current.jars[move.from].count
+                    && !current.jars[move.from].contains(where: \.isMorph) {
+                    continue // pouring a whole jar into an empty one changes nothing (unless a morph piece flips on the way)
                 }
                 var next = current
                 next.apply(move)

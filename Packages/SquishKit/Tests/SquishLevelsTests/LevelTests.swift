@@ -204,14 +204,17 @@ final class SolverTests: XCTestCase {
     }
 
     func testSolverPlansAroundAMorphPiece() throws {
-        // The morph piece shows B and turns into A; it has to be poured an even number of times.
+        // The morph piece shows B and turns into A. Poured once it is an A, and the board comes out as two jars of A.
         let start = Board(capacity: 2, jars: [[Piece(kind: 0), Piece(kind: 1, morph: 1)], [Piece(kind: 1), Piece(kind: 0)], [], []])
         let result = try XCTUnwrap(Solver.solve(start))
-        XCTAssertEqual(result.moves.count, 5)
+        XCTAssertEqual(result.moves.count, 4)
         var b = start
         for move in result.moves { XCTAssertNotNil(b.apply(move)) }
         XCTAssertTrue(b.isWon)
         if case .move = Solver.hint(start) {} else { XCTFail("a hint is found on a morph board") }
+        // Pouring a lone morph piece into an empty jar is a real move: it flips. Here it is the only way to win.
+        let flip = Board(capacity: 2, jars: [[Piece(kind: 0, morph: 2)], [Piece(kind: 1)], [Piece(kind: 0), Piece(kind: 0)], []])
+        XCTAssertEqual(Solver.solve(flip)?.moves.count, 2, "into the empty jar to become a B, then onto the B")
     }
 
     func testKeyJarsAndMorphPiecesReadFromALevelFile() throws {
