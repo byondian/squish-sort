@@ -119,6 +119,9 @@ jobs:
           echo "Simulator $UDID"
           # Started and fully up before the tests, and a test whose app did not launch gets another go:
           # a cold iPad simulator sometimes fails with "Failed to get launch progress".
+          # One simulator at a time: with the earlier ones still running the Mac runs out of memory
+          # and the test runner is killed before it starts.
+          xcrun simctl shutdown all || true
           xcrun simctl boot "$UDID" || true
           xcrun simctl bootstatus "$UDID" -b
           xcodebuild test -project SquishSort.xcodeproj -scheme SquishSort -destination "id=$UDID" \
@@ -138,6 +141,9 @@ jobs:
           echo "Simulator $UDID"
           # Started and fully up before the tests, and a test whose app did not launch gets another go:
           # a cold iPad simulator sometimes fails with "Failed to get launch progress".
+          # One simulator at a time: with the earlier ones still running the Mac runs out of memory
+          # and the test runner is killed before it starts.
+          xcrun simctl shutdown all || true
           xcrun simctl boot "$UDID" || true
           xcrun simctl bootstatus "$UDID" -b
           xcodebuild test -project SquishSort.xcodeproj -scheme SquishSort -destination "id=$UDID" \
@@ -161,6 +167,9 @@ jobs:
             if [ -z "$UDID" ]; then echo "::notice::No $PICK iPhone simulator on this runner."; continue; fi
             echo "Simulator $PICK $UDID"
             # Fully started first: on a cold simulator the first screen query can take minutes.
+            # One simulator at a time: with the earlier ones still running the Mac runs out of memory
+            # and the test runner is killed before it starts.
+            xcrun simctl shutdown all || true
             xcrun simctl boot "$UDID" || true
             xcrun simctl bootstatus "$UDID" -b
             xcodebuild test -project SquishSort.xcodeproj -scheme SquishSort -destination "id=$UDID" \
