@@ -133,6 +133,7 @@ jobs:
           xcodebuild test -project SquishSort.xcodeproj -scheme SquishSort -destination "id=$UDID" \
             -only-testing:SquishSortUITests/GoldenPathTests/testLaunchShowsLevelOne \
             -only-testing:SquishSortUITests/GoldenPathTests/testFirstSquishIsQuick \
+            -only-testing:SquishSortUITests/GoldenPathTests/testBuddyWearsItsGifts \
             -only-testing:SquishSortUITests/GoldenPathTests/testWorkshopMakesASquishy CODE_SIGNING_ALLOWED=NO | tee ipad.log | grep -E "Test Case|error:|TEST" || true
           grep -q "TEST SUCCEEDED" ipad.log
       - name: Home top bar on the smallest and the largest iPhone
@@ -149,6 +150,7 @@ jobs:
             if [ -z "$UDID" ]; then echo "::notice::No $PICK iPhone simulator on this runner."; continue; fi
             echo "Simulator $PICK $UDID"
             xcodebuild test -project SquishSort.xcodeproj -scheme SquishSort -destination "id=$UDID" \
+              -only-testing:SquishSortUITests/GoldenPathTests/testBuddyWearsItsGifts \
               -only-testing:SquishSortUITests/GoldenPathTests/testHomeTopBarLinesUp CODE_SIGNING_ALLOWED=NO | tee bar-$PICK.log | grep -E "Test Case|error:|TEST" || true
             grep -q "TEST SUCCEEDED" bar-$PICK.log
           done
