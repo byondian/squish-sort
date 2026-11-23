@@ -1773,6 +1773,28 @@
         }
       }
     },
+    "Candy Jungle": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "キャンディジャングル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "캔디 정글"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "糖果叢林"
+          }
+        }
+      }
+    },
     "Capsule next level!": {
       "localizations": {
         "ja": {
@@ -2653,6 +2675,28 @@
         }
       }
     },
+    "EXPERT": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "エキスパート"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "엑스퍼트"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高手關"
+          }
+        }
+      }
+    },
     "Each finished jar counts the tag down. At 0 the vine snaps!": {
       "localizations": {
         "ja": {
@@ -2737,6 +2781,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "安可演唱會"
+          }
+        }
+      }
+    },
+    "Encore Curtain": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アンコールカーテン"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앙코르 커튼"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安可謝幕"
           }
         }
       }
@@ -3225,6 +3291,28 @@
         }
       }
     },
+    "Frosty Bubbles": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ひんやりバブル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "꽁꽁 거품"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "冰凍泡泡"
+          }
+        }
+      }
+    },
     "Frozen! Moves next to it melt the ice.": {
       "localizations": {
         "ja": {
@@ -3467,6 +3555,28 @@
         }
       }
     },
+    "Gold star! The fewest moves there are.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ゴールドスター！さいしょう手数でクリア"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "골드 스타! 가장 적은 횟수로 성공"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "金星！用最少步數完成"
+          }
+        }
+      }
+    },
     "Golden Hour": {
       "localizations": {
         "ja": {
@@ -3529,6 +3639,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "烘焙大賽"
+          }
+        }
+      }
+    },
+    "Grand Mix": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ごちゃまぜミックス"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "왕창 믹스"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大混搭"
           }
         }
       }
@@ -4079,6 +4211,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "果凍"
+          }
+        }
+      }
+    },
+    "Jungle Bubbles": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ジャングルバブル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "정글 버블"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "叢林泡泡"
           }
         }
       }
@@ -5289,6 +5443,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "下一個把戲"
+          }
+        }
+      }
+    },
+    "Next up: %@": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "つぎは：%@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다음은: %@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "接下來：%@"
           }
         }
       }
@@ -7625,6 +7801,28 @@
         }
       }
     },
+    "Starlight Splash": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スターライトスプラッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스타라이트 스플래시"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "星光水花"
+          }
+        }
+      }
+    },
     "Starlight Stage": {
       "localizations": {
         "ja": {
@@ -7687,6 +7885,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "新手禮包"
+          }
+        }
+      }
+    },
+    "Sticky Sweets": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ねばねばスイーツ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "끈적끈적 과자"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "黏黏甜點"
           }
         }
       }
@@ -8215,6 +8435,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "迷你"
+          }
+        }
+      }
+    },
+    "Toy Box Freeze": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "カチコチおもちゃ箱"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "꽁꽁 장난감 상자"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "冰凍玩具箱"
           }
         }
       }

@@ -17,7 +17,27 @@ public enum LevelCatalog {
     /// Every world with level files, in the order the files are loaded.
     public static var fileWorlds: [String] { path + sideWorlds }
     /// Whose squishies and room each block of ten in Keep Squishing borrows.
-    public static let endlessLooks = ["sweetfactory", "starlight", "toyshop", "starlight"]
+    /// Six blocks to a round: five worlds in turn, then a Grand Mix. Keep in step with ENDLESS_BLOCKS in tools/levelgen.py.
+    public static let endlessLooks = [
+        "toyshop", "sweetfactory", "starlight", "bubblebath", "junglejam", "starlight",
+        "toyshop", "sweetfactory", "starlight", "bubblebath", "junglejam", "bubblebath",
+        "toyshop", "sweetfactory", "starlight", "bubblebath", "junglejam", "junglejam",
+        "toyshop", "sweetfactory", "starlight", "bubblebath", "junglejam", "toyshop",
+    ]
+    /// The name id of each block of ten, from the rules it mixes (the app holds the words).
+    public static let endlessBlocks = [
+        "toy-freeze", "sticky-sweets", "encore", "frosty-bubbles", "jungle-jam", "grand-mix",
+        "toy-freeze", "sticky-sweets", "encore", "star-splash", "jungle-jam", "grand-mix",
+        "toy-freeze", "sticky-sweets", "star-splash", "jungle-bubbles", "jungle-jam", "grand-mix",
+        "toy-freeze", "candy-jungle", "encore", "frosty-bubbles", "jungle-bubbles", "grand-mix",
+    ]
+    public static func endlessBlock(index: Int) -> String {
+        endlessBlocks[((max(1, index) - 1) / 10) % endlessBlocks.count]
+    }
+    /// The two hardest boards of a Keep Squishing block: its fifth and its tenth.
+    public static func isExpert(world: String, index: Int) -> Bool {
+        world == endless && index % 5 == 0
+    }
     /// The world a level looks like: its own, or the one its block borrows.
     public static func look(world: String, index: Int) -> String {
         guard world == endless else { return world }

@@ -6,18 +6,20 @@
   "beat": "bonus",
   "capacity": 4,
   "jars": [
-    ["pip", "nova", "zuzu", "zuzu"],
-    ["coco", "zuzu", "coco", "lumi"],
-    ["lumi", "riff", "lumi", "riff"],
-    ["nova", "pip", "pip", "nova"],
-    ["pip", "zuzu", "lumi", "riff"],
-    ["riff", "nova", "coco", "coco"],
+    ["minty", "shelly", "shelly", "minty"],
+    ["starla", "fizzy", "soapy", "fizzy"],
+    ["bubbly", "strawbie", "shelly", "shelly"],
+    ["quacky", "minty", "strawbie", "quacky"],
+    ["fizzy", "soapy", "soapy", "starla"],
+    ["fizzy", "starla", "minty", "strawbie"],
+    ["soapy", "bubbly", "starla", "quacky"],
+    ["quacky", "bubbly", "strawbie", "bubbly"],
     [],
     []
   ],
-  "mechanics": {"hidden": [[1, 0], [3, 0], [3, 2], [5, 0]], "sticky": [], "frozen": [[1, 1], [3, 1]], "curtains": [2, 4]},
+  "mechanics": {"hidden": [], "sticky": [], "frozen": [[0, 3, 1], [6, 3, 1], [7, 3, 1], [5, 3, 2]], "vines": [[1, 2]], "floats": true},
   "par": 22,
-  "solution": [[5, 6], [3, 5], [1, 7], [1, 6], [0, 1], [0, 5], [0, 3], [1, 0], [6, 1], [5, 6], [2, 5], [2, 7], [2, 5], [2, 7], [5, 2], [6, 5], [3, 6], [3, 5], [4, 2], [4, 7], [4, 0], [4, 6]],
+  "solution": [[0, 8], [2, 8], [5, 0], [7, 2], [2, 9], [7, 2], [3, 7], [3, 9], [3, 0], [3, 7], [5, -10], [4, 5], [6, 5], [6, 2], [4, 3], [1, 4], [1, 3], [1, 4], [5, 1], [4, 5], [6, 3], [6, 7]],
   "capsule": false,
   "softenAfterFails": null
 }

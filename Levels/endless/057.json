@@ -6,18 +6,19 @@
   "beat": "bonus",
   "capacity": 4,
   "jars": [
+    ["nova", "nova", "zuzu", "lumi"],
+    ["riff", "riff", "zuzu", "strawbie"],
+    ["riff", "coco", "coco", "strawbie"],
+    ["nova", "riff", "strawbie", "pip"],
+    ["strawbie", "lumi", "nova", "zuzu"],
     ["lumi", "pip", "zuzu", "coco"],
-    ["pip", "lumi", "coco", "riff"],
-    ["coco", "nova", "lumi", "zuzu"],
-    ["zuzu", "pip", "coco", "lumi"],
-    ["nova", "riff", "zuzu", "pip"],
-    ["riff", "nova", "nova", "riff"],
+    ["pip", "pip", "coco", "lumi"],
     [],
     []
   ],
-  "mechanics": {"hidden": [[2, 2], [3, 0], [5, 1]], "sticky": [[0, 0], [0, 2], [4, 2]], "frozen": []},
+  "mechanics": {"hidden": [], "sticky": [[1, 2], [3, 1]], "frozen": [[2, 0], [5, 3]]},
   "par": 20,
-  "solution": [[2, 6], [3, 2], [4, 6], [1, 4], [1, 3], [5, 4], [1, 7], [6, 1], [0, 6], [0, 7], [7, 1], [2, 7], [5, 2], [5, 2], [4, 5], [2, 4], [3, 2], [3, 1], [6, 2], [3, 6]],
+  "solution": [[0, 7], [4, 0], [6, 7], [0, 8], [1, 8], [4, 0], [4, 7], [2, 4], [6, 2], [3, 6], [3, 1], [0, 3], [1, 4], [8, 4], [2, 0], [1, 2], [5, 0], [5, 8], [5, 6], [5, 7]],
   "capsule": false,
   "softenAfterFails": null
 }

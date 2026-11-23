@@ -493,24 +493,109 @@ def make_level(world_idx, pos, salt=0):
 # worlds and mix their new things; sizes are the late-world ones.
 ENDLESS = "endless"
 ENDLESS_LENGTH = 240
-# (world whose squishies appear, the block's main rule). Must match LevelCatalog.endlessLooks.
-ENDLESS_SKINS = [(1, "hidden"), (2, "sticky"), (0, "frozen"), (2, "curtain")]
+# Keep Squishing (refresh, 23 Nov 2026: Ian found it boring and repetitive). Blocks of ten rotate
+# through six skins: the five story worlds, each with its own rule, and a Grand Mix. Every block has
+# a main rule and, from the second time round, a guest rule from another world.
+# (world whose squishies and room the block borrows, main rule, guest rule). The first entry of each
+# row must match LevelCatalog.endlessLooks.
+ENDLESS_BLOCKS = [
+    # first time round: each world's own rule
+    (0, "ice", None), (1, "wrapped", None), (2, "duets", None), (4, "floaters", None), (5, "vines", None), (2, "duets", "ice"),
+    # second
+    (0, "ice", "duets"), (1, "wrapped", "ice"), (2, "curtains", None), (4, "floaters", "duets"), (5, "vines", "ice"), (4, "floaters", "vines"),
+    # third
+    (0, "ice", "vines"), (1, "wrapped", "duets"), (2, "duets", "floaters"), (4, "floaters", "vines"), (5, "vines", "duets"), (5, "vines", "wrapped"),
+    # fourth
+    (0, "ice", "curtains"), (1, "wrapped", "vines"), (2, "curtains", "ice"), (4, "floaters", "wrapped"), (5, "vines", "floaters"), (0, "duets", "floaters"),
+]
+# Kinds for each place in a block. Places 5 and 10 are the Expert boards.
+ENDLESS_KINDS = [5, 5, 6, 6, 8, 6, 7, 7, 6, 8]
+# How often a careless player should win each place, first time round. It drops a little every round.
+ENDLESS_EASE = [0.7, 0.6, 0.5, 0.4, 0.1, 0.5, 0.35, 0.25, 0.45, 0.06]
 
 
-def endless_mix(block, mech):
-    """Rules mixed into a block (benchmark pass 2): two rules from level 81 on, three from 141 on.
-    Returns (wrapped pieces, frozen pieces) added on top of the block's main rule."""
-    hidden = 3 if mech in ("sticky", "curtain") else 0   # as in Starlight Stage
-    frozen = 0
-    if block >= 2:
-        if mech == "hidden":
-            frozen = 2
-        if mech == "frozen":
-            hidden = 3
-    if block >= 8:
-        frozen = max(frozen, 2) if mech != "frozen" else 0
-        hidden = max(hidden, 4) if mech != "hidden" else 0
-    return hidden, frozen
+def endless_rule(rule, p, lap, guest):
+    """What one rule adds to a board at place p (1 to 10) of a block. A guest rule comes in lighter."""
+    late = p > 5
+    if rule == "ice":
+        return dict(mix_frozen=2 if guest else 2 + late + (lap >= 2))
+    if rule == "wrapped":
+        return dict(mix_hidden=3 if guest else 5 + p // 2)
+    if rule == "duets":
+        return dict(mech="sticky", mcount=1 if guest else 2 + (late and lap >= 1))
+    if rule == "curtains":
+        return dict(mech="curtain", mcount=1 if (guest or not late) else 2)
+    if rule == "vines":
+        return dict(vines=[1] if guest and not late else [2] if guest or p < 4 else [1, 2] if p < 8 else [2, 2])
+    if rule == "floaters":
+        return dict(bubbles=(2, 1 if late else 0) if guest else (2 + late + (p in (5, 8, 10)), 0 if p in (1, 2, 8) else 1))
+    raise ValueError(rule)
+
+
+def endless_plan(pos):
+    block, p = (pos - 1) // 10, (pos - 1) % 10 + 1
+    lap = block // 6
+    world_idx, main, guest = ENDLESS_BLOCKS[block % len(ENDLESS_BLOCKS)]
+    plan = dict(mech=None, mcount=0, mix_hidden=0, mix_frozen=0, vines=None, bubbles=None)
+    plan.update(endless_rule(main, p, lap, False))
+    # the guest joins from the third level of its block, so the block opens on its main rule alone
+    if guest and p >= 3:
+        plan.update(endless_rule(guest, p, lap, True))
+    expert = p in (5, 10)
+    k = min(8, ENDLESS_KINDS[p - 1] + (1 if lap >= 2 and not expert else 0))
+    # one spare jar is what makes an Expert board bite; floaters already seal jars, so those keep two
+    empties = 1 if (expert or (p == 8 and lap >= 1)) and not plan["bubbles"] else 2
+    if empties == 1:
+        k = min(k, 7)
+    ease = max(0.04, ENDLESS_EASE[p - 1] - 0.05 * lap)
+    return world_idx, k, empties, ease, plan
+
+
+def lighter(plan):
+    """The same rules with less of each, for a place where no fair board could be dealt."""
+    out = dict(plan)
+    out["mcount"] = max(1, plan["mcount"] - 1) if plan["mech"] else 0
+    out["mix_hidden"] = max(0, plan["mix_hidden"] - 2)
+    out["mix_frozen"] = min(plan["mix_frozen"], 2)
+    if plan["vines"]:
+        out["vines"] = plan["vines"][:1]
+    if plan["bubbles"]:
+        out["bubbles"] = (max(1, plan["bubbles"][0] - 1), plan["bubbles"][1])
+    return out
+
+
+def choose_endless(rng, level, names, empties, plan, ease, tries=30, traps=False):
+    """The solvable deal with no losing first move whose careless-win rate is nearest `ease`."""
+    best = None
+    bubbles = plan["bubbles"]
+    for _ in range(tries):
+        cand = random_board(rng, names, empties, plan["mech"], plan["mcount"], plan["mix_hidden"], plan["mix_frozen"],
+                            plan["vines"], bubbles)
+        if cand is None:
+            continue
+        jars_c, mech_c = cand
+        if bubbles:
+            mech_c["floats"] = True
+        b, _ = board_from_level(dict(level, jars=jars_c, mechanics=mech_c))
+        if bubbles and sum(1 for jar in b.jars for p in jar if p[2] > 0) != sum(bubbles):
+            continue
+        # a quick, greedy look first throws out the boards that would be slow to settle, here and on a phone
+        quick, _ = solve(b, 6_000, weight=3)
+        if quick is None:
+            continue
+        sol, _ = solve(b, 40_000)
+        if sol is None:
+            continue
+        # With one spare jar some first moves always lose the board: that is the Expert board's bite
+        # (undo and the hint still work, and nothing is lost). Everywhere else no first move may.
+        if not traps and killing_first_moves(b) > 0:
+            continue
+        rank = abs(playout_wins(b, rng) - ease)
+        if best is None or rank < best[0]:
+            best = (rank, jars_c, mech_c)
+        if rank <= 0.05:
+            break
+    return None if best is None else (best[1], best[2])
 
 
 def endless_capsule(pos):
@@ -519,58 +604,26 @@ def endless_capsule(pos):
 
 
 def make_endless(pos):
-    # A position whose first deal cannot be made fair is dealt again with a new seed.
-    for salt in range(12):
-        try:
-            return make_endless_once(pos, salt)
-        except SystemExit as e:
-            last = e
-    raise last
-
-
-def make_endless_once(pos, salt):
-    block, p = (pos - 1) // 10, (pos - 1) % 10 + 1
-    world_idx, mech = ENDLESS_SKINS[block % len(ENDLESS_SKINS)]
-    mix_hidden, mix_frozen = endless_mix(block, mech)
-    beat = BEATS[p - 1]
-    k, empties, mult = SHAPE[15 + p]
-    if beat in ("tension", "boss", "medium", "bonus"):
-        empties, k, mult = 1, min(k, 7), None
+    world_idx, k, empties, ease, plan = endless_plan(pos)
+    beat = BEATS[(pos - 1) % 10]
     names = kinds_for(world_idx, k)
-    rng = random.Random(f"{ENDLESS}-{pos}" if salt == 0 else f"{ENDLESS}-{pos}-{salt}")
+    rng = random.Random(f"{ENDLESS}-remix-{pos}")
     level = {"schema": 1, "id": f"{ENDLESS}-{pos:02d}", "world": ENDLESS, "index": pos, "beat": beat, "capacity": CAP}
-    mcount = {"hidden": 5 + p // 2, "sticky": 2 if p < 6 else 3, "frozen": 2 if p < 6 else 3,
-              "curtain": 1 if p < 6 else 2}[mech]
-    target = mult * k if mult else None
-    tries = [(mcount, empties)]
-    if mech in ("sticky", "curtain"):
-        tries += [(m, empties) for m in range(mcount - 1, 0, -1)]
-    tries += [(mcount, 2), (1, 2)]
-    jars = None
-    for mc, em in tries:
-        try:
-            # Boards the search can settle quickly: mixed rules make the others slow to check, here and on a phone.
-            jars_c, mech_c = choose(rng, level, names, em, mech, mc, target, mix_hidden, mix_frozen, tries=60, states=40_000)
-        except SystemExit:
-            continue
-        b0, _ = board_from_level(dict(level, jars=jars_c, mechanics=mech_c))
-        if jars is None:
-            jars, mechanics = jars_c, mech_c
-        # No level ships with an opening move that loses it.
-        if killing_first_moves(b0) == 0:
-            jars, mechanics = jars_c, mech_c
+    # As planned; then with a second spare jar; then with less of each rule.
+    picked = None
+    for em, pl in [(empties, plan), (2, plan), (2, lighter(plan)), (2, lighter(lighter(plan)))]:
+        picked = choose_endless(rng, level, names, em, pl, ease, tries=30 if em > 1 else 80, traps=em == 1)
+        if picked:
             break
-    else:
-        if jars is None:
-            raise SystemExit(f"{level['id']}: no solvable candidate")
-        b0, _ = board_from_level(dict(level, jars=jars, mechanics=mechanics))
-        if killing_first_moves(b0) > 0:
-            raise SystemExit(f"{level['id']}: every candidate has a losing first move")
+    if not picked:
+        raise SystemExit(f"{level['id']}: no fair board")
+    jars, mechanics = picked
     level["jars"] = jars
     level["mechanics"] = {"hidden": mechanics.get("hidden", []), "sticky": mechanics.get("sticky", []),
                           "frozen": mechanics.get("frozen", [])}
-    if mechanics.get("curtains"):
-        level["mechanics"]["curtains"] = mechanics["curtains"]
+    for extra in ("curtains", "vines", "floats"):
+        if mechanics.get(extra):
+            level["mechanics"][extra] = mechanics[extra]
     b, _ = board_from_level(level)
     sol, explored = solve(b, 3_000_000)
     if sol is None:
@@ -578,7 +631,7 @@ def make_endless_once(pos, salt):
     level["par"] = len(sol)
     level["solution"] = [list(m) for m in sol]
     level["capsule"] = endless_capsule(pos)
-    level["softenAfterFails"] = 2 if beat in ("tension", "boss") else None
+    level["softenAfterFails"] = 2 if beat in ("tension", "boss", "showpiece") else None
     return level
 
 
@@ -608,6 +661,8 @@ def dump(level):
     extra = f', "curtains": {json.dumps(m["curtains"])}' if m.get("curtains") else ""
     if m.get("vines"):
         extra += f', "vines": {json.dumps(m["vines"])}'
+    if m.get("floats"):
+        extra += ', "floats": true'
     lines.append(f'  "mechanics": {{"hidden": {json.dumps(m["hidden"])}, "sticky": {json.dumps(m["sticky"])}, "frozen": {json.dumps(m["frozen"])}{extra}}},')
     lines.append(f'  "par": {level["par"]},')
     lines.append(f'  "solution": {json.dumps(level["solution"])},')

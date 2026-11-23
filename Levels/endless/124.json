@@ -6,16 +6,19 @@
   "beat": "medium",
   "capacity": 4,
   "jars": [
-    ["cupcake", "donut", "donut", "jelly"],
-    ["donut", "cupcake", "gummy-bear", "jelly"],
-    ["gummy-bear", "donut", "macaron", "cupcake"],
-    ["gummy-bear", "macaron", "cupcake", "jelly"],
-    ["macaron", "macaron", "gummy-bear", "jelly"],
+    ["sunny", "grapey", "tango", "strawbie"],
+    ["macaron", "blu", "sunny", "grapey"],
+    ["minty", "minty", "minty", "strawbie"],
+    ["strawbie", "blu", "grapey", "tango"],
+    ["blu", "minty", "macaron", "sunny"],
+    ["macaron", "sunny", "macaron", "tango"],
+    ["grapey", "tango", "strawbie", "blu"],
+    [],
     []
   ],
-  "mechanics": {"hidden": [[0, 0], [0, 1], [2, 1], [2, 2], [3, 0], [3, 1], [3, 2]], "sticky": [], "frozen": [[2, 3], [4, 1]]},
-  "par": 15,
-  "solution": [[0, 5], [1, 5], [3, 5], [2, 3], [4, 5], [1, 4], [3, 1], [3, 2], [4, 3], [2, 4], [0, 2], [0, 2], [1, 0], [2, 1], [2, 3]],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": [[2, 0], [3, 2], [5, 2]], "vines": [[6, 1]]},
+  "par": 21,
+  "solution": [[0, 7], [2, 7], [3, 0], [1, 3], [4, 1], [0, 8], [3, 0], [5, 8], [4, 5], [4, 2], [3, 4], [3, 7], [6, 4], [6, 7], [6, 8], [0, 6], [1, 0], [1, 4], [5, 1], [5, 0], [1, 5]],
   "capsule": false,
   "softenAfterFails": null
 }

@@ -132,6 +132,7 @@ struct MapView: View {
     private func levelBubble(_ i: Int) -> some View {
         let unlocked = model.isUnlocked(i)
         let stars = model.progress.stars[model.levels[i].id] ?? 0
+        let gold = model.progress.goldStars.contains(model.levels[i].id)
         let current = isCurrent(i)
         let boss = model.levels[i].file.beat == .boss
         let finale = boss && model.isFinale(i) && model.levels[i].file.world != LevelCatalog.endless
@@ -146,8 +147,11 @@ struct MapView: View {
                 if current {
                     Text("Play").font(.system(size: 11, weight: .heavy, design: .rounded)).lineLimit(1).minimumScaleFactor(0.6)
                 } else {
-                    Text(String(repeating: "★", count: stars) + String(repeating: "☆", count: 3 - stars))
-                        .font(.system(size: 10))
+                    // A gold fourth star for a win in the fewest moves there are.
+                    (Text(String(repeating: "★", count: stars) + String(repeating: "☆", count: 3 - stars))
+                     + Text(gold ? "★" : "").foregroundColor(RarityLook.gold))
+                        .font(.system(size: gold ? 9 : 10))
+                        .accessibilityIdentifier(gold ? "level-gold-\(i)" : "level-stars-\(i)")
                 }
             }
             .foregroundStyle(current ? .white : (unlocked ? Theme.plum : Theme.plum.opacity(0.3)))

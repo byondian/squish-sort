@@ -6,18 +6,19 @@
   "beat": "bonus",
   "capacity": 4,
   "jars": [
-    ["strawbie", "sunny", "sunny", "strawbie"],
-    ["tango", "grapey", "grapey", "sunny"],
-    ["blu", "minty", "sunny", "strawbie"],
-    ["grapey", "blu", "strawbie", "tango"],
-    ["blu", "minty", "grapey", "blu"],
-    ["tango", "minty", "tango", "minty"],
+    ["leafy", "tuki", "blu", "blu"],
+    ["pina", "tuki", "nana", "bongo"],
+    ["leafy", "dotty", "nana", "leafy"],
+    ["pina", "dotty", "pina", "nana"],
+    ["tuki", "tuki", "nana", "bongo"],
+    ["blu", "bongo", "dotty", "blu"],
+    ["dotty", "pina", "bongo", "leafy"],
     [],
     []
   ],
-  "mechanics": {"hidden": [[0, 1], [1, 0], [1, 2], [5, 2]], "sticky": [], "frozen": [[0, 2], [1, 1], [4, 0]]},
-  "par": 20,
-  "solution": [[5, 6], [3, 5], [0, 3], [1, 0], [2, 7], [3, 7], [4, 3], [4, 1], [4, 6], [3, 4], [1, 3], [5, 1], [5, 6], [1, 5], [2, 1], [2, 6], [2, 4], [0, 1], [0, 1], [0, 7]],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": [[3, 1], [6, 3]], "vines": [[0, 1], [5, 2]]},
+  "par": 23,
+  "solution": [[1, 7], [3, 1], [4, 7], [2, 8], [2, 4], [6, 8], [6, 7], [3, 6], [3, 2], [6, 3], [2, 6], [2, 8], [1, 2], [4, 2], [1, 4], [1, 3], [0, 1], [0, 4], [0, 8], [5, 1], [5, 6], [5, 7], [1, 5]],
   "capsule": false,
   "softenAfterFails": null
 }

@@ -6,16 +6,17 @@
   "beat": "intro",
   "capacity": 4,
   "jars": [
-    ["macaron", "macaron", "jelly", "cupcake"],
-    ["donut", "donut", "donut", "macaron"],
-    ["jelly", "cupcake", "cupcake", "macaron"],
-    ["jelly", "jelly", "cupcake", "donut"],
+    ["leafy", "dotty", "dotty", "leafy"],
+    ["bongo", "pina", "leafy", "dotty"],
+    ["pina", "tuki", "leafy", "dotty"],
+    ["tuki", "bongo", "tuki", "bongo"],
+    ["pina", "pina", "bongo", "tuki"],
     [],
     []
   ],
-  "mechanics": {"hidden": [[0, 2], [1, 0], [1, 1], [2, 0], [3, 0]], "sticky": [], "frozen": [[0, 0], [2, 2]]},
-  "par": 9,
-  "solution": [[1, 4], [2, 4], [0, 2], [3, 1], [2, 5], [0, 2], [0, 4], [3, 5], [2, 3]],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": [], "vines": [[4, 2]]},
+  "par": 14,
+  "solution": [[1, 5], [0, 1], [0, 5], [1, 0], [2, 5], [2, 0], [4, 2], [3, 4], [3, 2], [4, 3], [1, 4], [3, 1], [2, 3], [2, 4]],
   "capsule": false,
   "softenAfterFails": null
 }

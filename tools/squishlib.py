@@ -286,7 +286,8 @@ def board_from_level(level):
                 kinds.append(name)
     mech = level.get("mechanics") or {}
     hidden = {tuple(x[:2]) for x in mech.get("hidden", [])}
-    floats = level.get("world") == "bubblebath"
+    # Bubble Bath, and any Keep Squishing level that says so
+    floats = level.get("world") == "bubblebath" or bool(mech.get("floats"))
     # in Bubble Bath the third number is the bubble: 1 a floater, 2 a golden ride bubble
     frozen = {tuple(x[:2]): (x[2] if len(x) > 2 else (1 if floats else 2)) for x in mech.get("frozen", [])}
     sticky = {tuple(x[:2]) for x in mech.get("sticky", [])}
