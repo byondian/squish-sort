@@ -265,6 +265,9 @@ final class AppModel: ObservableObject {
             update { p in
                 // The Buddy lives on Home from the first capsule.
                 p.collection.totalCapsules = max(1, p.collection.totalCapsules)
+                // A Giant Buddy with a treat waiting: the tallest Home there is.
+                p.buddy.hearts = 95
+                p.buddy.treats = 1
                 for id in ["hats-and-headwear/party-hat", "neck-and-body/scarf", "held-items/balloon"] {
                     if let gift = BuddyGifts.gift(id) { p.buddy.receive(gift) }
                 }

@@ -11,6 +11,8 @@ struct HomeView: View {
     @State private var showStamps = false
     @State private var coinsFlying = false
     @State private var coinsLanded = false
+    /// How tall the Buddy and its rows want to be, before they are fitted to the room on Home.
+    @State private var buddyHeight: CGFloat = 0
 
     var body: some View {
         // While a new trick is being taught, everything but the Buddy steps back.
@@ -27,14 +29,24 @@ struct HomeView: View {
                         .padding(.top, compact ? 9 : 14)
                         .accessibilityElement().accessibilityIdentifier("home-logo")
                     if model.adventDoors > 0 { AdventShelf().dimmed(teaching) }
-                    Spacer(minLength: 0)
                     if model.isExtraUnlocked(.buddy) {
-                        BuddyHomeView(side: big ? 340 : compact ? 160 : 200)
+                        // The Buddy takes the room that is left and no more: a Giant Buddy with its gift
+                        // button is drawn a little smaller instead of pushing the buttons and the tab bar
+                        // off the screen.
+                        GeometryReader { slot in
+                            BuddyHomeView(side: big ? 340 : compact ? 160 : 200)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { buddyHeight = $0 }
+                                .scaleEffect(buddyHeight > slot.size.height && slot.size.height > 0 ? slot.size.height / buddyHeight : 1)
+                                .frame(width: slot.size.width, height: slot.size.height)
+                        }
+                        .frame(maxHeight: .infinity)
                     } else {
+                        Spacer(minLength: 0)
                         SquishyView(id: model.progress.favouriteSquishy ?? "peach-bun", rarity: .rare)
                             .frame(width: big ? 300 : 170, height: big ? 300 : 170)
+                        Spacer(minLength: 0)
                     }
-                    Spacer(minLength: 0)
                     if let banner = model.eventBanner {
                         // A light event from the website's config. No countdown.
                         Text(verbatim: banner).font(Theme.body(13)).foregroundStyle(Theme.plum)

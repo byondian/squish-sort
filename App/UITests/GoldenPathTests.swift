@@ -112,6 +112,15 @@ final class GoldenPathTests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["buddy-size"].waitForExistence(timeout: 5), "the size meter is on Home")
         Thread.sleep(forTimeInterval: 2.5)
         keep(app.screenshot(), as: "squishy-buddy-gifts")
+        // However big the Buddy is, Home's buttons and the tab bar stay on the screen.
+        let screen = app.windows.firstMatch.frame
+        for name in ["Home", "Levels", "Squish Room", "Workshop"] {
+            let tab = app.buttons[name]
+            XCTAssertTrue(tab.exists, "\(name) tab")
+            XCTAssertLessThanOrEqual(tab.frame.maxY, screen.maxY, "the \(name) tab is on the screen")
+            XCTAssertGreaterThan(tab.frame.height, 30, "the \(name) tab is whole")
+        }
+        XCTAssertLessThan(app.buttons["home-play"].frame.maxY, app.buttons["Levels"].frame.minY, "Play sits above the tab bar")
         app.terminate()
     }
 

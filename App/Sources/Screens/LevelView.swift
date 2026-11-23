@@ -257,7 +257,7 @@ final class LevelController: ObservableObject {
         guard !thinking, !shaking, outcome == nil else { return }
         let board = session.board
         Task {
-            let found = await Task.detached(priority: .userInitiated) { Solver.hint(board) }.value
+            let found = await Task.detached(priority: .userInitiated) { [level = self.level] in level.hint(for: board) }.value
             guard board == session.board, outcome == nil, case .move(let move) = found else { return }
             scene.showHint(move)
         }
@@ -552,7 +552,7 @@ final class LevelController: ObservableObject {
         thinking = true
         let board = session.board
         Task {
-            let move = await Task.detached(priority: .userInitiated) { Solver.hint(board) }.value
+            let move = await Task.detached(priority: .userInitiated) { [level = self.level] in level.hint(for: board) }.value
             thinking = false
             guard let model, board == session.board, outcome == nil else { return }
             guard case .move(let move) = move else {
@@ -578,7 +578,7 @@ final class LevelController: ObservableObject {
         thinking = true
         let board = session.board
         Task {
-            let found = await Task.detached(priority: .userInitiated) { Solver.hint(board) }.value
+            let found = await Task.detached(priority: .userInitiated) { [level = self.level] in level.hint(for: board) }.value
             thinking = false
             guard board == session.board, outcome == nil else { return }
             guard case .move(let move) = found else {
