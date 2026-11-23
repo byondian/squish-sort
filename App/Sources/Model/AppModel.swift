@@ -994,8 +994,8 @@ final class AppModel: ObservableObject {
         return nil
     }
 
-    /// `plainOnly` is the fallback for a player who has been shown no rule yet: boards with ice alone,
-    /// Toy Shop's own rule, which is on the board from its first levels.
+    /// `plainOnly` is the fallback for a player who has been shown no rule yet (levels 11 to 15): boards
+    /// with ice alone. Ice is in no story world, so it spoils none, and its demo plays the first time.
     private func dailyJarFits(_ index: Int, plainOnly: Bool) -> Bool {
         guard levels.indices.contains(index) else { return false }
         let level = levels[index]
