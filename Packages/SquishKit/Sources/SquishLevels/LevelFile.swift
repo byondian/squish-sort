@@ -27,14 +27,17 @@ public struct LevelFile: Codable, Equatable, Sendable {
         public var curtains: [Int]?
         /// [jar, tag]: jars tied shut by a vine until `tag` jars have been finished (1 or 2).
         public var vines: [[Int]]?
+        /// True when the frozen entries are bubbles outside Bubble Bath (a Keep Squishing block that borrows them).
+        public var floats: Bool?
 
         public init(hidden: [[Int]]? = nil, sticky: [[Int]]? = nil, frozen: [[Int]]? = nil, curtains: [Int]? = nil,
-                    vines: [[Int]]? = nil) {
+                    vines: [[Int]]? = nil, floats: Bool? = nil) {
             self.hidden = hidden
             self.sticky = sticky
             self.frozen = frozen
             self.curtains = curtains
             self.vines = vines
+            self.floats = floats
         }
     }
 
@@ -86,6 +89,18 @@ public struct Level: Sendable {
         (file.solution ?? []).compactMap { $0.count == 2 ? Move(from: $0[0], to: $0[1]) : nil }
     }
 
+    /// The hint for `current`. While the player is still on the level's own shortest answer the next
+    /// move of that answer is given, which costs nothing and is right even on boards too big to
+    /// search to the end. Anywhere else the solver looks for the shortest way on from here.
+    public func hint(for current: Board) -> Solver.Hint {
+        var step = board
+        for move in solution {
+            if step == current { return .move(move) }
+            guard step.apply(move) != nil else { break }
+        }
+        return Solver.hint(current)
+    }
+
     public init(file: LevelFile) throws {
         var kinds: [String] = []
         for jar in file.jars {
@@ -104,7 +119,7 @@ public struct Level: Sendable {
         }
         let hidden = Set(try positions(m.hidden, "hidden").map { [$0[0], $0[1]] })
         let sticky = Set(try positions(m.sticky, "sticky").map { [$0[0], $0[1]] })
-        let floats = file.world == LevelCatalog.floatWorld
+        let floats = file.world == LevelCatalog.floatWorld || m.floats == true
         var frozen: [[Int]: UInt8] = [:]
         for p in try positions(m.frozen, "frozen") {
             frozen[[p[0], p[1]]] = UInt8(clamping: p.count > 2 ? p[2] : (floats ? 1 : LevelFile.defaultThaw))

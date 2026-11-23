@@ -67,7 +67,7 @@ final class LevelTests: XCTestCase {
         }
         XCTAssertEqual(bath.first?.jars.joined().filter { $0.isFrozen }.count, 1)
         XCTAssertTrue(bath.count > 3 && bath[3].jars.joined().contains { $0.frozen == 2 }, "level 4 teaches the ride")
-        XCTAssertTrue(try all.filter { $0.world != "bubblebath" }.allSatisfy { try !Level(file: $0).board.floats })
+        XCTAssertTrue(try all.filter { $0.world != "bubblebath" && $0.mechanics?.floats != true }.allSatisfy { try !Level(file: $0).board.floats })
     }
 
     func testStructureBeatAndCapsules() throws {
@@ -216,6 +216,30 @@ final class SolverTests: XCTestCase {
             }
         }
         XCTAssertGreaterThan(seen, 0)
+    }
+
+    func testTakingEveryHintWinsInTheFewestMoves() throws {
+        // Three stars leave no move to spare on hard levels, so hints must not wander.
+        for file in try LevelCatalog.loadFiles(root: levelsRoot) {
+            let level = try Level(file: file)
+            var board = level.board
+            var moves = 0
+            while !board.isWon, moves <= level.par {
+                guard case .move(let hint) = level.hint(for: board), board.apply(hint) != nil else { break }
+                moves += 1
+            }
+            XCTAssertTrue(board.isWon, file.id)
+            XCTAssertEqual(moves, level.par, file.id)
+        }
+        // Off the level's own answer the search itself finds the shortest way (Sweet Factory 13 took 16, not 14).
+        let level = try Level(file: try LevelCatalog.loadFiles(root: levelsRoot).first { $0.id == "sweetfactory-13" }!)
+        var board = level.board
+        var moves = 0
+        while !board.isWon, moves < 40 {
+            guard case .move(let hint) = Solver.hint(board), board.apply(hint) != nil else { break }
+            moves += 1
+        }
+        XCTAssertEqual(moves, level.par)
     }
 
     func testRunningOutOfRoomIsNotCalledUnwinnable() throws {

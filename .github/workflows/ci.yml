@@ -116,7 +116,12 @@ jobs:
             exit 0
           fi
           echo "Simulator $UDID"
+          # Started and fully up before the tests, and a test whose app did not launch gets another go:
+          # a cold iPad simulator sometimes fails with "Failed to get launch progress".
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
           xcodebuild test -project SquishSort.xcodeproj -scheme SquishSort -destination "id=$UDID" \
+            -retry-tests-on-failure -test-iterations 3 \
             -only-testing:SquishSortUITests/GoldenPathTests/testLaunchShowsLevelOne \
             -only-testing:SquishSortUITests/GoldenPathTests/testHomeTopBarLinesUp CODE_SIGNING_ALLOWED=NO | tee smoke.log | grep -E "Test Case|error:|TEST" || true
           grep -q "TEST SUCCEEDED" smoke.log
@@ -130,7 +135,12 @@ jobs:
           print(next((x['udid'] for n in ['13-inch', '12.9-inch'] for x in pads if n in x['name']), pads[0]['udid'] if pads else ''))")
           if [ -z "$UDID" ]; then echo "::error::No iPad simulator on this runner."; exit 1; fi
           echo "Simulator $UDID"
+          # Started and fully up before the tests, and a test whose app did not launch gets another go:
+          # a cold iPad simulator sometimes fails with "Failed to get launch progress".
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
           xcodebuild test -project SquishSort.xcodeproj -scheme SquishSort -destination "id=$UDID" \
+            -retry-tests-on-failure -test-iterations 3 \
             -only-testing:SquishSortUITests/GoldenPathTests/testLaunchShowsLevelOne \
             -only-testing:SquishSortUITests/GoldenPathTests/testFirstSquishIsQuick \
             -only-testing:SquishSortUITests/GoldenPathTests/testBuddyWearsItsGifts \

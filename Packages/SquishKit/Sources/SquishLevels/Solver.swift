@@ -91,17 +91,22 @@ public enum Solver {
         case gaveUp
     }
 
-    /// The first move of a good solution from here, for the Hint helper.
-    /// The search leans on the heuristic and keeps at most `maxNodes` positions
-    /// (a few tens of MB at worst), so it is quick and safe on older phones.
+    /// The first move of the shortest solution from here, for the Hint helper, so a player who takes
+    /// every hint still earns three stars. When the shortest one cannot be found within the limits,
+    /// the search leans on the heuristic instead: a good solution, not always the shortest.
+    /// Either way at most `maxNodes` positions are kept (a few tens of MB at worst), so it is quick
+    /// and safe on older phones.
     public static func hint(_ board: Board, maxStates: Int = 30_000, maxNodes: Int = 60_000) -> Hint {
-        switch search(board, maxStates: maxStates, maxNodes: maxNodes, weight: 2) {
-        case .solved(let result):
-            guard let first = result.moves.first else { return .unwinnable }
-            return .move(first)
-        case .unwinnable: return .unwinnable
-        case .gaveUp: return .gaveUp
+        for weight in [1, 2] {
+            switch search(board, maxStates: maxStates, maxNodes: maxNodes, weight: weight) {
+            case .solved(let result):
+                guard let first = result.moves.first else { return .unwinnable }
+                return .move(first)
+            case .unwinnable: return .unwinnable
+            case .gaveUp: continue
+            }
         }
+        return .gaveUp
     }
 
     /// Runs still to remove. On a Bubble Bath board one move can remove two runs (a squishy taken from
