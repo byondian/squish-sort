@@ -40,6 +40,8 @@ struct BookView: View {
                         .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.6))
                     Text("Secret squishies never come from capsules: each one comes out when every other squishy of its world is found.")
                         .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.6))
+                    Text("Shiny editions come from Keep Squishing capsules once a world has no rare or ultra-rare left to find. They are earned by playing and are never sold.")
+                        .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.6))
                 }
                 .padding(16)
             }
