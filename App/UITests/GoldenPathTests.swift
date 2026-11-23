@@ -103,6 +103,51 @@ final class GoldenPathTests: XCTestCase {
         app.terminate()
     }
 
+    /// The Buddy on Home with gifts on and its size meter: a picture, so where a hat sits is seen without a phone.
+    func testBuddyWearsItsGifts() {
+        app.terminate()
+        app.launchArguments = ["-uiTesting", "-storeShot", "gifts"]
+        app.launch()
+        XCTAssertTrue(app.buttons["home-play"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.descendants(matching: .any)["buddy-size"].waitForExistence(timeout: 5), "the size meter is on Home")
+        Thread.sleep(forTimeInterval: 2.5)
+        keep(app.screenshot(), as: "squishy-buddy-gifts")
+        app.terminate()
+    }
+
+    /// Bubble Bath level 4, played to the end by its stored solution: floaters seal their jars and pop,
+    /// and the golden bubble takes its ride. Pictures are kept of the start, the bubble lifted and after it lands.
+    func testBubbleBathFloatersAndARide() {
+        app.terminate()
+        app.launchArguments = ["-uiTesting", "-storeShot", "bubbles:4"]
+        app.launch()
+        XCTAssertTrue(app.buttons["bubble-0"].waitForExistence(timeout: 20), "a Bubble Bath board has bubble buttons")
+        Thread.sleep(forTimeInterval: 2.5)
+        keep(app.screenshot(), as: "squishy-bubbles-1-start")
+        let state = app.staticTexts["scene-state"]
+        play([(2, 4)])
+        // Jar 2 now has room, but its bubble seals it: the lifted squishy goes back.
+        tapJar(1)
+        Thread.sleep(forTimeInterval: 0.3)
+        tapJar(2)
+        Thread.sleep(forTimeInterval: 1.0)
+        XCTAssertTrue(state.label.contains("lifted=-"), "nothing pours into a sealed jar: \(state.label)")
+        app.buttons["bubble-0"].tap()
+        Thread.sleep(forTimeInterval: 0.6)
+        XCTAssertTrue(state.label.contains("riding=0"), "the golden bubble is up: \(state.label)")
+        keep(app.screenshot(), as: "squishy-bubbles-2-riding")
+        tapJar(4)
+        Thread.sleep(forTimeInterval: 1.2)
+        XCTAssertTrue(state.label.contains("riding=-"), "the golden bubble has landed: \(state.label)")
+        keep(app.screenshot(), as: "squishy-bubbles-3-landed")
+        play([(2, 0), (1, 5), (2, 5), (1, 2), (0, 1), (0, 2), (0, 4), (3, 2), (3, 4), (3, 5), (1, 3)])
+        let won = NSPredicate(format: "label CONTAINS 'won'")
+        expectation(for: won, evaluatedWith: state)
+        waitForExpectations(timeout: 8)
+        keep(app.screenshot(), as: "squishy-bubbles-4-won")
+        app.terminate()
+    }
+
     /// Squishies whose signature move brings its own part (a top, a hat, a lid): a picture of each at
     /// rest in the Squish Room, so a part that sits in the wrong place is seen without a phone.
     func testPartsSitOnTheirSquishies() {

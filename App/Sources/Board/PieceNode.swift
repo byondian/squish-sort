@@ -235,20 +235,101 @@ final class PieceNode: SKNode {
         }
     }
 
-    /// Bubble Bath: the same rule as ice, drawn as a soap bubble round the squishy.
+    /// Bubble Bath: a floater. The squishy sits inside a big glossy soap bubble that covers all of it,
+    /// so it can never be taken for part of the squishy's own picture. A golden bubble can ride.
+    private var bubbleWorld = false
+    private var golden = false
+    private static let bubbleBlue = UIColor(hex: 0x3FB6F2)
+    private static let bubbleGold = UIColor(hex: 0xFFB300)
+
     func useBubble() {
-        let d = diameter * 1.14
+        bubbleWorld = true
+        let d = diameter * 1.22
         ice.path = CGPath(ellipseIn: CGRect(x: -d / 2, y: -d / 2, width: d, height: d), transform: nil)
-        ice.fillColor = UIColor.white.withAlphaComponent(0.3)
-        ice.strokeColor = UIColor(hex: 0x8FD8F5)
-        ice.lineWidth = 2.5
+        ice.zPosition = 4
+        ice.lineWidth = max(3.5, diameter * 0.07)
         ice.removeAllChildren()
-        let shine = SKShapeNode(ellipseOf: CGSize(width: d * 0.2, height: d * 0.1))
-        shine.fillColor = UIColor.white.withAlphaComponent(0.9)
+        // A long shine top left, a small one bottom right, and a rim of light inside the edge.
+        let shine = SKShapeNode(ellipseOf: CGSize(width: d * 0.3, height: d * 0.12))
+        shine.fillColor = UIColor.white.withAlphaComponent(0.95)
         shine.strokeColor = .clear
-        shine.zRotation = 0.6
-        shine.position = CGPoint(x: -d * 0.22, y: d * 0.26)
+        shine.zRotation = 0.7
+        shine.position = CGPoint(x: -d * 0.22, y: d * 0.27)
         ice.addChild(shine)
+        let dot = SKShapeNode(circleOfRadius: d * 0.045)
+        dot.fillColor = UIColor.white.withAlphaComponent(0.9)
+        dot.strokeColor = .clear
+        dot.position = CGPoint(x: d * 0.27, y: -d * 0.24)
+        ice.addChild(dot)
+        let rim = SKShapeNode(circleOfRadius: d * 0.44)
+        rim.fillColor = .clear
+        rim.strokeColor = UIColor.white.withAlphaComponent(0.55)
+        rim.lineWidth = 2
+        ice.addChild(rim)
+        let star = SKLabelNode(text: "★")
+        star.name = "ride-star"
+        star.fontSize = d * 0.3
+        star.fontColor = PieceNode.bubbleGold
+        star.verticalAlignmentMode = .center
+        star.position = CGPoint(x: d * 0.34, y: d * 0.34)
+        star.isHidden = true
+        ice.addChild(star)
+        colourBubble()
+    }
+
+    private func colourBubble() {
+        let colour = golden ? PieceNode.bubbleGold : PieceNode.bubbleBlue
+        ice.strokeColor = colour
+        ice.fillColor = (golden ? UIColor(hex: 0xFFE27A) : UIColor(hex: 0xBDEBFF)).withAlphaComponent(0.42)
+        ice.childNode(withName: "ride-star")?.isHidden = !golden
+    }
+
+    /// In a bubble right now (Bubble Bath).
+    var hasBubble: Bool { bubbleWorld && !ice.isHidden }
+    /// In a golden bubble that can ride.
+    var hasGoldenBubble: Bool { hasBubble && golden }
+    /// Where the middle of the squishy is, in the parent's coordinates (the node's origin is its bottom).
+    var middle: CGPoint { CGPoint(x: position.x, y: position.y + diameter / 2) }
+
+    /// The bubble wobbles: "not here" on a sealed jar, and "tap me" on a golden one.
+    func wobbleBubble() {
+        guard hasBubble, !UIAccessibility.isReduceMotionEnabled else { return }
+        ice.removeAction(forKey: "wobble")
+        ice.run(.sequence([
+            .scaleX(to: 1.12, y: 0.9, duration: 0.08), .scaleX(to: 0.92, y: 1.1, duration: 0.09),
+            .scaleX(to: 1.05, y: 0.96, duration: 0.08), .scaleX(to: 1, y: 1, duration: 0.08),
+        ]), withKey: "wobble")
+    }
+
+    /// The bubble bursts: a ring flies outwards and drops scatter.
+    private func burstBubble() {
+        let d = diameter * 1.22
+        let colour = golden ? PieceNode.bubbleGold : PieceNode.bubbleBlue
+        let ring = SKShapeNode(circleOfRadius: d / 2)
+        ring.strokeColor = colour
+        ring.lineWidth = 4
+        ring.fillColor = .clear
+        ring.zPosition = 6
+        content.addChild(ring)
+        if UIAccessibility.isReduceMotionEnabled {
+            ring.run(.sequence([.fadeOut(withDuration: 0.25), .removeFromParent()]))
+            return
+        }
+        ring.run(.sequence([.group([.scale(to: 1.5, duration: 0.2), .fadeOut(withDuration: 0.2)]), .removeFromParent()]))
+        for n in 0..<8 {
+            let drop = SKShapeNode(circleOfRadius: d * 0.05)
+            drop.fillColor = colour
+            drop.strokeColor = .white
+            drop.lineWidth = 1
+            drop.zPosition = 6
+            let angle = CGFloat(n) * .pi / 4 + 0.3
+            drop.position = CGPoint(x: cos(angle) * d * 0.45, y: sin(angle) * d * 0.45)
+            content.addChild(drop)
+            let out = SKAction.moveBy(x: cos(angle) * d * 0.5, y: sin(angle) * d * 0.5 - d * 0.15, duration: 0.3)
+            out.timingMode = .easeOut
+            drop.run(.sequence([.group([out, .fadeOut(withDuration: 0.3), .scale(to: 0.4, duration: 0.3)]), .removeFromParent()]))
+        }
+        run(.sequence([.scale(to: 1.12, duration: 0.07), .scale(to: 1, duration: 0.12)]))
     }
 
     func apply(_ piece: Piece) {
@@ -260,8 +341,27 @@ final class PieceNode: SKNode {
             art.isHidden = piece.hidden
             body.isHidden = !piece.hidden
         }
+        let hadBubble = hasBubble
         ice.isHidden = !piece.isFrozen
-        ice.alpha = piece.frozen >= 2 ? 1 : 0.6
+        if bubbleWorld {
+            ice.alpha = 1
+            if hadBubble && !piece.isFrozen { burstBubble() }
+            if piece.isFrozen {
+                golden = piece.frozen == 2
+                colourBubble()
+                if !hadBubble && !UIAccessibility.isReduceMotionEnabled {
+                    // A bubble breathes a little, so it reads as a bubble and not as a drawn ring.
+                    let slow = golden ? 0.5 : 0.9
+                    ice.run(.repeatForever(.sequence([
+                        .scaleX(to: 1.04, y: 0.97, duration: slow), .scaleX(to: 0.97, y: 1.04, duration: slow),
+                    ])), withKey: "breathe")
+                }
+            } else {
+                ice.removeAction(forKey: "breathe")
+            }
+        } else {
+            ice.alpha = piece.frozen >= 2 ? 1 : 0.6
+        }
         duetMark.isHidden = !piece.bondedAbove
         glitter.isHidden = !isLucky || piece.hidden
         if wasHidden && !piece.hidden {

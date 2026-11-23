@@ -6,18 +6,18 @@
   "beat": "breather",
   "capacity": 4,
   "jars": [
-    ["soapy", "quacky", "bubbly", "quacky"],
-    ["soapy", "bubbly", "bubbly", "quacky"],
-    ["quacky", "soapy", "starla", "shelly"],
-    ["fizzy", "shelly", "fizzy", "starla"],
-    ["fizzy", "fizzy", "starla", "soapy"],
-    ["bubbly", "starla", "shelly", "shelly"],
+    ["bubbly", "fizzy", "shelly", "bubbly"],
+    ["starla", "shelly", "soapy", "soapy"],
+    ["starla", "starla", "shelly", "quacky"],
+    ["quacky", "fizzy", "fizzy", "soapy"],
+    ["shelly", "bubbly", "quacky", "fizzy"],
+    ["bubbly", "soapy", "quacky", "starla"],
     [],
     []
   ],
-  "mechanics": {"hidden": [], "sticky": [[3, 2], [4, 2]], "frozen": [[0, 1], [5, 2]]},
+  "mechanics": {"hidden": [], "sticky": [[1, 1], [5, 2]], "frozen": [[0, 3, 1], [2, 3, 1], [4, 3, 1], [3, 3, 2]]},
   "par": 17,
-  "solution": [[2, 6], [2, 7], [4, 7], [2, 7], [0, 2], [1, 2], [0, 1], [0, 2], [3, 4], [3, 6], [5, 6], [4, 5], [3, 4], [7, 0], [5, 7], [1, 5], [0, 1]],
+  "solution": [[0, 6], [2, 6], [3, -8], [0, 3], [1, 7], [1, 6], [2, 1], [4, 2], [4, 0], [5, 2], [2, 1], [5, 7], [0, 5], [6, 7], [4, 6], [3, 4], [2, 3]],
   "capsule": false,
   "softenAfterFails": null
 }

@@ -47,6 +47,20 @@ public enum LevelValidator {
                 if b.bondedAbove { p.append("\(id): a piece can only be in one duet") }
             }
         }
+        // Bubble Bath: a bubble starts on the top squishy of its jar, one a jar, on a squishy of another
+        // kind, and is a floater (1) or a golden bubble (2).
+        if board.floats {
+            for b in file.mechanics?.frozen ?? [] {
+                let (j, i) = (b[0], b[1])
+                if i != file.jars[j].count - 1 { p.append("\(id): bubble \(b) is not on the top squishy of its jar") }
+                if i == 0 || file.jars[j][i - 1] == file.jars[j][i] { p.append("\(id): bubble \(b) would pop before the first move") }
+                if b.count > 2, !(1...2).contains(b[2]) { p.append("\(id): bubble \(b) must be 1 (floater) or 2 (golden)") }
+                // A wrapped squishy in a bubble would still be wrapped after it pops, on top of its jar for good.
+                if (file.mechanics?.hidden ?? []).contains(where: { $0.count >= 2 && $0[0] == j && $0[1] == i }) {
+                    p.append("\(id): bubble \(b) is on a wrapped squishy")
+                }
+            }
+        }
         // Curtain jars: at most two, each a full jar with nothing wrapped, frozen or paired inside,
         // and never on a level with duets.
         let curtains = board.curtains

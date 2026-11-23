@@ -13,6 +13,11 @@
 /// - A vine jar (Jungle Jam) is tied shut with a tag showing a number. Nothing goes in or comes
 ///   out. Every jar finished anywhere lowers each tag by one; at zero the vine snaps and it is an
 ///   ordinary jar. A shut jar is not a finished jar.
+/// - Bubble Bath boards (`floats`): a piece with `frozen` above zero is a floater, a squishy in a
+///   bubble. It floats on top of its jar. It cannot be picked up and nothing can be poured into its
+///   jar, but the squishies under it can be taken out. It pops when the piece right under it is its
+///   own kind, or when nothing is left under it. A golden bubble (`frozen` 2) may ride once to any
+///   other jar with room (`Move.ride`); it lands on top and is an ordinary floater from then on.
 public struct Board: Hashable, Sendable {
     public let capacity: Int
     public private(set) var jars: [[Piece]]
@@ -23,19 +28,46 @@ public struct Board: Hashable, Sendable {
     public private(set) var curtains: [Int]
     /// The number on each jar's vine tag, one entry per jar; 0 means no vine.
     public private(set) var vines: [UInt8]
+    /// Bubble Bath: frozen pieces are floaters, not ice.
+    public let floats: Bool
 
-    public init(capacity: Int, jars: [[Piece]], curtains: [Int] = [], vines: [Int: Int] = [:]) {
+    public init(capacity: Int, jars: [[Piece]], curtains: [Int] = [], vines: [Int: Int] = [:], floats: Bool = false) {
         self.capacity = capacity
         self.jars = jars
+        self.floats = floats
         self.layoutJarCount = jars.count
         self.curtains = Set(curtains).filter { jars.indices.contains($0) }.sorted()
         var tags = [UInt8](repeating: 0, count: jars.count)
         for (j, n) in vines where jars.indices.contains(j) && n > 0 { tags[j] = UInt8(clamping: n) }
         self.vines = tags
         for j in self.jars.indices {
+            settleFloaters(j)
             revealTop(j)
             if isComplete(j) { settle(j) }
         }
+    }
+
+    /// How many pieces of jar `j` are under its floaters (all of them on a board without floaters).
+    public func base(_ j: Int) -> Int {
+        var n = jars[j].count
+        if floats { while n > 0 && jars[j][n - 1].isFrozen { n -= 1 } }
+        return n
+    }
+
+    /// Jar `j` has a floater on top: nothing can be poured in.
+    public func isSealed(_ j: Int) -> Bool { floats && base(j) < jars[j].count }
+
+    /// The top piece of jar `from` is a golden bubble and can ride to jar `to`.
+    public func canRide(from f: Int, to t: Int) -> Bool {
+        guard floats, f != t, jars.indices.contains(f), jars.indices.contains(t) else { return false }
+        guard let top = jars[f].last, top.frozen == 2, !isShut(f), !isShut(t), !isComplete(t) else { return false }
+        return jars[t].count < capacity
+    }
+
+    /// Jars whose top piece is a golden bubble that still has somewhere to go.
+    public var rideJars: [Int] {
+        guard floats else { return [] }
+        return jars.indices.filter { f in jars.indices.contains { canRide(from: f, to: $0) } }
     }
 
     public var jarCount: Int { jars.count }
@@ -60,7 +92,7 @@ public struct Board: Hashable, Sendable {
 
     /// Pieces that would leave jar `j` if there were unlimited room.
     public func runLength(at j: Int) -> Int {
-        let jar = jars[j]
+        let jar = Array(jars[j].prefix(base(j)))
         guard let top = jar.last, !isComplete(j), !top.hidden, !top.isFrozen, !isShut(j) else { return 0 }
         if Board.duetOnTop(jar) {
             // A duet on top moves as a pair, and only as a pair.
@@ -84,24 +116,28 @@ public struct Board: Hashable, Sendable {
         let (f, t) = (move.from, move.to)
         guard f != t, jars.indices.contains(f), jars.indices.contains(t) else { return 0 }
         let n = runLength(at: f)
-        guard n > 0, !isComplete(t), !isShut(t) else { return 0 }
+        guard n > 0, !isComplete(t), !isShut(t), !isSealed(t) else { return 0 }
         let dest = jars[t]
         let room = capacity - dest.count
         guard room > 0 else { return 0 }
-        if Board.duetOnTop(jars[f]) {
+        let src = Array(jars[f].prefix(base(f)))
+        if Board.duetOnTop(src) {
             // A duet needs two spaces, and lands in an empty jar or on a squishy of its bottom member's kind.
-            let low = jars[f][jars[f].count - 2]
+            let low = src[src.count - 2]
             if room < 2 { return 0 }
             if let destTop = dest.last, destTop.kind != low.kind { return 0 }
             return 2
         }
-        if let destTop = dest.last, let srcTop = jars[f].last, destTop.kind != srcTop.kind { return 0 }
+        if let destTop = dest.last, let srcTop = src.last, destTop.kind != srcTop.kind { return 0 }
         var k = Swift.min(n, room)
-        while k > 0 && Board.splitsDuet(jars[f], movingTop: k) { k -= 1 }
+        while k > 0 && Board.splitsDuet(src, movingTop: k) { k -= 1 }
         return k
     }
 
-    public func isLegal(_ move: Move) -> Bool { piecesToMove(move) > 0 }
+    public func isLegal(_ move: Move) -> Bool {
+        if let t = move.rideTarget { return canRide(from: move.from, to: t) }
+        return piecesToMove(move) > 0
+    }
 
     public var legalMoves: [Move] {
         var out: [Move] = []
@@ -109,6 +145,11 @@ public struct Board: Hashable, Sendable {
             for t in jars.indices {
                 let m = Move(from: f, to: t)
                 if piecesToMove(m) > 0 { out.append(m) }
+            }
+        }
+        if floats {
+            for f in jars.indices where jars[f].last?.frozen == 2 {
+                for t in jars.indices where canRide(from: f, to: t) { out.append(Move.ride(from: f, to: t)) }
             }
         }
         return out
@@ -149,21 +190,25 @@ public struct Board: Hashable, Sendable {
 
     @discardableResult
     public mutating func apply(_ move: Move) -> MoveResult? {
+        if let t = move.rideTarget { return applyRide(from: move.from, to: t) }
         let k = piecesToMove(move)
         guard k > 0 else { return nil }
         let (f, t) = (move.from, move.to)
-        var moved = Array(jars[f].suffix(k))
+        // The squishies leave from under any floaters, which sink down with them.
+        let low = base(f)
+        var moved = Array(jars[f][(low - k)..<low])
         // A duet that lands on its bottom member's kind lets go: the two become ordinary pieces.
         let letGo = k == 2 && moved[0].bondedAbove && !jars[t].isEmpty
         if letGo { moved[0].bondedAbove = false }
-        jars[f].removeLast(k)
+        jars[f].removeSubrange((low - k)..<low)
         jars[t].append(contentsOf: moved)
         let revealed = revealTop(f)
+        let popped = settleFloaters(f)
 
         // Thaw: every move that leaves or lands on a jar next to a frozen
-        // piece counts once for that piece.
+        // piece counts once for that piece. Floaters are not ice: nothing next door changes them.
         var touched = Set<Int>()
-        for j in [f, t] where j < layoutJarCount {
+        for j in [f, t] where j < layoutJarCount && !floats {
             for nb in BoardLayout.neighbours(of: j, jarCount: layoutJarCount) { touched.insert(nb) }
         }
         var thawed: [Int] = []
@@ -200,7 +245,31 @@ public struct Board: Hashable, Sendable {
         }
         return MoveResult(move: move, count: k, revealedSourceTop: revealed,
                           completedJar: completed ? t : nil, thawedJars: thawed, duetLetGo: letGo,
-                          raisedCurtains: raised, snappedVines: snapped)
+                          raisedCurtains: raised, snappedVines: snapped, poppedJars: popped ? [f] : [])
+    }
+
+    /// A golden bubble rides from the top of jar `f` to the top of jar `t`.
+    private mutating func applyRide(from f: Int, to t: Int) -> MoveResult? {
+        guard canRide(from: f, to: t) else { return nil }
+        var rider = jars[f].removeLast()
+        rider.frozen = 1
+        jars[t].append(rider)
+        let popped = settleFloaters(t)
+        var snapped: [Int] = []
+        let completed = isComplete(t)
+        if completed {
+            settle(t)
+            for j in vines.indices where vines[j] > 0 {
+                vines[j] -= 1
+                if vines[j] == 0 {
+                    revealTop(j)
+                    snapped.append(j)
+                }
+            }
+        }
+        return MoveResult(move: Move.ride(from: f, to: t), count: 1, revealedSourceTop: false,
+                          completedJar: completed ? t : nil, thawedJars: [], snappedVines: snapped,
+                          poppedJars: popped ? [t] : [])
     }
 
     /// Adds one empty jar (softening after fails). The rows shift to make room, so "next door"
@@ -226,11 +295,26 @@ public struct Board: Hashable, Sendable {
         return jar[lowest - 1].bondedAbove
     }
 
+    /// The top squishy of a jar (the one under any floaters) is never wrapped.
     @discardableResult
     private mutating func revealTop(_ j: Int) -> Bool {
-        guard let last = jars[j].indices.last, jars[j][last].hidden else { return false }
+        let last = base(j) - 1
+        guard last >= 0, jars[j][last].hidden else { return false }
         jars[j][last].hidden = false
         return true
+    }
+
+    /// Pops every floater in jar `j` that sits on its own kind or on nothing, from the lowest up.
+    /// True if any popped.
+    @discardableResult
+    private mutating func settleFloaters(_ j: Int) -> Bool {
+        guard floats else { return false }
+        var popped = false
+        for i in jars[j].indices where jars[j][i].isFrozen && (i == 0 || jars[j][i - 1].kind == jars[j][i].kind) {
+            jars[j][i].frozen = 0
+            popped = true
+        }
+        return popped
     }
 
     /// A complete jar shows everything and nothing in it stays frozen.
@@ -244,7 +328,7 @@ public struct Board: Hashable, Sendable {
 
 public extension Board {
     /// Shake-up: every piece in an unfinished jar lands in a new spot. Finished jars stay as they
-    /// are, each jar keeps the number of pieces it had, and wrappers, ice and duets fall away.
+    /// are, each jar keeps the number of pieces it had, and wrappers, ice, bubbles and duets fall away.
     /// A jar behind a closed curtain or tied by a vine is left alone. The caller checks the result can still be solved.
     func shakenUp<R: RandomNumberGenerator>(using rng: inout R) -> Board {
         var next = jars
@@ -259,6 +343,6 @@ public extension Board {
         }
         var tags: [Int: Int] = [:]
         for j in vines.indices where vines[j] > 0 { tags[j] = Int(vines[j]) }
-        return Board(capacity: capacity, jars: next, curtains: curtains, vines: tags)
+        return Board(capacity: capacity, jars: next, curtains: curtains, vines: tags, floats: floats)
     }
 }

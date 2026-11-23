@@ -35,7 +35,7 @@ struct ShopView: View {
                         }
                         .buttonStyle(SquishButtonStyle(fill: .white, text: Theme.plum))
                     }
-                    Text("Win levels to earn coins too: 50 a win, 100 with three stars.")
+                    Text("Win levels to earn coins too: \(model.config.coins.winBase) a win, \(model.config.coins.winBase + model.config.coins.threeStarBonus) with three stars.")
                         .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.6))
                     if model.offersAllowed { extras }
 
@@ -47,12 +47,15 @@ struct ShopView: View {
                     }
                     if model.buddyActive {
                         Text("For your Buddy").font(Theme.title(20)).foregroundStyle(Theme.plum)
-                        HStack(spacing: 12) {
-                            buddyItem(.treat, "Treat", "birthday.cake.fill")
-                            buddyItem(.gift, "Gift", "gift.fill")
-                        }
+                        buddyItem(.treat, "Treat", "birthday.cake.fill")
                         Text("Hearts teach your Buddy tricks and help it grow. Every level you win gives a free treat. Just for fun.")
                             .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.6))
+                        Text("Gifts to keep").font(Theme.title(20)).foregroundStyle(Theme.plum)
+                        Text("Your Buddy keeps every gift and wears it. Tap one it has to put it on or take it off.")
+                            .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.6))
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 96), spacing: 10)], spacing: 10) {
+                            ForEach(BuddyGifts.all) { gift in giftCard(gift) }
+                        }
                     }
                     Text("Coins buy hints, shuffles and themes. Squishies are earned by playing and are never for sale.")
                         .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.6))
@@ -142,6 +145,45 @@ struct ShopView: View {
         }
         .buttonStyle(SquishButtonStyle(fill: .white, text: Theme.plum))
         .disabled(!model.progress.wallet.canAfford(item))
+    }
+
+    /// One gift: its picture and its price, or whether the Buddy has it on.
+    private func giftCard(_ gift: BuddyGift) -> some View {
+        let buddy = model.progress.buddy
+        let owned = buddy.owns(gift)
+        let wearing = buddy.isWearing(gift)
+        return Button {
+            if owned { model.toggleGift(gift) } else { model.buyGift(gift) }
+        } label: {
+            VStack(spacing: 4) {
+                Group {
+                    if let image = WorkshopArt.part(gift.category, gift.part) {
+                        Image(uiImage: image).resizable().scaledToFit()
+                    } else {
+                        Image(systemName: "gift.fill").font(.system(size: 30)).foregroundStyle(Theme.bubblegum)
+                    }
+                }
+                .frame(width: 60, height: 60)
+                if owned {
+                    Label(wearing ? "Wearing" : "Wear", systemImage: wearing ? "checkmark.circle.fill" : "circle")
+                        .font(Theme.body(13)).foregroundStyle(wearing ? Theme.bubblegum : Theme.plum.opacity(0.7))
+                } else {
+                    HStack(spacing: 3) {
+                        CoinIcon().foregroundStyle(Theme.butter).scaleEffect(0.7)
+                        Text(verbatim: "\(gift.price)").font(Theme.body(14)).monospacedDigit()
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .background(RoundedRectangle(cornerRadius: 18).fill(.white))
+            .overlay(RoundedRectangle(cornerRadius: 18).stroke(wearing ? Theme.bubblegum : Theme.plum.opacity(0.12), lineWidth: wearing ? 3 : 2))
+            .opacity(owned || model.progress.wallet.balance >= gift.price ? 1 : 0.5)
+        }
+        .buttonStyle(PressSquish())
+        .foregroundStyle(Theme.plum)
+        .disabled(!owned && model.progress.wallet.balance < gift.price)
+        .accessibilityIdentifier("gift-\(gift.part)")
     }
 
     private func themeCard(_ theme: BoardTheme) -> some View {
