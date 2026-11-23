@@ -53,6 +53,12 @@ struct SquishRoomView: View {
                         .colorMultiply(morphedInto == nil ? .white : Color(red: 0.86, green: 0.82, blue: 1))
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .overlay {
+                    // A shiny edition sparkles in the Room too.
+                    if morphedInto == nil, model.progress.collection.ownsShiny(id) {
+                        ShinyGlitter().frame(width: 230, height: 230)
+                    }
+                }
                 .accessibilityElement()
                 .accessibilityLabel(Text(verbatim: model.displayName(for: id)))
                 .accessibilityIdentifier("room-squishy")

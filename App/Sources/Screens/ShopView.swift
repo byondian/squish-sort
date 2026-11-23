@@ -55,6 +55,8 @@ struct ShopView: View {
                             .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.6))
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 96), spacing: 10)], spacing: 10) {
                             ForEach(BuddyGifts.all) { gift in giftCard(gift) }
+                            // Milestone prizes from Keep Squishing are never for sale: only the ones it has won show.
+                            ForEach(BuddyGifts.milestones.filter { model.progress.buddy.owns($0) }) { gift in giftCard(gift) }
                         }
                     }
                     Text("Coins buy hints, shuffles and themes. Squishies are earned by playing and are never for sale.")

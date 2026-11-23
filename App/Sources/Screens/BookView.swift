@@ -16,7 +16,10 @@ struct BookView: View {
         (LevelCatalog.worlds + [ChristmasWorld.id]).filter { showsShelf($0) }
     }
 
-    private var items: [Collectible] { model.roster.collectibles.filter { $0.world == world } }
+    @State private var shinyOnly = false
+    private var items: [Collectible] {
+        model.roster.collectibles.filter { $0.world == world && (!shinyOnly || model.progress.collection.ownsShiny($0.id)) }
+    }
     private var ownedHere: [Collectible] { items.filter { model.progress.collection.owns($0.id) } }
 
     var body: some View {
@@ -27,6 +30,7 @@ struct BookView: View {
                     hero
                     tabs
                     goals
+                    if model.progress.collection.shinyCount > 0 { shinyFilter }
                     grid
                     spares
                     if !model.progress.made.isEmpty { madeShelf }
@@ -224,6 +228,26 @@ struct BookView: View {
 
     // MARK: - Grid
 
+    /// Shown once the first shiny is found: how many there are, and a switch to see only those.
+    private var shinyFilter: some View {
+        let total = model.roster.collectibles.count
+        return Button {
+            model.haptics.land()
+            shinyOnly.toggle()
+        } label: {
+            HStack(spacing: 8) {
+                Text(verbatim: "✦").foregroundStyle(Color(hex: 0xFFB300))
+                Text("Shiny \(model.progress.collection.shinyCount)/\(total)").font(Theme.body(14)).foregroundStyle(Theme.plum)
+                Spacer()
+                Text(shinyOnly ? "Show all" : "Show only shiny").font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.7))
+            }
+            .padding(.horizontal, 14).padding(.vertical, 10)
+            .background(RoundedRectangle(cornerRadius: 16).fill(shinyOnly ? Theme.butter.opacity(0.6) : .white))
+        }
+        .buttonStyle(PressSquish())
+        .accessibilityIdentifier("shiny-filter")
+    }
+
     private var grid: some View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
             ForEach(items, id: \.id) { c in cubby(c) }
@@ -245,6 +269,7 @@ struct BookView: View {
         } label: {
             VStack(spacing: 4) {
                 SquishyView(id: c.id, rarity: c.rarity, silhouette: !has).frame(width: 74, height: 74)
+                    .shinyGlitter(has && model.progress.collection.ownsShiny(c.id))
                 Text(verbatim: has ? c.name(in: model.language) : (c.rarity == .secret ? RarityLook.name(.secret) : "???"))
                     .font(Theme.body(12)).foregroundStyle(Theme.plum.opacity(has ? 1 : 0.5)).lineLimit(1).minimumScaleFactor(0.6)
             }

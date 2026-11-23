@@ -74,6 +74,13 @@ struct NewsCard: View {
             Text(verbatim: "🏆").font(.system(size: 70))
         case .starterPack:
             Text(verbatim: "🎁").font(.system(size: 70))
+        case .milestone(_, let gift, _):
+            if let gift = gift.flatMap(BuddyGifts.gift), let image = WorkshopArt.part(gift.category, gift.part) {
+                Image(uiImage: image).resizable().scaledToFit().frame(width: 110, height: 110)
+                    .accessibilityIdentifier("milestone-gift")
+            } else {
+                CoinIcon().foregroundStyle(Theme.butter).scaleEffect(2.6).frame(width: 96, height: 96)
+            }
         case .bossBeaten:
             Text(verbatim: "👑").font(.system(size: 70))
         case .trick:
@@ -148,6 +155,8 @@ struct NewsCard: View {
             return ""
         case .starterPack:
             return "Starter pack"
+        case .milestone(let level, _, _):
+            return "Milestone: level \(level)!"
         case .bossBeaten:
             return "Boss beaten!"
         case .starJar:
@@ -181,6 +190,9 @@ struct NewsCard: View {
             return ""
         case .bossBeaten:
             return "You out-sorted the boss. On to the next jars!"
+        case .milestone(_, let gift, let coins):
+            if gift != nil { return "A prize for your milestone shelf. Your Buddy is wearing it now, and you can only get it here." }
+            return "\(coins) coins for your milestone shelf."
         case .starterPack:
             return "\(StarterPack.coins) coins, \(StarterPack.hints) hints and the Golden Hour board. It is in the shop whenever you like."
         case .trick:

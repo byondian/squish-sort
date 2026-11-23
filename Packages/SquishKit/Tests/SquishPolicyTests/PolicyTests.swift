@@ -381,6 +381,87 @@ final class CapsuleTests: XCTestCase {
         XCTAssertEqual(CapsuleDrops.open(world: "toyshop", roster: roster, state: &state, rng: &rng)?.id, "peach-bun")
     }
 
+    func testKeepSquishingCapsuleGivesWhatIsMissingFirstAndThenShinies() throws {
+        var state = CollectionState()
+        state.totalCapsules = 1 // past the Peach Bun capsule
+        var rng = SplitMix64(seed: 11)
+        let prizes = roster.world("toyshop", .rare) + roster.world("toyshop", .ultra)
+        // While a rare or an ultra is missing, it is an ordinary capsule: no shiny.
+        for _ in 0..<prizes.count {
+            let got = try XCTUnwrap(CapsuleDrops.openKeepSquishing(world: "toyshop", roster: roster, state: &state, rng: &rng))
+            XCTAssertFalse(got.shiny, got.squishy.id)
+        }
+        XCTAssertTrue(prizes.allSatisfy { state.owns($0.id) }, "new first: every rare and ultra is found before any shiny")
+        XCTAssertEqual(state.shinyCount, 0)
+        // Nothing is missing now: each capsule is a shiny of a squishy the player owns, a new one each time.
+        let owned = roster.collectibles.filter { $0.world == "toyshop" && state.owns($0.id) }
+        for n in 1...owned.count {
+            let spares = state.spareCount
+            let got = try XCTUnwrap(CapsuleDrops.openKeepSquishing(world: "toyshop", roster: roster, state: &state, rng: &rng))
+            XCTAssertTrue(got.shiny)
+            XCTAssertTrue(state.owns(got.squishy.id), "a shiny is only ever of a squishy you own")
+            XCTAssertEqual(state.shinyCount, n)
+            XCTAssertEqual(state.spareCount, spares, "a first shiny is not a spare")
+        }
+        // Every owned squishy is shiny: a further one is a duplicate and gives a spare, as now.
+        let spares = state.spareCount
+        let again = try XCTUnwrap(CapsuleDrops.openKeepSquishing(world: "toyshop", roster: roster, state: &state, rng: &rng))
+        XCTAssertTrue(again.shiny)
+        XCTAssertEqual(state.shinyCount, owned.count)
+        XCTAssertEqual(state.spareCount, spares + 1)
+        // A squishy the player does not own (a common never sorted, the secret) is never made shiny.
+        XCTAssertTrue(state.shiny.keys.allSatisfy { state.owns($0) })
+    }
+
+    func testTheExpertShinyCapsuleIsShinyEvenWhileSomethingIsMissing() throws {
+        var state = CollectionState()
+        state.totalCapsules = 1
+        var rng = SplitMix64(seed: 3)
+        // Nothing owned in this world yet: there is nothing to make shiny, so it is an ordinary capsule.
+        let first = try XCTUnwrap(CapsuleDrops.openKeepSquishing(world: "toyshop", roster: roster, state: &state, rng: &rng, alwaysShiny: true))
+        XCTAssertFalse(first.shiny)
+        let second = try XCTUnwrap(CapsuleDrops.openKeepSquishing(world: "toyshop", roster: roster, state: &state, rng: &rng, alwaysShiny: true))
+        XCTAssertTrue(second.shiny)
+        XCTAssertEqual(second.squishy.id, first.squishy.id, "the one squishy owned here is the one that turns shiny")
+    }
+
+    func testShiniesSurviveASaveAndOldSavesHaveNone() throws {
+        var state = CollectionState()
+        state.owned["peach-bun"] = 1
+        state.shiny["peach-bun"] = 1
+        let back = try JSONDecoder().decode(CollectionState.self, from: JSONEncoder().encode(state))
+        XCTAssertTrue(back.ownsShiny("peach-bun"))
+        let old = try JSONDecoder().decode(CollectionState.self, from: Data(#"{"owned": {"peach-bun": 1}}"#.utf8))
+        XCTAssertEqual(old.shinyCount, 0)
+        XCTAssertTrue(old.owns("peach-bun"))
+    }
+
+    func testMilestoneShelfGivesAWearableEveryTenthLevelAndCoinsOnceOwned() {
+        XCTAssertEqual(BuddyGifts.milestones.count, 24, "one for every tenth of the 240 Keep Squishing levels")
+        XCTAssertEqual(Set(BuddyGifts.milestones.map(\.id)).count, 24)
+        // Milestone prizes are never in the shop and have no price.
+        XCTAssertTrue(BuddyGifts.milestones.allSatisfy { $0.price == 0 && !BuddyGifts.all.contains($0) })
+        XCTAssertTrue(BuddyGifts.milestones.allSatisfy { gift in !BuddyGifts.all.contains { $0.id == gift.id } })
+        XCTAssertTrue(BuddyGifts.milestones.allSatisfy { BuddyGifts.categories.contains($0.category) })
+        XCTAssertNil(MilestoneShelf.slot(forLevel: 9))
+        XCTAssertEqual(MilestoneShelf.slot(forLevel: 10), 0)
+        XCTAssertEqual(MilestoneShelf.slot(forLevel: 240), 23)
+        var buddy = BuddyState()
+        XCTAssertNil(MilestoneShelf.prize(forLevel: 15, buddy: buddy))
+        let first = BuddyGifts.milestones[0]
+        XCTAssertEqual(MilestoneShelf.prize(forLevel: 10, buddy: buddy), .gift(first))
+        XCTAssertTrue(buddy.receive(first))
+        XCTAssertEqual(buddy.worn, [first], "a milestone prize can be worn like any gift")
+        // Next lap the same milestone gives coins, and the next one along is still a wearable.
+        XCTAssertEqual(MilestoneShelf.prize(forLevel: 10, buddy: buddy), .coins(MilestoneShelf.coinsWhenOwned))
+        XCTAssertEqual(MilestoneShelf.prize(forLevel: 20, buddy: buddy), .gift(BuddyGifts.milestones[1]))
+        // The free daily gift never hands one out.
+        for day in 1...60 {
+            let gift = BuddyGifts.inDailyGift(day: "2026-12-\(day)", installSeed: "seed", owned: [])
+            XCTAssertFalse(gift.map { BuddyGifts.milestones.contains($0) } ?? false)
+        }
+    }
+
     func testCapsulesHoldOnlyRaresAndUltras() {
         var state = CollectionState()
         state.totalCapsules = 1 // past the Peach Bun capsule

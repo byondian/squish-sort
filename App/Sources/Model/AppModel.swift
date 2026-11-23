@@ -70,6 +70,8 @@ final class AppModel: ObservableObject {
         case starterPack
         /// A boss in the middle of a world is beaten for the first time.
         case bossBeaten(world: String)
+        /// A tenth Keep Squishing level is won: a prize for the milestone shelf (a wearable, or coins once it is owned).
+        case milestone(level: Int, gift: String?, coins: Int)
 
         var isShow: Bool {
             switch self {
@@ -88,6 +90,7 @@ final class AppModel: ObservableObject {
             case .finale(let world): return "finale-\(world)"
             case .starterPack: return "starter-pack"
             case .bossBeaten(let world): return "boss-\(world)"
+            case .milestone(let level, _, _): return "milestone-\(level)"
             }
         }
     }
@@ -168,6 +171,8 @@ final class AppModel: ObservableObject {
     private var endlessLapJustDone = false
     /// Whether the capsule on screen is a squishy the player didn't have yet.
     @Published private(set) var capsuleIsNew = false
+    /// The capsule on screen holds a shiny edition of a squishy the player owns.
+    @Published private(set) var capsuleIsShiny = false
 
     /// UI tests start from a fresh install every time.
     static let isUITesting = ProcessInfo.processInfo.arguments.contains("-uiTesting")
@@ -1395,6 +1400,7 @@ final class AppModel: ObservableObject {
         // three-star bonus once) but never another capsule or more jar coins.
         let previousBest = progress.stars[level.id]
         let firstClear = previousBest == nil
+        let hadGold = progress.goldStars.contains(level.id)
         let extrasBefore = Extra.allCases.filter { isExtraUnlocked($0) }
         let worldWasComplete = isWorldComplete(level.file.world)
         var summary = WinSummary()
@@ -1499,6 +1505,17 @@ final class AppModel: ObservableObject {
             // was closed on the win card): the next win in it, a replay for stars too, brings both.
             news.append(.worldComplete(world: level.file.world, next: nil))
             news.append(.finale(world: level.file.world))
+        } else if firstClear, level.file.world == LevelCatalog.endless,
+                  let prize = MilestoneShelf.prize(forLevel: level.file.index, buddy: progress.buddy) {
+            // Every tenth Keep Squishing level puts a prize on the milestone shelf.
+            switch prize {
+            case .gift(let gift):
+                update { $0.buddy.receive(gift) }
+                news.append(.milestone(level: level.file.index, gift: gift.id, coins: 0))
+            case .coins(let amount):
+                update { $0.wallet.earn(amount) }
+                news.append(.milestone(level: level.file.index, gift: nil, coins: amount))
+            }
         } else if firstClear, level.file.beat == .boss, !AppModel.isUITesting {
             // A boss half way through a world gets its own cheer; the last boss has WORLD COMPLETE.
             news.append(.bossBeaten(world: level.file.world))
@@ -1525,8 +1542,12 @@ final class AppModel: ObservableObject {
             let world = mysteryCapsuleWorld
             update { $0.pendingCapsules.append(world) }
         }
+        // An Expert board won in the fewest moves gives a shiny capsule, the first time.
+        if gold, !hadGold, LevelCatalog.isExpert(world: level.file.world, index: level.file.index) {
+            update { $0.pendingCapsules.append(level.look + AppModel.shinyMark) }
+        }
         if firstClear && level.file.capsule {
-            openCapsule(world: level.look)
+            openCapsule(world: level.file.world == LevelCatalog.endless ? level.look + AppModel.keepMark : level.look)
         } else if !news.contains(where: { if case .starJar(_, let prize) = $0 { return prize >= 2 } else { return false } }) {
             openPendingCapsule()
         }
@@ -1720,7 +1741,28 @@ final class AppModel: ObservableObject {
 
     // MARK: - Capsules
 
+    /// A Keep Squishing capsule: what is missing first, then shiny editions.
+    static let keepMark = "#keep"
+    /// The shiny capsule for an Expert board won in the fewest moves.
+    static let shinyMark = "#shiny"
+
     private func openCapsule(world waiting: String) {
+        capsuleIsShiny = false
+        for (mark, always) in [(AppModel.keepMark, false), (AppModel.shinyMark, true)] where waiting.hasSuffix(mark) {
+            let world = String(waiting.dropLast(mark.count))
+            var state = progress.collection
+            guard let got = CapsuleDrops.openKeepSquishing(world: world, roster: roster, state: &state, rng: &rng,
+                                                           odds: config.capsuleOdds, alwaysShiny: always) else { return }
+            // A first shiny is new; a shiny of one already shiny is a spare, like any duplicate.
+            let alreadyShiny = progress.collection.ownsShiny(got.squishy.id)
+            capsuleIsNew = got.shiny ? !alreadyShiny : !progress.collection.owns(got.squishy.id)
+            capsuleSpares = capsuleIsNew ? nil : state.spareCount
+            capsuleIsShiny = got.shiny
+            update { $0.collection = state }
+            capsule = got.squishy
+            queueSecretIfWon(world: world)
+            return
+        }
         if waiting.hasSuffix(AppModel.secretMark) {
             // A secret is not in a capsule: it comes out of hiding when the rest of its world is found.
             let world = String(waiting.dropLast(AppModel.secretMark.count))
@@ -1764,6 +1806,7 @@ final class AppModel: ObservableObject {
     func capsuleClosed() {
         if capsule?.rarity == .ultra { ultraJustOpened = true }
         capsule = nil
+        capsuleIsShiny = false
     }
 
     /// Called by the capsule cover's onDismiss.

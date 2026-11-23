@@ -694,6 +694,8 @@ struct BuddyHomeView: View {
                     onGesture: { gesture in ask(for: gesture == .circle ? 1 : 2) }) {
             SquishRefView(ref: ref)
         }
+        // A Buddy whose shiny edition has been found sparkles.
+        .shinyGlitter(model.progress.collection.ownsShiny(ref))
         .frame(maxWidth: .infinity).frame(height: side)
         // Tricks: spin, flip and dance. Then the little growth from hearts, which never goes back.
         .rotationEffect(.degrees(spin))
