@@ -30,6 +30,8 @@ final class LevelTests: XCTestCase {
         XCTAssertEqual(LevelCatalog.endlessBlocks.count, LevelCatalog.endlessLooks.count)
         XCTAssertEqual(LevelCatalog.endlessBlock(index: 60), "grand-mix")
         XCTAssertEqual(LevelCatalog.endlessBlock(index: 91), "star-splash")
+        // The three Keep Squishing twists come in on blocks 2, 3 and 4.
+        XCTAssertEqual((1...4).map { LevelCatalog.endlessBlock(index: $0 * 10) }, ["toy-freeze", "space-locks", "morph-mayhem", "mega-jars"])
         XCTAssertTrue(LevelCatalog.isExpert(world: LevelCatalog.endless, index: 5))
         XCTAssertFalse(LevelCatalog.isExpert(world: "toyshop", index: 5))
         XCTAssertEqual(LevelCatalog.look(world: "toyshop", index: 11), "toyshop")
@@ -56,6 +58,22 @@ final class LevelTests: XCTestCase {
         XCTAssertTrue(keep.contains { !($0.mechanics?.sticky ?? []).isEmpty })
         XCTAssertTrue(keep.contains { !($0.mechanics?.curtains ?? []).isEmpty })
         XCTAssertLessThan(keep.filter { !($0.mechanics?.hidden ?? []).isEmpty }.count, keep.count / 3)
+        // Its own three twists: key jars, morph pieces (never more than two) and jars of five. No story world has them.
+        XCTAssertGreaterThanOrEqual(keep.filter { !($0.mechanics?.keys ?? []).isEmpty }.count, 20)
+        XCTAssertGreaterThanOrEqual(keep.filter { !($0.mechanics?.morph ?? []).isEmpty }.count, 20)
+        XCTAssertGreaterThanOrEqual(keep.filter { $0.capacity == 5 }.count, 20)
+        XCTAssertFalse(keep.contains { ($0.mechanics?.morph ?? []).count > LevelValidator.maxMorphs })
+        XCTAssertFalse(all.contains { $0.world != LevelCatalog.endless
+            && ($0.capacity != 4 || !($0.mechanics?.keys ?? []).isEmpty || !($0.mechanics?.morph ?? []).isEmpty) })
+        // The first board of each twist's first block shows that twist alone.
+        for (index, rule) in [(11, "keys"), (21, "morph"), (31, "big")] {
+            let file = try XCTUnwrap(keep.first { $0.index == index })
+            let m = file.mechanics
+            XCTAssertEqual(!(m?.keys ?? []).isEmpty, rule == "keys", file.id)
+            XCTAssertEqual(!(m?.morph ?? []).isEmpty, rule == "morph", file.id)
+            XCTAssertEqual(file.capacity == 5, rule == "big", file.id)
+            XCTAssertTrue((m?.hidden ?? []).isEmpty && (m?.sticky ?? []).isEmpty && (m?.frozen ?? []).isEmpty, file.id)
+        }
         XCTAssertGreaterThanOrEqual(keep.filter { $0.index % 5 == 0 && $0.jars.filter(\.isEmpty).count == 1 }.count, 15,
                                     "Expert boards with one spare jar")
         for file in jungle {
@@ -168,6 +186,53 @@ final class SolverTests: XCTestCase {
                              mechanics: nil, par: nil, solution: nil, capsule: true, softenAfterFails: nil)
         let level = try Level(file: file)
         XCTAssertEqual(Solver.solve(level.board)?.moves.count, 7)
+    }
+
+    func testSolverPlansAroundAKeyJar() throws {
+        // Jar 1 is padlocked until the jar of A is finished.
+        let pieces: ([UInt8]) -> [Piece] = { $0.map { Piece(kind: $0) } }
+        let jars = [pieces([0]), pieces([1, 2]), pieces([0]), pieces([2, 1]), pieces([])]
+        let locked = Board(capacity: 2, jars: jars, keys: [1: 0])
+        let result = try XCTUnwrap(Solver.solve(locked))
+        XCTAssertEqual(result.moves.count, 4)
+        var b = locked
+        for move in result.moves { XCTAssertNotNil(b.apply(move)) }
+        XCTAssertTrue(b.isWon)
+        // A padlock whose key kind is locked inside it can never open.
+        let stuck = Board(capacity: 2, jars: [pieces([0, 1]), pieces([1, 0]), pieces([])], keys: [0: 0])
+        XCTAssertNil(Solver.solve(stuck))
+    }
+
+    func testSolverPlansAroundAMorphPiece() throws {
+        // The morph piece shows B and turns into A; it has to be poured an even number of times.
+        let start = Board(capacity: 2, jars: [[Piece(kind: 0), Piece(kind: 1, morph: 1)], [Piece(kind: 1), Piece(kind: 0)], [], []])
+        let result = try XCTUnwrap(Solver.solve(start))
+        XCTAssertEqual(result.moves.count, 5)
+        var b = start
+        for move in result.moves { XCTAssertNotNil(b.apply(move)) }
+        XCTAssertTrue(b.isWon)
+        if case .move = Solver.hint(start) {} else { XCTFail("a hint is found on a morph board") }
+    }
+
+    func testKeyJarsAndMorphPiecesReadFromALevelFile() throws {
+        let json = """
+        {"schema": 1, "id": "endless-11", "world": "endless", "index": 11, "beat": "intro", "capacity": 4,
+         "jars": [["a", "a", "b", "b"], ["b", "b", "a", "a"], [], []],
+         "mechanics": {"hidden": [], "sticky": [], "frozen": [],
+                       "keys": [{"jar": 1, "kind": "a"}], "morph": [{"jar": 0, "at": 3, "kind": "a"}]},
+         "par": 1, "solution": [], "capsule": false, "softenAfterFails": null}
+        """
+        let file = try LevelFile.decode(Data(json.utf8))
+        let level = try Level(file: file)
+        XCTAssertEqual(level.board.keyKind(1), 0)
+        XCTAssertEqual(level.board.jars[0][3].otherKind, 0)
+        XCTAssertEqual(level.board.jars[0][3].kind, 1)
+        // The validator turns down a key jar that holds its own key kind, and either twist in a story world.
+        XCTAssertTrue(LevelValidator.structuralProblems(file).contains { $0.contains("holds its own key kind") })
+        var story = file
+        story.world = "toyshop"
+        story.id = "toyshop-11"
+        XCTAssertTrue(LevelValidator.structuralProblems(story).contains { $0.contains("Keep Squishing only") })
     }
 
     func testUnsolvableBoardReturnsNil() {

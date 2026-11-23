@@ -5,6 +5,8 @@ import SquishPolicy
 /// The twists a board can have. Each is shown once, on the first level that has it.
 enum BoardRule: String, CaseIterable {
     case wrapped, duet, frozen, curtain, floater, ride, vine
+    /// The three Keep Squishing twists: key jars, morph pieces and jars that hold five.
+    case key, morph, bigJar
     /// Not a twist of one world: a run only moves as far as there is room. Taught early in Toy Shop.
     case partial
 
@@ -23,6 +25,9 @@ enum BoardRule: String, CaseIterable {
         }
         if !board.curtains.isEmpty { found.insert(.curtain) }
         if board.hasVines { found.insert(.vine) }
+        if board.hasKeys { found.insert(.key) }
+        if board.hasMorphs { found.insert(.morph) }
+        if board.capacity > 4 { found.insert(.bigJar) }
         return BoardRule.allCases.filter { found.contains($0) }
     }
 
@@ -36,6 +41,9 @@ enum BoardRule: String, CaseIterable {
         case .floater: return String(localized: "A bubble seals its jar. Dig under it until it meets its twin or the bottom. Pop!")
         case .ride: return String(localized: "A golden bubble can fly! Tap it, then tap any jar.")
         case .vine: return String(localized: "Each finished jar counts the tag down. At 0 the vine snaps!")
+        case .key: return String(localized: "Locked! Finish a jar of the squishy on the padlock to open it.")
+        case .morph: return String(localized: "A morph squishy! Every time you pour it, it flips to its other look.")
+        case .bigJar: return String(localized: "Big jars! These hold 5 squishies.")
         }
     }
 }
@@ -90,6 +98,8 @@ struct RuleDemo: View {
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.65)) { step = s }
                 if s == 2 || s == 4 { model.sounds.play("land_soft", volume: 0.5) }
                 if s == 4, rule == .floater || rule == .ride { model.sounds.play("bubble_pop", volume: 0.6) }
+                if s == 4, rule == .key { model.sounds.play("unlock_new", volume: 0.5) }
+                if s == 4, rule == .morph { model.sounds.play("squeeze_out", volume: 0.5) }
                 try? await Task.sleep(nanoseconds: s == 5 ? 1_400_000_000 : 750_000_000)
                 if Task.isCancelled { return }
             }
@@ -116,6 +126,9 @@ struct RuleDemo: View {
         case .floater: floaterStage
         case .ride: rideStage
         case .vine: vineStage
+        case .key: keyStage
+        case .morph: morphStage
+        case .bigJar: bigJarStage
         case .partial: partialStage
         case .curtain: curtainStage
         }
@@ -230,6 +243,94 @@ struct RuleDemo: View {
         }
     }
 
+    // Key jar: the last one hops in, the jar of the padlock's squishy is finished, and the padlock opens.
+    private var keyStage: some View {
+        let moved = step >= 3
+        let open = step >= 4
+        return ZStack {
+            blob(actors[0], x: RuleDemo.xs[0], y: RuleDemo.ys[0])
+            blob(actors[0], x: RuleDemo.xs[0], y: RuleDemo.ys[1])
+            blob(actors[1], x: RuleDemo.xs[1], y: RuleDemo.ys[0])
+            blob(actors[1], x: RuleDemo.xs[2], y: RuleDemo.ys[0])
+            blob(actors[0], x: moved ? RuleDemo.xs[0] : RuleDemo.xs[2],
+                 y: moved ? RuleDemo.ys[2] : (step == 2 ? RuleDemo.ys[3] : RuleDemo.ys[1]))
+            if moved {
+                // The finished jar gets its lid.
+                Capsule().fill(Theme.butter).frame(width: 54, height: 9)
+                    .position(x: RuleDemo.xs[0], y: 40)
+                    .transition(.scale.combined(with: .opacity))
+            }
+            if !open {
+                // The padlock shows the squishy whose jar opens it.
+                ZStack {
+                    Capsule().fill(Color(hex: 0xC9B8E8)).frame(width: 60, height: 7).offset(y: 6)
+                    RoundedRectangle(cornerRadius: 8).stroke(Theme.plum, lineWidth: 4).frame(width: 18, height: 24).offset(y: -12)
+                    RoundedRectangle(cornerRadius: 8).fill(.white)
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.plum, lineWidth: 2.5))
+                        .overlay(SquishyView(id: actors[0]).padding(3))
+                        .frame(width: 34, height: 30).offset(y: 6)
+                }
+                .position(x: RuleDemo.xs[1], y: 44)
+                .transition(.scale(scale: 1.4).combined(with: .opacity))
+            }
+        }
+    }
+
+    /// A morph squishy in the demo: `front` on top, `back` showing through the lower corner.
+    private func morphBlob(front: String, back: String, x: CGFloat, y: CGFloat) -> some View {
+        ZStack {
+            SquishyView(id: front)
+            SquishyView(id: back).mask(
+                Path { p in
+                    p.move(to: CGPoint(x: 0, y: 34))
+                    p.addLine(to: CGPoint(x: 34, y: 34))
+                    p.addLine(to: CGPoint(x: 34, y: 0))
+                    p.closeSubpath()
+                }
+            )
+            Circle().fill(.white).overlay(Circle().stroke(Theme.plum, lineWidth: 1.5))
+                .overlay(Text(verbatim: "↻").font(.system(size: 9, weight: .heavy)).foregroundStyle(Theme.plum))
+                .frame(width: 13, height: 13).offset(x: -11, y: 11)
+        }
+        .frame(width: 34, height: 34).position(x: x, y: y)
+    }
+
+    // Morph: it is poured onto its own look, and as it lands it flips to its other one.
+    private var morphStage: some View {
+        let moved = step >= 3
+        let flipped = step >= 4
+        return ZStack {
+            blob(actors[1], x: RuleDemo.xs[0], y: RuleDemo.ys[0])
+            blob(actors[0], x: RuleDemo.xs[2], y: RuleDemo.ys[0])
+            morphBlob(front: flipped ? actors[1] : actors[0], back: flipped ? actors[0] : actors[1],
+                      x: moved ? RuleDemo.xs[2] : RuleDemo.xs[0],
+                      y: step == 2 ? RuleDemo.ys[3] : RuleDemo.ys[1])
+        }
+    }
+
+    // Big jar: four are in, the fifth hops over, and only then does the lid come.
+    private var bigJarStage: some View {
+        let moved = step >= 3
+        let ys: [CGFloat] = [134, 114, 94, 74, 54]
+        return ZStack {
+            ForEach(0..<4, id: \.self) { i in
+                SquishyView(id: actors[0]).frame(width: 24, height: 24).position(x: RuleDemo.xs[0], y: ys[i])
+            }
+            blob(actors[1], x: RuleDemo.xs[2], y: RuleDemo.ys[0])
+            SquishyView(id: actors[0]).frame(width: 24, height: 24)
+                .position(x: moved ? RuleDemo.xs[0] : RuleDemo.xs[2],
+                          y: moved ? ys[4] : (step == 2 ? RuleDemo.ys[3] : RuleDemo.ys[1]))
+            if step >= 4 {
+                Capsule().fill(Theme.butter).frame(width: 54, height: 9)
+                    .position(x: RuleDemo.xs[0], y: 40)
+                    .transition(.scale.combined(with: .opacity))
+                Text(verbatim: "5").font(Theme.title(22)).foregroundStyle(Theme.plum)
+                    .position(x: RuleDemo.xs[1], y: RuleDemo.ys[2])
+                    .transition(.scale.combined(with: .opacity))
+            }
+        }
+    }
+
     // Frozen: each move in or out of the jar next door melts one layer of ice.
     private var frozenStage: some View {
         let ice = step >= 4 ? 0 : (step >= 2 ? 1 : 2)
@@ -325,8 +426,11 @@ struct RuleDemo: View {
         case (.floater, 3), (.ride, 3): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])
         case (.partial, 1), (.partial, 2): spot = CGPoint(x: RuleDemo.xs[0], y: RuleDemo.ys[2])
         case (.partial, 3): spot = CGPoint(x: RuleDemo.xs[1], y: RuleDemo.ys[2])
-        case (.curtain, 1), (.curtain, 2), (.vine, 1), (.vine, 2): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])
-        case (.curtain, 3), (.vine, 3): spot = CGPoint(x: RuleDemo.xs[0], y: RuleDemo.ys[2])
+        case (.curtain, 1), (.curtain, 2), (.vine, 1), (.vine, 2), (.key, 1), (.key, 2), (.bigJar, 1), (.bigJar, 2):
+            spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])
+        case (.curtain, 3), (.vine, 3), (.key, 3), (.bigJar, 3): spot = CGPoint(x: RuleDemo.xs[0], y: RuleDemo.ys[2])
+        case (.morph, 1), (.morph, 2): spot = CGPoint(x: RuleDemo.xs[0], y: RuleDemo.ys[1])
+        case (.morph, 3): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])
         default: spot = CGPoint(x: 130, y: 190)
         }
         let shown = step >= 1 && step <= 4

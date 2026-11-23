@@ -53,6 +53,11 @@ final class BoardScene: SKScene {
     /// A vine has snapped (Jungle Jam): the jar it tied is open.
     var onVineSnap: (() -> Void)?
     private var vineNodes: [Int: VineNode] = [:]
+    /// A key jar's padlock has opened (Keep Squishing).
+    var onLockOpen: (() -> Void)?
+    /// A morph piece has flipped to its other kind.
+    var onMorph: (() -> Void)?
+    private var lockNodes: [Int: LockNode] = [:]
     /// Starlight Stage: lamps along the top and a little crowd along the bottom.
     private var stage: StageShowNode?
 
@@ -234,6 +239,7 @@ final class BoardScene: SKScene {
                 node.isLucky = piece.kind == luckyKind
                 if world == "bubblebath" { node.useBubble() }
                 node.apply(piece)
+                node.showMorph(other: piece.otherKind.map { kinds[Int($0)] })
                 addChild(node)
                 nodes.append(node)
             }
@@ -268,6 +274,16 @@ final class BoardScene: SKScene {
             vine.zPosition = 8
             addChild(vine)
             vineNodes[j] = vine
+        }
+        // Key jars: padlocked until a jar of the squishy on the padlock is finished.
+        lockNodes = [:]
+        for j in 0..<board.jarCount where j < geometry.centers.count {
+            guard let key = board.keyKind(j), Int(key) < kinds.count else { continue }
+            let lock = LockNode(size: geometry.jarSize, keyID: kinds[Int(key)])
+            lock.position = geometry.centers[j]
+            lock.zPosition = 8
+            addChild(lock)
+            lockNodes[j] = lock
         }
         if feverOn { setFever(true) }
         showTutorialIfNeeded()
@@ -631,6 +647,7 @@ final class BoardScene: SKScene {
     private func shake(_ j: Int) {
         curtainNodes[j]?.ripple()
         vineNodes[j]?.wobble()
+        lockNodes[j]?.rattle()
         let jar = jarNodes[j]
         let x = geometry.centers[j].x
         jar.run(.sequence([
@@ -705,6 +722,22 @@ final class BoardScene: SKScene {
     private func finish(_ result: MoveResult, newBoard: Board) {
         board = newBoard
         if !result.poppedJars.isEmpty { onBubblePop?() }
+        // A morph piece that was poured flips: a new node in its new kind takes the old one's place.
+        let to = result.move.destination
+        for i in result.flipped where to < pieces.count && i < pieces[to].count && i < board.jars[to].count {
+            let piece = board.jars[to][i]
+            guard Int(piece.kind) < kinds.count else { continue }
+            let old = pieces[to][i]
+            let node = PieceNode(kindID: kinds[Int(piece.kind)], diameter: old.diameter)
+            node.isLucky = piece.kind == luckyKind
+            node.apply(piece)
+            node.showMorph(other: piece.otherKind.map { kinds[Int($0)] })
+            addChild(node)
+            old.morph(into: node, calm: UIAccessibility.isReduceMotionEnabled)
+            node.position = slot(to, i)
+            pieces[to][i] = node
+        }
+        if !result.flipped.isEmpty { onMorph?() }
         for j in 0..<min(pieces.count, board.jarCount) {
             for (i, node) in pieces[j].enumerated() where i < board.jars[j].count {
                 node.apply(board.jars[j][i])
@@ -744,8 +777,27 @@ final class BoardScene: SKScene {
         for (n, j) in result.raisedCurtains.enumerated() { raiseCurtain(j, after: 0.7 + 0.25 * Double(n)) }
         for (j, vine) in vineNodes where !result.snappedVines.contains(j) { vine.set(newBoard.vineTag(j)) }
         for (n, j) in result.snappedVines.enumerated() { snapVine(j, after: 0.5 + 0.25 * Double(n)) }
+        for (n, j) in result.openedLocks.enumerated() { openLock(j, after: 0.6 + 0.25 * Double(n)) }
         busy = false
         onMoveFinished?(result)
+    }
+
+    /// A jar of the key squishy is finished: the padlock opens and what was locked in bounces once.
+    private func openLock(_ j: Int, after delay: Double) {
+        guard let lock = lockNodes.removeValue(forKey: j) else { return }
+        let calm = UIAccessibility.isReduceMotionEnabled
+        run(.sequence([
+            .wait(forDuration: delay),
+            .run { [weak self, weak lock] in
+                guard let self else { return }
+                self.onLockOpen?()
+                lock?.open(calm: calm)
+                guard j < self.geometry.centers.count else { return }
+                self.sparkle(at: self.geometry.centers[j])
+                guard !calm, j < self.pieces.count else { return }
+                for node in self.pieces[j] { node.squeezeAndRelease() }
+            },
+        ]))
     }
 
     /// The tag has reached zero: the vine snaps and what was tied in bounces once.

@@ -5,6 +5,9 @@ import SquishCore
 /// solvable, and the stored par and solution match the solver.
 public enum LevelValidator {
     public static let launchCapacity = 4
+    /// Keep Squishing has big jars on some boards.
+    public static let bigCapacity = 5
+    public static let maxMorphs = 2
     public static let kindRange = 2...8
 
     /// Everything that doesn't need the solver. Empty means OK.
@@ -16,7 +19,14 @@ public enum LevelValidator {
         if file.id != expectedID { p.append("\(id): id should be \(expectedID)") }
         if !LevelCatalog.fileWorlds.contains(file.world) { p.append("\(id): unknown world \(file.world)") }
         if !(1...LevelCatalog.levelCount(in: file.world)).contains(file.index) { p.append("\(id): index out of range") }
-        if file.capacity != launchCapacity { p.append("\(id): capacity \(file.capacity), launch levels use \(launchCapacity)") }
+        let big = file.world == LevelCatalog.endless && file.capacity == bigCapacity
+        if file.capacity != launchCapacity && !big {
+            p.append("\(id): capacity \(file.capacity), levels use \(launchCapacity) (Keep Squishing also \(bigCapacity))")
+        }
+        let m = file.mechanics
+        if file.world != LevelCatalog.endless, !(m?.keys ?? []).isEmpty || !(m?.morph ?? []).isEmpty {
+            p.append("\(id): key jars and morph pieces are Keep Squishing only")
+        }
         if !(2...BoardLayout.maxJars).contains(file.jars.count) { p.append("\(id): \(file.jars.count) jars, allowed 2 to \(BoardLayout.maxJars)") }
         if file.jars.contains(where: { $0.count > file.capacity }) { p.append("\(id): a jar is over capacity") }
         let beat = Beat.expected(forIndex: file.index, world: file.world)
@@ -86,6 +96,37 @@ public enum LevelValidator {
                 p.append("\(id): vine jar \(j) can't hold wrapped, frozen or duet pieces")
             }
         }
+        // Key jars: at most two, never also behind a curtain or a vine, with something inside, none of
+        // it the key kind (shown or as a morph piece's other kind) and nothing wrapped, frozen or paired.
+        let locked = board.jars.indices.filter { board.keyKind($0) != nil }
+        if locked.count > 2 { p.append("\(id): \(locked.count) key jars, at most 2") }
+        for j in locked {
+            let jar = board.jars[j]
+            let key = board.keyKind(j)
+            if board.isCurtained(j) || board.vineTag(j) > 0 { p.append("\(id): key jar \(j) also has a curtain or a vine") }
+            if jar.isEmpty { p.append("\(id): key jar \(j) is empty") }
+            if jar.contains(where: { $0.kind == key || $0.otherKind == key }) {
+                p.append("\(id): key jar \(j) holds its own key kind")
+            }
+            if jar.contains(where: { $0.hidden || $0.isFrozen || $0.bondedAbove }) {
+                p.append("\(id): key jar \(j) can't hold wrapped, frozen or duet pieces")
+            }
+        }
+        // Morph pieces: at most two, two different kinds each, never wrapped, frozen or in a duet,
+        // and not on a board with bubbles.
+        var morphs = 0
+        for jar in board.jars {
+            for i in jar.indices where jar[i].isMorph {
+                morphs += 1
+                let piece = jar[i]
+                if piece.otherKind == piece.kind { p.append("\(id): a morph piece needs two different kinds") }
+                if piece.hidden || piece.isFrozen || piece.bondedAbove || (i > 0 && jar[i - 1].bondedAbove) {
+                    p.append("\(id): a morph piece can't be wrapped, frozen or in a duet")
+                }
+            }
+        }
+        if morphs > maxMorphs { p.append("\(id): \(morphs) morph pieces, at most \(maxMorphs)") }
+        if morphs > 0 && board.floats { p.append("\(id): morph pieces and bubbles don't share a board") }
         return p
     }
 

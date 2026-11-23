@@ -18,6 +18,10 @@
 ///   jar, but the squishies under it can be taken out. It pops when the piece right under it is its
 ///   own kind, or when nothing is left under it. A golden bubble (`frozen` 2) may ride once to any
 ///   other jar with room (`Move.ride`); it lands on top and is an ordinary floater from then on.
+/// - A key jar (Keep Squishing) has a padlock showing a kind. Nothing goes in or comes out until a
+///   jar of that kind is finished anywhere; then the padlock opens for good.
+/// - A morph piece (Keep Squishing) shows two kinds and counts as the one in front. Each time it is
+///   itself poured it flips to its other kind as it lands.
 public struct Board: Hashable, Sendable {
     public let capacity: Int
     public private(set) var jars: [[Piece]]
@@ -28,10 +32,14 @@ public struct Board: Hashable, Sendable {
     public private(set) var curtains: [Int]
     /// The number on each jar's vine tag, one entry per jar; 0 means no vine.
     public private(set) var vines: [UInt8]
+    /// Each jar's padlock, one entry per jar: 0 for none, else the key kind + 1.
+    public private(set) var keys: [UInt8]
     /// Bubble Bath: frozen pieces are floaters, not ice.
     public let floats: Bool
 
-    public init(capacity: Int, jars: [[Piece]], curtains: [Int] = [], vines: [Int: Int] = [:], floats: Bool = false) {
+    /// `keys` maps a jar to the kind its padlock shows.
+    public init(capacity: Int, jars: [[Piece]], curtains: [Int] = [], vines: [Int: Int] = [:], floats: Bool = false,
+                keys: [Int: Int] = [:]) {
         self.capacity = capacity
         self.jars = jars
         self.floats = floats
@@ -40,6 +48,9 @@ public struct Board: Hashable, Sendable {
         var tags = [UInt8](repeating: 0, count: jars.count)
         for (j, n) in vines where jars.indices.contains(j) && n > 0 { tags[j] = UInt8(clamping: n) }
         self.vines = tags
+        var locks = [UInt8](repeating: 0, count: jars.count)
+        for (j, kind) in keys where jars.indices.contains(j) && kind >= 0 { locks[j] = UInt8(clamping: kind + 1) }
+        self.keys = locks
         for j in self.jars.indices {
             settleFloaters(j)
             revealTop(j)
@@ -77,8 +88,12 @@ public struct Board: Hashable, Sendable {
     /// The number left on jar `j`'s vine tag; 0 when it has no vine or the vine has snapped.
     public func vineTag(_ j: Int) -> Int { vines.indices.contains(j) ? Int(vines[j]) : 0 }
     public var hasVines: Bool { vines.contains { $0 > 0 } }
-    /// Behind a curtain or tied by a vine: nothing goes in or comes out.
-    public func isShut(_ j: Int) -> Bool { isCurtained(j) || vineTag(j) > 0 }
+    /// The kind on jar `j`'s padlock; nil when it has none or it has opened.
+    public func keyKind(_ j: Int) -> UInt8? { keys.indices.contains(j) && keys[j] > 0 ? keys[j] - 1 : nil }
+    public var hasKeys: Bool { keys.contains { $0 > 0 } }
+    public var hasMorphs: Bool { jars.contains { $0.contains { $0.isMorph } } }
+    /// Behind a curtain, tied by a vine or padlocked: nothing goes in or comes out.
+    public func isShut(_ j: Int) -> Bool { isCurtained(j) || vineTag(j) > 0 || keyKind(j) != nil }
 
     public func isComplete(_ j: Int) -> Bool {
         let jar = jars[j]
@@ -168,7 +183,8 @@ public struct Board: Hashable, Sendable {
         // Only real level boards are judged: every kind there fills whole jars.
         var counts: [UInt8: Int] = [:]
         for jar in jars { for piece in jar { counts[piece.kind, default: 0] += 1 } }
-        guard counts.values.allSatisfy({ $0 % capacity == 0 }) else { return false }
+        // (Morph pieces change the counts as they flip, so a board with one is judged as it stands.)
+        guard hasMorphs || counts.values.allSatisfy({ $0 % capacity == 0 }) else { return false }
         var seen: Set<Board> = [self]
         var queue = [self]
         var at = 0
@@ -200,6 +216,11 @@ public struct Board: Hashable, Sendable {
         // A duet that lands on its bottom member's kind lets go: the two become ordinary pieces.
         let letGo = k == 2 && moved[0].bondedAbove && !jars[t].isEmpty
         if letGo { moved[0].bondedAbove = false }
+        // A morph piece that is poured flips to its other kind as it lands.
+        var flipped: [Int] = []
+        for i in moved.indices {
+            if moved[i].flip() { flipped.append(jars[t].count + i) }
+        }
         jars[f].removeSubrange((low - k)..<low)
         jars[t].append(contentsOf: moved)
         let revealed = revealTop(f)
@@ -224,16 +245,9 @@ public struct Board: Hashable, Sendable {
         let completed = isComplete(t)
         var raised: [Int] = []
         var snapped: [Int] = []
+        var opened: [Int] = []
         if completed {
-            settle(t)
-            // Every finished jar lowers each vine tag by one; at zero the vine snaps.
-            for j in vines.indices where vines[j] > 0 {
-                vines[j] -= 1
-                if vines[j] == 0 {
-                    revealTop(j)
-                    snapped.append(j)
-                }
-            }
+            (snapped, opened) = finished(t)
             // A finished jar raises the curtain on the jars next to it.
             if t < layoutJarCount {
                 for nb in BoardLayout.neighbours(of: t, jarCount: layoutJarCount) where isCurtained(nb) {
@@ -245,7 +259,31 @@ public struct Board: Hashable, Sendable {
         }
         return MoveResult(move: move, count: k, revealedSourceTop: revealed,
                           completedJar: completed ? t : nil, thawedJars: thawed, duetLetGo: letGo,
-                          raisedCurtains: raised, snappedVines: snapped, poppedJars: popped ? [f] : [])
+                          raisedCurtains: raised, snappedVines: snapped, poppedJars: popped ? [f] : [],
+                          openedLocks: opened, flipped: flipped)
+    }
+
+    /// Jar `t` has just been finished: it settles, every vine tag drops by one (at zero the vine
+    /// snaps) and every padlock that shows its kind opens.
+    private mutating func finished(_ t: Int) -> (snapped: [Int], opened: [Int]) {
+        settle(t)
+        var snapped: [Int] = []
+        for j in vines.indices where vines[j] > 0 {
+            vines[j] -= 1
+            if vines[j] == 0 {
+                revealTop(j)
+                snapped.append(j)
+            }
+        }
+        var opened: [Int] = []
+        if let kind = jars[t].first?.kind {
+            for j in keys.indices where keys[j] == kind + 1 {
+                keys[j] = 0
+                revealTop(j)
+                opened.append(j)
+            }
+        }
+        return (snapped, opened)
     }
 
     /// A golden bubble rides from the top of jar `f` to the top of jar `t`.
@@ -256,20 +294,12 @@ public struct Board: Hashable, Sendable {
         jars[t].append(rider)
         let popped = settleFloaters(t)
         var snapped: [Int] = []
+        var opened: [Int] = []
         let completed = isComplete(t)
-        if completed {
-            settle(t)
-            for j in vines.indices where vines[j] > 0 {
-                vines[j] -= 1
-                if vines[j] == 0 {
-                    revealTop(j)
-                    snapped.append(j)
-                }
-            }
-        }
+        if completed { (snapped, opened) = finished(t) }
         return MoveResult(move: Move.ride(from: f, to: t), count: 1, revealedSourceTop: false,
                           completedJar: completed ? t : nil, thawedJars: [], snappedVines: snapped,
-                          poppedJars: popped ? [t] : [])
+                          poppedJars: popped ? [t] : [], openedLocks: opened)
     }
 
     /// Adds one empty jar (softening after fails). The rows shift to make room, so "next door"
@@ -277,6 +307,7 @@ public struct Board: Hashable, Sendable {
     public mutating func addEmptyJar() {
         jars.append([])
         vines.append(0)
+        keys.append(0)
         for j in curtains { revealTop(j) }
         curtains = []
     }
@@ -329,12 +360,13 @@ public struct Board: Hashable, Sendable {
 public extension Board {
     /// Shake-up: every piece in an unfinished jar lands in a new spot. Finished jars stay as they
     /// are, each jar keeps the number of pieces it had, and wrappers, ice, bubbles and duets fall away.
-    /// A jar behind a closed curtain or tied by a vine is left alone. The caller checks the result can still be solved.
+    /// A morph piece stays a morph piece, showing the kind it showed.
+    /// A jar behind a closed curtain, tied by a vine or padlocked is left alone. The caller checks the result can still be solved.
     func shakenUp<R: RandomNumberGenerator>(using rng: inout R) -> Board {
         var next = jars
         let open = next.indices.filter { !isComplete($0) && !isShut($0) }
         var pool: [Piece] = []
-        for j in open { for piece in next[j] { pool.append(Piece(kind: piece.kind)) } }
+        for j in open { for piece in next[j] { pool.append(Piece(kind: piece.kind, morph: piece.morph)) } }
         pool.shuffle(using: &rng)
         for j in open {
             let n = next[j].count
@@ -343,6 +375,8 @@ public extension Board {
         }
         var tags: [Int: Int] = [:]
         for j in vines.indices where vines[j] > 0 { tags[j] = Int(vines[j]) }
-        return Board(capacity: capacity, jars: next, curtains: curtains, vines: tags, floats: floats)
+        var locks: [Int: Int] = [:]
+        for j in keys.indices where keys[j] > 0 { locks[j] = Int(keys[j]) - 1 }
+        return Board(capacity: capacity, jars: next, curtains: curtains, vines: tags, floats: floats, keys: locks)
     }
 }

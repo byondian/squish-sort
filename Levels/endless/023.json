@@ -6,18 +6,18 @@
   "beat": "easy",
   "capacity": 4,
   "jars": [
-    ["coco", "zuzu", "zuzu", "nova"],
-    ["riff", "pip", "riff", "coco"],
-    ["lumi", "riff", "lumi", "lumi"],
-    ["coco", "zuzu", "nova", "riff"],
-    ["pip", "pip", "zuzu", "nova"],
-    ["pip", "nova", "lumi", "coco"],
+    ["zuzu", "coco", "coco", "riff"],
+    ["riff", "riff", "zuzu", "pip"],
+    ["riff", "zuzu", "coco", "lumi"],
+    ["coco", "lumi", "nova", "nova"],
+    ["lumi", "lumi", "pip", "pip"],
+    ["nova", "nova", "pip", "zuzu"],
     [],
     []
   ],
-  "mechanics": {"hidden": [], "sticky": [[3, 1], [4, 1]], "frozen": []},
-  "par": 19,
-  "solution": [[0, 6], [4, 6], [0, 7], [1, 0], [3, 1], [3, 7], [0, 3], [5, 3], [7, 6], [2, 0], [1, 2], [5, 0], [5, 6], [1, 5], [2, 1], [0, 2], [4, 5], [5, 7], [4, 5]],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": [], "morph": [{"jar": 1, "at": 3, "kind": "lumi"}, {"jar": 3, "at": 1, "kind": "pip"}]},
+  "par": 15,
+  "solution": [[3, 6], [3, 7], [4, 7], [2, 4], [2, 3], [5, 2], [5, 7], [5, 6], [1, 5], [1, 2], [0, 1], [0, 3], [2, 0], [1, 2], [4, 5]],
   "capsule": false,
   "softenAfterFails": null
 }

@@ -871,6 +871,28 @@
         }
       }
     },
+    "A morph squishy! Every time you pour it, it flips to its other look.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "へんしんスクイーズ！うつすたびに、もうひとつのすがたに変わるよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "변신 스퀴시! 옮길 때마다 다른 모습으로 바뀌어요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "變身捏捏！每移動一次，就會變成另一個樣子。"
+          }
+        }
+      }
+    },
     "A new world is open!": {
       "localizations": {
         "ja": {
@@ -1351,6 +1373,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "大"
+          }
+        }
+      }
+    },
+    "Big jars! These hold 5 squishies.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ビッグジャー！5こ入るよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "왕병! 5개가 들어가요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大罐子！可以裝 5 個。"
           }
         }
       }
@@ -4501,6 +4545,28 @@
         }
       }
     },
+    "Locked! Finish a jar of the squishy on the padlock to open it.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ロック中！カギにかいてある子のビンをそろえると開くよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "잠겼어요! 자물쇠에 그려진 친구의 병을 완성하면 열려요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "鎖住了！完成鎖頭上那個的罐子就能打開。"
+          }
+        }
+      }
+    },
     "Lucky hint!": {
       "localizations": {
         "ja": {
@@ -4787,6 +4853,28 @@
         }
       }
     },
+    "Mega Jar Party": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ビッグジャーパーティー"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "왕병 파티"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大罐派對"
+          }
+        }
+      }
+    },
     "Midnight Toy Parade": {
       "localizations": {
         "ja": {
@@ -4959,6 +5047,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "每完成一個世界，就會解鎖更多零件。"
+          }
+        }
+      }
+    },
+    "Morph Mayhem": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "へんしんパニック"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "변신 대소동"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "變身大騷動"
           }
         }
       }
@@ -7313,6 +7423,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "音效"
+          }
+        }
+      }
+    },
+    "Space Locks": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ロックオン宇宙"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "잠금 해제 우주"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "太空解鎖"
           }
         }
       }

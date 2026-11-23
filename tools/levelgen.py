@@ -104,12 +104,15 @@ def mechanic_count(mech, pos):
     return 0
 
 
-def random_board(rng, names, empties, mech, mcount, mix_hidden=0, mix_frozen=0, vines=None, bubbles=None):
-    """Returns (jars, mechanics) or None. `bubbles` is (floaters, golden ride bubbles) for Bubble Bath."""
+def random_board(rng, names, empties, mech, mcount, mix_hidden=0, mix_frozen=0, vines=None, bubbles=None,
+                 keys=0, morphs=0, cap=None):
+    """Returns (jars, mechanics) or None. `bubbles` is (floaters, golden ride bubbles) for Bubble Bath.
+    `keys` key jars, `morphs` morph pieces and jars of `cap` are the Keep Squishing twists."""
+    cap = cap or CAP
     units = []
     if mech == "sticky":
         # a duet is two different kinds placed as one 2-piece unit (bottom, top)
-        pool = [n for n in names for _ in range(CAP)]
+        pool = [n for n in names for _ in range(cap)]
         for _ in range(mcount):
             a, b = rng.sample(names, 2)
             if a in pool and b in pool:
@@ -117,19 +120,19 @@ def random_board(rng, names, empties, mech, mcount, mix_hidden=0, mix_frozen=0, 
                 units.append((a, b))
         units += [(p,) for p in pool]
     else:
-        units = [(n,) for n in names for _ in range(CAP)]
+        units = [(n,) for n in names for _ in range(cap)]
     for _ in range(200):
         rng.shuffle(units)
         jars, sticky, cur = [], [], []
         ok = True
         for u in units:
-            if len(cur) + len(u) > CAP:
+            if len(cur) + len(u) > cap:
                 ok = False
                 break
             if len(u) == 2:
                 sticky.append([len(jars), len(cur)])
             cur.extend(u)
-            if len(cur) == CAP:
+            if len(cur) == cap:
                 jars.append(cur)
                 cur = []
         if not ok or cur:
@@ -143,10 +146,10 @@ def random_board(rng, names, empties, mech, mcount, mix_hidden=0, mix_frozen=0, 
         if sticky:
             mechanics["sticky"] = sticky
         if mech == "hidden":
-            spots = [[j, i] for j in range(len(jars)) for i in range(CAP - 1)]
+            spots = [[j, i] for j in range(len(jars)) for i in range(cap - 1)]
             mechanics["hidden"] = sorted(rng.sample(spots, min(mcount, len(spots))))
         if mech == "frozen":
-            spots = [[j, i] for j in range(len(jars)) for i in range(CAP)]
+            spots = [[j, i] for j in range(len(jars)) for i in range(cap)]
             # not more than one frozen piece per jar, keeps it readable
             picks, used = [], set()
             for s in rng.sample(spots, len(spots)):
@@ -168,18 +171,27 @@ def random_board(rng, names, empties, mech, mcount, mix_hidden=0, mix_frozen=0, 
             picked = sorted(rng.sample(free, len(vines)))
             mechanics["vines"] = [[j, tag] for j, tag in zip(picked, vines)]
             closed = closed + picked
+        if keys:
+            # a padlock shuts a jar of mixed squishies until a jar of its key kind is finished: never a
+            # jar with a duet, and never a jar that holds the key kind itself
+            free = [j for j in range(len(jars)) if j not in closed and not any(sj == j for sj, _ in sticky)]
+            if len(free) < keys:
+                continue
+            picked = sorted(rng.sample(free, keys))
+            mechanics["keys"] = [{"jar": j, "kind": rng.choice([n for n in names if n not in jars[j]])} for j in picked]
+            closed = closed + picked
         if mix_hidden:
             # wrapped pieces mixed into a duet world: never a duet piece, never the top of a jar,
             # never behind a curtain
             taken = {(j, i) for j, i in sticky} | {(j, i + 1) for j, i in sticky}
-            spots = [[j, i] for j in range(len(jars)) for i in range(CAP - 1) if (j, i) not in taken and j not in closed]
+            spots = [[j, i] for j in range(len(jars)) for i in range(cap - 1) if (j, i) not in taken and j not in closed]
             mechanics["hidden"] = sorted(rng.sample(spots, min(mix_hidden, len(spots))))
         if mix_frozen:
             # frozen pieces mixed in (Keep Squishing): one a jar at most, never a duet piece,
             # never wrapped as well, never behind a curtain
             taken = {(j, i) for j, i in sticky} | {(j, i + 1) for j, i in sticky}
             taken |= {(j, i) for j, i in mechanics.get("hidden", [])}
-            spots = [[j, i] for j in range(len(jars)) for i in range(CAP) if (j, i) not in taken and j not in closed]
+            spots = [[j, i] for j in range(len(jars)) for i in range(cap) if (j, i) not in taken and j not in closed]
             picks, used = [], set()
             for sp in rng.sample(spots, len(spots)):
                 if sp[0] not in used:
@@ -187,17 +199,35 @@ def random_board(rng, names, empties, mech, mcount, mix_hidden=0, mix_frozen=0, 
                 if len(picks) == mix_frozen:
                     break
             mechanics["frozen"] = sorted(picks)
+        if morphs:
+            # A morph piece is a plain piece in an open jar. Two of them swap the same two kinds, so the
+            # board comes out whether both flip an even or an odd number of times.
+            taken = {(j, i) for j, i in sticky} | {(j, i + 1) for j, i in sticky}
+            taken |= {(j, i) for j, i in mechanics.get("hidden", [])} | {(j, i) for j, i, *_ in mechanics.get("frozen", [])}
+            spots = [(j, i) for j in range(len(jars)) for i in range(cap) if (j, i) not in taken and j not in closed]
+            rng.shuffle(spots)
+            first = spots[0]
+            a = jars[first[0]][first[1]]
+            if morphs == 1:
+                mechanics["morph"] = [{"jar": first[0], "at": first[1], "kind": rng.choice([n for n in names if n != a])}]
+            else:
+                second = next((sp for sp in spots[1:] if jars[sp[0]][sp[1]] != a and sp[0] != first[0]), None)
+                if second is None:
+                    continue
+                b = jars[second[0]][second[1]]
+                mechanics["morph"] = sorted([{"jar": first[0], "at": first[1], "kind": b},
+                                             {"jar": second[0], "at": second[1], "kind": a}], key=lambda m: (m["jar"], m["at"]))
         if bubbles:
             # A bubble goes on the top squishy of a jar, one a jar, never on a duet, never on a squishy
             # that already sits on its own kind (it would pop at once). The squishy under it is not wrapped.
             taken = {(j, i) for j, i in sticky} | {(j, i + 1) for j, i in sticky}
-            tops = [j for j in range(len(jars)) if jars[j][-1] != jars[j][-2] and (j, CAP - 1) not in taken and j not in closed]
+            tops = [j for j in range(len(jars)) if jars[j][-1] != jars[j][-2] and (j, cap - 1) not in taken and j not in closed]
             if len(tops) < sum(bubbles):
                 continue
             picked = rng.sample(tops, sum(bubbles))
-            mechanics["frozen"] = sorted([j, CAP - 1, 1] for j in picked[:bubbles[0]]) + sorted([j, CAP - 1, 2] for j in picked[bubbles[0]:])
+            mechanics["frozen"] = sorted([j, cap - 1, 1] for j in picked[:bubbles[0]]) + sorted([j, cap - 1, 2] for j in picked[bubbles[0]:])
             if "hidden" in mechanics:
-                mechanics["hidden"] = [h for h in mechanics["hidden"] if not (h[0] in picked and h[1] >= CAP - 2)]
+                mechanics["hidden"] = [h for h in mechanics["hidden"] if not (h[0] in picked and h[1] >= cap - 2)]
         jars = jars + [[] for _ in range(empties)]
         return jars, mechanics
     return None
@@ -498,15 +528,17 @@ ENDLESS_LENGTH = 240
 # a main rule and, from the second time round, a guest rule from another world.
 # (world whose squishies and room the block borrows, main rule, guest rule). The first entry of each
 # row must match LevelCatalog.endlessLooks.
+# Blocks 2, 3 and 4 bring in the three Keep Squishing twists (key jars, morph pieces, jars of 5), each on
+# its own; later rounds mix them with the worlds' rules.
 ENDLESS_BLOCKS = [
-    # first time round: each world's own rule
-    (0, "ice", None), (1, "wrapped", None), (2, "duets", None), (4, "floaters", None), (5, "vines", None), (2, "duets", "ice"),
+    # first time round
+    (0, "ice", None), (1, "keys", None), (2, "morph", None), (4, "big", "wrapped"), (5, "vines", None), (2, "duets", "ice"),
     # second
-    (0, "ice", "duets"), (1, "wrapped", "ice"), (2, "curtains", None), (4, "floaters", "duets"), (5, "vines", "ice"), (4, "floaters", "vines"),
+    (0, "ice", "duets"), (1, "wrapped", "keys"), (2, "curtains", None), (4, "floaters", "duets"), (5, "morph", "vines"), (4, "floaters", "vines"),
     # third
-    (0, "ice", "vines"), (1, "wrapped", "duets"), (2, "duets", "floaters"), (4, "floaters", "vines"), (5, "vines", "duets"), (5, "vines", "wrapped"),
+    (0, "ice", "vines"), (1, "wrapped", "duets"), (2, "duets", "floaters"), (4, "big", "floaters"), (5, "keys", "duets"), (5, "vines", "wrapped"),
     # fourth
-    (0, "ice", "curtains"), (1, "wrapped", "vines"), (2, "curtains", "ice"), (4, "floaters", "wrapped"), (5, "vines", "floaters"), (0, "duets", "floaters"),
+    (0, "ice", "curtains"), (1, "morph", "wrapped"), (2, "curtains", "ice"), (4, "floaters", "wrapped"), (5, "big", "vines"), (0, "duets", "floaters"),
 ]
 # Kinds for each place in a block. Places 5 and 10 are the Expert boards.
 ENDLESS_KINDS = [5, 5, 6, 6, 8, 6, 7, 7, 6, 8]
@@ -529,6 +561,13 @@ def endless_rule(rule, p, lap, guest):
         return dict(vines=[1] if guest and not late else [2] if guest or p < 4 else [1, 2] if p < 8 else [2, 2])
     if rule == "floaters":
         return dict(bubbles=(2, 1 if late else 0) if guest else (2 + late + (p in (5, 8, 10)), 0 if p in (1, 2, 8) else 1))
+    if rule == "keys":
+        # one padlock already halves how often a careless player wins; two only late in the block
+        return dict(keys=1 if guest or p < 9 else 2)
+    if rule == "morph":
+        return dict(morphs=1 if guest or p < 3 else 2)
+    if rule == "big":
+        return dict(cap=5)
     raise ValueError(rule)
 
 
@@ -536,7 +575,7 @@ def endless_plan(pos):
     block, p = (pos - 1) // 10, (pos - 1) % 10 + 1
     lap = block // 6
     world_idx, main, guest = ENDLESS_BLOCKS[block % len(ENDLESS_BLOCKS)]
-    plan = dict(mech=None, mcount=0, mix_hidden=0, mix_frozen=0, vines=None, bubbles=None)
+    plan = dict(mech=None, mcount=0, mix_hidden=0, mix_frozen=0, vines=None, bubbles=None, keys=0, morphs=0, cap=CAP)
     plan.update(endless_rule(main, p, lap, False))
     # the guest joins from the third level of its block, so the block opens on its main rule alone
     if guest and p >= 3:
@@ -547,6 +586,8 @@ def endless_plan(pos):
     empties = 1 if (expert or (p == 8 and lap >= 1)) and not plan["bubbles"] else 2
     if empties == 1:
         k = min(k, 7)
+    if plan["cap"] > CAP:
+        k = min(k - 1, 6)  # jars of 5 make a board longer, so it gets fewer kinds
     ease = max(0.04, ENDLESS_EASE[p - 1] - 0.05 * lap)
     return world_idx, k, empties, ease, plan
 
@@ -561,6 +602,8 @@ def lighter(plan):
         out["vines"] = plan["vines"][:1]
     if plan["bubbles"]:
         out["bubbles"] = (max(1, plan["bubbles"][0] - 1), plan["bubbles"][1])
+    out["keys"] = min(plan["keys"], 1)
+    out["morphs"] = min(plan["morphs"], 1)
     return out
 
 
@@ -570,7 +613,7 @@ def choose_endless(rng, level, names, empties, plan, ease, tries=30, traps=False
     bubbles = plan["bubbles"]
     for _ in range(tries):
         cand = random_board(rng, names, empties, plan["mech"], plan["mcount"], plan["mix_hidden"], plan["mix_frozen"],
-                            plan["vines"], bubbles)
+                            plan["vines"], bubbles, plan["keys"], plan["morphs"], plan["cap"])
         if cand is None:
             continue
         jars_c, mech_c = cand
@@ -608,7 +651,7 @@ def make_endless(pos):
     beat = BEATS[(pos - 1) % 10]
     names = kinds_for(world_idx, k)
     rng = random.Random(f"{ENDLESS}-remix-{pos}")
-    level = {"schema": 1, "id": f"{ENDLESS}-{pos:02d}", "world": ENDLESS, "index": pos, "beat": beat, "capacity": CAP}
+    level = {"schema": 1, "id": f"{ENDLESS}-{pos:02d}", "world": ENDLESS, "index": pos, "beat": beat, "capacity": plan["cap"]}
     # As planned; then with a second spare jar; then with less of each rule.
     picked = None
     for em, pl in [(empties, plan), (2, plan), (2, lighter(plan)), (2, lighter(lighter(plan)))]:
@@ -621,7 +664,7 @@ def make_endless(pos):
     level["jars"] = jars
     level["mechanics"] = {"hidden": mechanics.get("hidden", []), "sticky": mechanics.get("sticky", []),
                           "frozen": mechanics.get("frozen", [])}
-    for extra in ("curtains", "vines", "floats"):
+    for extra in ("curtains", "vines", "floats", "keys", "morph"):
         if mechanics.get(extra):
             level["mechanics"][extra] = mechanics[extra]
     b, _ = board_from_level(level)
@@ -663,6 +706,9 @@ def dump(level):
         extra += f', "vines": {json.dumps(m["vines"])}'
     if m.get("floats"):
         extra += ', "floats": true'
+    for name in ("keys", "morph"):
+        if m.get(name):
+            extra += f', "{name}": {json.dumps(m[name])}'
     lines.append(f'  "mechanics": {{"hidden": {json.dumps(m["hidden"])}, "sticky": {json.dumps(m["sticky"])}, "frozen": {json.dumps(m["frozen"])}{extra}}},')
     lines.append(f'  "par": {level["par"]},')
     lines.append(f'  "solution": {json.dumps(level["solution"])},')

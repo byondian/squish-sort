@@ -6,18 +6,18 @@
   "beat": "calm",
   "capacity": 4,
   "jars": [
-    ["dotty", "tuki", "bongo", "pina"],
-    ["dotty", "leafy", "nana", "bongo"],
-    ["dotty", "dotty", "leafy", "tuki"],
-    ["leafy", "nana", "leafy", "tuki"],
-    ["pina", "tuki", "bongo", "pina"],
-    ["nana", "nana", "bongo", "pina"],
+    ["bongo", "nana", "pina", "leafy"],
+    ["tuki", "nana", "dotty", "leafy"],
+    ["tuki", "pina", "tuki", "pina"],
+    ["dotty", "tuki", "nana", "dotty"],
+    ["bongo", "dotty", "pina", "leafy"],
+    ["nana", "bongo", "bongo", "leafy"],
     [],
     []
   ],
-  "mechanics": {"hidden": [], "sticky": [], "frozen": [[1, 0], [4, 2]], "vines": [[2, 2], [3, 2]]},
-  "par": 19,
-  "solution": [[0, 6], [1, 0], [4, 6], [5, 6], [5, 4], [1, 5], [0, 7], [4, 7], [4, 0], [4, 6], [3, 0], [3, 1], [3, 5], [1, 3], [0, 4], [0, 1], [2, 4], [2, 3], [1, 2]],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": [], "vines": [[0, 2]], "morph": [{"jar": 3, "at": 2, "kind": "bongo"}, {"jar": 5, "at": 2, "kind": "nana"}]},
+  "par": 23,
+  "solution": [[1, 6], [3, 1], [4, 6], [2, 4], [5, 6], [3, 7], [2, 3], [4, 2], [1, 4], [5, 7], [1, 5], [1, 3], [2, 1], [3, 2], [4, 3], [0, 6], [0, 1], [0, 5], [0, 4], [7, 5], [4, 7], [5, 0], [5, 0]],
   "capsule": false,
   "softenAfterFails": null
 }

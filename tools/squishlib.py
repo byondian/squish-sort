@@ -4,7 +4,13 @@ implementation; CI re-solves every level in Swift and fails if par differs."""
 import heapq
 from dataclasses import dataclass
 
-# A piece is a tuple (kind, hidden, frozen, bonded_above).
+# A piece is a tuple (kind, hidden, frozen, bonded_above, morph).
+#
+# Keep Squishing twists:
+# - Key jar (`keys`): a jar with a padlock showing a kind. It is shut, like a vine jar, until a jar
+#   of that kind is finished anywhere. keys[j] is 0 for no lock, else the key kind + 1.
+# - Morph piece: `morph` is its other kind + 1 (0 for an ordinary piece). It counts as the kind it
+#   shows, and each time it is itself poured it flips to its other kind.
 #
 # Bubble Bath boards (`floats`): a piece with frozen > 0 is a floater, a squishy in a bubble.
 # - It floats on top of its jar. It cannot be picked up, and nothing can be poured into its jar.
@@ -40,6 +46,7 @@ class Board:
     curtains: frozenset = frozenset()  # jars still behind a closed curtain
     vines: tuple = ()  # the number on each jar's vine tag (0: none); empty when the level has no vines
     floats: bool = False  # Bubble Bath: frozen pieces are floaters (see the top of this file)
+    keys: tuple = ()  # each jar's padlock (0: none, else key kind + 1); empty when the level has no key jars
 
     def base(self, j):
         """How many pieces of jar j are under its floaters."""
@@ -58,7 +65,8 @@ class Board:
         return len(self.jars[t]) < self.cap
 
     def shut(self, j):
-        return j in self.curtains or (j < len(self.vines) and self.vines[j] > 0)
+        return (j in self.curtains or (j < len(self.vines) and self.vines[j] > 0)
+                or (j < len(self.keys) and self.keys[j] > 0))
 
     def complete(self, j):
         jar = self.jars[j]
@@ -121,8 +129,8 @@ class Board:
             jars = list(self.jars)
             p = jars[f][-1]
             jars[f] = jars[f][:-1]
-            jars[t] = settle_floaters(jars[t] + ((p[0], p[1], 1, p[3]),))
-            return Board(self.cap, jars, self.neigh, self.curtains, self.vines, True)._finished(t, jars)
+            jars[t] = settle_floaters(jars[t] + ((p[0], p[1], 1, p[3], p[4]),))
+            return Board(self.cap, jars, self.neigh, self.curtains, self.vines, True, self.keys)._finished(t, jars)
         k = self.to_move(f, t)
         assert k > 0
         jars = list(self.jars)
@@ -132,11 +140,13 @@ class Board:
         if k == 2 and moved[0][3] and jars[t]:
             # landing on its own kind, the duet lets go
             p = moved[0]
-            moved = [(p[0], p[1], p[2], False), moved[1]]
+            moved = [(p[0], p[1], p[2], False, p[4]), moved[1]]
+        # a morph piece that is poured flips to its other kind
+        moved = [(p[4] - 1, p[1], p[2], p[3], p[0] + 1) if p[4] else p for p in moved]
         del src[-k:]
         if src and src[-1][1]:
             p = src[-1]
-            src[-1] = (p[0], False, p[2], p[3])
+            src[-1] = (p[0], False, p[2], p[3], p[4])
         dst = list(jars[t]) + moved
         jars[f] = settle_floaters(tuple(src) + floaters) if self.floats else tuple(src)
         jars[t] = tuple(dst)
@@ -149,14 +159,25 @@ class Board:
             if self.floats:
                 break  # floaters are not ice: moves next door do nothing to them
             if any(p[2] > 0 for p in jars[j]):
-                jars[j] = tuple((p[0], p[1], max(0, p[2] - 1), p[3]) for p in jars[j])
-        return Board(self.cap, jars, self.neigh, self.curtains, self.vines, self.floats)._finished(t, jars)
+                jars[j] = tuple((p[0], p[1], max(0, p[2] - 1), p[3], p[4]) for p in jars[j])
+        return Board(self.cap, jars, self.neigh, self.curtains, self.vines, self.floats, self.keys)._finished(t, jars)
 
     def _finished(self, t, jars):
         """What a move that landed on jar t sets off if it finished the jar. `jars` is this board's own list."""
         b = self
         if b.complete(t):
-            jars[t] = tuple((p[0], False, 0, p[3]) for p in jars[t])
+            jars[t] = tuple((p[0], False, 0, p[3], p[4]) for p in jars[t])
+            # a finished jar opens every padlock that shows its kind
+            if any(b.keys):
+                done = jars[t][0][0] + 1
+                locks = list(b.keys)
+                for j, k in enumerate(locks):
+                    if k == done:
+                        locks[j] = 0
+                        if jars[j] and jars[j][-1][1]:
+                            p = jars[j][-1]
+                            jars[j] = jars[j][:-1] + ((p[0], False, p[2], p[3], p[4]),)
+                b.keys = tuple(locks)
             # every finished jar lowers each vine tag by one; at zero the vine snaps
             if any(b.vines):
                 tags = list(b.vines)
@@ -165,7 +186,7 @@ class Board:
                         tags[j] = n - 1
                         if tags[j] == 0 and jars[j] and jars[j][-1][1]:
                             p = jars[j][-1]
-                            jars[j] = jars[j][:-1] + ((p[0], False, p[2], p[3]),)
+                            jars[j] = jars[j][:-1] + ((p[0], False, p[2], p[3], p[4]),)
                 b.vines = tuple(tags)
             # a finished jar raises the curtain on the jars next to it
             up = [nb for nb in b.neigh.get(t, []) if nb in b.curtains]
@@ -174,7 +195,7 @@ class Board:
                 for nb in up:
                     if jars[nb] and jars[nb][-1][1]:
                         p = jars[nb][-1]
-                        jars[nb] = jars[nb][:-1] + ((p[0], False, p[2], p[3]),)
+                        jars[nb] = jars[nb][:-1] + ((p[0], False, p[2], p[3], p[4]),)
         return b
 
     def moves(self):
@@ -198,7 +219,7 @@ def settle_floaters(jar):
     jar = list(jar)
     for i, p in enumerate(jar):
         if p[2] > 0 and (i == 0 or jar[i - 1][0] == p[0]):
-            jar[i] = (p[0], p[1], 0, p[3])
+            jar[i] = (p[0], p[1], 0, p[3], p[4])
     return tuple(jar)
 
 
@@ -229,12 +250,12 @@ def heuristic(b, kind_jars):
 
 
 def key(b, canonical):
-    parts = [tuple((p[0], p[1], p[2], p[3]) for p in jar) for jar in b.jars]
-    tied = any(b.vines)
+    parts = [tuple(jar) for jar in b.jars]
+    tied = any(b.vines) or any(b.keys)
     if canonical and not b.curtains and not tied:
         parts = sorted(parts)
-    # while a curtain is closed or a vine is tied, which jar is which matters
-    return (tuple(sorted(b.curtains)), b.vines if tied else (), tuple(parts))
+    # while a curtain is closed, a vine is tied or a padlock is shut, which jar is which matters
+    return (tuple(sorted(b.curtains)), (b.vines, b.keys) if tied else (), tuple(parts))
 
 
 def solve(b, max_states=3_000_000, weight=1, max_nodes=None):
@@ -245,6 +266,9 @@ def solve(b, max_states=3_000_000, weight=1, max_nodes=None):
         for p in jar:
             counts[p[0]] = counts.get(p[0], 0) + 1
     kind_jars = sum((c + b.cap - 1) // b.cap for c in counts.values())
+    if any(p[4] for jar in b.jars for p in jar):
+        # morph pieces change the count of each kind; a won board is still this many full jars
+        kind_jars = sum(counts.values()) // b.cap
     start = key(b, canonical)
     nodes = [(b, -1, None)]
     best = {start: 0}
@@ -266,7 +290,7 @@ def solve(b, max_states=3_000_000, weight=1, max_nodes=None):
         if explored > max_states or (max_nodes and len(nodes) > max_nodes):
             return None, explored
         for (f, t) in cur.moves():
-            if t >= 0 and canonical and not cur.curtains and not any(cur.vines) and len(cur.jars[t]) == 0 and cur.run_length(f) == len(cur.jars[f]):
+            if t >= 0 and canonical and not cur.curtains and not any(cur.vines) and not any(cur.keys) and len(cur.jars[t]) == 0 and cur.run_length(f) == len(cur.jars[f]):
                 continue  # pouring a whole jar into an empty one changes nothing
             nb = cur.apply(f, t)
             k = key(nb, canonical)
@@ -285,6 +309,11 @@ def board_from_level(level):
             if name not in kinds:
                 kinds.append(name)
     mech = level.get("mechanics") or {}
+    # {"jar": j, "at": i, "kind": name}: the piece's other kind; {"jar": j, "kind": name}: a padlock
+    morph = {(m["jar"], m["at"]): kinds.index(m["kind"]) + 1 for m in mech.get("morph", [])}
+    locks = [0] * len(level["jars"])
+    for k in mech.get("keys", []):
+        locks[k["jar"]] = kinds.index(k["kind"]) + 1
     hidden = {tuple(x[:2]) for x in mech.get("hidden", [])}
     # Bubble Bath, and any Keep Squishing level that says so
     floats = level.get("world") == "bubblebath" or bool(mech.get("floats"))
@@ -295,7 +324,8 @@ def board_from_level(level):
     for j, jar in enumerate(level["jars"]):
         pieces = []
         for i, name in enumerate(jar):
-            pieces.append((kinds.index(name), (j, i) in hidden, frozen.get((j, i), 0), (j, i) in sticky))
+            pieces.append((kinds.index(name), (j, i) in hidden, frozen.get((j, i), 0), (j, i) in sticky,
+                           morph.get((j, i), 0)))
         if floats:
             pieces = list(settle_floaters(pieces))
         # the top squishy (the one under any floaters) is never wrapped
@@ -303,11 +333,11 @@ def board_from_level(level):
         while floats and top >= 0 and pieces[top][2] > 0:
             top -= 1
         if top >= 0 and pieces[top][1]:
-            pieces[top] = (pieces[top][0], False, pieces[top][2], pieces[top][3])
+            pieces[top] = (pieces[top][0], False, pieces[top][2], pieces[top][3], pieces[top][4])
         jars.append(tuple(pieces))
     n = len(jars)
     tags = [0] * n
     for j, tag in mech.get("vines", []):
         tags[j] = tag
     return Board(level["capacity"], jars, neighbours_table(n), frozenset(mech.get("curtains", [])),
-                 tuple(tags) if any(tags) else (), floats), kinds
+                 tuple(tags) if any(tags) else (), floats, tuple(locks) if any(locks) else ()), kinds
