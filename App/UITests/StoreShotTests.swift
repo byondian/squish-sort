@@ -61,7 +61,7 @@ final class StoreShotTests: XCTestCase {
             keep(app, 3, "room", language.code)
 
             // 4. Home, with the Buddy.
-            app = launch("home", language)
+            app = launch("gifts", language)
             _ = app.buttons["home-play"].waitForExistence(timeout: 20)
             Thread.sleep(forTimeInterval: 2.0)
             keep(app, 4, "home", language.code)
