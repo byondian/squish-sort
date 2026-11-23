@@ -41,6 +41,10 @@ final class LevelController: ObservableObject {
     @Published private(set) var bossMood = 0
     /// Shuffles used on this try: the first is free, the rest cost coins.
     @Published private(set) var shufflesUsed = 0
+    /// The pieces were shuffled or shaken up on this try, so the move count no longer measures the board.
+    private(set) var reshuffled = false
+    /// A gold fourth star: the fewest moves there are, with no extra jar and no shuffle.
+    var earnsGold: Bool { !reshuffled && session.moveCount <= session.par && session.extraJarsAdded == 0 }
     /// The one opt-in video shuffle of this try has been used (offered on the stuck screen only).
     @Published private(set) var videoShuffleUsed = false
     /// A paid shuffle was tapped without enough coins.
@@ -146,7 +150,8 @@ final class LevelController: ObservableObject {
         }
         shakeAt = model.shakeUpMove(index: index)
         // The first board of a Keep Squishing block says which block this is.
-        if level.file.world == LevelCatalog.endless, level.file.index % 10 == 1, model.progress.stars[level.id] == nil {
+        if level.file.world == LevelCatalog.endless, level.file.index % 10 == 1, model.progress.stars[level.id] == nil,
+           !model.playingDaily {
             let name = String(localized: String.LocalizationValue(AppModel.blockEnglish(LevelCatalog.endlessBlock(index: level.file.index))))
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak model] in
                 model?.toast = String(localized: "Next up: \(name)")
@@ -410,6 +415,7 @@ final class LevelController: ObservableObject {
     private func shake(word: String, keepsStarLimit: Bool, kindest: Bool = false, then: @escaping (Bool) -> Void) {
         guard let model else { return }
         shaking = true
+        reshuffled = true
         magicPending = nil
         chain.end()
         feverLeft = 0
@@ -487,7 +493,7 @@ final class LevelController: ObservableObject {
             model.haptics.win()
             model.sounds.play(level.file.beat == .boss ? "win_boss" : "win")
             model.won(index: index, moves: session.moveCount, stars: stars, attempts: attempts, playSeconds: seconds,
-                      pot: pot.coins, gold: session.moveCount <= session.par && session.extraJarsAdded == 0)
+                      pot: pot.coins, gold: earnsGold)
         case .stuck:
             // Now and then a free magic shuffle steps in: the pieces land in the kindest layout found,
             // and the try carries on. It is not counted as a fail.
@@ -619,6 +625,7 @@ final class LevelController: ObservableObject {
         videoShuffleUsed = false
         bossMood = 0
         shufflesUsed = 0
+        reshuffled = false
         luckyUsed = false
         rescueUsed = false
         magicPending = nil
@@ -756,7 +763,7 @@ struct LevelView: View {
                             summary: model.lastWin,
                             moves: controller.session.moveCount,
                             perfect: controller.session.moveCount <= controller.session.par,
-                            gold: controller.session.moveCount <= controller.session.par && controller.session.extraJarsAdded == 0,
+                            gold: controller.earnsGold && !model.lastWin.dailyJar,
                             threeStarMoves: Stars.moveLimit(forStars: 3, par: controller.session.par, slack: controller.starSlack),
                             // Not while good news is waiting behind the win card: that is told first.
                             retry: controller.index < 2 || !model.news.isEmpty || model.lastWin.dailyJar ? nil : { controller.retry() },

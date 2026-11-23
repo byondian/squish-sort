@@ -980,11 +980,30 @@ final class AppModel: ObservableObject {
     var eventBanner: String? { event?.text(language: language) }
 
     /// Today's Daily Jar board: one of the Keep Squishing boards, picked by the date.
+    /// It is a calm board for everyone, so from the day's pick it walks on to the first board that is
+    /// not an Expert or boss board, has two spare jars, and uses only rules this player has been
+    /// shown (Keep Squishing borrows rules from worlds an early player has not reached).
     private var dailyJarIndex: Int? {
         guard let pick = DailyJar.board(day: today, count: endlessCount) else { return nil }
-        let index = storyLevelCount + pick
-        // Never a boss board: the one before a boss is a calm one.
-        return levels[index].file.beat == .boss ? index - 1 : index
+        for plainOnly in [false, true] {
+            for step in 0..<endlessCount {
+                let index = storyLevelCount + (pick + step) % endlessCount
+                if dailyJarFits(index, plainOnly: plainOnly) { return index }
+            }
+        }
+        return nil
+    }
+
+    /// `plainOnly` is the fallback for a player who has been shown no rule yet: boards with ice alone,
+    /// Toy Shop's own rule, which is on the board from its first levels.
+    private func dailyJarFits(_ index: Int, plainOnly: Bool) -> Bool {
+        guard levels.indices.contains(index) else { return false }
+        let level = levels[index]
+        guard level.file.beat != .boss, !LevelCatalog.isExpert(world: level.file.world, index: level.file.index),
+              level.board.jars.filter(\.isEmpty).count >= 2 else { return false }
+        let rules = BoardRule.rules(on: level.board, look: level.look)
+        if plainOnly { return rules.allSatisfy { $0 == .frozen } }
+        return rules.allSatisfy { progress.rulesShown.contains($0.rawValue) }
     }
 
     /// The Daily Jar shows on Home after level 10.
