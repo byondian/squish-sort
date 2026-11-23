@@ -16,7 +16,7 @@ export const SITE = {
   },
   email: { support: 'support@squishsort.app', privacy: 'privacy@squishsort.app' },
   byondianUrl: 'https://byondian.com', // Ian's personal brand site (partners page footer)
-  updated: '2026-11-18',
+  updated: '2026-11-20',
   langs: [
     // legal: true = the legal pages are written and reviewed in this language.
     // Other languages show the English legal pages with a short note in their language.

@@ -33,18 +33,18 @@ The starter pack and the piggy bank are shown only to players whose age the game
 | Stopping a Shake-up early | 250. Filling a jar stops it for free. Not offered in gentle mode |
 | Board theme | 1,500 |
 | Squishy Buddy treat | 100 |
-| Squishy Buddy gift | 600 |
+| Squishy Buddy gifts (28 things the Buddy keeps and wears: hats, things for the neck and things to hold) | 300 to 3,000 each. You choose the gift and see its price before you buy. Nothing is random |
 | Extras (things a squishy wears, such as a bow, glasses or wings) | 300, 500 or 800 each. The crown and unicorn horn can only be earned by playing |
 | Squishy Workshop wearables, without Workshop Pro (players 13 and over, 14 in Korea) | 300, 500 or 800 each, and they can be tried on for free first. More free shapes, faces, colours and parts open as you finish worlds. Workshop Pro owners never pay coins for parts |
 | Extra Squishy Workshop shelf place | 2,500 each, up to 8 places. The first 3 places are free (Workshop Pro gives 50) |
 
 ## Earning coins by playing
 
-- **Clearing a level for the first time:** 50 coins pop out of the jars as you fill them, plus 50 more for three stars.
-- **Finishing a world:** 500 coins.
+- **Clearing a level for the first time:** 25 coins pop out of the jars as you fill them, plus 25 more for three stars.
+- **Finishing a world:** 250 coins.
 - **Small bonuses:** filling two jars within 3 seconds (+10), the occasional glittering lucky squishy (+100), your first win of the day (+50), a win streak (+10 a step, up to +50; not in gentle mode) and any Mystery Bag guess (+50).
 - **Stamp card:** your first win each day adds a stamp. Stamps 1 to 6 give 50, 50, 100, 100, 150 and 150 coins; the 7th moves the capsule bar one step. A missed day loses nothing.
-- **Optional videos:** doubling the coins from a first clear, one more Mystery Bag guess (+50), and the Buddy's daily gift (200 coins, free with no video in gentle mode).
+- **Optional videos:** doubling the coins from a first clear, one more Mystery Bag guess (+50), and the Buddy's daily gift (100 coins, and on some days one of the small Buddy gifts of 600 coins or less that the Buddy doesn't have yet; free with no video in gentle mode).
 
 Replaying a level does not pay the level's coins again, so coins can't be farmed. Coins can't buy squishies, capsules or anything that changes capsule odds. Buddy items are just for fun.
 
