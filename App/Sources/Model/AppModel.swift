@@ -1389,7 +1389,7 @@ final class AppModel: ObservableObject {
     }
 
     /// `pot` is what the level's jars threw on this attempt (0 on a replay).
-    func won(index: Int, moves: Int, stars: Int, attempts: Int, playSeconds: Double, pot: Int, gold: Bool = false) {
+    func won(index: Int, moves: Int, stars: Int, attempts: Int, playSeconds: Double, pot: Int, gold: Bool = false, unaided: Bool = true) {
         if playingDaily {
             wonDailyJar(playSeconds: playSeconds)
             return
@@ -1542,8 +1542,9 @@ final class AppModel: ObservableObject {
             let world = mysteryCapsuleWorld
             update { $0.pendingCapsules.append(world) }
         }
-        // An Expert board won in the fewest moves gives a shiny capsule, the first time.
-        if gold, !hadGold, LevelCatalog.isExpert(world: level.file.world, index: level.file.index) {
+        // An Expert board won in the fewest moves gives a shiny capsule, the first time. Never on a try
+        // that used a hint or a magic move: those can be had for coins, and nothing paid decides a drop.
+        if gold, unaided, !hadGold, LevelCatalog.isExpert(world: level.file.world, index: level.file.index) {
             update { $0.pendingCapsules.append(level.look + AppModel.shinyMark) }
         }
         if firstClear && level.file.capsule {
@@ -1752,7 +1753,11 @@ final class AppModel: ObservableObject {
             let world = String(waiting.dropLast(mark.count))
             var state = progress.collection
             guard let got = CapsuleDrops.openKeepSquishing(world: world, roster: roster, state: &state, rng: &rng,
-                                                           odds: config.capsuleOdds, alwaysShiny: always) else { return }
+                                                           odds: config.capsuleOdds, alwaysShiny: always) else {
+                // Nothing could come out (no roster for this world): the capsule goes back to wait.
+                update { $0.pendingCapsules.append(waiting) }
+                return
+            }
             // A first shiny is new; a shiny of one already shiny is a spare, like any duplicate.
             let alreadyShiny = progress.collection.ownsShiny(got.squishy.id)
             capsuleIsNew = got.shiny ? !alreadyShiny : !progress.collection.owns(got.squishy.id)
