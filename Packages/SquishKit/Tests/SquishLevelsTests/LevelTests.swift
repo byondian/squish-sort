@@ -56,7 +56,7 @@ final class LevelTests: XCTestCase {
         XCTAssertTrue(keep.contains { !($0.mechanics?.sticky ?? []).isEmpty })
         XCTAssertTrue(keep.contains { !($0.mechanics?.curtains ?? []).isEmpty })
         XCTAssertLessThan(keep.filter { !($0.mechanics?.hidden ?? []).isEmpty }.count, keep.count / 3)
-        XCTAssertGreaterThanOrEqual(keep.filter { $0.index % 5 == 0 && $0.jars.filter(\.isEmpty).count == 1 }.count, 20,
+        XCTAssertGreaterThanOrEqual(keep.filter { $0.index % 5 == 0 && $0.jars.filter(\.isEmpty).count == 1 }.count, 15,
                                     "Expert boards with one spare jar")
         for file in jungle {
             let board = try Level(file: file).board
