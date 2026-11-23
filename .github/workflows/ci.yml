@@ -44,7 +44,8 @@ jobs:
     runs-on: macos-15
     # It does not wait for the Linux gates: free Macs can take a long time to arrive, so it queues at once.
     if: github.event_name == 'workflow_dispatch' && !inputs.kids
-    timeout-minutes: 80
+    # Five simulators are started one after another; on a busy day that alone has taken 80 minutes.
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v5
       - name: Select the newest Xcode
@@ -159,6 +160,9 @@ jobs:
           print(next((x['udid'] for n in names for x in newest if x['name'].startswith('iPhone') and n in x['name']), ''))")
             if [ -z "$UDID" ]; then echo "::notice::No $PICK iPhone simulator on this runner."; continue; fi
             echo "Simulator $PICK $UDID"
+            # Fully started first: on a cold simulator the first screen query can take minutes.
+            xcrun simctl boot "$UDID" || true
+            xcrun simctl bootstatus "$UDID" -b
             xcodebuild test -project SquishSort.xcodeproj -scheme SquishSort -destination "id=$UDID" \
               -only-testing:SquishSortUITests/GoldenPathTests/testBuddyWearsItsGifts \
               -only-testing:SquishSortUITests/GoldenPathTests/testHomeTopBarLinesUp CODE_SIGNING_ALLOWED=NO | tee bar-$PICK.log | grep -E "Test Case|error:|TEST" || true
