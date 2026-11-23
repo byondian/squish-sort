@@ -6,18 +6,19 @@
   "beat": "bonus",
   "capacity": 4,
   "jars": [
-    ["pip", "zuzu", "riff", "zuzu"],
-    ["nova", "lumi", "riff", "lumi"],
-    ["pip", "nova", "nova", "coco"],
-    ["coco", "pip", "pip", "zuzu"],
-    ["lumi", "riff", "coco", "zuzu"],
-    ["coco", "lumi", "nova", "riff"],
+    ["macaron", "lolly", "donut", "gummy-bear"],
+    ["donut", "cupcake", "jelly", "donut"],
+    ["cupcake", "gummy-bear", "cupcake", "macaron"],
+    ["macaron", "jelly", "jelly", "strawbie"],
+    ["cupcake", "lolly", "donut", "strawbie"],
+    ["jelly", "lolly", "macaron", "lolly"],
+    ["strawbie", "gummy-bear", "gummy-bear", "strawbie"],
     [],
     []
   ],
-  "mechanics": {"hidden": [[0, 2], [3, 0], [3, 2]], "sticky": [], "frozen": [], "curtains": [1, 5]},
-  "par": 19,
-  "solution": [[0, 6], [3, 6], [4, 6], [2, 4], [0, 7], [0, 6], [3, 0], [4, 3], [4, 7], [5, 7], [5, 2], [5, 4], [3, 5], [2, 3], [0, 2], [1, 4], [1, 7], [1, 4], [1, 3]],
+  "mechanics": {"hidden": [[0, 0], [1, 1], [2, 0], [4, 0], [4, 2], [5, 0], [6, 1], [6, 2]], "sticky": [], "frozen": [[3, 0], [6, 0]]},
+  "par": 23,
+  "solution": [[3, 7], [4, 7], [1, 4], [1, 3], [6, 7], [0, 6], [5, 8], [2, 5], [1, 2], [0, 1], [0, 8], [4, 1], [4, 8], [2, 4], [5, 0], [5, 8], [3, 5], [0, 3], [2, 0], [2, 4], [6, 0], [6, 0], [6, 7]],
   "capsule": false,
   "softenAfterFails": null
 }

@@ -6,19 +6,18 @@
   "beat": "easy",
   "capacity": 4,
   "jars": [
-    ["donut", "lolly", "cupcake", "gummy-bear"],
-    ["gummy-bear", "macaron", "jelly", "strawbie"],
-    ["donut", "strawbie", "jelly", "donut"],
-    ["gummy-bear", "jelly", "cupcake", "lolly"],
-    ["jelly", "strawbie", "macaron", "macaron"],
-    ["lolly", "donut", "macaron", "gummy-bear"],
-    ["strawbie", "cupcake", "lolly", "cupcake"],
+    ["grapey", "strawbie", "sunny", "tango"],
+    ["tango", "blu", "blu", "grapey"],
+    ["minty", "blu", "tango", "minty"],
+    ["minty", "grapey", "strawbie", "minty"],
+    ["strawbie", "strawbie", "blu", "sunny"],
+    ["tango", "sunny", "grapey", "sunny"],
     [],
     []
   ],
-  "mechanics": {"hidden": [[0, 0], [0, 2], [1, 0], [4, 1], [4, 2], [6, 2]], "sticky": [], "frozen": []},
-  "par": 23,
-  "solution": [[6, 7], [3, 6], [3, 7], [4, 8], [4, 8], [1, 4], [1, 3], [1, 8], [0, 1], [0, 7], [5, 1], [5, 8], [2, 5], [2, 3], [2, 4], [5, 2], [0, 5], [0, 2], [6, 5], [6, 7], [4, 6], [3, 4], [1, 3]],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": [[0, 1], [3, 0]]},
+  "par": 19,
+  "solution": [[2, 6], [0, 2], [3, 6], [5, 0], [1, 5], [0, 7], [3, 0], [4, 7], [4, 1], [0, 4], [3, 0], [3, 6], [5, 0], [5, 7], [2, 5], [1, 3], [1, 5], [2, 3], [2, 6]],
   "capsule": false,
   "softenAfterFails": null
 }

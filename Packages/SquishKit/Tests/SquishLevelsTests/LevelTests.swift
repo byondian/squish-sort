@@ -23,8 +23,10 @@ final class LevelTests: XCTestCase {
                        "the main path comes first, in play order")
         XCTAssertEqual(Array(all[125..<365]).map(\.world), Array(repeating: LevelCatalog.endless, count: 240),
                        "Keep Squishing follows the story worlds")
-        XCTAssertEqual(LevelCatalog.look(world: LevelCatalog.endless, index: 1), "sweetfactory")
-        XCTAssertEqual(LevelCatalog.look(world: LevelCatalog.endless, index: 11), "starlight")
+        XCTAssertEqual(LevelCatalog.look(world: LevelCatalog.endless, index: 1), "toyshop")
+        XCTAssertEqual(LevelCatalog.look(world: LevelCatalog.endless, index: 11), "sweetfactory")
+        XCTAssertEqual(LevelCatalog.look(world: LevelCatalog.endless, index: 31), "bubblebath")
+        XCTAssertEqual(LevelCatalog.endlessLooks.count * 10, LevelCatalog.levelCount(in: LevelCatalog.endless))
         XCTAssertEqual(LevelCatalog.look(world: "toyshop", index: 11), "toyshop")
         XCTAssertEqual((1...20).filter { LevelCatalog.isCapsuleLevel(index: $0, world: LevelCatalog.endless) }, [5, 10, 15, 20])
         for world in LevelCatalog.fileWorlds {

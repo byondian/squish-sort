@@ -17,7 +17,13 @@ public enum LevelCatalog {
     /// Every world with level files, in the order the files are loaded.
     public static var fileWorlds: [String] { path + sideWorlds }
     /// Whose squishies and room each block of ten in Keep Squishing borrows.
-    public static let endlessLooks = ["sweetfactory", "starlight", "toyshop", "starlight"]
+    /// Six blocks to a round: five worlds in turn, then a Grand Mix. Keep in step with ENDLESS_BLOCKS in tools/levelgen.py.
+    public static let endlessLooks = [
+        "toyshop", "sweetfactory", "starlight", "bubblebath", "junglejam", "starlight",
+        "toyshop", "sweetfactory", "starlight", "bubblebath", "junglejam", "bubblebath",
+        "toyshop", "sweetfactory", "starlight", "bubblebath", "junglejam", "junglejam",
+        "toyshop", "sweetfactory", "starlight", "bubblebath", "junglejam", "toyshop",
+    ]
     /// The world a level looks like: its own, or the one its block borrows.
     public static func look(world: String, index: Int) -> String {
         guard world == endless else { return world }
