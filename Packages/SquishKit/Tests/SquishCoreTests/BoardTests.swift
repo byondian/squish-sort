@@ -361,7 +361,7 @@ final class BoardTests: XCTestCase {
 
     func testOnlyTheMorphPieceOfARunFlips() {
         // Three that show B, the middle one a morph piece: all three move, one flips.
-        var b = Board(capacity: 3, jars: [[Piece(kind: 1), Piece(kind: 1, morph: 1), Piece(kind: 1)], []])
+        var b = Board(capacity: 4, jars: [[Piece(kind: 1), Piece(kind: 1, morph: 1), Piece(kind: 1)], []])
         XCTAssertEqual(b.runLength(at: 0), 3)
         let result = b.apply(Move(from: 0, to: 1))
         XCTAssertEqual(result?.count, 3)
