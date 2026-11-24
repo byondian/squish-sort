@@ -6,7 +6,7 @@ import SquishPolicy
 /// Collectible ids are stable so the January accounts update can migrate them.
 struct PlayerProgress: Codable, Equatable {
     /// 2 since the worlds became 15, 20 and 25 levels long (build 3).
-    var version = 3
+    var version = 4
     /// Best stars per level id.
     var stars: [String: Int] = [:]
     /// Index into the play-order level list of the furthest unlocked level.
@@ -142,6 +142,18 @@ struct PlayerProgress: Codable, Equatable {
         guard version < 3 else { return }
         version = 3
         guard highestUnlocked >= oldStoryCount, let first = path.firstIndex(of: "bubblebath-01") else { return }
+        highestUnlocked = first
+    }
+
+    /// Saves from before Space Station and Morph Lab joined the path (story levels ended at 125, then
+    /// Keep Squishing). Anyone who was in Keep Squishing starts the new worlds at Space Station 1.
+    /// Nothing is taken away: their Keep Squishing stars, laps and prizes are kept, and when Morph Lab
+    /// is won they carry on from the Keep Squishing level they had reached.
+    /// - Parameter path: ids of the story levels as they are now, in play order.
+    mutating func migrateSpaceAndLab(path: [String], oldStoryCount: Int = 125) {
+        guard version < 4 else { return }
+        version = 4
+        guard highestUnlocked >= oldStoryCount, let first = path.firstIndex(of: "spacestation-01") else { return }
         highestUnlocked = first
     }
 

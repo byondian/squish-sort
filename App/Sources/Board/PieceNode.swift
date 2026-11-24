@@ -579,6 +579,8 @@ final class JarNode: SKNode {
         case "starlight": return String(localized: "Encore!")
         case "bubblebath": return String(localized: "Splash!")
         case "junglejam": return String(localized: "Wild!")
+        case "spacestation": return String(localized: "Lift-off!")
+        case "morphlab": return String(localized: "Eureka!")
         case "christmas": return String(localized: "Ho ho!")
         default: return String(localized: "Sorted!")
         }

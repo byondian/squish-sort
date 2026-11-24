@@ -118,6 +118,8 @@ struct CapsuleView: View {
         case "starlight": return [Theme.grape, Theme.sky, Theme.butter]
         case "bubblebath": return [Theme.sky, Theme.bubblegum, Color.white]
         case "junglejam": return [Theme.mint, Theme.butter, Theme.bubblegum]
+        case "spacestation": return [Theme.grape, Theme.butter, Theme.sky]
+        case "morphlab": return [Theme.mint, Theme.bubblegum, Theme.grape]
         default: return [Theme.bubblegum, Theme.mint, Theme.butter, Theme.sky]
         }
     }

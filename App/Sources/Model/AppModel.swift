@@ -135,6 +135,8 @@ final class AppModel: ObservableObject {
         case "starlight": return "Starlight Stage"
         case "bubblebath": return "Bubble Bath"
         case "junglejam": return "Jungle Jam"
+        case "spacestation": return "Space Station"
+        case "morphlab": return "Morph Lab"
         case LevelCatalog.endless: return "Keep Squishing"
         default: return christmasWorldName
         }
@@ -190,9 +192,11 @@ final class AppModel: ObservableObject {
         // Each made squishy's Workshop design is a file of its own; one from the old Maker has none.
         for i in loaded.made.indices { loaded.made[i].design = MadeFiles.shared.load(id: loaded.made[i].id) }
         levels = AppModel.loadLevels()
-        if loaded.version < 3 {
-            loaded.migrate(path: levels.filter { LevelCatalog.worlds.contains($0.file.world) }.map(\.id))
-            loaded.migrateNewWorlds(path: levels.filter { LevelCatalog.worlds.contains($0.file.world) }.map(\.id))
+        if loaded.version < 4 {
+            let story = levels.filter { LevelCatalog.worlds.contains($0.file.world) }.map(\.id)
+            loaded.migrate(path: story)
+            loaded.migrateNewWorlds(path: story)
+            loaded.migrateSpaceAndLab(path: story)
             store.save(loaded)
         }
         #if KIDS
@@ -229,6 +233,7 @@ final class AppModel: ObservableObject {
         if story > 0, story < mainLevelCount, progress.highestUnlocked == story - 1, progress.stars[levels[story - 1].id] != nil {
             update { $0.highestUnlocked = story }
         }
+        resumeKeepSquishing()
         purchases.onStarter = { [weak self] transactionID in self?.starterPackBought(transactionID) }
         purchases.onPiggy = { [weak self] transactionID in self?.piggyBroken(transactionID) }
         purchases.onChange = { [weak self] owns in self?.update { $0.ownsRemoveAds = owns } }
@@ -373,6 +378,8 @@ final class AppModel: ObservableObject {
         case "starlight": return String(localized: "Starlight Stage")
         case "bubblebath": return String(localized: "Bubble Bath")
         case "junglejam": return String(localized: "Jungle Jam")
+        case "spacestation": return String(localized: "Space Station")
+        case "morphlab": return String(localized: "Morph Lab")
         default:
             return ["US", "CA"].contains(Locale.current.region?.identifier ?? "")
                 ? String(localized: "Santa's Workshop") : String(localized: "Santa's Grotto")
@@ -415,6 +422,17 @@ final class AppModel: ObservableObject {
     /// The story worlds only: where Keep Squishing begins.
     var storyLevelCount: Int { levels.filter { LevelCatalog.worlds.contains($0.file.world) }.count }
     var endlessCount: Int { mainLevelCount - storyLevelCount }
+
+    /// A player who was sent back from Keep Squishing to a new story world comes back to the Keep
+    /// Squishing level they had reached, not to its first level: the path walks on past the levels
+    /// that still have their stars.
+    func resumeKeepSquishing() {
+        let story = storyLevelCount, end = mainLevelCount
+        let at = progress.highestUnlocked
+        guard story > 0, at >= story, at < end, progress.stars[levels[at].id] != nil,
+              let open = (at..<end).first(where: { progress.stars[levels[$0].id] == nil }) else { return }
+        update { $0.highestUnlocked = open }
+    }
 
     func isSideLevel(_ index: Int) -> Bool {
         levels.indices.contains(index) && !LevelCatalog.path.contains(levels[index].file.world)
@@ -1865,6 +1883,11 @@ final class AppModel: ObservableObject {
         if endlessLapJustDone {
             endlessLapJustDone = false
             n = storyLevelCount
+        }
+        // After the last story level, Keep Squishing carries on where the player had got to.
+        if index == storyLevelCount - 1 {
+            resumeKeepSquishing()
+            if progress.highestUnlocked > storyLevelCount { n = progress.highestUnlocked }
         }
         // The main path never rolls on into a side world.
         let samePath = isSideLevel(n) == isSideLevel(index)

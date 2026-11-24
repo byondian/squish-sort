@@ -19,15 +19,17 @@ public enum LevelValidator {
         if file.id != expectedID { p.append("\(id): id should be \(expectedID)") }
         if !LevelCatalog.fileWorlds.contains(file.world) { p.append("\(id): unknown world \(file.world)") }
         if !(1...LevelCatalog.levelCount(in: file.world)).contains(file.index) { p.append("\(id): index out of range") }
-        // Keep Squishing and Twist of the week share the three extra twists.
-        let twists = file.world == LevelCatalog.endless || file.world == LevelCatalog.weekly
-        let big = twists && file.capacity == bigCapacity
+        // Jars of 5 are for Keep Squishing and Twist of the week only. Key jars and morph pieces are
+        // taught in Space Station and Morph Lab, so they are allowed from there on.
+        let extras = file.world == LevelCatalog.endless || file.world == LevelCatalog.weekly
+        let twists = extras || file.world == "spacestation" || file.world == "morphlab"
+        let big = extras && file.capacity == bigCapacity
         if file.capacity != launchCapacity && !big {
             p.append("\(id): capacity \(file.capacity), levels use \(launchCapacity) (Keep Squishing also \(bigCapacity))")
         }
         let m = file.mechanics
         if !twists, !(m?.keys ?? []).isEmpty || !(m?.morph ?? []).isEmpty {
-            p.append("\(id): key jars and morph pieces are Keep Squishing only")
+            p.append("\(id): key jars and morph pieces start in Space Station (Keep Squishing only before it)")
         }
         if !(2...BoardLayout.maxJars).contains(file.jars.count) { p.append("\(id): \(file.jars.count) jars, allowed 2 to \(BoardLayout.maxJars)") }
         if file.jars.contains(where: { $0.count > file.capacity }) { p.append("\(id): a jar is over capacity") }

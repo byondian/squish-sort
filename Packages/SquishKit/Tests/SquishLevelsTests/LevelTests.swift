@@ -15,16 +15,17 @@ final class LevelTests: XCTestCase {
 
     func testWorldsGrowAndEveryLevelIsThere() throws {
         let all = try files()
-        XCTAssertEqual(LevelCatalog.worlds.map(LevelCatalog.levelCount(in:)), [15, 20, 25, 30, 35])
-        XCTAssertEqual(LevelCatalog.mainLevelCount, 125)
-        XCTAssertEqual(all.count, 425)
-        XCTAssertEqual(Array(all.prefix(125)).map(\.world),
+        XCTAssertEqual(LevelCatalog.worlds.map(LevelCatalog.levelCount(in:)), [15, 20, 25, 30, 35, 40, 45])
+        XCTAssertEqual(LevelCatalog.mainLevelCount, 210)
+        XCTAssertEqual(all.count, 510)
+        XCTAssertEqual(Array(all.prefix(210)).map(\.world),
                        LevelCatalog.worlds.flatMap { Array(repeating: $0, count: LevelCatalog.levelCount(in: $0)) },
                        "the main path comes first, in play order")
-        XCTAssertEqual(Array(all[125..<365]).map(\.world), Array(repeating: LevelCatalog.endless, count: 240),
+        XCTAssertEqual(Array(all[210..<450]).map(\.world), Array(repeating: LevelCatalog.endless, count: 240),
                        "Keep Squishing follows the story worlds")
         XCTAssertEqual(LevelCatalog.look(world: LevelCatalog.endless, index: 1), "toyshop")
-        XCTAssertEqual(LevelCatalog.look(world: LevelCatalog.endless, index: 11), "sweetfactory")
+        XCTAssertEqual(LevelCatalog.look(world: LevelCatalog.endless, index: 11), "spacestation")
+        XCTAssertEqual(LevelCatalog.look(world: LevelCatalog.endless, index: 21), "morphlab")
         XCTAssertEqual(LevelCatalog.look(world: LevelCatalog.endless, index: 31), "bubblebath")
         XCTAssertEqual(LevelCatalog.endlessLooks.count * 10, LevelCatalog.levelCount(in: LevelCatalog.endless))
         XCTAssertEqual(LevelCatalog.endlessBlocks.count, LevelCatalog.endlessLooks.count)
@@ -74,13 +75,37 @@ final class LevelTests: XCTestCase {
         }
     }
 
+    func testSpaceStationTeachesKeyJarsAndMorphLabTeachesMorphPieces() throws {
+        let all = try files()
+        let space = all.filter { $0.world == "spacestation" }
+        let lab = all.filter { $0.world == "morphlab" }
+        XCTAssertEqual(space.count, 40)
+        XCTAssertEqual(lab.count, 45)
+        XCTAssertEqual(LevelCatalog.worlds.suffix(2), ["spacestation", "morphlab"], "they follow Jungle Jam, before Keep Squishing")
+        // Every level shows its world's rule, and the first eleven show it alone.
+        XCTAssertTrue(space.allSatisfy { !($0.mechanics?.keys ?? []).isEmpty })
+        XCTAssertTrue(lab.allSatisfy { !($0.mechanics?.morph ?? []).isEmpty })
+        for file in (space + lab) where file.index <= 11 {
+            let m = file.mechanics
+            XCTAssertTrue((m?.hidden ?? []).isEmpty && (m?.sticky ?? []).isEmpty && (m?.frozen ?? []).isEmpty
+                          && (m?.vines ?? []).isEmpty && (m?.curtains ?? []).isEmpty, file.id)
+        }
+        // Morph pieces are not met before Morph Lab, and neither world has bubbles or jars of 5.
+        XCTAssertTrue(space.allSatisfy { ($0.mechanics?.morph ?? []).isEmpty })
+        XCTAssertTrue((space + lab).allSatisfy { $0.mechanics?.floats != true && $0.capacity == 4 })
+        // The first levels are small and have one airlock or one morph piece.
+        XCTAssertEqual(space.first?.mechanics?.keys?.count, 1)
+        XCTAssertEqual(lab.first?.mechanics?.morph?.count, 1)
+        for file in space + lab { XCTAssertEqual(LevelValidator.structuralProblems(file), [], file.id) }
+    }
+
     func testJungleJamHasVineJarsAndBubbleBathHasBubbles() throws {
         let all = try files()
         let jungle = all.filter { $0.world == "junglejam" }
         XCTAssertTrue(jungle.contains { !($0.mechanics?.vines ?? []).isEmpty }, "Jungle Jam has vine jars")
         // Keep Squishing comes after Jungle Jam, so it may borrow vines; no earlier world does.
-        XCTAssertFalse(all.contains { !["junglejam", LevelCatalog.endless, LevelCatalog.weekly].contains($0.world) && !($0.mechanics?.vines ?? []).isEmpty },
-                       "vines stay in Jungle Jam and Keep Squishing")
+        XCTAssertFalse(all.contains { !["junglejam", "morphlab", LevelCatalog.endless, LevelCatalog.weekly].contains($0.world) && !($0.mechanics?.vines ?? []).isEmpty },
+                       "vines start in Jungle Jam")
         // Keep Squishing mixes every world's rule, and wrapped squishies are no longer on every level.
         let keep = all.filter { $0.world == LevelCatalog.endless }
         XCTAssertTrue(keep.contains { !($0.mechanics?.vines ?? []).isEmpty })
@@ -93,7 +118,8 @@ final class LevelTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(keep.filter { !($0.mechanics?.morph ?? []).isEmpty }.count, 20)
         XCTAssertGreaterThanOrEqual(keep.filter { $0.capacity == 5 }.count, 20)
         XCTAssertFalse(keep.contains { ($0.mechanics?.morph ?? []).count > LevelValidator.maxMorphs })
-        XCTAssertFalse(all.contains { $0.world != LevelCatalog.endless && $0.world != LevelCatalog.weekly
+        XCTAssertFalse(all.contains { $0.world != LevelCatalog.endless && $0.world != LevelCatalog.weekly && $0.capacity != 4 })
+        XCTAssertFalse(all.contains { !["spacestation", "morphlab", LevelCatalog.endless, LevelCatalog.weekly].contains($0.world)
             && ($0.capacity != 4 || !($0.mechanics?.keys ?? []).isEmpty || !($0.mechanics?.morph ?? []).isEmpty) })
         // The first board of each twist's first block shows that twist alone.
         for (index, rule) in [(11, "keys"), (21, "morph"), (31, "big")] {

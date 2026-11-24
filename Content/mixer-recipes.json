@@ -1,4 +1,28 @@
 {
+ "astro-cat": {
+  "colours": [
+   "#F8D868",
+   "#F8A858"
+  ],
+  "feel": "mochi",
+  "mould": "cat"
+ },
+ "atomo": {
+  "colours": [
+   "#F8D868",
+   "#78E8C8"
+  ],
+  "feel": "jelly",
+  "mould": "bun"
+ },
+ "aurora-whale": {
+  "colours": [
+   "#88B8F8",
+   "#E8F8F8"
+  ],
+  "feel": "jelly",
+  "mould": "fish"
+ },
  "axo": {
   "colours": [
    "#F8B8C8",
@@ -23,6 +47,14 @@
   "feel": "foam",
   "mould": "dino"
  },
+ "black-hole": {
+  "colours": [
+   "#F898C8",
+   "#F8D868"
+  ],
+  "feel": "gel",
+  "mould": "donut"
+ },
  "blaze-dragon": {
   "colours": [
    "#98E8B8",
@@ -30,6 +62,14 @@
   ],
   "feel": "jelly",
   "mould": "blob"
+ },
+ "blip": {
+  "colours": [
+   "#98E868",
+   "#F8E8F8"
+  ],
+  "feel": "jelly",
+  "mould": "drop"
  },
  "blossom-ellie": {
   "colours": [
@@ -111,6 +151,14 @@
   "feel": "jelly",
   "mould": "flower"
  },
+ "cheesy": {
+  "colours": [
+   "#F8E868",
+   "#F8C848"
+  ],
+  "feel": "foam",
+  "mould": "moon"
+ },
  "choco-bat": {
   "colours": [
    "#986848",
@@ -127,6 +175,14 @@
   "feel": "jelly",
   "mould": "pear"
  },
+ "chroma": {
+  "colours": [
+   "#78E8C8",
+   "#F8D868"
+  ],
+  "feel": "jelly",
+  "mould": "blob"
+ },
  "coco": {
   "colours": [
    "#78E8A8",
@@ -142,6 +198,22 @@
   ],
   "feel": "foam",
   "mould": "blob"
+ },
+ "crystal-fox": {
+  "colours": [
+   "#B8E8F8",
+   "#E8D8F8"
+  ],
+  "feel": "mochi",
+  "mould": "cat"
+ },
+ "crystal-hog": {
+  "colours": [
+   "#B8E8F8",
+   "#D8B888"
+  ],
+  "feel": "mochi",
+  "mould": "dome"
  },
  "cupcake": {
   "colours": [
@@ -223,6 +295,30 @@
   "feel": "jelly",
   "mould": "drop"
  },
+ "flux": {
+  "colours": [
+   "#A8F8D8",
+   "#F898C8"
+  ],
+  "feel": "jelly",
+  "mould": "blob"
+ },
+ "galaxy-cat": {
+  "colours": [
+   "#383878",
+   "#F8D868"
+  ],
+  "feel": "mochi",
+  "mould": "cat"
+ },
+ "gear-mouse": {
+  "colours": [
+   "#C8D8E8",
+   "#F8C8D8"
+  ],
+  "feel": "foam",
+  "mould": "bear"
+ },
  "ginger": {
   "colours": [
    "#E8A878",
@@ -255,6 +351,14 @@
   "feel": "gel",
   "mould": "flower"
  },
+ "goggle-frog": {
+  "colours": [
+   "#78D888",
+   "#C8E8F8"
+  ],
+  "feel": "jelly",
+  "mould": "dome"
+ },
  "golden-bell": {
   "colours": [
    "#E8A828",
@@ -270,6 +374,14 @@
   ],
   "feel": "jelly",
   "mould": "egg"
+ },
+ "golden-flask": {
+  "colours": [
+   "#F8E8F8",
+   "#F8F8F8"
+  ],
+  "feel": "gel",
+  "mould": "pear"
  },
  "golden-gummy": {
   "colours": [
@@ -294,6 +406,14 @@
   ],
   "feel": "jelly",
   "mould": "moon"
+ },
+ "golden-rocket": {
+  "colours": [
+   "#F8E8F8",
+   "#F8F8F8"
+  ],
+  "feel": "foam",
+  "mould": "drop"
  },
  "golden-shop-cat": {
   "colours": [
@@ -351,6 +471,14 @@
   "feel": "jelly",
   "mould": "drop"
  },
+ "lava-lamp": {
+  "colours": [
+   "#7868D8",
+   "#F8E8A8"
+  ],
+  "feel": "gel",
+  "mould": "pear"
+ },
  "leafy": {
   "colours": [
    "#68C888",
@@ -391,6 +519,14 @@
   "feel": "foam",
   "mould": "blob"
  },
+ "maggie": {
+  "colours": [
+   "#E8E8F8",
+   "#F8C8D8"
+  ],
+  "feel": "foam",
+  "mould": "square"
+ },
  "mer-kitty": {
   "colours": [
    "#F8E8F8",
@@ -414,6 +550,14 @@
   ],
   "feel": "mochi",
   "mould": "drop"
+ },
+ "moon-bunny": {
+  "colours": [
+   "#F8E8F8",
+   "#F8C8D8"
+  ],
+  "feel": "mochi",
+  "mould": "bunny"
  },
  "morphy": {
   "colours": [
@@ -439,6 +583,14 @@
   "feel": "jelly",
   "mould": "moon"
  },
+ "nebula-jelly": {
+  "colours": [
+   "#D8B8F8",
+   "#F8E8F8"
+  ],
+  "feel": "gel",
+  "mould": "dome"
+ },
  "nova": {
   "colours": [
    "#C8D8E8",
@@ -454,6 +606,30 @@
   ],
   "feel": "jelly",
   "mould": "blob"
+ },
+ "octo-lab": {
+  "colours": [
+   "#F8B8C8",
+   "#78E8C8"
+  ],
+  "feel": "jelly",
+  "mould": "dome"
+ },
+ "orbit": {
+  "colours": [
+   "#B8C8F8",
+   "#F8B878"
+  ],
+  "feel": "jelly",
+  "mould": "blob"
+ },
+ "orbit-hamster": {
+  "colours": [
+   "#F8C898",
+   "#C8E8F8"
+  ],
+  "feel": "mochi",
+  "mould": "bear"
  },
  "panda-dumpling": {
   "colours": [
@@ -519,6 +695,22 @@
   "feel": "jelly",
   "mould": "drop"
  },
+ "popsy": {
+  "colours": [
+   "#E8F8F8",
+   "#F898C8"
+  ],
+  "feel": "gel",
+  "mould": "pear"
+ },
+ "prism-penguin": {
+  "colours": [
+   "#485878",
+   "#E8F8F8"
+  ],
+  "feel": "mochi",
+  "mould": "egg"
+ },
  "prisma": {
   "colours": [
    "#B8E8F8",
@@ -567,6 +759,30 @@
   "feel": "jelly",
   "mould": "blob"
  },
+ "ringo": {
+  "colours": [
+   "#F8B878",
+   "#F8E8F8"
+  ],
+  "feel": "jelly",
+  "mould": "bun"
+ },
+ "robo-owl": {
+  "colours": [
+   "#98D8E8",
+   "#F8A858"
+  ],
+  "feel": "foam",
+  "mould": "egg"
+ },
+ "rover-pup": {
+  "colours": [
+   "#C8D8E8",
+   "#78E8C8"
+  ],
+  "feel": "foam",
+  "mould": "bear"
+ },
  "santa": {
   "colours": [
    "#F85868",
@@ -574,6 +790,22 @@
   ],
   "feel": "jelly",
   "mould": "bun"
+ },
+ "satellite-snail": {
+  "colours": [
+   "#F8D868",
+   "#F8C8D8"
+  ],
+  "feel": "jelly",
+  "mould": "bean"
+ },
+ "saucy": {
+  "colours": [
+   "#C8E8F8",
+   "#78D8C8"
+  ],
+  "feel": "gel",
+  "mould": "dome"
  },
  "scrubby-crab": {
   "colours": [
@@ -605,6 +837,14 @@
    "#B888F8"
   ],
   "feel": "jelly",
+  "mould": "blob"
+ },
+ "slimo": {
+  "colours": [
+   "#B8F868",
+   "#F8E8F8"
+  ],
+  "feel": "gel",
   "mould": "blob"
  },
  "snooze": {
@@ -759,6 +999,14 @@
   "feel": "foam",
   "mould": "egg"
  },
+ "trio": {
+  "colours": [
+   "#E8D8F8",
+   "#C8A8F8"
+  ],
+  "feel": "jelly",
+  "mould": "cloud"
+ },
  "tub-hippo": {
   "colours": [
    "#C8A8F8",
@@ -766,6 +1014,14 @@
   ],
   "feel": "jelly",
   "mould": "cloud"
+ },
+ "tubey": {
+  "colours": [
+   "#88C8F8",
+   "#E8F8F8"
+  ],
+  "feel": "foam",
+  "mould": "egg"
  },
  "tuki": {
   "colours": [
@@ -790,6 +1046,22 @@
   ],
   "feel": "jelly",
   "mould": "egg"
+ },
+ "zip": {
+  "colours": [
+   "#F85868",
+   "#F8D868"
+  ],
+  "feel": "foam",
+  "mould": "drop"
+ },
+ "zoomie": {
+  "colours": [
+   "#C8A8F8",
+   "#F898C8"
+  ],
+  "feel": "jelly",
+  "mould": "drop"
  },
  "zuzu": {
   "colours": [

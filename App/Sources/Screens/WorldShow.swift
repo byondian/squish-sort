@@ -11,7 +11,7 @@ struct ShowPlan: Decodable {
     }
 
     /// stage (Starlight), parade (Toy Shop), bake (Sweet Factory), sleigh (Santa's Grotto),
-    /// swim (Bubble Bath) or treetop (Jungle Jam).
+    /// swim (Bubble Bath), treetop (Jungle Jam), launch (Space Station) or lab (Morph Lab).
     let style: String
     let music: String
     /// The sneak peeks' music is this plus their number.
@@ -23,7 +23,7 @@ struct ShowPlan: Decodable {
     private static var cache: [String: ShowPlan] = [:]
     private static var missing: Set<String> = []
 
-    static let worlds = ["toyshop", "sweetfactory", "starlight", "bubblebath", "junglejam", "christmas"]
+    static let worlds = ["toyshop", "sweetfactory", "starlight", "bubblebath", "junglejam", "spacestation", "morphlab", "christmas"]
 
     static func load(_ world: String) -> ShowPlan? {
         if let plan = cache[world] { return plan }
@@ -51,6 +51,8 @@ struct ShowPlan: Decodable {
         case "globe": return "❄️"
         case "duck": return "⛲"
         case "bongo": return "🪘"
+        case "rocket": return "🚀"
+        case "flask": return "🧪"
         default: return "🎤"
         }
     }
@@ -62,6 +64,8 @@ struct ShowPlan: Decodable {
         case "christmas": return "Sleigh Night"
         case "bubblebath": return "Bubble Ballet"
         case "junglejam": return "Treetop Jam Session"
+        case "spacestation": return "Launch Night"
+        case "morphlab": return "The Big Experiment"
         default: return "Encore Concert"
         }
     }
@@ -207,6 +211,8 @@ struct WorldShowView: View {
         case "sleigh": return [Color(red: 0.05, green: 0.10, blue: 0.26), Color(red: 0.16, green: 0.26, blue: 0.48)]
         case "swim": return [Color(red: 0.05, green: 0.28, blue: 0.44), Color(red: 0.24, green: 0.60, blue: 0.74)]
         case "treetop": return [Color(red: 0.04, green: 0.16, blue: 0.14), Color(red: 0.14, green: 0.38, blue: 0.24)]
+        case "launch": return [Color(red: 0.07, green: 0.06, blue: 0.20), Color(red: 0.24, green: 0.21, blue: 0.44)]
+        case "lab": return [Color(red: 0.06, green: 0.24, blue: 0.22), Color(red: 0.20, green: 0.50, blue: 0.44)]
         default: return [Color(red: 0.09, green: 0.06, blue: 0.20), Color(red: 0.26, green: 0.14, blue: 0.42)]
         }
     }
@@ -521,6 +527,64 @@ struct WorldShowView: View {
             RoundedRectangle(cornerRadius: 10).fill(Color(hex: 0xB98654))
                 .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(hex: 0x8A5F38), lineWidth: 3))
                 .frame(width: w * 0.96, height: side * 0.32)
+                .position(x: w / 2, y: floor + side * 0.12)
+        case "launch":
+            // Launch night: twinkling stars, a ringed planet, a shower of new stars on the finish chord, and the launch pad.
+            ForEach(0..<30, id: \.self) { k in
+                let fx: Double = (Double(k) * 0.618).truncatingRemainder(dividingBy: 1)
+                let fy: Double = (Double(k) * 0.37).truncatingRemainder(dividingBy: 1)
+                let blink: Double = reduceMotion ? 0.7 : 0.5 + 0.5 * sin(t * 1.8 + Double(k) * 1.3)
+                Circle().fill(Color.white.opacity(0.2 + 0.7 * blink * lit))
+                    .frame(width: 4, height: 4)
+                    .position(x: fx * w, y: fy * h * 0.6)
+            }
+            Ellipse().stroke(Color(hex: 0xFFB37A).opacity(0.7 * lit), lineWidth: 5)
+                .frame(width: 150, height: 40)
+                .rotationEffect(.degrees(-18))
+                .position(x: w * 0.8, y: h * 0.16)
+            Circle().fill(Color(hex: 0xC9A7F5).opacity(0.25 + 0.6 * lit))
+                .frame(width: 84, height: 84)
+                .position(x: w * 0.8, y: h * 0.16)
+            ForEach(0..<14, id: \.self) { k in
+                let fall: Double = ramp(t, from: finishAt + 0.08 * Double(k), over: 1.6)
+                let fx: Double = (Double(k) * 0.381 + 0.05).truncatingRemainder(dividingBy: 1)
+                Image(systemName: "star.fill").font(.system(size: 16))
+                    .foregroundStyle(Theme.butter.opacity(fall > 0 && fall < 1 ? 1 : 0))
+                    .position(x: fx * w, y: h * (0.05 + 0.5 * (reduceMotion ? 0.5 : fall)))
+            }
+            RoundedRectangle(cornerRadius: 12).fill(Color(hex: 0x9AA6C2))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(hex: 0x6E7A98), lineWidth: 4))
+                .frame(width: w * 0.96, height: side * 0.3)
+                .position(x: w / 2, y: floor + side * 0.12)
+        case "lab":
+            // The big experiment: bubbles rising, a shelf of flasks that fizz, and a rainbow across the lab for the finish.
+            ForEach(0..<10, id: \.self) { k in
+                let fx: Double = (Double(k) * 0.618 + 0.1).truncatingRemainder(dividingBy: 1)
+                let speed: Double = 0.06 + 0.02 * Double(k % 3)
+                let fy: Double = (Double(k) * 0.29 + (reduceMotion ? 0 : t * speed)).truncatingRemainder(dividingBy: 1)
+                let size: Double = 12 + Double(k % 4) * 8
+                Circle().stroke(Color(hex: 0xA8F0D8).opacity(0.7), lineWidth: 3)
+                    .frame(width: size, height: size)
+                    .position(x: fx * w, y: h * 0.7 * (1 - fy))
+            }
+            ForEach(0..<5, id: \.self) { k in
+                let fizz: Double = reduceMotion ? 0.6 : 0.5 + 0.5 * sin(t * 3.1 + Double(k) * 1.9)
+                let tint: Color = [Color(hex: 0xFFC9DE), Color(hex: 0xC9A7F5), Color(hex: 0xB6F06A)][k % 3]
+                RoundedRectangle(cornerRadius: 10).fill(tint.opacity(0.35 + 0.55 * fizz * lit))
+                    .frame(width: 30, height: 44)
+                    .position(x: w * (0.14 + 0.18 * Double(k)), y: h * 0.12)
+            }
+            let bow: Double = ramp(t, from: finishAt, over: 1.2)
+            ForEach(0..<4, id: \.self) { k in
+                let tint: Color = [Theme.bubblegum, Theme.butter, Theme.mint, Theme.sky][k]
+                Circle().trim(from: 0.5, to: 0.5 + 0.5 * bow)
+                    .stroke(tint.opacity(0.85), lineWidth: 9)
+                    .frame(width: w * 0.9 - Double(k) * 22, height: w * 0.9 - Double(k) * 22)
+                    .position(x: w / 2, y: floor - side * 0.2)
+            }
+            RoundedRectangle(cornerRadius: 12).fill(Color(hex: 0xE3D3FF))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(hex: 0xB9A3E8), lineWidth: 4))
+                .frame(width: w * 0.96, height: side * 0.3)
                 .position(x: w / 2, y: floor + side * 0.12)
         case "sleigh":
             // A moon, falling snow, and the sleigh the cast ride in.

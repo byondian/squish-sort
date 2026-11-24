@@ -1026,6 +1026,416 @@
    "feel": "jelly"
   },
   {
+   "id": "ringo",
+   "name": "Ringo",
+   "world": "spacestation",
+   "rarity": "common",
+   "names": {
+    "ja": "リンギー",
+    "ko": "링고",
+    "zh-Hant": "小環星"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "zip",
+   "name": "Zip",
+   "world": "spacestation",
+   "rarity": "common",
+   "names": {
+    "ja": "ジップ",
+    "ko": "집",
+    "zh-Hant": "小火箭"
+   },
+   "feel": "foam"
+  },
+  {
+   "id": "blip",
+   "name": "Blip",
+   "world": "spacestation",
+   "rarity": "common",
+   "names": {
+    "ja": "ブリップ",
+    "ko": "블립",
+    "zh-Hant": "小綠"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "saucy",
+   "name": "Saucy",
+   "world": "spacestation",
+   "rarity": "common",
+   "names": {
+    "ja": "ソーシー",
+    "ko": "소시",
+    "zh-Hant": "碟碟"
+   },
+   "feel": "gel"
+  },
+  {
+   "id": "cheesy",
+   "name": "Cheesy",
+   "world": "spacestation",
+   "rarity": "common",
+   "names": {
+    "ja": "チーズムーン",
+    "ko": "치즈문",
+    "zh-Hant": "起司月"
+   },
+   "feel": "foam"
+  },
+  {
+   "id": "zoomie",
+   "name": "Zoomie",
+   "world": "spacestation",
+   "rarity": "common",
+   "names": {
+    "ja": "ズーミー",
+    "ko": "주미",
+    "zh-Hant": "流星咻"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "astro-cat",
+   "name": "Astro Cat",
+   "world": "spacestation",
+   "rarity": "rare",
+   "names": {
+    "ja": "うちゅうネコ",
+    "ko": "우주 고양이",
+    "zh-Hant": "太空貓"
+   },
+   "feel": "mochi"
+  },
+  {
+   "id": "rover-pup",
+   "name": "Rover Pup",
+   "world": "spacestation",
+   "rarity": "rare",
+   "names": {
+    "ja": "ローバーわんこ",
+    "ko": "로버 멍멍이",
+    "zh-Hant": "探測小狗"
+   },
+   "feel": "foam"
+  },
+  {
+   "id": "moon-bunny",
+   "name": "Moon Bunny",
+   "world": "spacestation",
+   "rarity": "rare",
+   "names": {
+    "ja": "つきうさぎ",
+    "ko": "달토끼",
+    "zh-Hant": "月兔"
+   },
+   "feel": "mochi"
+  },
+  {
+   "id": "nebula-jelly",
+   "name": "Nebula Jelly",
+   "world": "spacestation",
+   "rarity": "rare",
+   "names": {
+    "ja": "せいうんクラゲ",
+    "ko": "성운 해파리",
+    "zh-Hant": "星雲水母"
+   },
+   "feel": "gel"
+  },
+  {
+   "id": "satellite-snail",
+   "name": "Satellite Snail",
+   "world": "spacestation",
+   "rarity": "rare",
+   "names": {
+    "ja": "えいせいカタツムリ",
+    "ko": "위성 달팽이",
+    "zh-Hant": "衛星蝸牛"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "orbit-hamster",
+   "name": "Orbit Hamster",
+   "world": "spacestation",
+   "rarity": "rare",
+   "names": {
+    "ja": "うちゅうハムスター",
+    "ko": "우주 햄스터",
+    "zh-Hant": "太空倉鼠"
+   },
+   "feel": "mochi"
+  },
+  {
+   "id": "black-hole",
+   "name": "Holey",
+   "world": "spacestation",
+   "rarity": "rare",
+   "names": {
+    "ja": "ブラックホーリー",
+    "ko": "블랙홀리",
+    "zh-Hant": "小黑洞"
+   },
+   "feel": "gel"
+  },
+  {
+   "id": "aurora-whale",
+   "name": "Aurora Whale",
+   "world": "spacestation",
+   "rarity": "ultra",
+   "names": {
+    "ja": "オーロラクジラ",
+    "ko": "오로라 고래",
+    "zh-Hant": "極光鯨"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "galaxy-cat",
+   "name": "Galaxy Cat",
+   "world": "spacestation",
+   "rarity": "ultra",
+   "names": {
+    "ja": "ぎんがネコ",
+    "ko": "은하 고양이",
+    "zh-Hant": "銀河貓"
+   },
+   "feel": "mochi"
+  },
+  {
+   "id": "orbit",
+   "name": "Orbit",
+   "world": "spacestation",
+   "rarity": "ultra",
+   "names": {
+    "ja": "オービット",
+    "ko": "오빗",
+    "zh-Hant": "軌軌"
+   },
+   "feel": "jelly",
+   "shapeshifter": true
+  },
+  {
+   "id": "golden-rocket",
+   "name": "Golden Rocket",
+   "world": "spacestation",
+   "rarity": "secret",
+   "names": {
+    "ja": "ゴールデンロケット",
+    "ko": "황금 로켓",
+    "zh-Hant": "黃金火箭"
+   },
+   "feel": "foam"
+  },
+  {
+   "id": "popsy",
+   "name": "Popsy",
+   "world": "morphlab",
+   "rarity": "common",
+   "names": {
+    "ja": "ポップシー",
+    "ko": "팝시",
+    "zh-Hant": "啵啵瓶"
+   },
+   "feel": "gel"
+  },
+  {
+   "id": "slimo",
+   "name": "Slimo",
+   "world": "morphlab",
+   "rarity": "common",
+   "names": {
+    "ja": "スライモ",
+    "ko": "슬라이모",
+    "zh-Hant": "史萊莫"
+   },
+   "feel": "gel"
+  },
+  {
+   "id": "tubey",
+   "name": "Tubey",
+   "world": "morphlab",
+   "rarity": "common",
+   "names": {
+    "ja": "チュービー",
+    "ko": "튜비",
+    "zh-Hant": "試管仔"
+   },
+   "feel": "foam"
+  },
+  {
+   "id": "maggie",
+   "name": "Maggie",
+   "world": "morphlab",
+   "rarity": "common",
+   "names": {
+    "ja": "マギー",
+    "ko": "매기",
+    "zh-Hant": "磁磁"
+   },
+   "feel": "foam"
+  },
+  {
+   "id": "atomo",
+   "name": "Atomo",
+   "world": "morphlab",
+   "rarity": "common",
+   "names": {
+    "ja": "アトモ",
+    "ko": "아토모",
+    "zh-Hant": "原子仔"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "trio",
+   "name": "Trio",
+   "world": "morphlab",
+   "rarity": "common",
+   "names": {
+    "ja": "トリオン",
+    "ko": "트리오",
+    "zh-Hant": "三泡團"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "goggle-frog",
+   "name": "Goggle Frog",
+   "world": "morphlab",
+   "rarity": "rare",
+   "names": {
+    "ja": "ゴーグルガエル",
+    "ko": "고글 개구리",
+    "zh-Hant": "護目鏡青蛙"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "gear-mouse",
+   "name": "Wind-up Mouse",
+   "world": "morphlab",
+   "rarity": "rare",
+   "names": {
+    "ja": "ぜんまいネズミ",
+    "ko": "태엽 생쥐",
+    "zh-Hant": "發條老鼠"
+   },
+   "feel": "foam"
+  },
+  {
+   "id": "lava-lamp",
+   "name": "Lava Lamp",
+   "world": "morphlab",
+   "rarity": "rare",
+   "names": {
+    "ja": "ラバランプ",
+    "ko": "라바 램프",
+    "zh-Hant": "熔岩燈"
+   },
+   "feel": "gel"
+  },
+  {
+   "id": "robo-owl",
+   "name": "Robo Owl",
+   "world": "morphlab",
+   "rarity": "rare",
+   "names": {
+    "ja": "ロボフクロウ",
+    "ko": "로봇 부엉이",
+    "zh-Hant": "機器貓頭鷹"
+   },
+   "feel": "foam"
+  },
+  {
+   "id": "crystal-hog",
+   "name": "Crystal Hog",
+   "world": "morphlab",
+   "rarity": "rare",
+   "names": {
+    "ja": "クリスタルハリネズミ",
+    "ko": "크리스탈 고슴도치",
+    "zh-Hant": "水晶刺蝟"
+   },
+   "feel": "mochi"
+  },
+  {
+   "id": "octo-lab",
+   "name": "Octo",
+   "world": "morphlab",
+   "rarity": "rare",
+   "names": {
+    "ja": "ラボタコ",
+    "ko": "연구소 문어",
+    "zh-Hant": "實驗章魚"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "prism-penguin",
+   "name": "Prism Penguin",
+   "world": "morphlab",
+   "rarity": "rare",
+   "names": {
+    "ja": "プリズムペンギン",
+    "ko": "프리즘 펭귄",
+    "zh-Hant": "稜鏡企鵝"
+   },
+   "feel": "mochi"
+  },
+  {
+   "id": "chroma",
+   "name": "Chroma",
+   "world": "morphlab",
+   "rarity": "ultra",
+   "names": {
+    "ja": "クロマ",
+    "ko": "크로마",
+    "zh-Hant": "七彩變色龍"
+   },
+   "feel": "jelly"
+  },
+  {
+   "id": "crystal-fox",
+   "name": "Crystal Fox",
+   "world": "morphlab",
+   "rarity": "ultra",
+   "names": {
+    "ja": "クリスタルギツネ",
+    "ko": "크리스탈 여우",
+    "zh-Hant": "水晶狐"
+   },
+   "feel": "mochi"
+  },
+  {
+   "id": "flux",
+   "name": "Flux",
+   "world": "morphlab",
+   "rarity": "ultra",
+   "names": {
+    "ja": "フラックス",
+    "ko": "플럭스",
+    "zh-Hant": "變變"
+   },
+   "feel": "jelly",
+   "shapeshifter": true
+  },
+  {
+   "id": "golden-flask",
+   "name": "Golden Flask",
+   "world": "morphlab",
+   "rarity": "secret",
+   "names": {
+    "ja": "ゴールデンフラスコ",
+    "ko": "황금 플라스크",
+    "zh-Hant": "黃金燒瓶"
+   },
+   "feel": "gel"
+  },
+  {
    "id": "santa",
    "name": "Santa Squish",
    "world": "christmas",

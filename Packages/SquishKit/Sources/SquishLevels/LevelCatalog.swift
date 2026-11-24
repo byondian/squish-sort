@@ -3,7 +3,7 @@ import Foundation
 /// The worlds in play order (main path first, then side worlds) and where their level files live.
 public enum LevelCatalog {
     /// The main path, in play order.
-    public static let worlds = ["toyshop", "sweetfactory", "starlight", "bubblebath", "junglejam"]
+    public static let worlds = ["toyshop", "sweetfactory", "starlight", "bubblebath", "junglejam", "spacestation", "morphlab"]
     /// The world whose bubbles are floaters (see `Board.floats`).
     public static let floatWorld = "bubblebath"
     /// Side worlds have their own level numbers and are not on the map's main path.
@@ -20,8 +20,8 @@ public enum LevelCatalog {
     public static let weeklyBoards = 5
     /// Whose squishies and room each weekly board borrows. Keep in step with WEEKLY_THEMES in tools/levelgen.py.
     public static let weeklyLooks: [String] = [
-        Array(repeating: "sweetfactory", count: 5), Array(repeating: "junglejam", count: 5),
-        Array(repeating: "starlight", count: 5), Array(repeating: "starlight", count: 5),
+        Array(repeating: "spacestation", count: 5), Array(repeating: "junglejam", count: 5),
+        Array(repeating: "morphlab", count: 5), Array(repeating: "starlight", count: 5),
         Array(repeating: "bubblebath", count: 5), Array(repeating: "bubblebath", count: 5),
         Array(repeating: "toyshop", count: 5),
         ["toyshop", "sweetfactory", "starlight", "bubblebath", "junglejam"],
@@ -30,11 +30,12 @@ public enum LevelCatalog {
     public static var fileWorlds: [String] { path + sideWorlds + [weekly] }
     /// Whose squishies and room each block of ten in Keep Squishing borrows.
     /// Six blocks to a round: five worlds in turn, then a Grand Mix. Keep in step with ENDLESS_BLOCKS in tools/levelgen.py.
+    /// The key jar blocks are dressed as Space Station and the morph blocks as Morph Lab.
     public static let endlessLooks = [
-        "toyshop", "sweetfactory", "starlight", "bubblebath", "junglejam", "starlight",
-        "toyshop", "sweetfactory", "starlight", "bubblebath", "junglejam", "bubblebath",
-        "toyshop", "sweetfactory", "starlight", "bubblebath", "junglejam", "junglejam",
-        "toyshop", "sweetfactory", "starlight", "bubblebath", "junglejam", "toyshop",
+        "toyshop", "spacestation", "morphlab", "bubblebath", "junglejam", "starlight",
+        "toyshop", "sweetfactory", "starlight", "bubblebath", "morphlab", "bubblebath",
+        "toyshop", "sweetfactory", "starlight", "bubblebath", "spacestation", "junglejam",
+        "toyshop", "morphlab", "starlight", "bubblebath", "junglejam", "toyshop",
     ]
     /// The name id of each block of ten, from the rules it mixes (the app holds the words).
     public static let endlessBlocks = [
@@ -57,7 +58,7 @@ public enum LevelCatalog {
         return endlessLooks[((max(1, index) - 1) / 10) % endlessLooks.count]
     }
     /// How many levels each world has. Worlds grow as the game goes on; this table is the one place that says so.
-    public static let lengths: [String: Int] = ["toyshop": 15, "sweetfactory": 20, "starlight": 25, "bubblebath": 30, "junglejam": 35, "christmas": 20, endless: 240, weekly: 40]
+    public static let lengths: [String: Int] = ["toyshop": 15, "sweetfactory": 20, "starlight": 25, "bubblebath": 30, "junglejam": 35, "spacestation": 40, "morphlab": 45, "christmas": 20, endless: 240, weekly: 40]
     public static func levelCount(in world: String) -> Int { lengths[world] ?? 20 }
     public static var mainLevelCount: Int { worlds.reduce(0) { $0 + levelCount(in: $1) } }
 
