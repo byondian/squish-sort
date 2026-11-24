@@ -17,7 +17,7 @@ final class LevelTests: XCTestCase {
         let all = try files()
         XCTAssertEqual(LevelCatalog.worlds.map(LevelCatalog.levelCount(in:)), [15, 20, 25, 30, 35])
         XCTAssertEqual(LevelCatalog.mainLevelCount, 125)
-        XCTAssertEqual(all.count, 385)
+        XCTAssertEqual(all.count, 425)
         XCTAssertEqual(Array(all.prefix(125)).map(\.world),
                        LevelCatalog.worlds.flatMap { Array(repeating: $0, count: LevelCatalog.levelCount(in: $0)) },
                        "the main path comes first, in play order")
@@ -39,8 +39,38 @@ final class LevelTests: XCTestCase {
         for world in LevelCatalog.fileWorlds {
             let inWorld = all.filter { $0.world == world }
             XCTAssertEqual(inWorld.map(\.index), Array(1...LevelCatalog.levelCount(in: world)), world)
+            // Twist of the week has no boss and no capsules.
+            if world == LevelCatalog.weekly { continue }
             XCTAssertEqual(inWorld.last?.beat, .boss, "\(world) ends on a boss")
             XCTAssertEqual(inWorld.last?.capsule, true, "\(world) ends on a capsule")
+        }
+    }
+
+    func testTwistOfTheWeekHasFiveCalmBoardsOfEachTheme() throws {
+        let weekly = try files().filter { $0.world == LevelCatalog.weekly }
+        XCTAssertEqual(weekly.count, 40)
+        XCTAssertEqual(LevelCatalog.weeklyLooks.count, 40)
+        XCTAssertEqual(LevelCatalog.look(world: LevelCatalog.weekly, index: 6), "junglejam")
+        XCTAssertEqual(LevelCatalog.look(world: LevelCatalog.weekly, index: 40), "junglejam")
+        XCTAssertFalse(LevelCatalog.fileWorlds.dropLast().contains(LevelCatalog.weekly), "the weekly boards load last, after every path and side world")
+        XCTAssertFalse(LevelCatalog.path.contains(LevelCatalog.weekly))
+        XCTAssertFalse(LevelCatalog.allWorlds.contains(LevelCatalog.weekly), "no book page, no map and no world prizes")
+        // Each theme's five boards all show its twist. Themes in the order of WeeklyTwist.themes.
+        let has: [(LevelFile) -> Bool] = [
+            { !($0.mechanics?.keys ?? []).isEmpty }, { !($0.mechanics?.vines ?? []).isEmpty },
+            { !($0.mechanics?.morph ?? []).isEmpty }, { !($0.mechanics?.sticky ?? []).isEmpty },
+            { $0.capacity == 5 }, { $0.mechanics?.floats == true },
+            { $0.mechanics?.floats != true && !($0.mechanics?.frozen ?? []).isEmpty },
+        ]
+        for (theme, check) in has.enumerated() {
+            for file in weekly where (file.index - 1) / 5 == theme { XCTAssertTrue(check(file), file.id) }
+        }
+        for file in weekly {
+            // No capsule, no boss, two spare jars: calm boards for every age.
+            XCTAssertFalse(file.capsule, file.id)
+            XCTAssertNotEqual(file.beat, .boss, file.id)
+            XCTAssertGreaterThanOrEqual(file.jars.filter(\.isEmpty).count, 2, file.id)
+            XCTAssertEqual(LevelValidator.structuralProblems(file), [], file.id)
         }
     }
 
@@ -49,7 +79,7 @@ final class LevelTests: XCTestCase {
         let jungle = all.filter { $0.world == "junglejam" }
         XCTAssertTrue(jungle.contains { !($0.mechanics?.vines ?? []).isEmpty }, "Jungle Jam has vine jars")
         // Keep Squishing comes after Jungle Jam, so it may borrow vines; no earlier world does.
-        XCTAssertFalse(all.contains { !["junglejam", LevelCatalog.endless].contains($0.world) && !($0.mechanics?.vines ?? []).isEmpty },
+        XCTAssertFalse(all.contains { !["junglejam", LevelCatalog.endless, LevelCatalog.weekly].contains($0.world) && !($0.mechanics?.vines ?? []).isEmpty },
                        "vines stay in Jungle Jam and Keep Squishing")
         // Keep Squishing mixes every world's rule, and wrapped squishies are no longer on every level.
         let keep = all.filter { $0.world == LevelCatalog.endless }
@@ -63,7 +93,7 @@ final class LevelTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(keep.filter { !($0.mechanics?.morph ?? []).isEmpty }.count, 20)
         XCTAssertGreaterThanOrEqual(keep.filter { $0.capacity == 5 }.count, 20)
         XCTAssertFalse(keep.contains { ($0.mechanics?.morph ?? []).count > LevelValidator.maxMorphs })
-        XCTAssertFalse(all.contains { $0.world != LevelCatalog.endless
+        XCTAssertFalse(all.contains { $0.world != LevelCatalog.endless && $0.world != LevelCatalog.weekly
             && ($0.capacity != 4 || !($0.mechanics?.keys ?? []).isEmpty || !($0.mechanics?.morph ?? []).isEmpty) })
         // The first board of each twist's first block shows that twist alone.
         for (index, rule) in [(11, "keys"), (21, "morph"), (31, "big")] {

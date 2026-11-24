@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "id": "weekly-34",
+  "world": "weekly",
+  "index": 34,
+  "beat": "tension",
+  "capacity": 4,
+  "jars": [
+    ["sunny", "tango", "strawbie", "strawbie"],
+    ["macaron", "grapey", "minty", "blu"],
+    ["tango", "grapey", "macaron", "macaron"],
+    ["blu", "strawbie", "macaron", "minty"],
+    ["minty", "blu", "sunny", "grapey"],
+    ["tango", "minty", "grapey", "sunny"],
+    ["strawbie", "blu", "tango", "sunny"],
+    [],
+    []
+  ],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": [[0, 0], [3, 2], [6, 1]], "curtains": [1]},
+  "par": 21,
+  "solution": [[2, 7], [4, 2], [5, 4], [5, 2], [3, 5], [3, 7], [0, 3], [2, 8], [0, 2], [4, 0], [6, 0], [1, 4], [1, 5], [1, 8], [1, 7], [6, 2], [6, 4], [3, 6], [4, 3], [5, 4], [2, 5]],
+  "capsule": false,
+  "softenAfterFails": 2
+}

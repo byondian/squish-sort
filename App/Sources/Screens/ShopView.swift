@@ -57,6 +57,8 @@ struct ShopView: View {
                             ForEach(BuddyGifts.all) { gift in giftCard(gift) }
                             // Milestone prizes from Keep Squishing are never for sale: only the ones it has won show.
                             ForEach(BuddyGifts.milestones.filter { model.progress.buddy.owns($0) }) { gift in giftCard(gift) }
+                            // The same for the glasses that come with a Twist of the week sticker.
+                            ForEach(BuddyGifts.weekly.filter { model.progress.buddy.owns($0) }) { gift in giftCard(gift) }
                         }
                     }
                     Text("Coins buy hints, shuffles and themes. Squishies are earned by playing and are never for sale.")

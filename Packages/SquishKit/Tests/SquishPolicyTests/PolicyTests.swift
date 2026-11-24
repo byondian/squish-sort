@@ -462,6 +462,85 @@ final class CapsuleTests: XCTestCase {
         }
     }
 
+    func testTheDatePicksTheTwistOfTheWeekAndEveryThemeComesBackEveryEightWeeks() {
+        XCTAssertEqual(WeeklyTwist.themes.count, 8)
+        // Weeks start on Monday and count on across the new year, so the round of eight never skips.
+        XCTAssertEqual(WeeklyTwist.week(day: "2026-01-05"), 0)
+        XCTAssertEqual(WeeklyTwist.week(day: "2026-01-11"), 0)
+        XCTAssertEqual(WeeklyTwist.week(day: "2026-01-12"), 1)
+        XCTAssertEqual(WeeklyTwist.week(day: "2026-01-04"), -1)
+        XCTAssertEqual(WeeklyTwist.week(day: "2026-11-22"), 45)
+        XCTAssertEqual(WeeklyTwist.week(day: "2026-11-23"), 46)
+        XCTAssertEqual(WeeklyTwist.week(day: "2027-01-04"), 52)
+        XCTAssertEqual(WeeklyTwist.week(day: "2028-02-29"), 112)
+        XCTAssertNil(WeeklyTwist.week(day: "soon"))
+        XCTAssertEqual(WeeklyTwist.theme(day: "2026-01-05"), "keys")
+        XCTAssertEqual(WeeklyTwist.theme(day: "2026-11-22"), "floaters")
+        XCTAssertEqual(WeeklyTwist.theme(day: "2026-11-23"), "frozen")
+        XCTAssertEqual(WeeklyTwist.theme(day: "2026-01-04"), "grand-mix")
+        XCTAssertEqual(WeeklyTwist.theme(day: "2026-12-28"), WeeklyTwist.theme(day: "2027-01-03"), "one theme all week, over the new year too")
+        for week in -20...200 {
+            XCTAssertEqual(WeeklyTwist.theme(week: week), WeeklyTwist.theme(week: week + 8))
+            XCTAssertEqual(Set((0..<8).map { WeeklyTwist.theme(week: week + $0) }).count, 8, "all eight in any eight weeks")
+        }
+        XCTAssertEqual(WeeklyTwist.levelIndex(theme: "keys", board: 1), 1)
+        XCTAssertEqual(WeeklyTwist.levelIndex(theme: "grand-mix", board: 5), 40)
+        XCTAssertNil(WeeklyTwist.levelIndex(theme: "keys", board: 6))
+        XCTAssertEqual(WeeklyTwist.theme(levelIndex: 26), "floaters")
+        // One wearable and one sticker a theme; the wearables are never in the shop and never in the daily gift.
+        XCTAssertEqual(BuddyGifts.weekly.count, WeeklyTwist.themes.count)
+        XCTAssertEqual(Set(BuddyGifts.weekly.map(\.id)).count, 8)
+        XCTAssertEqual(Set(WeeklyTwist.themes.map(WeeklyTwist.sticker(theme:))).count, 8)
+        XCTAssertTrue(BuddyGifts.weekly.allSatisfy { gift in
+            gift.price == 0 && !BuddyGifts.all.contains { $0.id == gift.id } && !BuddyGifts.milestones.contains { $0.id == gift.id }
+        })
+        XCTAssertEqual(WeeklyTwist.gift(theme: "frozen").flatMap { BuddyGifts.gift($0.id) }, BuddyGifts.weekly[6])
+    }
+
+    func testWeeklyBoardsPayOnceAWeekAndAStickerIsNeverLostByMissingAWeek() throws {
+        var state = WeeklyState()
+        XCTAssertEqual(state.next(theme: "keys", week: 0), 1)
+        var prize = state.win(theme: "keys", board: 1, week: 0)
+        XCTAssertEqual(prize, WeeklyState.Prize(coins: WeeklyTwist.coins, sticker: false, bonus: 0))
+        // The same board again in the same week pays nothing.
+        XCTAssertEqual(state.win(theme: "keys", board: 1, week: 0), WeeklyState.Prize())
+        _ = state.win(theme: "keys", board: 2, week: 0)
+        _ = state.win(theme: "keys", board: 3, week: 0)
+        XCTAssertEqual(state.towardsSticker("keys"), 3)
+        XCTAssertEqual(state.next(theme: "keys", week: 0), 4)
+        // Another theme's week: its own boards, and the keys boards stay won.
+        XCTAssertEqual(state.next(theme: "vines", week: 1), 1)
+        XCTAssertEqual(state.win(theme: "vines", board: 1, week: 1).coins, WeeklyTwist.coins)
+        XCTAssertEqual(state.towardsSticker("keys"), 3)
+        // Eight weeks on the keys come back: the two boards still missing come first, and the fifth brings the sticker.
+        XCTAssertEqual(state.playedThisWeek(8), [])
+        XCTAssertEqual(state.next(theme: "keys", week: 8), 4)
+        XCTAssertFalse(state.win(theme: "keys", board: 4, week: 8).sticker)
+        prize = state.win(theme: "keys", board: 5, week: 8)
+        XCTAssertTrue(prize.sticker)
+        XCTAssertEqual(prize.coins, WeeklyTwist.coins)
+        XCTAssertTrue(state.hasSticker("keys"))
+        XCTAssertEqual(state.next(theme: "keys", week: 8), 1, "the other three can still be played for coins this week")
+        _ = state.win(theme: "keys", board: 1, week: 8)
+        _ = state.win(theme: "keys", board: 2, week: 8)
+        // All five played in a week with the sticker on the card: the bonus, and never a second sticker.
+        prize = state.win(theme: "keys", board: 3, week: 8)
+        XCTAssertEqual(prize.bonus, WeeklyTwist.coinsWhenOwned)
+        XCTAssertFalse(prize.sticker)
+        XCTAssertNil(state.next(theme: "keys", week: 8))
+        // Next time round the sticker is owned: coins a board, a bonus for all five, never a second sticker.
+        for board in 1...4 { XCTAssertEqual(state.win(theme: "keys", board: board, week: 16), WeeklyState.Prize(coins: WeeklyTwist.coins, sticker: false, bonus: 0)) }
+        XCTAssertEqual(state.win(theme: "keys", board: 5, week: 16), WeeklyState.Prize(coins: WeeklyTwist.coins, sticker: false, bonus: WeeklyTwist.coinsWhenOwned))
+        XCTAssertEqual(state.stickers, ["keys"])
+        // A bad board or theme changes nothing.
+        XCTAssertEqual(state.win(theme: "keys", board: 9, week: 24), WeeklyState.Prize())
+        XCTAssertEqual(state.win(theme: "nope", board: 1, week: 24), WeeklyState.Prize())
+        // It saves and loads, and an older save without it starts empty.
+        let back = try JSONDecoder().decode(WeeklyState.self, from: JSONEncoder().encode(state))
+        XCTAssertEqual(back, state)
+        XCTAssertEqual(try JSONDecoder().decode(WeeklyState.self, from: Data("{}".utf8)), WeeklyState())
+    }
+
     func testCapsulesHoldOnlyRaresAndUltras() {
         var state = CollectionState()
         state.totalCapsules = 1 // past the Peach Bun capsule

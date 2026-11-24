@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "id": "weekly-17",
+  "world": "weekly",
+  "index": 17,
+  "beat": "easy",
+  "capacity": 4,
+  "jars": [
+    ["pip", "riff", "lumi", "coco"],
+    ["zuzu", "coco", "coco", "nova"],
+    ["lumi", "pip", "nova", "zuzu"],
+    ["riff", "coco", "pip", "pip"],
+    ["nova", "zuzu", "riff", "nova"],
+    ["lumi", "lumi", "riff", "zuzu"],
+    [],
+    []
+  ],
+  "mechanics": {"hidden": [], "sticky": [[0, 2], [5, 2]], "frozen": []},
+  "par": 17,
+  "solution": [[1, 6], [4, 6], [1, 7], [2, 1], [2, 6], [3, 2], [3, 7], [4, 3], [4, 1], [4, 6], [5, 3], [0, 5], [3, 1], [0, 3], [2, 0], [5, 7], [2, 5]],
+  "capsule": false,
+  "softenAfterFails": null
+}

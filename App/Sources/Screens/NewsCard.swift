@@ -81,6 +81,13 @@ struct NewsCard: View {
             } else {
                 CoinIcon().foregroundStyle(Theme.butter).scaleEffect(2.6).frame(width: 96, height: 96)
             }
+        case .sticker(let theme, let gift):
+            HStack(spacing: 14) {
+                WeeklyTwistView.sticker(theme, size: 100).accessibilityIdentifier("weekly-sticker")
+                if let gift = gift.flatMap(BuddyGifts.gift), let image = WorkshopArt.part(gift.category, gift.part) {
+                    Image(uiImage: image).resizable().scaledToFit().frame(width: 100, height: 100)
+                }
+            }
         case .bossBeaten:
             Text(verbatim: "👑").font(.system(size: 70))
         case .trick:
@@ -157,6 +164,8 @@ struct NewsCard: View {
             return "Starter pack"
         case .milestone(let level, _, _):
             return "Milestone: level \(level)!"
+        case .sticker:
+            return "Sticker won!"
         case .bossBeaten:
             return "Boss beaten!"
         case .starJar:
@@ -188,6 +197,9 @@ struct NewsCard: View {
             }
         case .teaser, .finale:
             return ""
+        case .sticker(_, let gift):
+            if gift != nil { return "It is on your sticker card, and your Buddy is wearing its prize. You can only get it here." }
+            return "It is on your sticker card."
         case .bossBeaten:
             return "You out-sorted the boss. On to the next jars!"
         case .milestone(_, let gift, let coins):

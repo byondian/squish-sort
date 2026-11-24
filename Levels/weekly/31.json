@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "id": "weekly-31",
+  "world": "weekly",
+  "index": 31,
+  "beat": "easy",
+  "capacity": 4,
+  "jars": [
+    ["strawbie", "minty", "strawbie", "tango"],
+    ["blu", "blu", "tango", "minty"],
+    ["blu", "minty", "sunny", "strawbie"],
+    ["sunny", "sunny", "tango", "minty"],
+    ["tango", "sunny", "blu", "strawbie"],
+    [],
+    []
+  ],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": [[0, 2], [4, 2]]},
+  "par": 15,
+  "solution": [[1, 5], [3, 5], [1, 3], [2, 6], [4, 6], [4, 1], [4, 2], [0, 4], [0, 6], [0, 5], [0, 6], [3, 4], [2, 3], [2, 5], [1, 2]],
+  "capsule": false,
+  "softenAfterFails": null
+}

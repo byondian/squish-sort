@@ -9,6 +9,7 @@ struct HomeView: View {
     @State private var coinGatePassed = false
     @State private var wobble = false
     @State private var showStamps = false
+    @State private var showWeekly = false
     @State private var coinsFlying = false
     @State private var coinsLanded = false
     /// How tall the Buddy and its rows want to be, before they are fitted to the room on Home.
@@ -55,7 +56,14 @@ struct HomeView: View {
                             .background(Capsule().fill(Theme.butter))
                             .dimmed(teaching)
                     }
-                    if model.dailyJarOpen { dailyJarButton.frame(maxWidth: 620).dimmed(teaching) }
+                    if model.dailyJarOpen || model.weeklyOpen {
+                        // One row: the Daily Jar and, once the story worlds are won, the twist of the week.
+                        HStack(spacing: 10) {
+                            if model.dailyJarOpen { dailyJarButton }
+                            if model.weeklyOpen { weeklyButton }
+                        }
+                        .frame(maxWidth: 620).dimmed(teaching)
+                    }
                     playButton(height: big ? 124 : compact ? 84 : 104).frame(maxWidth: 620).dimmed(teaching)
                     HStack(spacing: 12) {
                         collectionButton(height: big ? 104 : compact ? 76 : 88)
@@ -155,6 +163,31 @@ struct HomeView: View {
         .frame(height: HomeView.barHeight)
     }
 
+    /// Twist of the week: opens its card (theme, five boards, sticker card). Nothing counts down.
+    private var weeklyButton: some View {
+        let done = model.weeklyNext == nil
+        return Button { showWeekly = true } label: {
+            HStack(spacing: 6) {
+                Image(systemName: done ? "checkmark.circle.fill" : "sparkles").font(.system(size: 17, weight: .bold))
+                    .foregroundStyle(done ? Theme.mint : Theme.bubblegum)
+                Text("Twist of the week").font(Theme.title(17)).lineLimit(1).minimumScaleFactor(0.5)
+                Spacer(minLength: 0)
+                Text(verbatim: "\(model.weeklyPlayed.count)/\(WeeklyTwist.boardsPerTheme)").font(Theme.body(15)).monospacedDigit()
+            }
+            .foregroundStyle(Theme.plum)
+            .padding(.horizontal, 14).frame(height: 44)
+            .background(Capsule().fill(.white))
+            .overlay(Capsule().stroke(Theme.plum.opacity(0.12), lineWidth: 2))
+        }
+        .buttonStyle(PressSquish())
+        .accessibilityIdentifier("home-weekly-twist")
+        .sheet(isPresented: $showWeekly) {
+            WeeklyTwistView { showWeekly = false }
+                .environmentObject(model)
+                .presentationDetents([.large])
+        }
+    }
+
     /// Daily Jar: one board a day. Once it is won it just says so until tomorrow; nothing counts down.
     private var dailyJarButton: some View {
         let done = model.dailyJarDone
@@ -162,7 +195,7 @@ struct HomeView: View {
             HStack(spacing: 8) {
                 Image(systemName: done ? "checkmark.circle.fill" : "sun.max.fill").font(.system(size: 17, weight: .bold))
                     .foregroundStyle(done ? Theme.mint : Theme.butter)
-                Text("Daily Jar").font(Theme.title(17))
+                Text("Daily Jar").font(Theme.title(17)).lineLimit(1).minimumScaleFactor(0.6)
                 Spacer(minLength: 0)
                 if done {
                     Text("Done today").font(Theme.body(14)).opacity(0.7)

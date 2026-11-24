@@ -30,6 +30,8 @@ public struct GameConfig: Codable, Equatable, Sendable {
     /// The paid extras for 13 and over (starter pack, piggy bank) and the Daily Jar can be switched off.
     public var offersEnabled = true
     public var dailyJarEnabled = true
+    /// Twist of the week (after the story worlds are won).
+    public var weeklyTwistEnabled = true
     /// One light event, or none.
     public var event: GameEvent?
 
@@ -59,6 +61,7 @@ public struct GameConfig: Codable, Equatable, Sendable {
         squishyShopEnabled = try c.decodeIfPresent(Bool.self, forKey: .squishyShopEnabled) ?? d.squishyShopEnabled
         offersEnabled = try c.decodeIfPresent(Bool.self, forKey: .offersEnabled) ?? d.offersEnabled
         dailyJarEnabled = try c.decodeIfPresent(Bool.self, forKey: .dailyJarEnabled) ?? d.dailyJarEnabled
+        weeklyTwistEnabled = try c.decodeIfPresent(Bool.self, forKey: .weeklyTwistEnabled) ?? d.weeklyTwistEnabled
         // A broken event never breaks the rest of the config.
         event = (try? c.decodeIfPresent(GameEvent.self, forKey: .event)) ?? nil
     }

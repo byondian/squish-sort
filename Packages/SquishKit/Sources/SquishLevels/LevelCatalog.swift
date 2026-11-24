@@ -14,8 +14,20 @@ public enum LevelCatalog {
     public static let endless = "endless"
     /// Every level you walk through in order: the story worlds, then Keep Squishing.
     public static var path: [String] { worlds + [endless] }
+    /// Twist of the week: eight themes of five boards (1 to 5, 6 to 10 and so on). They are played from
+    /// the Home card only and are on no map; the app picks the week's theme from the date.
+    public static let weekly = "weekly"
+    public static let weeklyBoards = 5
+    /// Whose squishies and room each weekly board borrows. Keep in step with WEEKLY_THEMES in tools/levelgen.py.
+    public static let weeklyLooks: [String] = [
+        Array(repeating: "sweetfactory", count: 5), Array(repeating: "junglejam", count: 5),
+        Array(repeating: "starlight", count: 5), Array(repeating: "starlight", count: 5),
+        Array(repeating: "bubblebath", count: 5), Array(repeating: "bubblebath", count: 5),
+        Array(repeating: "toyshop", count: 5),
+        ["toyshop", "sweetfactory", "starlight", "bubblebath", "junglejam"],
+    ].flatMap { $0 }
     /// Every world with level files, in the order the files are loaded.
-    public static var fileWorlds: [String] { path + sideWorlds }
+    public static var fileWorlds: [String] { path + sideWorlds + [weekly] }
     /// Whose squishies and room each block of ten in Keep Squishing borrows.
     /// Six blocks to a round: five worlds in turn, then a Grand Mix. Keep in step with ENDLESS_BLOCKS in tools/levelgen.py.
     public static let endlessLooks = [
@@ -40,11 +52,12 @@ public enum LevelCatalog {
     }
     /// The world a level looks like: its own, or the one its block borrows.
     public static func look(world: String, index: Int) -> String {
+        if world == weekly { return weeklyLooks[(max(1, index) - 1) % weeklyLooks.count] }
         guard world == endless else { return world }
         return endlessLooks[((max(1, index) - 1) / 10) % endlessLooks.count]
     }
     /// How many levels each world has. Worlds grow as the game goes on; this table is the one place that says so.
-    public static let lengths: [String: Int] = ["toyshop": 15, "sweetfactory": 20, "starlight": 25, "bubblebath": 30, "junglejam": 35, "christmas": 20, endless: 240]
+    public static let lengths: [String: Int] = ["toyshop": 15, "sweetfactory": 20, "starlight": 25, "bubblebath": 30, "junglejam": 35, "christmas": 20, endless: 240, weekly: 40]
     public static func levelCount(in world: String) -> Int { lengths[world] ?? 20 }
     public static var mainLevelCount: Int { worlds.reduce(0) { $0 + levelCount(in: $1) } }
 
@@ -52,6 +65,8 @@ public enum LevelCatalog {
     public static func isCapsuleLevel(index: Int, world: String) -> Bool {
         // Keep Squishing: every fifth level.
         if world == endless { return index % 5 == 0 }
+        // Twist of the week gives stickers, never capsules.
+        if world == weekly { return false }
         return index % 3 == 0 || index % 10 == 0 || index == levelCount(in: world)
     }
 

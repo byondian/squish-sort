@@ -689,6 +689,77 @@ def write_endless(first, last):
         print(f"{lv['id']:16} {lv['beat']:10} jars={len(lv['jars']):2} kinds={kinds} par={lv['par']:2} capsule={lv['capsule']}", flush=True)
 
 
+# Twist of the week: eight themes, five boards each, in Levels/weekly (01 to 40). The app picks the
+# week's theme from the date. Keep the order in step with WeeklyTwist.themes and LevelCatalog.weeklyLooks.
+WEEKLY = "weekly"
+# (theme, then for each of its five boards: world whose squishies it borrows, main rule, guest rule)
+WEEKLY_THEMES = [
+    ("keys", [(1, "keys", None), (1, "keys", None), (1, "keys", "wrapped"), (1, "keys", "ice"), (1, "keys", "wrapped")]),
+    ("vines", [(5, "vines", None), (5, "vines", None), (5, "vines", None), (5, "vines", "ice"), (5, "vines", "wrapped")]),
+    ("morph", [(2, "morph", None), (2, "morph", None), (2, "morph", None), (2, "morph", "wrapped"), (2, "morph", "ice")]),
+    ("duets", [(2, "duets", None), (2, "duets", None), (2, "duets", None), (2, "duets", "ice"), (2, "duets", "wrapped")]),
+    ("big", [(4, "big", None), (4, "big", None), (4, "big", "wrapped"), (4, "big", "ice"), (4, "big", "vines")]),
+    ("floaters", [(4, "floaters", None), (4, "floaters", None), (4, "floaters", None), (4, "floaters", "duets"), (4, "floaters", "wrapped")]),
+    ("frozen", [(0, "ice", None), (0, "ice", None), (0, "ice", "wrapped"), (0, "ice", "curtains"), (0, "ice", "duets")]),
+    ("grand-mix", [(0, "ice", "duets"), (1, "wrapped", "keys"), (2, "curtains", "ice"), (4, "floaters", "vines"), (5, "morph", "vines")]),
+]
+WEEKLY_BEATS = ["easy", "easy", "medium", "tension", "showpiece"]
+WEEKLY_KINDS = [5, 6, 6, 7, 7]
+WEEKLY_EASE = [0.6, 0.5, 0.4, 0.3, 0.2]
+
+
+def make_weekly(pos):
+    theme, boards = WEEKLY_THEMES[(pos - 1) // 5]
+    n = (pos - 1) % 5 + 1
+    world_idx, main, guest = boards[n - 1]
+    plan = dict(mech=None, mcount=0, mix_hidden=0, mix_frozen=0, vines=None, bubbles=None, keys=0, morphs=0, cap=CAP)
+    # the same dials as Keep Squishing, read at places 1, 3, 5, 7 and 9 of a block
+    plan.update(endless_rule(main, 2 * n - 1, 0, False))
+    if guest:
+        plan.update(endless_rule(guest, 2 * n - 1, 0, True))
+    k = WEEKLY_KINDS[n - 1] - (1 if plan["cap"] > CAP else 0)
+    names = kinds_for(world_idx, k)
+    rng = random.Random(f"{WEEKLY}-{theme}-{n}")
+    level = {"schema": 1, "id": f"{WEEKLY}-{pos:02d}", "world": WEEKLY, "index": pos, "beat": WEEKLY_BEATS[n - 1], "capacity": plan["cap"]}
+    # Always two spare jars and no first move that loses: these are calm boards for every age.
+    picked = None
+    for pl in [plan, lighter(plan), lighter(lighter(plan))]:
+        picked = choose_endless(rng, level, names, 2, pl, WEEKLY_EASE[n - 1])
+        if picked:
+            break
+    if not picked:
+        raise SystemExit(f"{level['id']}: no fair board")
+    jars, mechanics = picked
+    level["jars"] = jars
+    level["mechanics"] = {"hidden": mechanics.get("hidden", []), "sticky": mechanics.get("sticky", []),
+                          "frozen": mechanics.get("frozen", [])}
+    for extra in ("curtains", "vines", "floats", "keys", "morph"):
+        if mechanics.get(extra):
+            level["mechanics"][extra] = mechanics[extra]
+    b, _ = board_from_level(level)
+    sol, explored = solve(b, 3_000_000)
+    if sol is None:
+        raise SystemExit(f"{level['id']}: unsolvable or too big ({explored} states)")
+    level["par"] = len(sol)
+    level["solution"] = [list(m) for m in sol]
+    level["capsule"] = False
+    level["softenAfterFails"] = 2 if n >= 4 else None
+    return level
+
+
+def write_weekly(first, last):
+    d = os.path.join(ROOT, "Levels", WEEKLY)
+    os.makedirs(d, exist_ok=True)
+    for pos in range(first, last + 1):
+        lv = make_weekly(pos)
+        with open(os.path.join(d, f"{pos:02d}.json"), "w") as f:
+            f.write(dump(lv))
+        kinds = len({q for jar in lv["jars"] for q in jar})
+        m = lv["mechanics"]
+        rules = [name for name in ("hidden", "sticky", "frozen", "curtains", "vines", "keys", "morph") if m.get(name)]
+        print(f"{lv['id']:12} {WEEKLY_THEMES[(pos - 1) // 5][0]:10} jars={len(lv['jars']):2} cap={lv['capacity']} kinds={kinds} par={lv['par']:2} {rules}", flush=True)
+
+
 def dump(level):
     """Stable, diff-friendly JSON: one jar per line."""
     lines = ["{"]
@@ -730,6 +801,12 @@ def main():
         i = sys.argv.index("--world") + 2
         nums = [int(x) for x in sys.argv[i:i + 2]]
         write_endless(nums[0] if nums else 1, nums[1] if len(nums) > 1 else ENDLESS_LENGTH)
+        return
+    if world == WEEKLY:
+        # python3 tools/levelgen.py --world weekly [first last]
+        i = sys.argv.index("--world") + 2
+        nums = [int(x) for x in sys.argv[i:i + 2]]
+        write_weekly(nums[0] if nums else 1, nums[1] if len(nums) > 1 else 5 * len(WEEKLY_THEMES))
         return
     # python3 tools/levelgen.py --world junglejam [first last]
     span = []

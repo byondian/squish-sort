@@ -86,6 +86,8 @@ struct PlayerProgress: Codable, Equatable {
     var goldStars: Set<String> = []
     /// yyyy-MM-dd of the last Daily Jar won.
     var dailyJarDay: String?
+    /// Twist of the week: boards played this week, boards ever won and the sticker card.
+    var weekly = WeeklyState()
     /// Places on the Workshop shelf: three are free, more are bought with coins.
     var makerSlots = MakerSlots.free
     /// Workshop wearables bought one at a time with coins, as "tray/part".
@@ -199,6 +201,7 @@ struct PlayerProgress: Codable, Equatable {
         endlessLaps = max(0, v(.endlessLaps, d.endlessLaps))
         goldStars = v(.goldStars, d.goldStars)
         dailyJarDay = (try? c.decodeIfPresent(String.self, forKey: .dailyJarDay)) ?? nil
+        weekly = v(.weekly, d.weekly)
         // A save from before places had a price keeps a place for everything it already made.
         makerSlots = max(MakerSlots.free, v(.makerSlots, MakerSlots.starting(alreadyMade: made.count)))
         workshopParts = v(.workshopParts, d.workshopParts)

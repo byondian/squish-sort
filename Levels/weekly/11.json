@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "id": "weekly-11",
+  "world": "weekly",
+  "index": 11,
+  "beat": "easy",
+  "capacity": 4,
+  "jars": [
+    ["pip", "nova", "lumi", "zuzu"],
+    ["riff", "zuzu", "zuzu", "riff"],
+    ["riff", "zuzu", "lumi", "nova"],
+    ["nova", "lumi", "pip", "pip"],
+    ["lumi", "pip", "nova", "riff"],
+    [],
+    []
+  ],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": [], "morph": [{"jar": 1, "at": 0, "kind": "nova"}]},
+  "par": 15,
+  "solution": [[0, 5], [0, 6], [2, 0], [2, 6], [2, 5], [1, 2], [1, 5], [2, 1], [4, 1], [4, 0], [3, 4], [3, 6], [0, 3], [4, 0], [4, 6]],
+  "capsule": false,
+  "softenAfterFails": null
+}
