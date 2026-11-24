@@ -312,24 +312,24 @@
         }
       }
     },
-    "%lld more levels. Opens after Jungle Jam.": {
+    "%lld more levels. Opens after Morph Lab.": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "あと%lldレベル。ジャングルジャムのあとにひらくよ。"
+            "value": "あと%lldレベル。へんしんラボのあとにひらくよ。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "레벨 %lld개 더. 정글 잼 다음에 열려요."
+            "value": "레벨 %lld개 더. 변신 연구소 다음에 열려요."
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "還有 %lld 關。完成叢林果醬後開放。"
+            "value": "還有 %lld 關。完成變身實驗室後開放。"
           }
         }
       }
@@ -3005,6 +3005,28 @@
         }
       }
     },
+    "Eureka!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ひらめいた！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "유레카!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有了！"
+          }
+        }
+      }
+    },
     "Every level you win gives your Buddy a free treat. Treats and gifts are just for fun.": {
       "localizations": {
         "ja": {
@@ -4611,6 +4633,28 @@
         }
       }
     },
+    "Launch Night": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ローンチ・ナイト"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "발사의 밤"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "升空之夜"
+          }
+        }
+      }
+    },
     "Let's go!": {
       "localizations": {
         "ja": {
@@ -4717,6 +4761,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "找不到關卡"
+          }
+        }
+      }
+    },
+    "Lift-off!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "はっしゃ！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "발사!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "升空！"
           }
         }
       }
@@ -5289,6 +5355,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "每完成一個世界，就會解鎖更多零件。"
+          }
+        }
+      }
+    },
+    "Morph Lab": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "へんしんラボ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "변신 연구소"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "變身實驗室"
+          }
+        }
+      }
+    },
+    "Morph Lab complete!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "へんしんラボ クリア！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "변신 연구소 완료!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "變身實驗室完成！"
           }
         }
       }
@@ -7823,6 +7933,50 @@
         }
       }
     },
+    "Space Station": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スペースステーション"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "우주 정거장"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "太空站"
+          }
+        }
+      }
+    },
+    "Space Station complete!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スペースステーション クリア！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "우주 정거장 완료!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "太空站完成！"
+          }
+        }
+      }
+    },
     "Spares": {
       "localizations": {
         "ja": {
@@ -8875,6 +9029,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "謝謝！接下來一陣子不會有廣告休息。"
+          }
+        }
+      }
+    },
+    "The Big Experiment": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "だいじっけん"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "대실험"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大實驗"
           }
         }
       }
@@ -10349,6 +10525,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "你整理好所有罐子了。叢林果醬開放了！"
+          }
+        }
+      }
+    },
+    "You sorted every jar. Morph Lab is open!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ぜんぶのビンをそろえたよ。へんしんラボがオープン！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모든 병을 정리했어. 변신 연구소가 열렸어!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你整理好所有罐子了。變身實驗室開放了！"
+          }
+        }
+      }
+    },
+    "You sorted every jar. Space Station is open!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ぜんぶのビンをそろえたよ。スペースステーションがオープン！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모든 병을 정리했어. 우주 정거장이 열렸어!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你整理好所有罐子了。太空站開放了！"
           }
         }
       }

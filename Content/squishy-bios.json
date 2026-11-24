@@ -588,6 +588,210 @@
    "ja": "ジャングルでいちばん熟したバナナ。おひさまみたいに光るよ。",
    "ko": "정글에서 가장 잘 익은 바나나. 해처럼 빛나요.",
    "zh-Hant": "叢林裡最熟的香蕉，像太陽一樣閃亮。"
+  },
+  "ringo": {
+   "en": "Hula-hoops with its own ring all day long.",
+   "ja": "自分のわっかで一日じゅうフラフープしてる。",
+   "ko": "하루 종일 자기 고리로 훌라후프를 해요.",
+   "zh-Hant": "整天用自己的光環轉呼拉圈。"
+  },
+  "zip": {
+   "en": "Counts down from ten before every hug.",
+   "ja": "ハグの前に、かならず10からカウントダウン。",
+   "ko": "안아 주기 전에 꼭 10부터 거꾸로 세요.",
+   "zh-Hant": "每次擁抱前都要從十倒數。"
+  },
+  "blip": {
+   "en": "Has one big eye so it never misses a wave.",
+   "ja": "大きな目がひとつだから、手をふられたら見のがさない。",
+   "ko": "눈이 하나라서 손 흔드는 걸 절대 놓치지 않아요.",
+   "zh-Hant": "只有一隻大眼睛，所以從不錯過別人揮手。"
+  },
+  "saucy": {
+   "en": "Gives free rides to anyone who says please.",
+   "ja": "「おねがい」って言えば、だれでも乗せてあげる。",
+   "ko": "\"부탁해\"라고 말하면 누구든 태워 줘요.",
+   "zh-Hant": "只要說「拜託」，誰都可以免費搭一程。"
+  },
+  "cheesy": {
+   "en": "Glows brightest when someone is telling a joke.",
+   "ja": "だれかがジョークを言うと、いちばん明るく光る。",
+   "ko": "누가 농담을 하면 제일 밝게 빛나요.",
+   "zh-Hant": "有人說笑話時就會發出最亮的光。"
+  },
+  "zoomie": {
+   "en": "Makes a wish for you every time it zooms by.",
+   "ja": "ビュンと通るたびに、あなたのためにお願いごとをする。",
+   "ko": "휙 지나갈 때마다 너를 위해 소원을 빌어요.",
+   "zh-Hant": "每次咻地飛過都會幫你許個願。"
+  },
+  "astro-cat": {
+   "en": "Took one small step and then a very long nap.",
+   "ja": "小さな一歩をふみだして、それからとても長いお昼寝。",
+   "ko": "작은 한 걸음을 내딛고 아주 긴 낮잠을 잤어요.",
+   "zh-Hant": "踏出一小步，然後睡了好長的午覺。"
+  },
+  "rover-pup": {
+   "en": "Fetches moon rocks and wags its antenna.",
+   "ja": "月の石をとってきて、アンテナをふりふり。",
+   "ko": "달 돌멩이를 물어 오고 안테나를 살랑살랑 흔들어요.",
+   "zh-Hant": "會撿月球石頭回來，還會搖搖天線。"
+  },
+  "moon-bunny": {
+   "en": "Bakes tiny moon cakes for everyone on the station.",
+   "ja": "ステーションのみんなに小さな月のおかしを焼いてあげる。",
+   "ko": "정거장 친구들 모두에게 작은 달 과자를 구워 줘요.",
+   "zh-Hant": "幫太空站的大家烤小小的月亮蛋糕。"
+  },
+  "nebula-jelly": {
+   "en": "Floats through star clouds and comes back glittery.",
+   "ja": "星の雲をふわふわ通って、キラキラになって帰ってくる。",
+   "ko": "별 구름 사이를 둥둥 떠다니다 반짝반짝해져서 돌아와요.",
+   "zh-Hant": "飄過星雲，回來時全身亮晶晶。"
+  },
+  "satellite-snail": {
+   "en": "Slow and steady, but always gets the signal.",
+   "ja": "ゆっくりだけど、電波はいつもバッチリ。",
+   "ko": "느릿느릿하지만 신호는 언제나 딱 잡아요.",
+   "zh-Hant": "慢慢來，但訊號永遠最好。"
+  },
+  "orbit-hamster": {
+   "en": "Runs laps around the planet in its bubble ball.",
+   "ja": "バブルボールで惑星のまわりをぐるぐる走る。",
+   "ko": "버블 공을 타고 행성 주위를 빙글빙글 달려요.",
+   "zh-Hant": "坐在泡泡球裡繞著星球跑圈圈。"
+  },
+  "black-hole": {
+   "en": "Swallows bad dreams and keeps the sweet ones.",
+   "ja": "こわい夢をのみこんで、いい夢だけ残してくれる。",
+   "ko": "무서운 꿈은 꿀꺽 삼키고 좋은 꿈만 남겨 줘요.",
+   "zh-Hant": "把惡夢吞掉，只留下甜甜的夢。"
+  },
+  "aurora-whale": {
+   "en": "Sings in colours you can see from very far away.",
+   "ja": "遠くからでも見える色で歌うんだ。",
+   "ko": "아주 멀리서도 보이는 색깔로 노래해요.",
+   "zh-Hant": "用遠遠就看得見的顏色唱歌。"
+  },
+  "galaxy-cat": {
+   "en": "Every time it purrs, a new star is born.",
+   "ja": "ゴロゴロ言うたびに、新しい星が生まれる。",
+   "ko": "가르랑거릴 때마다 새로운 별이 태어나요.",
+   "zh-Hant": "每次呼嚕一聲，就有一顆新星誕生。"
+  },
+  "orbit": {
+   "en": "Squeeze me and I'll turn into anyone on the station!",
+   "ja": "ぎゅっとしたら、ステーションのだれにでも変身するよ！",
+   "ko": "꾹 누르면 정거장의 누구로든 변신해요!",
+   "zh-Hant": "捏我一下，我就變成太空站的任何一個朋友！"
+  },
+  "golden-rocket": {
+   "en": "Waits on the launch pad for a true collector.",
+   "ja": "本物のコレクターを発射台で待っている。",
+   "ko": "진정한 수집가를 발사대에서 기다려요.",
+   "zh-Hant": "在發射台上等待真正的收藏家。"
+  },
+  "popsy": {
+   "en": "Gets the giggles when anyone shakes it.",
+   "ja": "ふられると、くすくす笑いが止まらない。",
+   "ko": "누가 흔들면 킥킥 웃음이 멈추지 않아요.",
+   "zh-Hant": "被搖一搖就咯咯笑個不停。"
+  },
+  "slimo": {
+   "en": "Leaves a tiny happy trail wherever it goes.",
+   "ja": "どこへ行っても、小さなしあわせの跡を残す。",
+   "ko": "어디를 가든 작은 행복 자국을 남겨요.",
+   "zh-Hant": "走到哪裡都留下一道小小的快樂痕跡。"
+  },
+  "tubey": {
+   "en": "Stands up very straight for every experiment.",
+   "ja": "実験のときは、いつもピシッと立ってる。",
+   "ko": "실험할 때마다 아주 꼿꼿하게 서 있어요.",
+   "zh-Hant": "每次做實驗都站得直挺挺。"
+  },
+  "maggie": {
+   "en": "Can't help sticking close to her friends.",
+   "ja": "友だちにぴったりくっつかずにはいられない。",
+   "ko": "친구들 곁에 착 붙어 있지 않고는 못 배겨요.",
+   "zh-Hant": "忍不住就會黏在朋友身邊。"
+  },
+  "atomo": {
+   "en": "Tiny but full of big, bouncy energy.",
+   "ja": "小さいけど、元気いっぱいでポンポンはずむ。",
+   "ko": "작지만 통통 튀는 에너지가 가득해요.",
+   "zh-Hant": "個子小小，卻充滿蹦蹦跳的能量。"
+  },
+  "trio": {
+   "en": "Three best friends who always pop up together.",
+   "ja": "いつもいっしょにポンと現れる、なかよし3人組。",
+   "ko": "언제나 함께 퐁 나타나는 단짝 셋.",
+   "zh-Hant": "三個好朋友，總是一起冒出來。"
+  },
+  "goggle-frog": {
+   "en": "Safety first, then jumping. Lots of jumping.",
+   "ja": "安全第一、それからジャンプ。いっぱいジャンプ。",
+   "ko": "안전이 먼저, 그다음은 점프. 점프 많이.",
+   "zh-Hant": "安全第一，然後跳，跳很多很多下。"
+  },
+  "gear-mouse": {
+   "en": "Wind it up and it dances until bedtime.",
+   "ja": "ねじを巻くと、ねる時間までおどってる。",
+   "ko": "태엽을 감으면 잘 시간까지 춤을 춰요.",
+   "zh-Hant": "上緊發條，就一直跳舞到睡覺時間。"
+  },
+  "lava-lamp": {
+   "en": "Its blobs dance slowly when it feels calm.",
+   "ja": "おちついていると、中のつぶがゆっくりおどる。",
+   "ko": "마음이 편하면 안의 방울들이 천천히 춤춰요.",
+   "zh-Hant": "心情平靜時，裡面的泡泡會慢慢跳舞。"
+  },
+  "robo-owl": {
+   "en": "Stays up all night checking the stars are tidy.",
+   "ja": "星がきちんと並んでいるか、ひと晩じゅう見はってる。",
+   "ko": "별들이 잘 정리돼 있는지 밤새 지켜봐요.",
+   "zh-Hant": "整晚熬夜確認星星排得整整齊齊。"
+  },
+  "crystal-hog": {
+   "en": "Spiky on top, the softest hugger underneath.",
+   "ja": "上はトゲトゲ、下はいちばんやさしいハグ名人。",
+   "ko": "위는 뾰족뾰족, 아래는 제일 포근한 포옹 대장.",
+   "zh-Hant": "上面刺刺的，下面是最軟的抱抱高手。"
+  },
+  "octo-lab": {
+   "en": "Can stir eight potions at once without a spill.",
+   "ja": "こぼさずに8つの薬を同時にまぜられる。",
+   "ko": "하나도 안 흘리고 물약 여덟 개를 동시에 저어요.",
+   "zh-Hant": "可以同時攪拌八瓶藥水，一滴都不灑。"
+  },
+  "prism-penguin": {
+   "en": "Turns sunshine into rainbows for the whole lab.",
+   "ja": "おひさまの光を、ラボみんなのにじに変える。",
+   "ko": "햇빛을 연구소 모두를 위한 무지개로 바꿔요.",
+   "zh-Hant": "把陽光變成給整個實驗室的彩虹。"
+  },
+  "chroma": {
+   "en": "Changes colour to match whoever it's hugging.",
+   "ja": "ハグしている子と同じ色に変わる。",
+   "ko": "안아 주는 친구랑 같은 색으로 변해요.",
+   "zh-Hant": "抱著誰，就變成跟誰一樣的顏色。"
+  },
+  "crystal-fox": {
+   "en": "Its tail chimes softly when it's happy.",
+   "ja": "うれしいと、しっぽがやさしくチリンと鳴る。",
+   "ko": "기쁘면 꼬리가 살랑 딸랑 울려요.",
+   "zh-Hant": "開心時，尾巴會輕輕叮噹響。"
+  },
+  "flux": {
+   "en": "Squeeze me and I'll turn into anyone in the lab!",
+   "ja": "ぎゅっとしたら、ラボのだれにでも変身するよ！",
+   "ko": "꾹 누르면 연구소의 누구로든 변신해요!",
+   "zh-Hant": "捏我一下，我就變成實驗室的任何一個朋友！"
+  },
+  "golden-flask": {
+   "en": "The rarest mix in the whole lab.",
+   "ja": "ラボでいちばんめずらしい調合。",
+   "ko": "연구소에서 가장 귀한 조합.",
+   "zh-Hant": "整個實驗室最稀有的配方。"
   }
  },
  "riddles": {
@@ -626,6 +830,18 @@
    "ja": "ジャングルジャムのほかの子をぜんぶ見つけたら、木からおりてくるよ。",
    "ko": "정글 잼의 다른 친구들을 모두 찾으면 나무에서 내려올게요.",
    "zh-Hant": "找到叢林果醬其他所有軟軟，我就會從樹上掉下來。"
+  },
+  "golden-rocket": {
+   "en": "Find every other Space Station squishy and I'll blast off to you.",
+   "ja": "スペースステーションのほかの子をぜんぶ見つけたら、とんでいくよ。",
+   "ko": "우주 정거장의 다른 친구들을 모두 찾으면 날아갈게요.",
+   "zh-Hant": "找到太空站其他所有軟軟，我就會飛向你。"
+  },
+  "golden-flask": {
+   "en": "Find every other Morph Lab squishy and I'll bubble up.",
+   "ja": "へんしんラボのほかの子をぜんぶ見つけたら、ぶくぶく出てくるよ。",
+   "ko": "변신 연구소의 다른 친구들을 모두 찾으면 보글보글 나타날게요.",
+   "zh-Hant": "找到變身實驗室其他所有軟軟，我就會咕嘟咕嘟冒出來。"
   }
  },
  "stats": {
@@ -1216,6 +1432,210 @@
    "bounce": 98,
    "stretch": 73,
    "charm": 99
+  },
+  "ringo": {
+   "squish": 53,
+   "bounce": 53,
+   "stretch": 48,
+   "charm": 56
+  },
+  "zip": {
+   "squish": 66,
+   "bounce": 47,
+   "stretch": 40,
+   "charm": 57
+  },
+  "blip": {
+   "squish": 43,
+   "bounce": 65,
+   "stretch": 41,
+   "charm": 62
+  },
+  "saucy": {
+   "squish": 59,
+   "bounce": 48,
+   "stretch": 59,
+   "charm": 45
+  },
+  "cheesy": {
+   "squish": 52,
+   "bounce": 46,
+   "stretch": 48,
+   "charm": 63
+  },
+  "zoomie": {
+   "squish": 39,
+   "bounce": 49,
+   "stretch": 50,
+   "charm": 72
+  },
+  "astro-cat": {
+   "squish": 73,
+   "bounce": 50,
+   "stretch": 71,
+   "charm": 56
+  },
+  "rover-pup": {
+   "squish": 67,
+   "bounce": 76,
+   "stretch": 58,
+   "charm": 48
+  },
+  "moon-bunny": {
+   "squish": 53,
+   "bounce": 63,
+   "stretch": 75,
+   "charm": 59
+  },
+  "nebula-jelly": {
+   "squish": 50,
+   "bounce": 51,
+   "stretch": 99,
+   "charm": 50
+  },
+  "satellite-snail": {
+   "squish": 59,
+   "bounce": 81,
+   "stretch": 53,
+   "charm": 56
+  },
+  "orbit-hamster": {
+   "squish": 63,
+   "bounce": 48,
+   "stretch": 86,
+   "charm": 53
+  },
+  "black-hole": {
+   "squish": 64,
+   "bounce": 51,
+   "stretch": 69,
+   "charm": 66
+  },
+  "aurora-whale": {
+   "squish": 75,
+   "bounce": 99,
+   "stretch": 58,
+   "charm": 51
+  },
+  "galaxy-cat": {
+   "squish": 61,
+   "bounce": 58,
+   "stretch": 99,
+   "charm": 62
+  },
+  "orbit": {
+   "squish": 82,
+   "bounce": 78,
+   "stretch": 67,
+   "charm": 63
+  },
+  "golden-rocket": {
+   "squish": 99,
+   "bounce": 59,
+   "stretch": 78,
+   "charm": 59
+  },
+  "popsy": {
+   "squish": 36,
+   "bounce": 70,
+   "stretch": 57,
+   "charm": 47
+  },
+  "slimo": {
+   "squish": 55,
+   "bounce": 51,
+   "stretch": 53,
+   "charm": 51
+  },
+  "tubey": {
+   "squish": 56,
+   "bounce": 57,
+   "stretch": 38,
+   "charm": 59
+  },
+  "maggie": {
+   "squish": 74,
+   "bounce": 38,
+   "stretch": 47,
+   "charm": 51
+  },
+  "atomo": {
+   "squish": 48,
+   "bounce": 65,
+   "stretch": 46,
+   "charm": 50
+  },
+  "trio": {
+   "squish": 53,
+   "bounce": 77,
+   "stretch": 40,
+   "charm": 40
+  },
+  "goggle-frog": {
+   "squish": 79,
+   "bounce": 59,
+   "stretch": 56,
+   "charm": 57
+  },
+  "gear-mouse": {
+   "squish": 52,
+   "bounce": 46,
+   "stretch": 68,
+   "charm": 85
+  },
+  "lava-lamp": {
+   "squish": 60,
+   "bounce": 51,
+   "stretch": 75,
+   "charm": 63
+  },
+  "robo-owl": {
+   "squish": 78,
+   "bounce": 60,
+   "stretch": 49,
+   "charm": 62
+  },
+  "crystal-hog": {
+   "squish": 78,
+   "bounce": 55,
+   "stretch": 69,
+   "charm": 49
+  },
+  "octo-lab": {
+   "squish": 76,
+   "bounce": 55,
+   "stretch": 46,
+   "charm": 73
+  },
+  "prism-penguin": {
+   "squish": 46,
+   "bounce": 55,
+   "stretch": 74,
+   "charm": 75
+  },
+  "chroma": {
+   "squish": 77,
+   "bounce": 77,
+   "stretch": 50,
+   "charm": 86
+  },
+  "crystal-fox": {
+   "squish": 73,
+   "bounce": 65,
+   "stretch": 86,
+   "charm": 66
+  },
+  "flux": {
+   "squish": 73,
+   "bounce": 67,
+   "stretch": 84,
+   "charm": 66
+  },
+  "golden-flask": {
+   "squish": 80,
+   "bounce": 80,
+   "stretch": 82,
+   "charm": 78
   }
  },
  "statsNote": "Squish card stats, 1 to 99: Squish (how soft), Bounce, Stretch, Charm. Rarer squishies have higher totals, each has one standout stat, feel nudges them (foam squishier, jelly bouncier, gel and mochi stretchier). Shown on the squishy card in 1.0; used for the friend face-offs (Squish Slam) in January. Generated deterministically from the id; edit by hand freely."

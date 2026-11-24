@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "id": "spacestation-25",
+  "world": "spacestation",
+  "index": 25,
+  "beat": "showpiece",
+  "capacity": 4,
+  "jars": [
+    ["ringo", "saucy", "zoomie", "ringo"],
+    ["blip", "zip", "blip", "saucy"],
+    ["donut", "zip", "donut", "blip"],
+    ["cheesy", "zoomie", "zip", "cheesy"],
+    ["cheesy", "cheesy", "zoomie", "zip"],
+    ["zoomie", "ringo", "saucy", "ringo"],
+    ["blip", "donut", "saucy", "donut"],
+    [],
+    []
+  ],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": [], "keys": [{"jar": 3, "kind": "blip"}]},
+  "par": 23,
+  "solution": [[1, 7], [2, 1], [6, 2], [6, 7], [2, 6], [4, 2], [0, 8], [0, 4], [0, 7], [0, 8], [5, 8], [5, 7], [5, 8], [4, 5], [2, 0], [6, 2], [1, 6], [1, 0], [1, 6], [3, 4], [3, 0], [3, 5], [3, 4]],
+  "capsule": false,
+  "softenAfterFails": null
+}

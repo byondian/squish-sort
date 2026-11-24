@@ -39,6 +39,7 @@ struct MapView: View {
     private var worlds: [(id: String, name: LocalizedStringKey)] { [
         ("toyshop", "Toy Shop"), ("sweetfactory", "Sweet Factory"),
         ("starlight", "Starlight Stage"), ("bubblebath", "Bubble Bath"), ("junglejam", "Jungle Jam"),
+        ("spacestation", "Space Station"), ("morphlab", "Morph Lab"),
         (LevelCatalog.endless, "Keep Squishing"),
         ("christmas", AppModel.christmasWorldName),
     ] }
@@ -94,12 +95,12 @@ struct MapView: View {
                                 if world.id != LevelCatalog.endless { starJar(world.id) }
                             }
                             if world.id == LevelCatalog.endless {
-                                if model.progress.highestUnlocked >= model.storyLevelCount {
+                                if model.keepSquishingOpen {
                                     Text("It never runs out. A capsule every fifth level.")
                                         .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.65))
                                     milestoneShelf
                                 } else {
-                                    Text("\(model.endlessCount) more levels. Opens after Jungle Jam.")
+                                    Text("\(model.endlessCount) more levels. Opens after Morph Lab.")
                                         .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.65))
                                         .accessibilityIdentifier("keep-squishing-locked")
                                 }

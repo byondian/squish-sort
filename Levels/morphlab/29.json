@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "id": "morphlab-29",
+  "world": "morphlab",
+  "index": 29,
+  "beat": "calm",
+  "capacity": 4,
+  "jars": [
+    ["tubey", "maggie", "trio", "popsy"],
+    ["atomo", "trio", "maggie", "popsy"],
+    ["atomo", "trio", "tango", "atomo"],
+    ["popsy", "slimo", "tango", "tango"],
+    ["slimo", "maggie", "maggie", "slimo"],
+    ["popsy", "tango", "slimo", "tubey"],
+    ["atomo", "tubey", "trio", "tubey"],
+    [],
+    []
+  ],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": [], "vines": [[2, 2]], "morph": [{"jar": 1, "at": 3, "kind": "tubey"}, {"jar": 6, "at": 3, "kind": "popsy"}]},
+  "par": 24,
+  "solution": [[1, 7], [5, 7], [4, 5], [1, 4], [4, 8], [5, 4], [3, 5], [3, 4], [0, 3], [0, 1], [0, 8], [0, 7], [6, 0], [3, 0], [6, 1], [6, 7], [2, 6], [2, 3], [5, 3], [5, 0], [1, 5], [1, 6], [2, 5], [2, 6]],
+  "capsule": false,
+  "softenAfterFails": null
+}

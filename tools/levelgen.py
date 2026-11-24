@@ -22,9 +22,13 @@ WORLDS = [
     # Added after the others so the indexes above stay put. On the path they follow Starlight Stage.
     ("bubblebath", ["quacky", "soapy", "bubbly", "starla", "shelly", "fizzy"], None),       # floaters and golden ride bubbles
     ("junglejam", ["bongo", "tuki", "pina", "leafy", "dotty", "nana"], None),               # vine jars
+    # The two worlds after Jungle Jam (23 Nov 2026). Their levels come from make_new_world below.
+    ("spacestation", ["ringo", "zip", "blip", "saucy", "cheesy", "zoomie"], None),          # key jars (airlocks)
+    ("morphlab", ["popsy", "slimo", "tubey", "maggie", "atomo", "trio"], None),             # morph pieces
 ]
 # Worlds grow as the game goes on. The last level of a world is always a boss.
-LENGTHS = {"toyshop": 15, "sweetfactory": 20, "starlight": 25, "christmas": 20, "bubblebath": 30, "junglejam": 35}
+LENGTHS = {"toyshop": 15, "sweetfactory": 20, "starlight": 25, "christmas": 20, "bubblebath": 30, "junglejam": 35,
+           "spacestation": 40, "morphlab": 45}
 BEATS = ["intro", "easy", "easy", "medium", "showpiece", "breather", "bonus", "tension", "calm", "boss"]
 
 # (kinds, empty jars, target par as a multiple of kinds) for world positions 1..20.
@@ -80,6 +84,8 @@ BORROW = {
     "christmas": ["jelly", "cupcake"],
     "bubblebath": ["minty", "strawbie"],
     "junglejam": ["blu", "grapey"],
+    "spacestation": ["donut", "macaron"],
+    "morphlab": ["tango", "donut"],
 }
 
 
@@ -174,7 +180,8 @@ def random_board(rng, names, empties, mech, mcount, mix_hidden=0, mix_frozen=0, 
         if keys:
             # a padlock shuts a jar of mixed squishies until a jar of its key kind is finished: never a
             # jar with a duet, and never a jar that holds the key kind itself
-            free = [j for j in range(len(jars)) if j not in closed and not any(sj == j for sj, _ in sticky)]
+            free = [j for j in range(len(jars)) if j not in closed and not any(sj == j for sj, _ in sticky)
+                    and any(n not in jars[j] for n in names)]
             if len(free) < keys:
                 continue
             picked = sorted(rng.sample(free, keys))
@@ -532,13 +539,13 @@ ENDLESS_LENGTH = 240
 # its own; later rounds mix them with the worlds' rules.
 ENDLESS_BLOCKS = [
     # first time round
-    (0, "ice", None), (1, "keys", None), (2, "morph", None), (4, "big", "wrapped"), (5, "vines", None), (2, "duets", "ice"),
+    (0, "ice", None), (6, "keys", None), (7, "morph", None), (4, "big", "wrapped"), (5, "vines", None), (2, "duets", "ice"),
     # second
-    (0, "ice", "duets"), (1, "wrapped", "keys"), (2, "curtains", None), (4, "floaters", "duets"), (5, "morph", "vines"), (4, "floaters", "vines"),
+    (0, "ice", "duets"), (1, "wrapped", "keys"), (2, "curtains", None), (4, "floaters", "duets"), (7, "morph", "vines"), (4, "floaters", "vines"),
     # third
-    (0, "ice", "vines"), (1, "wrapped", "duets"), (2, "duets", "floaters"), (4, "big", "floaters"), (5, "keys", "duets"), (5, "vines", "wrapped"),
+    (0, "ice", "vines"), (1, "wrapped", "duets"), (2, "duets", "floaters"), (4, "big", "floaters"), (6, "keys", "duets"), (5, "vines", "wrapped"),
     # fourth
-    (0, "ice", "curtains"), (1, "morph", "wrapped"), (2, "curtains", "ice"), (4, "floaters", "wrapped"), (5, "big", "vines"), (0, "duets", "floaters"),
+    (0, "ice", "curtains"), (7, "morph", "wrapped"), (2, "curtains", "ice"), (4, "floaters", "wrapped"), (5, "big", "vines"), (0, "duets", "floaters"),
 ]
 # Kinds for each place in a block. Places 5 and 10 are the Expert boards.
 ENDLESS_KINDS = [5, 5, 6, 6, 8, 6, 7, 7, 6, 8]
@@ -689,14 +696,88 @@ def write_endless(first, last):
         print(f"{lv['id']:16} {lv['beat']:10} jars={len(lv['jars']):2} kinds={kinds} par={lv['par']:2} capsule={lv['capsule']}", flush=True)
 
 
+# Space Station and Morph Lab: the two story worlds after Jungle Jam. Space Station teaches key jars
+# (airlocks), Morph Lab teaches morph pieces; rules from earlier worlds mix back in as guests from
+# level 12. Boards are dealt like Keep Squishing boards (choose_endless), but calmer: no first move
+# may lose a level, and only a boss or a tension level has a single spare jar.
+NEW_WORLDS = {
+    # world: (main rule, guest rules in turn)
+    "spacestation": ("keys", ["wrapped", "ice", "duets"]),
+    "morphlab": ("morph", ["wrapped", "ice", "vines", "keys"]),
+}
+# By beat: (kinds, how often a careless player should win at the start of the world)
+NEW_SHAPE = {"intro": (5, 0.7), "easy": (5, 0.6), "medium": (6, 0.45), "showpiece": (7, 0.5), "breather": (5, 0.65),
+             "bonus": (6, 0.5), "tension": (7, 0.25), "calm": (6, 0.55), "boss": (7, 0.12)}
+
+
+def new_world_plan(world, pos):
+    main, guests = NEW_WORLDS[world]
+    last = LENGTHS[world]
+    beat = "boss" if pos == last else BEATS[(pos - 1) % 10]
+    k, ease = NEW_SHAPE[beat]
+    plan = dict(mech=None, mcount=0, mix_hidden=0, mix_frozen=0, vines=None, bubbles=None, keys=0, morphs=0, cap=CAP)
+    if main == "keys":
+        # one airlock for the first half of the world; two on the hard levels after that
+        plan["keys"] = 2 if pos >= 20 and beat in ("tension", "boss") else 1
+    else:
+        # one morph piece for the first five levels, then two
+        plan["morphs"] = 1 if pos <= 5 else 2
+    guest = None
+    if pos >= 12 and beat in ("medium", "bonus", "tension", "calm", "boss"):
+        guest = guests[(pos // 2) % len(guests)]
+        plan.update(endless_rule(guest, (pos - 1) % 10 + 1, 0, True))
+    if pos <= 3:
+        k = (3, 4, 4)[pos - 1]
+        ease = 0.75
+    elif pos >= 21:
+        k = min(8, k + (1 if beat in ("easy", "breather", "calm") else 0))
+    empties = 1 if beat in ("tension", "boss") and pos >= 8 else 2
+    if empties == 1:
+        k = min(k, 7)
+    ease = max(0.08, ease - 0.03 * ((pos - 1) // 10))
+    return beat, k, empties, ease, plan
+
+
+def make_new_world(world_idx, pos):
+    world = WORLDS[world_idx][0]
+    last = LENGTHS[world]
+    beat, k, empties, ease, plan = new_world_plan(world, pos)
+    names = kinds_for(world_idx, k)
+    rng = random.Random(f"{world}-{pos}")
+    level = {"schema": 1, "id": f"{world}-{pos:02d}", "world": world, "index": pos, "beat": beat, "capacity": CAP}
+    picked = None
+    for em, pl in [(empties, plan), (2, plan), (2, lighter(plan)), (2, lighter(lighter(plan)))]:
+        picked = choose_endless(rng, level, names, em, pl, ease, tries=40 if em > 1 else 80)
+        if picked:
+            break
+    if not picked:
+        raise SystemExit(f"{level['id']}: no fair board")
+    jars, mechanics = picked
+    level["jars"] = jars
+    level["mechanics"] = {"hidden": mechanics.get("hidden", []), "sticky": mechanics.get("sticky", []),
+                          "frozen": mechanics.get("frozen", [])}
+    for extra in ("curtains", "vines", "floats", "keys", "morph"):
+        if mechanics.get(extra):
+            level["mechanics"][extra] = mechanics[extra]
+    b, _ = board_from_level(level)
+    sol, explored = solve(b, 3_000_000)
+    if sol is None:
+        raise SystemExit(f"{level['id']}: unsolvable or too big ({explored} states)")
+    level["par"] = len(sol)
+    level["solution"] = [list(m) for m in sol]
+    level["capsule"] = capsule_level(pos, last)
+    level["softenAfterFails"] = 2 if beat in ("tension", "boss") else None
+    return level
+
+
 # Twist of the week: eight themes, five boards each, in Levels/weekly (01 to 40). The app picks the
 # week's theme from the date. Keep the order in step with WeeklyTwist.themes and LevelCatalog.weeklyLooks.
 WEEKLY = "weekly"
 # (theme, then for each of its five boards: world whose squishies it borrows, main rule, guest rule)
 WEEKLY_THEMES = [
-    ("keys", [(1, "keys", None), (1, "keys", None), (1, "keys", "wrapped"), (1, "keys", "ice"), (1, "keys", "wrapped")]),
+    ("keys", [(6, "keys", None), (6, "keys", None), (6, "keys", "wrapped"), (6, "keys", "ice"), (6, "keys", "wrapped")]),
     ("vines", [(5, "vines", None), (5, "vines", None), (5, "vines", None), (5, "vines", "ice"), (5, "vines", "wrapped")]),
-    ("morph", [(2, "morph", None), (2, "morph", None), (2, "morph", None), (2, "morph", "wrapped"), (2, "morph", "ice")]),
+    ("morph", [(7, "morph", None), (7, "morph", None), (7, "morph", None), (7, "morph", "wrapped"), (7, "morph", "ice")]),
     ("duets", [(2, "duets", None), (2, "duets", None), (2, "duets", None), (2, "duets", "ice"), (2, "duets", "wrapped")]),
     ("big", [(4, "big", None), (4, "big", None), (4, "big", "wrapped"), (4, "big", "ice"), (4, "big", "vines")]),
     ("floaters", [(4, "floaters", None), (4, "floaters", None), (4, "floaters", None), (4, "floaters", "duets"), (4, "floaters", "wrapped")]),
@@ -819,6 +900,17 @@ def main():
         for pos in range(span[0] if span else 1, (span[1] if len(span) > 1 else LENGTHS[WORLDS[w][0]]) + 1):
             lid = f"{WORLDS[w][0]}-{pos:02d}"
             if only and only != lid:
+                continue
+            if WORLDS[w][0] in NEW_WORLDS:
+                lv = make_new_world(w, pos)
+                d = os.path.join(ROOT, "Levels", WORLDS[w][0])
+                os.makedirs(d, exist_ok=True)
+                with open(os.path.join(d, f"{pos:02d}.json"), "w") as f:
+                    f.write(dump(lv))
+                m = lv["mechanics"]
+                rules = [name for name in ("hidden", "sticky", "frozen", "curtains", "vines", "keys", "morph") if m.get(name)]
+                empty = sum(1 for jar in lv["jars"] if not jar)
+                print(f"{lid:16} {lv['beat']:10} jars={len(lv['jars']):2} spare={empty} par={lv['par']:2} {rules}", flush=True)
                 continue
             lv = make_level(w, pos)
             if WORLDS[w][0] in ("bubblebath", "junglejam"):

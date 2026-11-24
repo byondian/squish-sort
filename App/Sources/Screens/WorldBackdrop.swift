@@ -5,8 +5,8 @@ import SwiftUI
 struct WorldBackdrop: View {
     let world: String
 
-    /// Starlight Stage is a night scene: jars glow and loose text turns white.
-    static func isDark(_ world: String) -> Bool { world == "starlight" }
+    /// Starlight Stage and Space Station are night scenes: jars glow and loose text turns white.
+    static func isDark(_ world: String) -> Bool { world == "starlight" || world == "spacestation" }
 
     var body: some View {
         GeometryReader { geo in
@@ -17,6 +17,8 @@ struct WorldBackdrop: View {
                 case "starlight": starlight(w, h)
                 case "bubblebath": bubbleBath(w, h)
                 case "junglejam": jungle(w, h)
+                case "spacestation": spaceStation(w, h)
+                case "morphlab": morphLab(w, h)
                 case "christmas": grotto(w, h)
                 default: toyShop(w, h)
                 }
@@ -139,6 +141,48 @@ struct WorldBackdrop: View {
                 .position(x: w * (0.08 + 0.21 * CGFloat(i)), y: long)
         }
         shelf(w, h, top: Color(hex: 0xC99A66), front: Color(hex: 0x9C6E42))
+    }
+
+    /// Deep space through the station's portholes: star dots, one soft ringed planet, a metal shelf.
+    @ViewBuilder private func spaceStation(_ w: CGFloat, _ h: CGFloat) -> some View {
+        LinearGradient(colors: [Color(hex: 0x2E2A55), Color(hex: 0x3D3670)], startPoint: .top, endPoint: .bottom)
+        ForEach(0..<30, id: \.self) { i in
+            let x = CGFloat((i * 61 + 7) % 100) / 100, y = CGFloat((i * 37 + 11) % 74) / 100
+            let size: CGFloat = 1.5 + CGFloat(i % 4) * 0.5
+            Circle().fill(Color.white.opacity(0.5)).frame(width: size, height: size).position(x: x * w, y: y * h)
+        }
+        Ellipse().stroke(Color(hex: 0xFFB37A).opacity(0.3), lineWidth: 6)
+            .frame(width: 190, height: 50)
+            .rotationEffect(.degrees(-16))
+            .position(x: w * 0.84, y: h * 0.17)
+        Circle().fill(Color(hex: 0xC9A7F5).opacity(0.35)).frame(width: 110, height: 110).position(x: w * 0.84, y: h * 0.17)
+        ForEach(0..<3, id: \.self) { i in
+            Circle().fill(Color(hex: 0x4A4380))
+                .overlay(Circle().stroke(Color(hex: 0x8C84C9), lineWidth: 4))
+                .frame(width: 46, height: 46)
+                .position(x: w * (0.16 + 0.2 * CGFloat(i)), y: h * 0.07)
+        }
+        shelf(w, h, top: Color(hex: 0x9AA6C2), front: Color(hex: 0x6E7A98))
+    }
+
+    /// A pale mint lab: outlined bubbles rising, a top shelf of flask shapes, a lilac bench.
+    @ViewBuilder private func morphLab(_ w: CGFloat, _ h: CGFloat) -> some View {
+        Color(hex: 0xE9FBF3)
+        ForEach(0..<8, id: \.self) { i in
+            let x = CGFloat((i * 53 + 13) % 100) / 100, y = CGFloat((i * 41 + 17) % 62) / 100
+            let size: CGFloat = 12 + CGFloat(i * 7 % 29)
+            Circle().stroke(Color(hex: 0xA8F0D8).opacity(0.6), lineWidth: 3)
+                .frame(width: size, height: size)
+                .position(x: x * w, y: (0.12 + y) * h)
+        }
+        ForEach(0..<6, id: \.self) { i in
+            let tint: Color = [Color(hex: 0xFFC9DE), Color(hex: 0xC9A7F5), Color(hex: 0xB6F06A)][i % 3]
+            let tall: CGFloat = 34 + CGFloat(i % 2) * 10
+            RoundedRectangle(cornerRadius: 9).fill(tint.opacity(0.5))
+                .frame(width: 24, height: tall)
+                .position(x: w * (0.1 + 0.16 * CGFloat(i)), y: h * 0.075 - tall / 2 + 22)
+        }
+        shelf(w, h, top: Color(hex: 0xE3D3FF), front: Color(hex: 0xB9A3E8))
     }
 
     /// Warm red and cream, fairy lights, snow on the shelf.

@@ -135,6 +135,8 @@ final class AppModel: ObservableObject {
         case "starlight": return "Starlight Stage"
         case "bubblebath": return "Bubble Bath"
         case "junglejam": return "Jungle Jam"
+        case "spacestation": return "Space Station"
+        case "morphlab": return "Morph Lab"
         case LevelCatalog.endless: return "Keep Squishing"
         default: return christmasWorldName
         }
@@ -190,9 +192,11 @@ final class AppModel: ObservableObject {
         // Each made squishy's Workshop design is a file of its own; one from the old Maker has none.
         for i in loaded.made.indices { loaded.made[i].design = MadeFiles.shared.load(id: loaded.made[i].id) }
         levels = AppModel.loadLevels()
-        if loaded.version < 3 {
-            loaded.migrate(path: levels.filter { LevelCatalog.worlds.contains($0.file.world) }.map(\.id))
-            loaded.migrateNewWorlds(path: levels.filter { LevelCatalog.worlds.contains($0.file.world) }.map(\.id))
+        if loaded.version < 4 {
+            let story = levels.filter { LevelCatalog.worlds.contains($0.file.world) }.map(\.id)
+            loaded.migrate(path: story)
+            loaded.migrateNewWorlds(path: story)
+            loaded.migrateSpaceAndLab(path: story)
             store.save(loaded)
         }
         #if KIDS
@@ -229,6 +233,7 @@ final class AppModel: ObservableObject {
         if story > 0, story < mainLevelCount, progress.highestUnlocked == story - 1, progress.stars[levels[story - 1].id] != nil {
             update { $0.highestUnlocked = story }
         }
+        resumeKeepSquishing()
         purchases.onStarter = { [weak self] transactionID in self?.starterPackBought(transactionID) }
         purchases.onPiggy = { [weak self] transactionID in self?.piggyBroken(transactionID) }
         purchases.onChange = { [weak self] owns in self?.update { $0.ownsRemoveAds = owns } }
@@ -373,6 +378,8 @@ final class AppModel: ObservableObject {
         case "starlight": return String(localized: "Starlight Stage")
         case "bubblebath": return String(localized: "Bubble Bath")
         case "junglejam": return String(localized: "Jungle Jam")
+        case "spacestation": return String(localized: "Space Station")
+        case "morphlab": return String(localized: "Morph Lab")
         default:
             return ["US", "CA"].contains(Locale.current.region?.identifier ?? "")
                 ? String(localized: "Santa's Workshop") : String(localized: "Santa's Grotto")
@@ -415,6 +422,30 @@ final class AppModel: ObservableObject {
     /// The story worlds only: where Keep Squishing begins.
     var storyLevelCount: Int { levels.filter { LevelCatalog.worlds.contains($0.file.world) }.count }
     var endlessCount: Int { mainLevelCount - storyLevelCount }
+
+    /// Every story world is won.
+    var storyDone: Bool { storyLevelCount > 0 && progress.highestUnlocked >= storyLevelCount }
+    /// Keep Squishing can be played: the story is won, or the player was already in Keep Squishing
+    /// when new story worlds joined the path.
+    var keepSquishingOpen: Bool { storyDone || (storyLevelCount > 0 && progress.keepSquishingAt != nil) }
+
+    /// A player who was sent back from Keep Squishing to a new story world comes back to the Keep
+    /// Squishing level they had reached, not to its first level: the path walks on past the levels
+    /// that still have their stars.
+    func resumeKeepSquishing() {
+        let story = storyLevelCount, end = mainLevelCount
+        if storyDone, let reached = progress.keepSquishingAt {
+            // The new worlds are won: the two roads join again at the Keep Squishing level reached.
+            update { p in
+                p.highestUnlocked = max(p.highestUnlocked, min(story + reached, max(story, end - 1)))
+                p.keepSquishingAt = nil
+            }
+        }
+        let at = progress.highestUnlocked
+        guard story > 0, at >= story, at < end, progress.stars[levels[at].id] != nil,
+              let open = (at..<end).first(where: { progress.stars[levels[$0].id] == nil }) else { return }
+        update { $0.highestUnlocked = open }
+    }
 
     func isSideLevel(_ index: Int) -> Bool {
         levels.indices.contains(index) && !LevelCatalog.path.contains(levels[index].file.world)
@@ -507,6 +538,11 @@ final class AppModel: ObservableObject {
         if levels[index].file.world == LevelCatalog.weekly { return false }
         if isSideLevel(index) {
             return progress.christmasEntered && levels[index].file.index - 1 <= progress.christmasUnlocked
+        }
+        if index >= storyLevelCount, !storyDone {
+            // Keep Squishing while new story worlds are still to win: open as far as it had been reached.
+            guard let reached = progress.keepSquishingAt else { return false }
+            return index - storyLevelCount <= reached
         }
         return index <= progress.highestUnlocked
     }
@@ -1103,7 +1139,7 @@ final class AppModel: ObservableObject {
 
     /// Twist of the week shows on Home once every story world is won and its boards are in the build.
     var weeklyOpen: Bool {
-        config.weeklyTwistEnabled && storyLevelCount > 0 && progress.highestUnlocked >= storyLevelCount
+        config.weeklyTwistEnabled && keepSquishingOpen
             && weeklyTheme != nil && levels.contains { $0.file.world == LevelCatalog.weekly }
     }
 
@@ -1579,6 +1615,7 @@ final class AppModel: ObservableObject {
         let held = opensWorld
             && self.stars(inWorld: level.file.world).earned - (previousBest ?? 0) + bestNow < starGate(level.file.world)
         var barFull = false
+        let storyCount = storyLevelCount, keepCount = endlessCount
         update { p in
             p.stampCard = card
             if stampFillsBar { barFull = p.mystery.addStep() }
@@ -1594,6 +1631,12 @@ final class AppModel: ObservableObject {
             if gold { p.goldStars.insert(level.id) }
             if side {
                 p.christmasUnlocked = max(p.christmasUnlocked, min(level.file.index, LevelCatalog.levelCount(in: level.file.world) - 1))
+            } else if index >= storyCount, p.highestUnlocked < storyCount {
+                // Keep Squishing played while new story worlds wait: it moves its own marker, never the
+                // story's, so the new worlds are not skipped.
+                if let reached = p.keepSquishingAt {
+                    p.keepSquishingAt = max(reached, min(index - storyCount + 1, max(0, keepCount - 1)))
+                }
             } else if !held {
                 p.highestUnlocked = max(p.highestUnlocked, min(index + 1, max(0, mainLevelCount - 1)))
             }
@@ -1616,7 +1659,7 @@ final class AppModel: ObservableObject {
                 update { p in
                     for id in ids { p.stars[id] = nil; p.goldStars.remove(id) }
                     p.endlessLaps += 1
-                    p.highestUnlocked = storyLevelCount
+                    if p.highestUnlocked >= storyCount { p.highestUnlocked = storyCount } else { p.keepSquishingAt = 0 }
                     p.wallet.earn(config.coins.worldComplete)
                 }
                 endlessLapJustDone = true
@@ -1865,6 +1908,11 @@ final class AppModel: ObservableObject {
         if endlessLapJustDone {
             endlessLapJustDone = false
             n = storyLevelCount
+        }
+        // After the last story level, Keep Squishing carries on where the player had got to.
+        if index == storyLevelCount - 1 {
+            resumeKeepSquishing()
+            if progress.highestUnlocked > storyLevelCount { n = progress.highestUnlocked }
         }
         // The main path never rolls on into a side world.
         let samePath = isSideLevel(n) == isSideLevel(index)

@@ -67,6 +67,8 @@ struct WorldCompleteView: View {
         case "starlight": return [Theme.grape, Theme.sky, Theme.butter]
         case "bubblebath": return [Theme.sky, Theme.bubblegum, Color.white]
         case "junglejam": return [Theme.mint, Theme.butter, Theme.bubblegum]
+        case "spacestation": return [Theme.grape, Theme.butter, Theme.sky]
+        case "morphlab": return [Theme.mint, Theme.bubblegum, Theme.grape]
         default: return [Theme.bubblegum, Theme.mint, Theme.butter, Theme.sky]
         }
     }
@@ -233,6 +235,8 @@ struct WorldCompleteView: View {
         case "starlight": return "Starlight Stage complete!"
         case "bubblebath": return "Bubble Bath complete!"
         case "junglejam": return "Jungle Jam complete!"
+        case "spacestation": return "Space Station complete!"
+        case "morphlab": return "Morph Lab complete!"
         default: return "World complete!"
         }
     }
