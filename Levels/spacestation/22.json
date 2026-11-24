@@ -6,18 +6,17 @@
   "beat": "easy",
   "capacity": 4,
   "jars": [
-    ["blip", "zip", "zoomie", "cheesy"],
-    ["zoomie", "cheesy", "blip", "saucy"],
-    ["zip", "cheesy", "saucy", "ringo"],
-    ["zip", "ringo", "ringo", "saucy"],
-    ["cheesy", "ringo", "saucy", "blip"],
-    ["zoomie", "blip", "zoomie", "zip"],
-    [],
+    ["saucy", "zip", "cheesy", "zoomie"],
+    ["ringo", "zip", "cheesy", "blip"],
+    ["saucy", "blip", "zip", "cheesy"],
+    ["zoomie", "blip", "zoomie", "ringo"],
+    ["zoomie", "cheesy", "zip", "saucy"],
+    ["blip", "ringo", "ringo", "saucy"],
     []
   ],
-  "mechanics": {"hidden": [], "sticky": [], "frozen": [], "keys": [{"jar": 4, "kind": "zoomie"}]},
-  "par": 19,
-  "solution": [[1, 6], [3, 6], [2, 3], [2, 6], [0, 2], [3, 7], [5, 3], [0, 5], [0, 3], [1, 0], [1, 2], [5, 1], [5, 0], [1, 5], [4, 0], [4, 6], [4, 7], [2, 4], [2, 3]],
+  "mechanics": {"hidden": [], "sticky": [], "frozen": [], "spins": [0, 1, 2, 4, 5, 6]},
+  "par": 20,
+  "solution": [[4, 6], [5, 6], [3, 5], [0, 3], [2, 2], [2, 6], [1, 2], [0, 1], [4, 0], [1, 4], [1, 0], [5, 1], [2, 5], [0, 0], [0, 6], [2, 0], [4, 2], [3, 4], [3, 5], [3, 4]],
   "capsule": false,
   "softenAfterFails": null
 }

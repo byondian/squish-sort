@@ -12,6 +12,11 @@ from dataclasses import dataclass
 # - Morph piece: `morph` is its other kind + 1 (0 for an ordinary piece). It counts as the kind it
 #   shows, and each time it is itself poured it flips to its other kind.
 #
+# Space Station:
+# - Spin jar (`spins`): a jar in a zero gravity ring. Tapping the ring turns the jar upside down, so
+#   its pieces are in the opposite order. It is a move of its own, written (j, j). A finished or shut
+#   jar does not spin, nor does one holding a duet, and a spin that would change nothing is no move.
+#
 # Bubble Bath boards (`floats`): a piece with frozen > 0 is a floater, a squishy in a bubble.
 # - It floats on top of its jar. It cannot be picked up, and nothing can be poured into its jar.
 # - Squishies under it can still be taken out. It pops (frozen 0) when the piece right under it is
@@ -47,6 +52,15 @@ class Board:
     vines: tuple = ()  # the number on each jar's vine tag (0: none); empty when the level has no vines
     floats: bool = False  # Bubble Bath: frozen pieces are floaters (see the top of this file)
     keys: tuple = ()  # each jar's padlock (0: none, else key kind + 1); empty when the level has no key jars
+    spins: frozenset = frozenset()  # Space Station: jars that can be turned upside down
+
+    def can_spin(self, j):
+        if j not in self.spins or self.floats or self.complete(j) or self.shut(j):
+            return False
+        jar = self.jars[j]
+        if len(jar) < 2 or any(p[3] for p in jar):
+            return False
+        return spun(jar) != jar
 
     def base(self, j):
         """How many pieces of jar j are under its floaters."""
@@ -130,7 +144,13 @@ class Board:
             p = jars[f][-1]
             jars[f] = jars[f][:-1]
             jars[t] = settle_floaters(jars[t] + ((p[0], p[1], 1, p[3], p[4]),))
-            return Board(self.cap, jars, self.neigh, self.curtains, self.vines, True, self.keys)._finished(t, jars)
+            return Board(self.cap, jars, self.neigh, self.curtains, self.vines, True, self.keys, self.spins)._finished(t, jars)
+        if f == t:
+            # the jar turns upside down
+            assert self.can_spin(f)
+            jars = list(self.jars)
+            jars[f] = spun(jars[f])
+            return Board(self.cap, jars, self.neigh, self.curtains, self.vines, self.floats, self.keys, self.spins)
         k = self.to_move(f, t)
         assert k > 0
         jars = list(self.jars)
@@ -160,7 +180,7 @@ class Board:
                 break  # floaters are not ice: moves next door do nothing to them
             if any(p[2] > 0 for p in jars[j]):
                 jars[j] = tuple((p[0], p[1], max(0, p[2] - 1), p[3], p[4]) for p in jars[j])
-        return Board(self.cap, jars, self.neigh, self.curtains, self.vines, self.floats, self.keys)._finished(t, jars)
+        return Board(self.cap, jars, self.neigh, self.curtains, self.vines, self.floats, self.keys, self.spins)._finished(t, jars)
 
     def _finished(self, t, jars):
         """What a move that landed on jar t sets off if it finished the jar. `jars` is this board's own list."""
@@ -211,7 +231,17 @@ class Board:
             for f in range(n):
                 if self.jars[f] and self.jars[f][-1][2] == 2:
                     out += [(f, -1 - t) for t in range(n) if self.can_ride(f, t)]
+        out += [(j, j) for j in sorted(self.spins) if self.can_spin(j)]
         return out
+
+
+def spun(jar):
+    """The jar upside down. Its new top squishy is never wrapped."""
+    jar = list(reversed(jar))
+    if jar and jar[-1][1]:
+        p = jar[-1]
+        jar[-1] = (p[0], False, p[2], p[3], p[4])
+    return tuple(jar)
 
 
 def settle_floaters(jar):
@@ -251,6 +281,9 @@ def heuristic(b, kind_jars):
 
 def key(b, canonical):
     parts = [tuple(jar) for jar in b.jars]
+    if b.spins:
+        # a spin jar is not the same place as an ordinary jar
+        parts = [(jar, j in b.spins) for j, jar in enumerate(parts)]
     tied = any(b.vines) or any(b.keys)
     if canonical and not b.curtains and not tied:
         parts = sorted(parts)
@@ -290,7 +323,7 @@ def solve(b, max_states=3_000_000, weight=1, max_nodes=None):
         if explored > max_states or (max_nodes and len(nodes) > max_nodes):
             return None, explored
         for (f, t) in cur.moves():
-            if t >= 0 and canonical and not cur.curtains and not any(cur.vines) and not any(cur.keys) and len(cur.jars[t]) == 0 and cur.run_length(f) == len(cur.jars[f]) and not any(p[4] for p in cur.jars[f]):
+            if t >= 0 and f != t and (f in cur.spins) == (t in cur.spins) and canonical and not cur.curtains and not any(cur.vines) and not any(cur.keys) and len(cur.jars[t]) == 0 and cur.run_length(f) == len(cur.jars[f]) and not any(p[4] for p in cur.jars[f]):
                 continue  # pouring a whole jar into an empty one changes nothing (unless a morph piece flips on the way)
             nb = cur.apply(f, t)
             k = key(nb, canonical)
@@ -340,4 +373,5 @@ def board_from_level(level):
     for j, tag in mech.get("vines", []):
         tags[j] = tag
     return Board(level["capacity"], jars, neighbours_table(n), frozenset(mech.get("curtains", [])),
-                 tuple(tags) if any(tags) else (), floats, tuple(locks) if any(locks) else ()), kinds
+                 tuple(tags) if any(tags) else (), floats, tuple(locks) if any(locks) else (),
+                 frozenset(mech.get("spins", []))), kinds

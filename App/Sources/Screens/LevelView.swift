@@ -135,6 +135,11 @@ final class LevelController: ObservableObject {
             model?.haptics.star()
         }
         scene.onMorph = { [weak model] in model?.sounds.play("squeeze_out", volume: 0.7) }
+        scene.onSpin = { [weak self, weak model] in
+            model?.sounds.play("spin", or: "hop")
+            model?.haptics.land()
+            self?.landed()
+        }
         let bubbles = level.look == "bubblebath"
         scene.onReject = { [weak model] in
             model?.haptics.reject()
@@ -194,7 +199,8 @@ final class LevelController: ObservableObject {
     }
 
     private func play(_ move: Move) -> (MoveResult, Board)? {
-        let ontoMatch = session.board.jars.indices.contains(move.destination) && !session.board.jars[move.destination].isEmpty
+        // Turning a jar over lands on nothing.
+        let ontoMatch = !move.isSpin && session.board.jars.indices.contains(move.destination) && !session.board.jars[move.destination].isEmpty
         let free = feverLeft > 0
         let before = feverLeft
         // A magic move is only used up (or paid for) when it really lands.
@@ -1138,6 +1144,17 @@ struct LevelView: View {
                         .frame(width: 28, height: 14)
                         .background(Color.white)
                         .accessibilityIdentifier("jar-\(j)")
+                }
+            }
+            if controller.scene.board.hasSpins {
+                HStack(spacing: 2) {
+                    ForEach(controller.scene.board.spinJars, id: \.self) { j in
+                        Button("spin-\(j)") { controller.scene.tapSpin(j) }
+                            .font(.system(size: 6))
+                            .frame(width: 28, height: 14)
+                            .background(Color.white)
+                            .accessibilityIdentifier("spin-\(j)")
+                    }
                 }
             }
             if controller.scene.board.floats {

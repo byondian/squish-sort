@@ -37,6 +37,8 @@ public struct LevelFile: Codable, Equatable, Sendable {
         public var keys: [KeyJar]?
         /// Morph pieces (Keep Squishing): the piece at `at` in `jar` flips to `kind` when it is poured, and back.
         public var morph: [MorphPiece]?
+        /// Spin jars (Space Station): jars in a zero gravity ring that can be turned upside down.
+        public var spins: [Int]?
 
         public struct KeyJar: Codable, Equatable, Sendable {
             public var jar: Int
@@ -59,7 +61,9 @@ public struct LevelFile: Codable, Equatable, Sendable {
         }
 
         public init(hidden: [[Int]]? = nil, sticky: [[Int]]? = nil, frozen: [[Int]]? = nil, curtains: [Int]? = nil,
-                    vines: [[Int]]? = nil, floats: Bool? = nil, keys: [KeyJar]? = nil, morph: [MorphPiece]? = nil) {
+                    vines: [[Int]]? = nil, floats: Bool? = nil, keys: [KeyJar]? = nil, morph: [MorphPiece]? = nil,
+                    spins: [Int]? = nil) {
+            self.spins = spins
             self.keys = keys
             self.morph = morph
             self.hidden = hidden
@@ -197,7 +201,11 @@ public struct Level: Sendable {
             }
             keys[key.jar] = kind
         }
+        let spins = m.spins ?? []
+        guard spins.allSatisfy({ file.jars.indices.contains($0) }), Set(spins).count == spins.count else {
+            throw LevelError.invalid("\(file.id): spin jars \(spins) must be on the board, once each")
+        }
         self.board = Board(capacity: file.capacity, jars: jars, curtains: m.curtains ?? [], vines: vines, floats: floats,
-                           keys: keys)
+                           keys: keys, spins: spins)
     }
 }

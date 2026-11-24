@@ -341,6 +341,65 @@ final class BoardTests: XCTestCase {
         XCTAssertEqual(shaken.keyKind(1), 0)
     }
 
+    func testASpinJarTurnsUpsideDown() {
+        // Jar 0 sits in a ring: a wrapped A at the bottom, then B, then C on top.
+        let jars = board(["aBC", "C", ""], capacity: 3).jars
+        var b = Board(capacity: 3, jars: jars, spins: [0])
+        XCTAssertTrue(b.isSpinJar(0))
+        XCTAssertFalse(b.isSpinJar(1))
+        XCTAssertTrue(b.hasSpins)
+        XCTAssertEqual(b.spinJars, [0])
+        XCTAssertTrue(b.jars[0][0].hidden)
+        XCTAssertTrue(b.canSpin(0))
+        XCTAssertFalse(b.canSpin(1), "only a jar in a ring spins")
+        XCTAssertTrue(b.legalMoves.contains(Move.spin(0)))
+        XCTAssertTrue(Move.spin(0).isSpin)
+        XCTAssertFalse(Move(from: 0, to: 1).isSpin)
+        XCTAssertFalse(Move.ride(from: 0, to: 0).isSpin)
+        let result = b.apply(Move.spin(0))
+        XCTAssertEqual(result?.count, 3)
+        XCTAssertEqual(result?.revealedSourceTop, true, "the wrapped squishy from the bottom is on top now, unwrapped")
+        XCTAssertNil(result?.completedJar)
+        XCTAssertEqual(b.jars[0].map(\.kind), [2, 1, 0])
+        XCTAssertFalse(b.jars[0].contains(where: \.hidden))
+        // The spin jar is an ordinary jar in every other way: things go in and come out.
+        XCTAssertTrue(b.isLegal(Move(from: 0, to: 2)))
+        // Turned twice, a jar is back as it was.
+        var twice = Board(capacity: 3, jars: board(["ABC", ""], capacity: 3).jars, spins: [0])
+        let start = twice
+        twice.apply(Move.spin(0))
+        twice.apply(Move.spin(0))
+        XCTAssertEqual(twice, start)
+    }
+
+    func testASpinThatChangesNothingIsNoMove() {
+        // One squishy, an empty jar, a jar that reads the same both ways, a finished jar, a jar with a duet.
+        let jars = board(["A", "", "BAB", "CCC", "A+BA"], capacity: 3).jars
+        var b = Board(capacity: 3, jars: jars, spins: [0, 1, 2, 3, 4])
+        for j in 0..<5 { XCTAssertFalse(b.canSpin(j), "jar \(j)") }
+        XCTAssertNil(b.apply(Move.spin(0)))
+        XCTAssertFalse(b.legalMoves.contains(where: \.isSpin))
+        // A padlocked or tied spin jar does not turn either.
+        let shut = Board(capacity: 3, jars: board(["AB", "BA", ""], capacity: 3).jars, vines: [0: 1], keys: [1: 0], spins: [0, 1])
+        XCTAssertFalse(shut.canSpin(0))
+        XCTAssertFalse(shut.canSpin(1))
+        // A board is not stuck while a jar can still turn.
+        let turn = Board(capacity: 2, jars: board(["AB", "BA"], capacity: 2).jars, spins: [0])
+        XCTAssertFalse(turn.isStuck)
+        XCTAssertEqual(turn.legalMoves, [Move.spin(0)])
+    }
+
+    func testASpinDoesNotThawIceAndKeepsItsRingThroughAShakeUpAndAnExtraJar() {
+        var b = Board(capacity: 2, jars: board(["AB", "A*B", ""], capacity: 2).jars, spins: [0])
+        b.apply(Move.spin(0))
+        XCTAssertEqual(b.jars[1][0].frozen, 2, "nothing left or landed next door")
+        var rng = SystemRandomNumberGenerator()
+        XCTAssertEqual(b.shakenUp(using: &rng).spinJars, [0])
+        b.addEmptyJar()
+        XCTAssertEqual(b.spinJars, [0])
+        XCTAssertFalse(b.isSpinJar(3))
+    }
+
     func testMorphPieceFlipsEachTimeItIsPoured() {
         // Jar 0: A, then a morph piece that shows B and turns into A. Jar 1: B.
         var b = Board(capacity: 3, jars: [[Piece(kind: 0), Piece(kind: 1, morph: 1)], [Piece(kind: 1)], []])

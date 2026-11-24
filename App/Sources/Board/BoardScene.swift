@@ -58,6 +58,9 @@ final class BoardScene: SKScene {
     /// A morph piece has flipped to its other kind.
     var onMorph: (() -> Void)?
     private var lockNodes: [Int: LockNode] = [:]
+    /// A spin jar has been turned upside down (Space Station).
+    var onSpin: (() -> Void)?
+    private var spinNodes: [Int: SpinRingNode] = [:]
     /// Starlight Stage: lamps along the top and a little crowd along the bottom.
     private var stage: StageShowNode?
 
@@ -285,14 +288,47 @@ final class BoardScene: SKScene {
             addChild(lock)
             lockNodes[j] = lock
         }
+        // Spin jars: a zero gravity ring round the jar and the button that turns it over.
+        spinNodes = [:]
+        for j in board.spinJars where j < geometry.centers.count {
+            let ring = SpinRingNode(size: geometry.jarSize, piece: geometry.piece, calm: UIAccessibility.isReduceMotionEnabled)
+            ring.position = geometry.centers[j]
+            ring.zPosition = 7
+            addChild(ring)
+            spinNodes[j] = ring
+        }
+        refreshSpinRings(animated: false)
         if feverOn { setFever(true) }
         showTutorialIfNeeded()
+    }
+
+    /// Each ring shows whether its jar can turn right now; a finished jar loses its ring.
+    private func refreshSpinRings(animated: Bool) {
+        for (j, ring) in spinNodes where j < board.jarCount {
+            ring.set(board.isComplete(j) ? .gone : board.canSpin(j) ? .ready : .resting, animated: animated)
+        }
+    }
+
+    /// Where the button that turns jar `j` over is, if the jar has one.
+    private func spinButton(_ j: Int) -> CGPoint? {
+        guard let ring = spinNodes[j], ring.state != .gone, j < geometry.centers.count else { return nil }
+        return CGPoint(x: geometry.centers[j].x + ring.buttonOffset.x, y: geometry.centers[j].y + ring.buttonOffset.y)
+    }
+
+    /// The spin jar whose button is under the finger.
+    private func spinJar(at p: CGPoint) -> Int? {
+        for (j, ring) in spinNodes {
+            guard let c = spinButton(j) else { continue }
+            if hypot(p.x - c.x, p.y - c.y) <= ring.reach { return j }
+        }
+        return nil
     }
 
     private func showTutorialIfNeeded() {
         guard let move = tutorialMove, lifted == nil, riding == nil, board.isLegal(move),
               move.from < board.jarCount, move.destination < board.jarCount else { return }
-        if move.isRide { liftRide(move.from) } else { lift(move.from) }
+        // A spin starts on the jar's button: nothing is lifted, the hand just points at it.
+        if move.isSpin { } else if move.isRide { liftRide(move.from) } else { lift(move.from) }
         let to = move.destination
         let hand = SKLabelNode(text: "👆")
         hand.name = "tutorial-hand"
@@ -300,6 +336,9 @@ final class BoardScene: SKScene {
         hand.verticalAlignmentMode = .center
         hand.position = CGPoint(x: geometry.centers[to].x + geometry.piece * 0.25,
                                 y: geometry.centers[to].y - geometry.jarSize.height * 0.1)
+        if move.isSpin, let button = spinButton(move.from) {
+            hand.position = CGPoint(x: button.x + geometry.piece * 0.2, y: button.y - geometry.piece * 0.45)
+        }
         hand.zPosition = 40
         addChild(hand)
         let pulse = SKAction.sequence([
@@ -413,7 +452,10 @@ final class BoardScene: SKScene {
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let point = touches.first?.location(in: self) else { return }
         clearHint()
-        if lifted == nil, riding == nil, !busy, let j = goldenBubble(at: point) {
+        if let j = spinJar(at: point) {
+            // A tap on a spin jar's button turns the jar over.
+            spinTap(j)
+        } else if lifted == nil, riding == nil, !busy, let j = goldenBubble(at: point) {
             // A tap on a golden bubble picks it up for its ride.
             endTutorial()
             liftRide(j)
@@ -486,6 +528,21 @@ final class BoardScene: SKScene {
         }
     }
 
+    /// The button of spin jar `j` was tapped: the jar turns upside down, if a turn changes anything.
+    private func spinTap(_ j: Int) {
+        guard !busy, j < board.jarCount else { return }
+        endTutorial()
+        if let up = lifted ?? riding { putBack(up) }
+        let move = Move.spin(j)
+        if board.isLegal(move), let played = onPlay?(move) {
+            animateSpin(played.0, newBoard: played.1)
+        } else {
+            spinNodes[j]?.refuse()
+            shake(j)
+            onReject?()
+        }
+    }
+
     /// The golden bubble on top of jar `j` drifts up and waits for a jar to ride to.
     private func liftRide(_ j: Int) {
         guard let node = pieces[j].last else { return }
@@ -510,6 +567,10 @@ final class BoardScene: SKScene {
         guard !busy, board.isLegal(move) else { return false }
         endTutorial()
         clearHint()
+        if move.isSpin {
+            spinTap(move.from)
+            return true
+        }
         let to = move.destination
         if (move.isRide ? riding : lifted) == move.from, (move.isRide ? lifted : riding) == nil {
             tap(to)
@@ -531,6 +592,14 @@ final class BoardScene: SKScene {
         guard j < board.jarCount else { return }
         clearHint()
         tap(j)
+    }
+
+    /// Same as a finger tap on the button of spin jar `j` (used by UI tests and accessibility).
+    func tapSpin(_ j: Int) {
+        taps += 1
+        guard j < board.jarCount, spinNodes[j] != nil else { return }
+        clearHint()
+        spinTap(j)
     }
 
     private var taps = 0
@@ -661,6 +730,72 @@ final class BoardScene: SKScene {
         for node in pieces[j] { node.wobbleBubble() }
     }
 
+    /// A spin jar turns upside down: the jar tumbles once round, its squishies swing to the other
+    /// end, and whatever is left hanging drops to the bottom. With Reduce Motion they change places with a fade.
+    private func animateSpin(_ result: MoveResult, newBoard: Board) {
+        busy = true
+        let j = result.move.from
+        let calm = UIAccessibility.isReduceMotionEnabled
+        let centre = geometry.centers[j]
+        let turn = 0.42
+        let half = geometry.piece * 0.43
+        jarNodes[j].setHighlighted(false)
+        spinNodes[j]?.turn(duration: turn, calm: calm)
+        onSpin?()
+        if !calm {
+            // A full turn, so the jar ends the right way up.
+            let tumble = SKAction.rotate(byAngle: -.pi * 2, duration: turn)
+            tumble.timingMode = .easeInEaseOut
+            jarNodes[j].run(.sequence([tumble, .rotate(toAngle: 0, duration: 0)]))
+        }
+        pieces[j].reverse()
+        var settle = 0.0
+        for (i, node) in pieces[j].enumerated() {
+            node.removeAction(forKey: "wobble")
+            node.removeAction(forKey: "hop")
+            node.alpha = 1
+            node.zPosition = 6
+            let home = slot(j, i)
+            if calm {
+                node.run(.sequence([.fadeOut(withDuration: 0.14), .run { [weak node] in node?.position = home },
+                                    .fadeIn(withDuration: 0.14)]), withKey: "travel")
+                continue
+            }
+            // The squishy's middle swings half way round the jar's middle while it rolls over once.
+            let start = node.position
+            let arm = CGPoint(x: start.x - centre.x, y: start.y + half - centre.y)
+            let swing = SKAction.customAction(withDuration: turn) { n, elapsed in
+                let p = min(1, max(0, elapsed / CGFloat(turn)))
+                let eased = p * p * (3 - 2 * p)
+                let a = -CGFloat.pi * eased
+                let roll = a * 2
+                let mid = CGPoint(x: centre.x + arm.x * cos(a) - arm.y * sin(a), y: centre.y + arm.x * sin(a) + arm.y * cos(a))
+                n.zRotation = roll
+                n.position = CGPoint(x: mid.x + half * sin(roll), y: mid.y - half * cos(roll))
+            }
+            let hangs = CGPoint(x: centre.x - arm.x, y: centre.y - arm.y - half)
+            let drop = Double(max(0, hangs.y - home.y)) / Double(max(geometry.piece, 1))
+            let fall = SKAction.move(to: home, duration: 0.07 * min(drop, 3))
+            fall.timingMode = .easeIn
+            settle = max(settle, fall.duration)
+            node.run(.sequence([
+                swing,
+                .run { [weak node] in node?.zRotation = 0 },
+                fall,
+                .run { [weak self, weak node] in
+                    guard let self, let node else { return }
+                    node.zPosition = 5
+                    node.position = home
+                    self.land(node, jar: j, index: i, speed: 3 + 3 * drop)
+                },
+            ]), withKey: "travel")
+        }
+        run(.sequence([
+            .wait(forDuration: (calm ? 0.3 : turn) + settle + 0.12),
+            .run { [weak self] in self?.finish(result, newBoard: newBoard) },
+        ]))
+    }
+
     private func animate(_ result: MoveResult, newBoard: Board) {
         busy = true
         let from = result.move.from, to = result.move.destination, k = result.count
@@ -778,6 +913,7 @@ final class BoardScene: SKScene {
         for (j, vine) in vineNodes where !result.snappedVines.contains(j) { vine.set(newBoard.vineTag(j)) }
         for (n, j) in result.snappedVines.enumerated() { snapVine(j, after: 0.5 + 0.25 * Double(n)) }
         for (n, j) in result.openedLocks.enumerated() { openLock(j, after: 0.6 + 0.25 * Double(n)) }
+        refreshSpinRings(animated: true)
         busy = false
         onMoveFinished?(result)
     }
@@ -1002,6 +1138,20 @@ final class BoardScene: SKScene {
 
     func showHint(_ move: Move) {
         clearHint()
+        if move.isSpin, let button = spinButton(move.from), let reach = spinNodes[move.from]?.reach {
+            // A hint to turn a jar over glows round its button.
+            let ring = SKShapeNode(circleOfRadius: reach)
+            ring.strokeColor = UIColor(hex: 0xFFD86B)
+            ring.lineWidth = 5
+            ring.fillColor = .clear
+            ring.position = button
+            ring.zPosition = 25
+            ring.name = "hint"
+            ring.alpha = 0
+            addChild(ring)
+            ring.run(.repeatForever(.sequence([.fadeIn(withDuration: 0.35), .fadeAlpha(to: 0.3, duration: 0.35)])))
+            return
+        }
         for (j, delay) in [(move.from, 0.0), (move.destination, 0.35)] where j >= 0 && j < geometry.centers.count {
             let ring = SKShapeNode(rectOf: CGSize(width: geometry.jarSize.width + 10, height: geometry.jarSize.height + 10),
                                    cornerRadius: geometry.jarSize.width * 0.35)

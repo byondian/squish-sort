@@ -335,6 +335,12 @@ final class AppModel: ObservableObject {
                 let at = levels.firstIndex { $0.id == id } ?? 0
                 update { p in p.highestUnlocked = max(p.highestUnlocked, at) }
                 screen = .level(at)
+            } else if shot.hasPrefix("level:") {
+                // "level:<id>" opens one level by its id, for the checks.
+                let id = String(shot.dropFirst(6))
+                let at = levels.firstIndex { $0.id == id } ?? 0
+                update { p in p.highestUnlocked = max(p.highestUnlocked, at) }
+                screen = .level(at)
             } else if shot.hasPrefix("room:") {
                 let id = String(shot.dropFirst(5))
                 update { p in p.collection.owned[id] = 1 }

@@ -7,6 +7,8 @@ enum BoardRule: String, CaseIterable {
     case wrapped, duet, frozen, curtain, floater, ride, vine
     /// The three Keep Squishing twists: key jars, morph pieces and jars that hold five.
     case key, morph, bigJar
+    /// Space Station's twist: a jar in a ring turns upside down.
+    case spin
     /// Not a twist of one world: a run only moves as far as there is room. Taught early in Toy Shop.
     case partial
 
@@ -28,6 +30,7 @@ enum BoardRule: String, CaseIterable {
         if board.hasKeys { found.insert(.key) }
         if board.hasMorphs { found.insert(.morph) }
         if board.capacity > 4 { found.insert(.bigJar) }
+        if board.hasSpins { found.insert(.spin) }
         return BoardRule.allCases.filter { found.contains($0) }
     }
 
@@ -44,6 +47,7 @@ enum BoardRule: String, CaseIterable {
         case .key: return String(localized: "Locked! Finish a jar of the squishy on the padlock to open it.")
         case .morph: return String(localized: "A morph squishy! Every time you pour it, it flips to its other look.")
         case .bigJar: return String(localized: "Big jars! These hold 5 squishies.")
+        case .spin: return String(localized: "A spin jar! Tap its button and the jar turns upside down.")
         }
     }
 }
@@ -96,7 +100,11 @@ struct RuleDemo: View {
         while !Task.isCancelled {
             for s in 0...5 {
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.65)) { step = s }
-                if s == 2 || s == 4 { model.sounds.play("land_soft", volume: 0.5) }
+                if s == 2, rule == .spin {
+                    model.sounds.play("spin", or: "hop")
+                } else if s == 2 || s == 4 {
+                    model.sounds.play("land_soft", volume: 0.5)
+                }
                 if s == 4, rule == .floater || rule == .ride { model.sounds.play("bubble_pop", volume: 0.6) }
                 if s == 4, rule == .key { model.sounds.play("unlock_new", volume: 0.5) }
                 if s == 4, rule == .morph { model.sounds.play("squeeze_out", volume: 0.5) }
@@ -129,6 +137,7 @@ struct RuleDemo: View {
         case .key: keyStage
         case .morph: morphStage
         case .bigJar: bigJarStage
+        case .spin: spinStage
         case .partial: partialStage
         case .curtain: curtainStage
         }
@@ -308,6 +317,32 @@ struct RuleDemo: View {
         }
     }
 
+    // Spin jar: a tap on the button under the jar and it turns upside down. The one that was stuck
+    // at the bottom is now on top and hops over to its own kind.
+    private var spinStage: some View {
+        let turned = step >= 2
+        let moved = step >= 4
+        let glow = Color(hex: 0x7CE8FF)
+        return ZStack {
+            Ellipse().stroke(glow, lineWidth: 4)
+                .frame(width: 66, height: 26)
+                .rotationEffect(.degrees(turned ? 160 : -20))
+                .position(x: RuleDemo.xs[0], y: 96)
+            blob(actors[0], x: RuleDemo.xs[2], y: RuleDemo.ys[0])
+            blob(actors[0], x: RuleDemo.xs[2], y: RuleDemo.ys[1])
+            blob(actors[1], x: RuleDemo.xs[0], y: RuleDemo.ys[1])
+            blob(actors[1], x: RuleDemo.xs[0], y: turned ? RuleDemo.ys[0] : RuleDemo.ys[2])
+            blob(actors[0], x: moved ? RuleDemo.xs[2] : RuleDemo.xs[0],
+                 y: turned ? RuleDemo.ys[2] : RuleDemo.ys[0])
+            Circle().fill(Theme.butter)
+                .overlay(Circle().stroke(Theme.plum, lineWidth: 2))
+                .overlay(Text(verbatim: "↻").font(.system(size: 15, weight: .heavy)).foregroundStyle(Theme.plum))
+                .frame(width: 24, height: 24)
+                .scaleEffect(step == 2 ? 0.8 : 1)
+                .position(x: RuleDemo.xs[0], y: 156)
+        }
+    }
+
     // Big jar: four are in, the fifth hops over, and only then does the lid come.
     private var bigJarStage: some View {
         let moved = step >= 3
@@ -431,6 +466,9 @@ struct RuleDemo: View {
         case (.curtain, 3), (.vine, 3), (.key, 3), (.bigJar, 3): spot = CGPoint(x: RuleDemo.xs[0], y: RuleDemo.ys[2])
         case (.morph, 1), (.morph, 2): spot = CGPoint(x: RuleDemo.xs[0], y: RuleDemo.ys[1])
         case (.morph, 3): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[1])
+        case (.spin, 1), (.spin, 2): spot = CGPoint(x: RuleDemo.xs[0] + 14, y: 134)
+        case (.spin, 3): spot = CGPoint(x: RuleDemo.xs[0], y: RuleDemo.ys[2])
+        case (.spin, 4): spot = CGPoint(x: RuleDemo.xs[2], y: RuleDemo.ys[2])
         default: spot = CGPoint(x: 130, y: 190)
         }
         let shown = step >= 1 && step <= 4
