@@ -86,6 +86,10 @@ struct PlayerProgress: Codable, Equatable {
     var goldStars: Set<String> = []
     /// yyyy-MM-dd of the last Daily Jar won.
     var dailyJarDay: String?
+    /// Set only for a player who reached Keep Squishing before new story worlds joined the path and
+    /// has not finished them yet: how far into Keep Squishing they are (0 = its first level is the
+    /// next to win). Keep Squishing stays open for them while they play the new worlds.
+    var keepSquishingAt: Int?
     /// Twist of the week: boards played this week, boards ever won and the sticker card.
     var weekly = WeeklyState()
     /// Places on the Workshop shelf: three are free, more are bought with coins.
@@ -146,14 +150,15 @@ struct PlayerProgress: Codable, Equatable {
     }
 
     /// Saves from before Space Station and Morph Lab joined the path (story levels ended at 125, then
-    /// Keep Squishing). Anyone who was in Keep Squishing starts the new worlds at Space Station 1.
-    /// Nothing is taken away: their Keep Squishing stars, laps and prizes are kept, and when Morph Lab
-    /// is won they carry on from the Keep Squishing level they had reached.
+    /// Keep Squishing). For anyone who was in Keep Squishing the main button now leads to Space
+    /// Station 1. Nothing is taken away: Keep Squishing stays open on the map from the level they had
+    /// reached (`keepSquishingAt`), with its stars, laps and prizes, and so does Twist of the week.
     /// - Parameter path: ids of the story levels as they are now, in play order.
-    mutating func migrateSpaceAndLab(path: [String], oldStoryCount: Int = 125) {
+    mutating func migrateSpaceAndLab(path: [String], oldStoryCount: Int = 125, keepSquishingLength: Int = 240) {
         guard version < 4 else { return }
         version = 4
         guard highestUnlocked >= oldStoryCount, let first = path.firstIndex(of: "spacestation-01") else { return }
+        keepSquishingAt = min(highestUnlocked - oldStoryCount, max(0, keepSquishingLength - 1))
         highestUnlocked = first
     }
 
@@ -214,6 +219,7 @@ struct PlayerProgress: Codable, Equatable {
         goldStars = v(.goldStars, d.goldStars)
         dailyJarDay = (try? c.decodeIfPresent(String.self, forKey: .dailyJarDay)) ?? nil
         weekly = v(.weekly, d.weekly)
+        keepSquishingAt = (try? c.decodeIfPresent(Int.self, forKey: .keepSquishingAt)) ?? nil
         // A save from before places had a price keeps a place for everything it already made.
         makerSlots = max(MakerSlots.free, v(.makerSlots, MakerSlots.starting(alreadyMade: made.count)))
         workshopParts = v(.workshopParts, d.workshopParts)

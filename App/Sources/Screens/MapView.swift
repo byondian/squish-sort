@@ -95,7 +95,7 @@ struct MapView: View {
                                 if world.id != LevelCatalog.endless { starJar(world.id) }
                             }
                             if world.id == LevelCatalog.endless {
-                                if model.progress.highestUnlocked >= model.storyLevelCount {
+                                if model.keepSquishingOpen {
                                     Text("It never runs out. A capsule every fifth level.")
                                         .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.65))
                                     milestoneShelf
