@@ -39,9 +39,10 @@ final class AppModel: ObservableObject {
     }
     /// The level on screen is today's Daily Jar or a Twist of the week board, not a level of the path.
     private(set) var playingDaily = false
-    /// The Twist of the week board on screen (1 to 5). `playingDaily` is set with it, so the board is
-    /// kept off the path's stars, capsules and lucky bonuses the same way.
-    private(set) var playingWeekly: Int?
+    /// The Twist of the week board on screen (1 to 5), with the theme and week it was started in: a
+    /// board finished after the week turns still counts for the theme it belongs to. `playingDaily` is
+    /// set with it, so the board is kept off the path's stars, capsules and lucky bonuses the same way.
+    private(set) var playingWeekly: (theme: String, board: Int, week: Int)?
     @Published private(set) var progress: PlayerProgress
     @Published var capsule: Collectible?
     @Published var askAge = false
@@ -1116,28 +1117,24 @@ final class AppModel: ObservableObject {
     }
 
     func playWeekly() {
-        guard weeklyOpen, let theme = weeklyTheme, let board = weeklyNext,
+        guard weeklyOpen, let theme = weeklyTheme, let week = weeklyWeek, let board = weeklyNext,
               let number = WeeklyTwist.levelIndex(theme: theme, board: board),
               let index = levels.firstIndex(where: { $0.file.world == LevelCatalog.weekly && $0.file.index == number }) else { return }
         playingDaily = true
-        playingWeekly = board
+        playingWeekly = (theme, board, week)
         screen = .level(index)
         // Setting the screen is what clears the flags for other screens; a level keeps them.
         playingDaily = true
-        playingWeekly = board
+        playingWeekly = (theme, board, week)
     }
 
     /// A Twist of the week board is won: coins once a week, a treat for the Buddy, and on a theme's
     /// fifth board its sticker and its wearable. Nothing is timed and nothing is ever lost.
-    private func wonWeekly(board: Int, playSeconds: Double) {
+    private func wonWeekly(theme: String, board: Int, week: Int, playSeconds: Double) {
         var summary = WinSummary()
         summary.dailyJar = true
         summary.weeklyTwist = true
         summary.firstClear = true
-        guard let week = weeklyWeek, let theme = weeklyTheme else {
-            lastWin = summary
-            return
-        }
         var state = progress.weekly
         let prize = state.win(theme: theme, board: board, week: week)
         summary.pot = prize.coins + prize.bonus
@@ -1520,8 +1517,8 @@ final class AppModel: ObservableObject {
 
     /// `pot` is what the level's jars threw on this attempt (0 on a replay).
     func won(index: Int, moves: Int, stars: Int, attempts: Int, playSeconds: Double, pot: Int, gold: Bool = false, unaided: Bool = true) {
-        if let board = playingWeekly {
-            wonWeekly(board: board, playSeconds: playSeconds)
+        if let playing = playingWeekly {
+            wonWeekly(theme: playing.theme, board: playing.board, week: playing.week, playSeconds: playSeconds)
             return
         }
         if playingDaily {
