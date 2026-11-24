@@ -45,6 +45,9 @@ final class LevelController: ObservableObject {
     private(set) var reshuffled = false
     /// A gold fourth star: the fewest moves there are, with no extra jar and no shuffle.
     var earnsGold: Bool { !reshuffled && session.moveCount <= session.par && session.extraJarsAdded == 0 }
+    /// A hint was shown or a magic move was played on this try. Hints and magic moves can be had for
+    /// coins, so a try that used one never decides a capsule: no shiny capsule for it.
+    private(set) var helped = false
     /// The one opt-in video shuffle of this try has been used (offered on the stuck screen only).
     @Published private(set) var videoShuffleUsed = false
     /// A paid shuffle was tapped without enough coins.
@@ -498,7 +501,7 @@ final class LevelController: ObservableObject {
             model.haptics.win()
             model.sounds.play(level.file.beat == .boss ? "win_boss" : "win")
             model.won(index: index, moves: session.moveCount, stars: stars, attempts: attempts, playSeconds: seconds,
-                      pot: pot.coins, gold: earnsGold)
+                      pot: pot.coins, gold: earnsGold, unaided: !helped)
         case .stuck:
             // Now and then a free magic shuffle steps in: the pieces land in the kindest layout found,
             // and the try carries on. It is not counted as a fail.
@@ -604,12 +607,13 @@ final class LevelController: ObservableObject {
                 return
             }
             magicPending = (move, paid)
-            if !scene.playForPlayer(move) { magicPending = nil }
+            if scene.playForPlayer(move) { helped = true } else { magicPending = nil }
         }
     }
 
     private func showHint() {
         guard let found = foundHint, found.board == session.board else { return }
+        helped = true
         scene.showHint(found.move)
     }
 
@@ -631,6 +635,7 @@ final class LevelController: ObservableObject {
         bossMood = 0
         shufflesUsed = 0
         reshuffled = false
+        helped = false
         luckyUsed = false
         rescueUsed = false
         magicPending = nil

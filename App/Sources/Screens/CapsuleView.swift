@@ -353,6 +353,7 @@ struct CapsuleView: View {
                 SquishyView(id: collectible.id, rarity: collectible.rarity)
             }
             .frame(width: side, height: side)
+            .shinyGlitter(model.capsuleIsShiny)
             .scaleEffect(x: 1 + squash, y: 1 - squash * 0.9, anchor: .bottom)
             .offset(y: landed ? 0 : -700)
             .accessibilityElement()
@@ -398,6 +399,7 @@ struct CapsuleView: View {
                 Text(verbatim: collectible.name(in: model.language)).font(Theme.title(32)).foregroundStyle(Theme.plum)
                     .lineLimit(1).minimumScaleFactor(0.5)
                 Spacer(minLength: 4)
+                if model.capsuleIsShiny { ShinyBadge(size: 13) }
                 RarityTag(rarity: rarity)
             }
             HStack(spacing: 6) {

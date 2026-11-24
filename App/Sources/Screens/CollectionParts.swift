@@ -269,6 +269,10 @@ struct SquishyCard: View {
                         SquishyView(id: squishy.id, rarity: squishy.rarity)
                     }
                     .frame(width: 190, height: 190)
+                    .shinyGlitter(model.progress.collection.ownsShiny(squishy.id))
+                    .overlay(alignment: .bottom) {
+                        if model.progress.collection.ownsShiny(squishy.id) { ShinyBadge(size: 13) }
+                    }
                 }
                 .frame(maxWidth: .infinity).frame(height: 200)
                 arrow("chevron.right", 1)
@@ -388,5 +392,57 @@ struct StatPanel: View {
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
+    }
+}
+
+/// The sparkle of a shiny edition: gold and white stars twinkling over the squishy. Still with Reduce Motion.
+struct ShinyGlitter: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var on = false
+
+    private static let spots: [(x: CGFloat, y: CGFloat, size: CGFloat)] = [
+        (0.16, 0.2, 0.16), (0.84, 0.16, 0.2), (0.3, 0.52, 0.12), (0.78, 0.58, 0.15), (0.12, 0.8, 0.14), (0.9, 0.86, 0.12), (0.52, 0.1, 0.11),
+    ]
+
+    var body: some View {
+        GeometryReader { geo in
+            let side = min(geo.size.width, geo.size.height)
+            ForEach(0..<ShinyGlitter.spots.count, id: \.self) { i in
+                let s = ShinyGlitter.spots[i]
+                let lit = (i % 2 == 0) == on
+                Text(verbatim: "✦").font(.system(size: max(7, s.size * side)))
+                    .foregroundStyle(i % 3 == 0 ? Color.white : Theme.butter)
+                    .shadow(color: Color(hex: 0xFFB300).opacity(0.8), radius: 2)
+                    .scaleEffect(lit ? 1.15 : 0.45)
+                    .opacity(lit ? 1 : 0.3)
+                    .position(x: s.x * geo.size.width, y: s.y * geo.size.height)
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+        .onAppear {
+            guard !reduceMotion else { return }
+            withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) { on = true }
+        }
+    }
+}
+
+/// The small gold "Shiny" label on a shiny edition.
+struct ShinyBadge: View {
+    var size: CGFloat = 11
+
+    var body: some View {
+        Text("Shiny").font(Theme.body(size)).foregroundStyle(Theme.plum)
+            .padding(.horizontal, size * 0.6).padding(.vertical, size * 0.25)
+            .background(Capsule().fill(LinearGradient(colors: [Theme.butter, Color(hex: 0xFFC94D)], startPoint: .top, endPoint: .bottom)))
+            .overlay(Capsule().stroke(.white, lineWidth: 1.5))
+            .accessibilityIdentifier("shiny-badge")
+    }
+}
+
+extension View {
+    /// Lays the shiny sparkle over a squishy the player owns a shiny edition of.
+    func shinyGlitter(_ shiny: Bool) -> some View {
+        overlay { if shiny { ShinyGlitter() } }
     }
 }

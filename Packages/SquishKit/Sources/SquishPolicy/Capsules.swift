@@ -95,6 +95,9 @@ public struct CollectionState: Codable, Equatable, Sendable {
     /// Every squishy earned, in order, with where it came from. Kept for the
     /// January migration and for support.
     public var earnedLog: [Earned] = []
+    /// Shiny editions, by squishy id. A shiny is an extra look of a squishy the player already owns.
+    /// It only ever comes out of a Keep Squishing capsule: never from an ad, a purchase or coins.
+    public var shiny: [String: Int] = [:]
 
     public struct Earned: Codable, Equatable, Sendable {
         public var id: String
@@ -110,9 +113,12 @@ public struct CollectionState: Codable, Equatable, Sendable {
         capsulesOpened = try c.decodeIfPresent([String: Int].self, forKey: .capsulesOpened) ?? [:]
         totalCapsules = try c.decodeIfPresent(Int.self, forKey: .totalCapsules) ?? 0
         earnedLog = try c.decodeIfPresent([Earned].self, forKey: .earnedLog) ?? []
+        shiny = try c.decodeIfPresent([String: Int].self, forKey: .shiny) ?? [:]
     }
 
     public func owns(_ id: String) -> Bool { (owned[id] ?? 0) > 0 }
+    public func ownsShiny(_ id: String) -> Bool { (shiny[id] ?? 0) > 0 }
+    public var shinyCount: Int { shiny.values.filter { $0 > 0 }.count }
     public var spareCount: Int { owned.values.reduce(0) { $0 + max(0, $1 - 1) } }
 
     /// Commons join the book the first time a jar of them is completed.
@@ -233,6 +239,35 @@ public enum CapsuleDrops {
         state.totalCapsules += 1
         state.earnedLog.append(.init(id: got.id, source: "capsule"))
         return got
+    }
+
+    /// A Keep Squishing capsule. While the world it borrows still has a rare or an ultra the player has
+    /// not found, it is an ordinary capsule. Once none is missing (or always, for the shiny capsule an
+    /// Expert board gives at par, `alwaysShiny`) it holds a shiny edition of a squishy of that world the
+    /// player owns: one that is not shiny yet while there is one, and after that a spare, as with any duplicate.
+    /// Like every drop, it takes no purchase state.
+    public static func openKeepSquishing<R: RandomNumberGenerator>(world: String, roster: Roster, state: inout CollectionState,
+                                                                   rng: inout R, odds: CapsuleOdds = CapsuleOdds(),
+                                                                   alwaysShiny: Bool = false) -> (squishy: Collectible, shiny: Bool)? {
+        let here = roster.collectibles.filter { $0.world == world }
+        let missing = here.contains { ($0.rarity == .rare || $0.rarity == .ultra) && !state.owns($0.id) }
+        let ownedHere = here.filter { state.owns($0.id) }
+        if state.totalCapsules == 0 || ownedHere.isEmpty || (missing && !alwaysShiny) {
+            guard let got = open(world: world, roster: roster, state: &state, rng: &rng, odds: odds) else { return nil }
+            return (got, false)
+        }
+        let fresh = ownedHere.filter { !state.ownsShiny($0.id) }
+        let pool = fresh.isEmpty ? ownedHere : fresh
+        let got = pool[Int(rng.next() % UInt64(pool.count))]
+        if state.ownsShiny(got.id) {
+            state.owned[got.id, default: 0] += 1
+        } else {
+            state.shiny[got.id] = 1
+        }
+        state.capsulesOpened[world, default: 0] += 1
+        state.totalCapsules += 1
+        state.earnedLog.append(.init(id: got.id, source: "shiny"))
+        return (got, true)
     }
 
     /// Squish 3 spares together for a squishy you don't have yet in `world`.

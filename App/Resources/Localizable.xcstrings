@@ -92,6 +92,28 @@
         }
       }
     },
+    "%lld coins for your milestone shelf.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "マイルストーンだなに%lldコイン。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마일스톤 선반 보상으로 코인 %lld개."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "里程碑架獎勵：%lld 金幣。"
+          }
+        }
+      }
+    },
     "%lld coins, %lld hints and the Golden Hour board. It is in the shop whenever you like.": {
       "localizations": {
         "ja": {
@@ -911,6 +933,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "新世界開放了！"
+          }
+        }
+      }
+    },
+    "A prize for your milestone shelf. Your Buddy is wearing it now, and you can only get it here.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "マイルストーンだなのごほうびです。バディがもう身につけています。ここでしか手に入りません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마일스톤 선반에 놓을 상이에요. 버디가 벌써 착용했어요. 여기서만 받을 수 있어요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這是里程碑架上的獎品。夥伴已經戴上了，而且只有這裡拿得到。"
           }
         }
       }
@@ -4897,6 +4941,50 @@
         }
       }
     },
+    "Milestone shelf %lld/%lld": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "マイルストーンだな %1$lld/%2$lld"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마일스톤 선반 %1$lld/%2$lld"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "里程碑架 %1$lld/%2$lld"
+          }
+        }
+      }
+    },
+    "Milestone: level %lld!": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "マイルストーン：レベル%lld！"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마일스톤: 레벨 %lld!"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "里程碑：第 %lld 關！"
+          }
+        }
+      }
+    },
     "Mint Fizz": {
       "localizations": {
         "ja": {
@@ -7031,6 +7119,72 @@
         }
       }
     },
+    "Shiny": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "シャイニー"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "샤이니"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "閃亮"
+          }
+        }
+      }
+    },
+    "Shiny %lld/%lld": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "シャイニー %1$lld/%2$lld"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "샤이니 %1$lld/%2$lld"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "閃亮 %1$lld/%2$lld"
+          }
+        }
+      }
+    },
+    "Shiny editions come from Keep Squishing capsules once a world has no rare or ultra-rare left to find. They are earned by playing and are never sold.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "シャイニーは、そのワールドのレアとウルトラレアをぜんぶ見つけたあと、「ずっとスクイーズ」のカプセルから出ます。プレイでもらえるもので、販売はしません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "샤이니는 그 월드의 레어와 울트라 레어를 모두 찾은 뒤 '계속 말랑말랑' 캡슐에서 나와요. 플레이로만 얻을 수 있고 판매하지 않아요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "當一個世界的稀有和超稀有都找齊後，「一直捏捏」的扭蛋就會出現閃亮版。閃亮版只能靠遊玩獲得，絕不販售。"
+          }
+        }
+      }
+    },
     "Shop": {
       "localizations": {
         "ja": {
@@ -7075,6 +7229,28 @@
         }
       }
     },
+    "Show all": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ぜんぶ見る"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모두 보기"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顯示全部"
+          }
+        }
+      }
+    },
     "Show me!": {
       "localizations": {
         "ja": {
@@ -7093,6 +7269,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "示範給我看！"
+          }
+        }
+      }
+    },
+    "Show only shiny": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "シャイニーだけ見る"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "샤이니만 보기"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只看閃亮"
           }
         }
       }
@@ -9425,6 +9623,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "過一關，我就有點心吃！"
+          }
+        }
+      }
+    },
+    "Win every 10th level for a Buddy prize you can only get here.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "10レベルごとに、ここだけのバディのごほうびがもらえます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "10레벨마다 여기서만 받을 수 있는 버디 상을 받아요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每過 10 關，就能拿到只有這裡才有的夥伴獎品。"
           }
         }
       }

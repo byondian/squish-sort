@@ -1,5 +1,36 @@
 import SwiftUI
 import SquishLevels
+import SquishPolicy
+
+extension MapView {
+    /// The Keep Squishing milestone shelf: one place for every tenth level, filled as they are won.
+    var milestoneShelf: some View {
+        let buddy = model.progress.buddy
+        let won = BuddyGifts.milestones.filter { buddy.owns($0) }.count
+        return VStack(alignment: .leading, spacing: 6) {
+            Text("Milestone shelf \(won)/\(BuddyGifts.milestones.count)").font(Theme.body(13)).foregroundStyle(Theme.plum)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 6) {
+                    ForEach(Array(BuddyGifts.milestones.enumerated()), id: \.offset) { n, gift in
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12).fill(.white.opacity(buddy.owns(gift) ? 1 : 0.5))
+                            if buddy.owns(gift), let image = WorkshopArt.part(gift.category, gift.part) {
+                                Image(uiImage: image).resizable().scaledToFit().padding(5)
+                            } else {
+                                Text(verbatim: "\((n + 1) * MilestoneShelf.every)").font(Theme.body(12))
+                                    .foregroundStyle(Theme.plum.opacity(0.45))
+                            }
+                        }
+                        .frame(width: 44, height: 44)
+                    }
+                }
+            }
+            Text("Win every 10th level for a Buddy prize you can only get here.")
+                .font(Theme.body(12)).foregroundStyle(Theme.plum.opacity(0.6))
+        }
+        .accessibilityIdentifier("milestone-shelf")
+    }
+}
 
 /// World map: the story worlds of the main path, Keep Squishing, plus Santa's Grotto once its door has been opened.
 struct MapView: View {
@@ -66,6 +97,7 @@ struct MapView: View {
                                 if model.progress.highestUnlocked >= model.storyLevelCount {
                                     Text("It never runs out. A capsule every fifth level.")
                                         .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.65))
+                                    milestoneShelf
                                 } else {
                                     Text("\(model.endlessCount) more levels. Opens after Jungle Jam.")
                                         .font(Theme.body(13)).foregroundStyle(Theme.plum.opacity(0.65))

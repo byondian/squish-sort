@@ -455,7 +455,16 @@ public enum BuddyGifts {
         (held, "teddy", 900), (held, "wand", 1200), (held, "guitar", 1800),
     ].map { BuddyGift(category: $0.0, part: $0.1, price: $0.2) }
 
-    public static func gift(_ id: String) -> BuddyGift? { all.first { $0.id == id } }
+    /// The Keep Squishing milestone shelf: one for every tenth Keep Squishing level, in this order.
+    /// They are prizes for playing and are never in the shop: no price, no coins, no ad.
+    public static let milestones: [BuddyGift] = [
+        (hats, "sweatband"), (held, "flag"), (neck, "tie"), (hats, "bowler"), (held, "book"), (hats, "sailor"),
+        (neck, "bib"), (held, "paintbrush"), (hats, "straw-sun-hat"), (held, "ice-lolly"), (neck, "lei"), (hats, "frog-hood"),
+        (held, "umbrella"), (hats, "helmet"), (held, "controller"), (neck, "backpack"), (hats, "bunny-hood"), (held, "microphone"),
+        (hats, "graduation"), (held, "foam-sword"), (neck, "tutu"), (hats, "witch"), (held, "heart-sign"), (hats, "space-helmet"),
+    ].map { BuddyGift(category: $0.0, part: $0.1, price: 0) }
+
+    public static func gift(_ id: String) -> BuddyGift? { all.first { $0.id == id } ?? milestones.first { $0.id == id } }
 
     /// The free daily gift holds one of the small gifts on about one day in three, while there is one
     /// the Buddy does not have yet. Stable for the day, so opening it again changes nothing.
@@ -466,6 +475,34 @@ public enum BuddyGifts {
         let open = all.filter { $0.price <= freeUpTo && !owned.contains($0.id) }
         guard !open.isEmpty else { return nil }
         return open[Int(MysteryBag.stableHash(installSeed + "|gift-pick|" + day) % UInt64(open.count))]
+    }
+}
+
+/// The Keep Squishing milestone shelf: every tenth Keep Squishing level won for the first time puts a
+/// prize on the shelf. First time round each is a wearable for the Buddy that is nowhere else in the
+/// game; a milestone whose wearable the Buddy already has (a later lap) gives coins instead.
+public enum MilestoneShelf {
+    public static let every = 10
+    public static let coinsWhenOwned = 300
+
+    /// The shelf place (0 is the first) that Keep Squishing level `index` fills; nil for any other level.
+    public static func slot(forLevel index: Int) -> Int? {
+        guard index > 0, index % every == 0, !BuddyGifts.milestones.isEmpty else { return nil }
+        return (index / every - 1) % BuddyGifts.milestones.count
+    }
+
+    public static func gift(slot: Int) -> BuddyGift { BuddyGifts.milestones[slot % BuddyGifts.milestones.count] }
+
+    public enum Prize: Equatable, Sendable {
+        case gift(BuddyGift)
+        case coins(Int)
+    }
+
+    /// What winning Keep Squishing level `index` for the first time puts on the shelf.
+    public static func prize(forLevel index: Int, buddy: BuddyState) -> Prize? {
+        guard let slot = slot(forLevel: index) else { return nil }
+        let wearable = gift(slot: slot)
+        return buddy.owns(wearable) ? .coins(coinsWhenOwned) : .gift(wearable)
     }
 }
 
