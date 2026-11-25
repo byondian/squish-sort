@@ -6,18 +6,18 @@
   "beat": "medium",
   "capacity": 4,
   "jars": [
-    ["trio", "trio", "popsy", "atomo"],
-    ["atomo", "atomo", "trio", "popsy"],
-    ["tubey", "slimo", "maggie", "maggie"],
-    ["maggie", "tubey", "atomo", "slimo"],
-    ["tubey", "popsy", "trio", "slimo"],
-    ["maggie", "tubey", "popsy", "slimo"],
+    ["maggie", "slimo", "popsy", "atomo"],
+    ["trio", "atomo", "tubey", "slimo"],
+    ["maggie", "trio", "maggie", "trio"],
+    ["popsy", "popsy", "atomo", "atomo"],
+    ["popsy", "tubey", "tubey", "maggie"],
+    ["tubey", "slimo", "trio", "slimo"],
     [],
     []
   ],
-  "mechanics": {"hidden": [], "sticky": [], "frozen": [], "keys": [{"jar": 2, "kind": "atomo"}], "morph": [{"jar": 1, "at": 2, "kind": "popsy"}, {"jar": 4, "at": 1, "kind": "trio"}]},
-  "par": 18,
-  "solution": [[3, 6], [0, 3], [1, 0], [4, 6], [5, 6], [1, 7], [0, 7], [3, 1], [4, 0], [5, 7], [3, 5], [2, 3], [2, 6], [5, 2], [3, 5], [4, 3], [0, 3], [2, 4]],
+  "mechanics": {"hidden": [[0, 0], [0, 2], [5, 2]], "sticky": [], "frozen": [], "morph": [{"jar": 0, "at": 1, "kind": "trio"}, {"jar": 1, "at": 0, "kind": "slimo"}]},
+  "par": 19,
+  "solution": [[1, 6], [5, 6], [2, 5], [4, 2], [1, 4], [0, 1], [1, 7], [3, 7], [0, 3], [5, 1], [5, 6], [4, 5], [3, 4], [0, 3], [2, 0], [2, 1], [0, 2], [3, 0], [6, 0]],
   "capsule": false,
   "softenAfterFails": null
 }

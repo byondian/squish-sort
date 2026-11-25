@@ -17,13 +17,18 @@ public struct Move: Hashable, Codable, Sendable, CustomStringConvertible {
     /// The jar the move ends in, ride or not.
     public var destination: Int { rideTarget ?? to }
 
-    public var description: String { isRide ? "\(from)⇢\(destination)" : "\(from)→\(to)" }
+    /// Space Station: jar `jar` turns upside down. Stored as a move from the jar to itself, so a
+    /// level file keeps its solution as plain pairs of numbers.
+    public static func spin(_ jar: Int) -> Move { Move(from: jar, to: jar) }
+    public var isSpin: Bool { from == to && to >= 0 }
+
+    public var description: String { isSpin ? "\(from)↻" : isRide ? "\(from)⇢\(destination)" : "\(from)→\(to)" }
 }
 
 /// What a move did, so the board scene can animate it.
 public struct MoveResult: Equatable, Sendable {
     public let move: Move
-    /// How many pieces hopped (a conga line when > 1).
+    /// How many pieces hopped (a conga line when > 1). For a spin: how many pieces the jar holds.
     public let count: Int
     /// The source jar's new top was unwrapped.
     public let revealedSourceTop: Bool

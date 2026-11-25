@@ -75,7 +75,7 @@ final class LevelTests: XCTestCase {
         }
     }
 
-    func testSpaceStationTeachesKeyJarsAndMorphLabTeachesMorphPieces() throws {
+    func testSpaceStationTeachesSpinJarsAndMorphLabTeachesMorphPieces() throws {
         let all = try files()
         let space = all.filter { $0.world == "spacestation" }
         let lab = all.filter { $0.world == "morphlab" }
@@ -83,8 +83,19 @@ final class LevelTests: XCTestCase {
         XCTAssertEqual(lab.count, 45)
         XCTAssertEqual(LevelCatalog.worlds.suffix(2), ["spacestation", "morphlab"], "they follow Jungle Jam, before Keep Squishing")
         // Every level shows its world's rule, and the first eleven show it alone.
-        XCTAssertTrue(space.allSatisfy { !($0.mechanics?.keys ?? []).isEmpty })
+        XCTAssertTrue(space.allSatisfy { ($0.mechanics?.spins ?? []).count >= 2 })
         XCTAssertTrue(lab.allSatisfy { !($0.mechanics?.morph ?? []).isEmpty })
+        // Padlocks are for Keep Squishing and Twist of the week only (Ian, 24 Nov 2026).
+        XCTAssertFalse(all.contains { $0.world != LevelCatalog.endless && $0.world != LevelCatalog.weekly && !($0.mechanics?.keys ?? []).isEmpty })
+        // A Space Station board has one spare jar, its answer turns a jar over, and without its rings
+        // it has no answer at all: the spin is the level.
+        for file in space {
+            XCTAssertEqual(file.jars.filter(\.isEmpty).count, 1, file.id)
+            XCTAssertTrue((file.solution ?? []).contains { $0.count == 2 && $0[0] == $0[1] }, file.id)
+            var plain = file
+            plain.mechanics?.spins = nil
+            XCTAssertNil(Solver.solve(try Level(file: plain).board, maxStates: 60_000), file.id)
+        }
         for file in (space + lab) where file.index <= 11 {
             let m = file.mechanics
             XCTAssertTrue((m?.hidden ?? []).isEmpty && (m?.sticky ?? []).isEmpty && (m?.frozen ?? []).isEmpty
@@ -93,8 +104,8 @@ final class LevelTests: XCTestCase {
         // Morph pieces are not met before Morph Lab, and neither world has bubbles or jars of 5.
         XCTAssertTrue(space.allSatisfy { ($0.mechanics?.morph ?? []).isEmpty })
         XCTAssertTrue((space + lab).allSatisfy { $0.mechanics?.floats != true && $0.capacity == 4 })
-        // The first levels are small and have one airlock or one morph piece.
-        XCTAssertEqual(space.first?.mechanics?.keys?.count, 1)
+        // The first levels are small; Morph Lab opens with one morph piece.
+        XCTAssertLessThanOrEqual(space.first?.jars.count ?? 9, 4)
         XCTAssertEqual(lab.first?.mechanics?.morph?.count, 1)
         for file in space + lab { XCTAssertEqual(LevelValidator.structuralProblems(file), [], file.id) }
     }
@@ -259,6 +270,58 @@ final class SolverTests: XCTestCase {
         XCTAssertNil(Solver.solve(stuck))
     }
 
+    func testSolverTurnsASpinJarOver() throws {
+        // One spare jar and no way in: A is under B in one jar and B under A in the other. Turning
+        // jar 0 over is the only way to start.
+        let pieces: ([UInt8]) -> [Piece] = { $0.map { Piece(kind: $0) } }
+        let jars = [pieces([0, 0, 1]), pieces([1, 1, 0]), pieces([])]
+        XCTAssertEqual(Solver.solve(Board(capacity: 3, jars: jars))?.moves.count, 3, "without a ring: out, across, back")
+        // Two kinds under each other with no spare jar cannot be won, until one jar can turn.
+        let tight = [pieces([0, 1]), pieces([1, 0])]
+        XCTAssertNil(Solver.solve(Board(capacity: 2, jars: tight)))
+        XCTAssertNil(Solver.solve(Board(capacity: 2, jars: tight, spins: [0])), "turning alone is not enough here")
+        let roomy = [pieces([0, 1, 1]), pieces([1, 0, 0]), pieces([])]
+        let ring = Board(capacity: 3, jars: roomy, spins: [0])
+        let result = try XCTUnwrap(Solver.solve(ring))
+        var b = ring
+        for move in result.moves { XCTAssertNotNil(b.apply(move), "\(move)") }
+        XCTAssertTrue(b.isWon)
+        XCTAssertLessThanOrEqual(result.moves.count, try XCTUnwrap(Solver.solve(Board(capacity: 3, jars: roomy))).moves.count)
+        if case .move(let hint) = Solver.hint(ring) { XCTAssertTrue(ring.isLegal(hint)) } else { XCTFail("a hint is found on a spin board") }
+        // A ring changes nothing when the plain moves already win.
+        let lone = Board(capacity: 2, jars: [pieces([0, 1]), pieces([1]), pieces([0]), pieces([])], spins: [0])
+        XCTAssertEqual(Solver.solve(lone)?.moves.count, 2)
+    }
+
+    func testSpinJarsReadFromALevelFile() throws {
+        let json = """
+        {"schema": 1, "id": "spacestation-01", "world": "spacestation", "index": 1, "beat": "intro", "capacity": 4,
+         "jars": [["a", "a", "b", "b"], ["b", "b", "a", "a"], []],
+         "mechanics": {"hidden": [], "sticky": [], "frozen": [], "spins": [0, 2]},
+         "par": 3, "solution": [[0, 0]], "capsule": false, "softenAfterFails": null}
+        """
+        let file = try LevelFile.decode(Data(json.utf8))
+        let level = try Level(file: file)
+        XCTAssertEqual(level.board.spinJars, [0, 2])
+        XCTAssertEqual(level.solution, [Move.spin(0)])
+        XCTAssertEqual(LevelValidator.structuralProblems(file), [])
+        // No ring before Space Station, none twice, none off the board, none round a duet.
+        var early = file
+        early.world = "toyshop"
+        early.id = "toyshop-01"
+        XCTAssertTrue(LevelValidator.structuralProblems(early).contains { $0.contains("spin jars start in Space Station") })
+        var twice = file
+        twice.mechanics?.spins = [0, 0]
+        XCTAssertThrowsError(try Level(file: twice))
+        var off = file
+        off.mechanics?.spins = [7]
+        XCTAssertThrowsError(try Level(file: off))
+        var duet = file
+        duet.jars = [["a", "b", "a", "b"], ["b", "b", "a", "a"], []]
+        duet.mechanics?.sticky = [[0, 0]]
+        XCTAssertTrue(LevelValidator.structuralProblems(duet).contains { $0.contains("can't hold a duet") })
+    }
+
     func testSolverPlansAroundAMorphPiece() throws {
         // The morph piece shows B and turns into A. Poured once it is an A, and the board comes out as two jars of A.
         let start = Board(capacity: 2, jars: [[Piece(kind: 0), Piece(kind: 1, morph: 1)], [Piece(kind: 1), Piece(kind: 0)], [], []])
@@ -291,7 +354,7 @@ final class SolverTests: XCTestCase {
         var story = file
         story.world = "toyshop"
         story.id = "toyshop-11"
-        XCTAssertTrue(LevelValidator.structuralProblems(story).contains { $0.contains("Keep Squishing only") })
+        XCTAssertTrue(LevelValidator.structuralProblems(story).contains { $0.contains("Keep Squishing") })
     }
 
     func testUnsolvableBoardReturnsNil() {

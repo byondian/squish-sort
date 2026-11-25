@@ -937,6 +937,28 @@
         }
       }
     },
+    "A spin jar! Tap its button and the jar turns upside down.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "くるりんジャー！ボタンをタップすると、さかさまになるよ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "빙글 병! 버튼을 누르면 병이 거꾸로 뒤집혀요."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "旋轉罐！點一下按鈕，罐子就會上下顛倒。"
+          }
+        }
+      }
+    },
     "A new world is open!": {
       "localizations": {
         "ja": {

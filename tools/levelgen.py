@@ -23,7 +23,7 @@ WORLDS = [
     ("bubblebath", ["quacky", "soapy", "bubbly", "starla", "shelly", "fizzy"], None),       # floaters and golden ride bubbles
     ("junglejam", ["bongo", "tuki", "pina", "leafy", "dotty", "nana"], None),               # vine jars
     # The two worlds after Jungle Jam (23 Nov 2026). Their levels come from make_new_world below.
-    ("spacestation", ["ringo", "zip", "blip", "saucy", "cheesy", "zoomie"], None),          # key jars (airlocks)
+    ("spacestation", ["ringo", "zip", "blip", "saucy", "cheesy", "zoomie"], None),          # spin jars
     ("morphlab", ["popsy", "slimo", "tubey", "maggie", "atomo", "trio"], None),             # morph pieces
 ]
 # Worlds grow as the game goes on. The last level of a world is always a boss.
@@ -111,9 +111,10 @@ def mechanic_count(mech, pos):
 
 
 def random_board(rng, names, empties, mech, mcount, mix_hidden=0, mix_frozen=0, vines=None, bubbles=None,
-                 keys=0, morphs=0, cap=None):
+                 keys=0, morphs=0, cap=None, spins=0):
     """Returns (jars, mechanics) or None. `bubbles` is (floaters, golden ride bubbles) for Bubble Bath.
-    `keys` key jars, `morphs` morph pieces and jars of `cap` are the Keep Squishing twists."""
+    `keys` key jars, `morphs` morph pieces and jars of `cap` are the Keep Squishing twists.
+    `spins` spin jars are Space Station's."""
     cap = cap or CAP
     units = []
     if mech == "sticky":
@@ -235,6 +236,14 @@ def random_board(rng, names, empties, mech, mcount, mix_hidden=0, mix_frozen=0, 
             mechanics["frozen"] = sorted([j, cap - 1, 1] for j in picked[:bubbles[0]]) + sorted([j, cap - 1, 2] for j in picked[bubbles[0]:])
             if "hidden" in mechanics:
                 mechanics["hidden"] = [h for h in mechanics["hidden"] if not (h[0] in picked and h[1] >= cap - 2)]
+        if spins:
+            # A spin jar is an open jar without a duet. The first spare jar may be one too.
+            free = [j for j in range(len(jars)) if j not in closed and not any(sj == j for sj, _ in sticky)]
+            if empties:
+                free.append(len(jars))
+            if len(free) < spins:
+                continue
+            mechanics["spins"] = sorted(rng.sample(free, spins))
         jars = jars + [[] for _ in range(empties)]
         return jars, mechanics
     return None
@@ -696,14 +705,15 @@ def write_endless(first, last):
         print(f"{lv['id']:16} {lv['beat']:10} jars={len(lv['jars']):2} kinds={kinds} par={lv['par']:2} capsule={lv['capsule']}", flush=True)
 
 
-# Space Station and Morph Lab: the two story worlds after Jungle Jam. Space Station teaches key jars
-# (airlocks), Morph Lab teaches morph pieces; rules from earlier worlds mix back in as guests from
+# Space Station and Morph Lab: the two story worlds after Jungle Jam. Space Station teaches spin jars,
+# Morph Lab teaches morph pieces; rules from earlier worlds mix back in as guests from
 # level 12. Boards are dealt like Keep Squishing boards (choose_endless), but calmer: no first move
 # may lose a level, and only a boss or a tension level has a single spare jar.
 NEW_WORLDS = {
     # world: (main rule, guest rules in turn)
-    "spacestation": ("keys", ["wrapped", "ice", "duets"]),
-    "morphlab": ("morph", ["wrapped", "ice", "vines", "keys"]),
+    "spacestation": ("spins", ["wrapped", "ice"]),
+    # (padlocks are for Keep Squishing only: Ian, 24 Nov 2026)
+    "morphlab": ("morph", ["wrapped", "ice", "vines", "wrapped"]),
 }
 # By beat: (kinds, how often a careless player should win at the start of the world)
 NEW_SHAPE = {"intro": (5, 0.7), "easy": (5, 0.6), "medium": (6, 0.45), "showpiece": (7, 0.5), "breather": (5, 0.65),
@@ -716,9 +726,8 @@ def new_world_plan(world, pos):
     beat = "boss" if pos == last else BEATS[(pos - 1) % 10]
     k, ease = NEW_SHAPE[beat]
     plan = dict(mech=None, mcount=0, mix_hidden=0, mix_frozen=0, vines=None, bubbles=None, keys=0, morphs=0, cap=CAP)
-    if main == "keys":
-        # one airlock for the first half of the world; two on the hard levels after that
-        plan["keys"] = 2 if pos >= 20 and beat in ("tension", "boss") else 1
+    if main == "spins":
+        plan["spins"] = True  # how many is chosen board by board: see choose_space
     else:
         # one morph piece for the first five levels, then two
         plan["morphs"] = 1 if pos <= 5 else 2
@@ -732,10 +741,49 @@ def new_world_plan(world, pos):
     elif pos >= 21:
         k = min(8, k + (1 if beat in ("easy", "breather", "calm") else 0))
     empties = 1 if beat in ("tension", "boss") and pos >= 8 else 2
+    if main == "spins":
+        # Space Station boards have one spare jar: that is what makes turning a jar over matter.
+        empties = 1
+        if pos == 1:
+            ease = 0.9
     if empties == 1:
         k = min(k, 7)
     ease = max(0.08, ease - 0.03 * ((pos - 1) // 10))
     return beat, k, empties, ease, plan
+
+
+def choose_space(rng, level, names, plan, ease, traps, tries=60):
+    """A Space Station board: one spare jar and some spin jars. It cannot be won without turning a jar
+    over, and the number of spin jars is what sets how forgiving it is (prototype, 24 Nov 2026: with
+    two spare jars the best answer never spins; with one spare jar and 6 kinds a careless player wins
+    0.04 of boards with one spin jar and 0.93 with every jar a spin jar)."""
+    best = None
+    for _ in range(tries):
+        n = rng.randint(2, len(names) + 1)
+        cand = random_board(rng, names, 1, None, 0, plan["mix_hidden"], plan["mix_frozen"], spins=n)
+        if cand is None:
+            continue
+        jars_c, mech_c = cand
+        b, _ = board_from_level(dict(level, jars=jars_c, mechanics=mech_c))
+        quick, _ = solve(b, 6_000, weight=3)
+        if quick is None:
+            continue
+        sol, _ = solve(b, 40_000)
+        if sol is None or not any(f == t for f, t in sol):
+            continue
+        # the same board without its rings must have no answer at all
+        plain, _ = board_from_level(dict(level, jars=jars_c, mechanics={k: v for k, v in mech_c.items() if k != "spins"}))
+        without, explored = solve(plain, 40_000)
+        if without is not None or explored > 40_000:
+            continue
+        if not traps and killing_first_moves(b) > 0:
+            continue
+        rank = abs(playout_wins(b, rng) - ease)
+        if best is None or rank < best[0]:
+            best = (rank, jars_c, mech_c)
+        if rank <= 0.05:
+            break
+    return None if best is None else (best[1], best[2])
 
 
 def make_new_world(world_idx, pos):
@@ -746,17 +794,23 @@ def make_new_world(world_idx, pos):
     rng = random.Random(f"{world}-{pos}")
     level = {"schema": 1, "id": f"{world}-{pos:02d}", "world": world, "index": pos, "beat": beat, "capacity": CAP}
     picked = None
-    for em, pl in [(empties, plan), (2, plan), (2, lighter(plan)), (2, lighter(lighter(plan)))]:
-        picked = choose_endless(rng, level, names, em, pl, ease, tries=40 if em > 1 else 80)
-        if picked:
-            break
+    if plan.get("spins"):
+        for pl in [plan, lighter(plan), lighter(lighter(plan))]:
+            picked = choose_space(rng, level, names, pl, ease, traps=beat in ("tension", "boss"))
+            if picked:
+                break
+    else:
+        for em, pl in [(empties, plan), (2, plan), (2, lighter(plan)), (2, lighter(lighter(plan)))]:
+            picked = choose_endless(rng, level, names, em, pl, ease, tries=40 if em > 1 else 80)
+            if picked:
+                break
     if not picked:
         raise SystemExit(f"{level['id']}: no fair board")
     jars, mechanics = picked
     level["jars"] = jars
     level["mechanics"] = {"hidden": mechanics.get("hidden", []), "sticky": mechanics.get("sticky", []),
                           "frozen": mechanics.get("frozen", [])}
-    for extra in ("curtains", "vines", "floats", "keys", "morph"):
+    for extra in ("curtains", "vines", "floats", "keys", "morph", "spins"):
         if mechanics.get(extra):
             level["mechanics"][extra] = mechanics[extra]
     b, _ = board_from_level(level)
@@ -858,7 +912,7 @@ def dump(level):
         extra += f', "vines": {json.dumps(m["vines"])}'
     if m.get("floats"):
         extra += ', "floats": true'
-    for name in ("keys", "morph"):
+    for name in ("keys", "morph", "spins"):
         if m.get(name):
             extra += f', "{name}": {json.dumps(m[name])}'
     lines.append(f'  "mechanics": {{"hidden": {json.dumps(m["hidden"])}, "sticky": {json.dumps(m["sticky"])}, "frozen": {json.dumps(m["frozen"])}{extra}}},')
@@ -909,6 +963,8 @@ def main():
                     f.write(dump(lv))
                 m = lv["mechanics"]
                 rules = [name for name in ("hidden", "sticky", "frozen", "curtains", "vines", "keys", "morph") if m.get(name)]
+                if m.get("spins"):
+                    rules.append(f"spins={len(m['spins'])} turns={sum(1 for f, t in lv['solution'] if f == t)}")
                 empty = sum(1 for jar in lv["jars"] if not jar)
                 print(f"{lid:16} {lv['beat']:10} jars={len(lv['jars']):2} spare={empty} par={lv['par']:2} {rules}", flush=True)
                 continue

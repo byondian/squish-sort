@@ -66,7 +66,8 @@ public enum Solver {
             explored += 1
             if explored > maxStates || boards.count > maxNodes { return .gaveUp }
             for move in current.legalMoves {
-                if free && !move.isRide && current.jars[move.to].isEmpty
+                if free && !move.isRide && !move.isSpin && current.jars[move.to].isEmpty
+                    && current.isSpinJar(move.from) == current.isSpinJar(move.to)
                     && current.runLength(at: move.from) == current.jars[move.from].count
                     && !current.jars[move.from].contains(where: \.isMorph) {
                     continue // pouring a whole jar into an empty one changes nothing (unless a morph piece flips on the way)
@@ -142,6 +143,8 @@ public enum Solver {
         var parts: [[UInt8]] = b.jars.map { jar in
             morphs ? jar.flatMap { [$0.code, $0.morph] } : jar.map(\.code)
         }
+        // A spin jar is not the same place as an ordinary jar: each part says which it is.
+        if b.hasSpins { for j in parts.indices { parts[j].insert(b.isSpinJar(j) ? 1 : 0, at: 0) } }
         // While a curtain is closed, a vine is tied or a padlock is shut, which jar is which matters.
         let tied = b.hasVines || b.hasKeys
         if canonical && b.curtains.isEmpty && !tied { parts.sort { $0.lexicographicallyPrecedes($1) } }

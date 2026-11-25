@@ -157,6 +157,36 @@ final class GoldenPathTests: XCTestCase {
         app.terminate()
     }
 
+    /// Space Station level 1, played to the end by its stored solution: the fifth move is a tap on a
+    /// spin button, and the jar turns upside down. Pictures are kept of the start and after the turn.
+    func testSpaceStationSpinJar() {
+        app.terminate()
+        app.launchArguments = ["-uiTesting", "-storeShot", "level:spacestation-01"]
+        app.launch()
+        XCTAssertTrue(app.buttons["spin-0"].waitForExistence(timeout: 20), "a Space Station board has spin buttons")
+        Thread.sleep(forTimeInterval: 2.5)
+        keep(app.screenshot(), as: "squishy-spin-jar-1-start")
+        let state = app.staticTexts["scene-state"]
+        play([(1, 3), (0, 1), (0, 3), (2, 3)])
+        app.buttons["spin-0"].tap()
+        Thread.sleep(forTimeInterval: 0.5)
+        keep(app.screenshot(), as: "squishy-spin-jar-2-turning")
+        Thread.sleep(forTimeInterval: 1.5)
+        keep(app.screenshot(), as: "squishy-spin-jar-3-turned")
+        play([(0, 2), (1, 0), (2, 1), (2, 3)])
+        let won = NSPredicate(format: "label CONTAINS 'won'")
+        expectation(for: won, evaluatedWith: state)
+        waitForExpectations(timeout: 8)
+        // The last board of the world, for a picture of eight jars with their rings and buttons.
+        app.terminate()
+        app.launchArguments = ["-uiTesting", "-storeShot", "level:spacestation-40"]
+        app.launch()
+        XCTAssertTrue(app.buttons["jar-7"].waitForExistence(timeout: 20), "the last Space Station board has eight jars")
+        Thread.sleep(forTimeInterval: 2.5)
+        keep(app.screenshot(), as: "squishy-spin-jar-4-eight-jars")
+        app.terminate()
+    }
+
     /// Squishies whose signature move brings its own part (a top, a hat, a lid): a picture of each at
     /// rest in the Squish Room, so a part that sits in the wrong place is seen without a phone.
     func testPartsSitOnTheirSquishies() {

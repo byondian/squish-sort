@@ -965,6 +965,117 @@ final class LockNode: SKNode {
     }
 }
 
+/// The zero gravity ring of a Space Station spin jar: a tilted hoop round the jar with a little moon
+/// going round it, and a round button under the jar. A tap on the button turns the jar upside down.
+final class SpinRingNode: SKNode {
+    enum State { case ready, resting, gone }
+
+    private let hoop = SKNode()
+    private let button = SKNode()
+    private let arrow = SKLabelNode(text: "↻")
+    /// Where the button's middle is, measured from the jar's middle.
+    let buttonOffset: CGPoint
+    /// How far from the button's middle a tap still counts.
+    let reach: CGFloat
+    private(set) var state = State.ready
+
+    init(size: CGSize, piece: CGFloat, calm: Bool) {
+        let w = size.width, h = size.height
+        let radius = max(11, min(piece * 0.3, 24))
+        buttonOffset = CGPoint(x: 0, y: -h / 2 - radius * 0.15)
+        reach = max(radius * 1.45, 22)
+        super.init()
+        let glow = UIColor(hex: 0x7CE8FF)
+        // The hoop is an ellipse seen from a little above: the far half is faint, the near half bright.
+        let rx = w * 0.66, squash: CGFloat = 0.3
+        let flat = CGAffineTransform(scaleX: 1, y: squash)
+        let far = CGMutablePath()
+        far.addArc(center: .zero, radius: rx, startAngle: 0, endAngle: .pi, clockwise: false, transform: flat)
+        let near = CGMutablePath()
+        near.addArc(center: .zero, radius: rx, startAngle: .pi, endAngle: .pi * 2, clockwise: false, transform: flat)
+        for (path, alpha, width) in [(far, CGFloat(0.35), CGFloat(2)), (near, CGFloat(0.95), CGFloat(3.5))] {
+            let line = SKShapeNode(path: path)
+            line.strokeColor = glow.withAlphaComponent(alpha)
+            line.lineWidth = width
+            line.lineCap = .round
+            line.fillColor = .clear
+            line.glowWidth = alpha > 0.5 ? 1.5 : 0
+            hoop.addChild(line)
+        }
+        let moon = SKShapeNode(circleOfRadius: max(3, piece * 0.07))
+        moon.fillColor = UIColor(hex: 0xFFF4D6)
+        moon.strokeColor = glow
+        moon.lineWidth = 1.5
+        moon.position = CGPoint(x: -rx, y: 0)
+        hoop.addChild(moon)
+        if !calm {
+            let orbit = CGMutablePath()
+            orbit.addEllipse(in: CGRect(x: -rx, y: -rx * squash, width: rx * 2, height: rx * 2 * squash))
+            moon.run(.repeatForever(.follow(orbit, asOffset: false, orientToPath: false, duration: 5)))
+        }
+        hoop.position = CGPoint(x: 0, y: -h * 0.2)
+        addChild(hoop)
+
+        let disc = SKShapeNode(circleOfRadius: radius)
+        disc.fillColor = UIColor(hex: 0xFFD86B)
+        disc.strokeColor = .plum
+        disc.lineWidth = 2.5
+        button.addChild(disc)
+        arrow.fontName = "AvenirNext-Heavy"
+        arrow.fontSize = radius * 1.5
+        arrow.fontColor = .plum
+        arrow.verticalAlignmentMode = .center
+        arrow.horizontalAlignmentMode = .center
+        arrow.zPosition = 1
+        button.addChild(arrow)
+        button.position = buttonOffset
+        button.zPosition = 2
+        addChild(button)
+        isAccessibilityElement = false
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) is not used") }
+
+    /// Ready: the jar can turn. Resting: a turn would change nothing right now. Gone: the jar is finished.
+    func set(_ next: State, animated: Bool) {
+        guard next != state else { return }
+        state = next
+        let (ring, knob): (CGFloat, CGFloat) = next == .ready ? (1, 1) : next == .resting ? (0.55, 0.4) : (0, 0)
+        hoop.removeAction(forKey: "state")
+        button.removeAction(forKey: "state")
+        guard animated else {
+            hoop.alpha = ring
+            button.alpha = knob
+            return
+        }
+        hoop.run(.fadeAlpha(to: ring, duration: 0.25), withKey: "state")
+        button.run(.fadeAlpha(to: knob, duration: 0.25), withKey: "state")
+    }
+
+    /// The jar turns: the arrow goes round once and the button gives under the finger.
+    func turn(duration: Double, calm: Bool) {
+        button.removeAction(forKey: "press")
+        button.setScale(1)
+        button.run(.sequence([.scale(to: 0.82, duration: 0.06), .scale(to: 1.1, duration: 0.1), .scale(to: 1, duration: 0.08)]), withKey: "press")
+        guard !calm else { return }
+        arrow.removeAction(forKey: "turn")
+        arrow.zRotation = 0
+        let round = SKAction.rotate(byAngle: -.pi * 2, duration: duration)
+        round.timingMode = .easeInEaseOut
+        arrow.run(.sequence([round, .rotate(toAngle: 0, duration: 0)]), withKey: "turn")
+    }
+
+    /// A tap when the jar cannot turn: the button shakes its head.
+    func refuse() {
+        button.removeAction(forKey: "press")
+        button.setScale(1)
+        let x = buttonOffset.x
+        button.run(.sequence([
+            .moveTo(x: x - 4, duration: 0.05), .moveTo(x: x + 4, duration: 0.07), .moveTo(x: x - 2, duration: 0.05), .moveTo(x: x, duration: 0.05),
+        ]), withKey: "press")
+    }
+}
+
 /// The velvet stage curtain in front of a Curtain Call jar. It hangs from its top edge, so it
 /// gathers upwards when it rises.
 final class CurtainNode: SKNode {

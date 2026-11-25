@@ -18,6 +18,10 @@
 ///   jar, but the squishies under it can be taken out. It pops when the piece right under it is its
 ///   own kind, or when nothing is left under it. A golden bubble (`frozen` 2) may ride once to any
 ///   other jar with room (`Move.ride`); it lands on top and is an ordinary floater from then on.
+/// - A spin jar (Space Station) sits in a zero gravity ring. Tapping the ring turns the jar upside
+///   down, so its squishies are in the opposite order (`Move.spin`). It is a move of its own. A
+///   finished or shut jar does not spin, nor does one holding a duet, and a spin that would change
+///   nothing is no move.
 /// - A key jar (Keep Squishing) has a padlock showing a kind. Nothing goes in or comes out until a
 ///   jar of that kind is finished anywhere; then the padlock opens for good.
 /// - A morph piece (Keep Squishing) shows two kinds and counts as the one in front. Each time it is
@@ -34,12 +38,17 @@ public struct Board: Hashable, Sendable {
     public private(set) var vines: [UInt8]
     /// Each jar's padlock, one entry per jar: 0 for none, else the key kind + 1.
     public private(set) var keys: [UInt8]
+    /// Space Station: one entry per jar, true for a jar that can be turned upside down.
+    public private(set) var spins: [Bool]
     /// Bubble Bath: frozen pieces are floaters, not ice.
     public let floats: Bool
 
-    /// `keys` maps a jar to the kind its padlock shows.
+    /// `keys` maps a jar to the kind its padlock shows. `spins` lists the spin jars.
     public init(capacity: Int, jars: [[Piece]], curtains: [Int] = [], vines: [Int: Int] = [:], floats: Bool = false,
-                keys: [Int: Int] = [:]) {
+                keys: [Int: Int] = [:], spins: [Int] = []) {
+        var rings = [Bool](repeating: false, count: jars.count)
+        for j in spins where jars.indices.contains(j) { rings[j] = true }
+        self.spins = rings
         self.capacity = capacity
         self.jars = jars
         self.floats = floats
@@ -92,6 +101,26 @@ public struct Board: Hashable, Sendable {
     public func keyKind(_ j: Int) -> UInt8? { keys.indices.contains(j) && keys[j] > 0 ? keys[j] - 1 : nil }
     public var hasKeys: Bool { keys.contains { $0 > 0 } }
     public var hasMorphs: Bool { jars.contains { $0.contains { $0.isMorph } } }
+    /// Jar `j` sits in a zero gravity ring.
+    public func isSpinJar(_ j: Int) -> Bool { spins.indices.contains(j) && spins[j] }
+    public var hasSpins: Bool { spins.contains(true) }
+    /// The spin jars, in order.
+    public var spinJars: [Int] { spins.indices.filter { spins[$0] } }
+
+    /// Jar `j` as it would stand upside down. Its new top squishy is never wrapped.
+    private func spun(_ j: Int) -> [Piece] {
+        var jar = Array(jars[j].reversed())
+        if !jar.isEmpty { jar[jar.count - 1].hidden = false }
+        return jar
+    }
+
+    /// Jar `j` can be turned upside down now, and turning it changes something.
+    public func canSpin(_ j: Int) -> Bool {
+        guard isSpinJar(j), !floats, !isComplete(j), !isShut(j) else { return false }
+        let jar = jars[j]
+        guard jar.count >= 2, !jar.contains(where: \.bondedAbove) else { return false }
+        return spun(j) != jar
+    }
     /// Behind a curtain, tied by a vine or padlocked: nothing goes in or comes out.
     public func isShut(_ j: Int) -> Bool { isCurtained(j) || vineTag(j) > 0 || keyKind(j) != nil }
 
@@ -150,6 +179,7 @@ public struct Board: Hashable, Sendable {
     }
 
     public func isLegal(_ move: Move) -> Bool {
+        if move.isSpin { return canSpin(move.from) }
         if let t = move.rideTarget { return canRide(from: move.from, to: t) }
         return piecesToMove(move) > 0
     }
@@ -167,6 +197,7 @@ public struct Board: Hashable, Sendable {
                 for t in jars.indices where canRide(from: f, to: t) { out.append(Move.ride(from: f, to: t)) }
             }
         }
+        for j in spins.indices where spins[j] && canSpin(j) { out.append(Move.spin(j)) }
         return out
     }
 
@@ -206,6 +237,15 @@ public struct Board: Hashable, Sendable {
 
     @discardableResult
     public mutating func apply(_ move: Move) -> MoveResult? {
+        if move.isSpin {
+            // The jar turns upside down. Nothing leaves or lands, so no ice thaws next door.
+            let j = move.from
+            guard jars.indices.contains(j), canSpin(j) else { return nil }
+            let revealed = jars[j][0].hidden
+            jars[j] = spun(j)
+            return MoveResult(move: move, count: jars[j].count, revealedSourceTop: revealed,
+                              completedJar: nil, thawedJars: [])
+        }
         if let t = move.rideTarget { return applyRide(from: move.from, to: t) }
         let k = piecesToMove(move)
         guard k > 0 else { return nil }
@@ -308,6 +348,7 @@ public struct Board: Hashable, Sendable {
         jars.append([])
         vines.append(0)
         keys.append(0)
+        spins.append(false)
         for j in curtains { revealTop(j) }
         curtains = []
     }
@@ -377,6 +418,7 @@ public extension Board {
         for j in vines.indices where vines[j] > 0 { tags[j] = Int(vines[j]) }
         var locks: [Int: Int] = [:]
         for j in keys.indices where keys[j] > 0 { locks[j] = Int(keys[j]) - 1 }
-        return Board(capacity: capacity, jars: next, curtains: curtains, vines: tags, floats: floats, keys: locks)
+        return Board(capacity: capacity, jars: next, curtains: curtains, vines: tags, floats: floats, keys: locks,
+                     spins: spinJars)
     }
 }

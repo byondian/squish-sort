@@ -19,17 +19,22 @@ public enum LevelValidator {
         if file.id != expectedID { p.append("\(id): id should be \(expectedID)") }
         if !LevelCatalog.fileWorlds.contains(file.world) { p.append("\(id): unknown world \(file.world)") }
         if !(1...LevelCatalog.levelCount(in: file.world)).contains(file.index) { p.append("\(id): index out of range") }
-        // Jars of 5 are for Keep Squishing and Twist of the week only. Key jars and morph pieces are
-        // taught in Space Station and Morph Lab, so they are allowed from there on.
+        // Jars of 5 and key jars are for Keep Squishing and Twist of the week only. Spin jars are
+        // taught in Space Station and morph pieces in Morph Lab, so each is allowed from there on.
         let extras = file.world == LevelCatalog.endless || file.world == LevelCatalog.weekly
-        let twists = extras || file.world == "spacestation" || file.world == "morphlab"
         let big = extras && file.capacity == bigCapacity
         if file.capacity != launchCapacity && !big {
             p.append("\(id): capacity \(file.capacity), levels use \(launchCapacity) (Keep Squishing also \(bigCapacity))")
         }
         let m = file.mechanics
-        if !twists, !(m?.keys ?? []).isEmpty || !(m?.morph ?? []).isEmpty {
-            p.append("\(id): key jars and morph pieces start in Space Station (Keep Squishing only before it)")
+        if !extras, !(m?.keys ?? []).isEmpty {
+            p.append("\(id): key jars are for Keep Squishing and Twist of the week only")
+        }
+        if !extras, file.world != "morphlab", !(m?.morph ?? []).isEmpty {
+            p.append("\(id): morph pieces start in Morph Lab (Keep Squishing only before it)")
+        }
+        if !extras, file.world != "spacestation", file.world != "morphlab", !(m?.spins ?? []).isEmpty {
+            p.append("\(id): spin jars start in Space Station (Keep Squishing only before it)")
         }
         if !(2...BoardLayout.maxJars).contains(file.jars.count) { p.append("\(id): \(file.jars.count) jars, allowed 2 to \(BoardLayout.maxJars)") }
         if file.jars.contains(where: { $0.count > file.capacity }) { p.append("\(id): a jar is over capacity") }
@@ -116,6 +121,13 @@ public enum LevelValidator {
                 p.append("\(id): key jar \(j) can't hold wrapped, frozen or duet pieces")
             }
         }
+        // Spin jars: never behind a curtain, a vine or a padlock, never holding a duet, and not on a
+        // board with bubbles.
+        for j in board.spinJars {
+            if board.isShut(j) { p.append("\(id): spin jar \(j) also has a curtain, a vine or a padlock") }
+            if board.jars[j].contains(where: \.bondedAbove) { p.append("\(id): spin jar \(j) can't hold a duet") }
+        }
+        if board.hasSpins && board.floats { p.append("\(id): spin jars and bubbles don't share a board") }
         // Morph pieces: at most two, two different kinds each, never wrapped, frozen or in a duet,
         // and not on a board with bubbles.
         var morphs = 0
