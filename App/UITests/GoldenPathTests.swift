@@ -165,14 +165,14 @@ final class GoldenPathTests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.buttons["spin-0"].waitForExistence(timeout: 20), "a Space Station board has spin buttons")
         Thread.sleep(forTimeInterval: 2.5)
-        keep(app.screenshot(), as: "spin-jar-1-start")
+        keep(app.screenshot(), as: "squishy-spin-jar-1-start")
         let state = app.staticTexts["scene-state"]
         play([(1, 3), (0, 1), (0, 3), (2, 3)])
         app.buttons["spin-0"].tap()
         Thread.sleep(forTimeInterval: 0.5)
-        keep(app.screenshot(), as: "spin-jar-2-turning")
+        keep(app.screenshot(), as: "squishy-spin-jar-2-turning")
         Thread.sleep(forTimeInterval: 1.5)
-        keep(app.screenshot(), as: "spin-jar-3-turned")
+        keep(app.screenshot(), as: "squishy-spin-jar-3-turned")
         play([(0, 2), (1, 0), (2, 1), (2, 3)])
         let won = NSPredicate(format: "label CONTAINS 'won'")
         expectation(for: won, evaluatedWith: state)
@@ -183,7 +183,7 @@ final class GoldenPathTests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.buttons["jar-7"].waitForExistence(timeout: 20), "the last Space Station board has eight jars")
         Thread.sleep(forTimeInterval: 2.5)
-        keep(app.screenshot(), as: "spin-jar-4-eight-jars")
+        keep(app.screenshot(), as: "squishy-spin-jar-4-eight-jars")
         app.terminate()
     }
 

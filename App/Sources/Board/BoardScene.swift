@@ -758,7 +758,8 @@ final class BoardScene: SKScene {
             let home = slot(j, i)
             if calm {
                 node.run(.sequence([.fadeOut(withDuration: 0.14), .run { [weak node] in node?.position = home },
-                                    .fadeIn(withDuration: 0.14)]), withKey: "travel")
+                                    .fadeIn(withDuration: 0.14),
+                                    .run { [weak node] in node?.zPosition = 5 }]), withKey: "travel")
                 continue
             }
             // The squishy's middle swings half way round the jar's middle while it rolls over once.
